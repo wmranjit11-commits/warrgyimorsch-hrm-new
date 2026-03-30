@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <div class="px-4">
+    <div class="px-4 pt-4">
         <form action="{{ route('payroll.attendance.store') }}" method="POST">
             @csrf
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white; overflow: hidden;">
@@ -87,7 +87,6 @@
                                 <td class="pe-4">
                                     <select name="employees[{{ $index }}][status]" class="form-select border-0 bg-light fw-bold small py-2 shadow-none" style="border-radius: 8px; cursor: pointer;">
                                         <option value="present">Present</option>
-                                        <option value="absent">Absent</option>
                                         <option value="half_day">Half Day</option>
                                         <option value="leave">Leave</option>
                                         <option value="late">Late</option>

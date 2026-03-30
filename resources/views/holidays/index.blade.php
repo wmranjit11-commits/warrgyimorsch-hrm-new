@@ -13,7 +13,7 @@
                         <!-- LEFT FORM -->
                         <div class="col-lg-4 col-md-5 form-section">
 
-                            <h6 class="fw-bold mb-3">Holiday Name</h6>
+                            <h6 class="fw-bold mb-4" style="color: #334155;"><i class="feather-calendar me-2"></i>New Holiday</h6>
 
                             <form method="POST" action="{{ route('holidays.store') }}">
                                 @csrf
@@ -36,25 +36,17 @@
                         <!-- RIGHT TABLE -->
                         <div class="col-lg-8 col-md-7 table-section">
 
-                            <h6 class="fw-bold mb-3">Holiday List</h6>
-
-                            <div class="d-flex justify-content-between mb-3">
-
-                                <div>
-                                    Show
-                                    <select class="form-select form-select-sm d-inline w-auto">
-                                        <option value="10">10</option>
-                                        <option value="20">20</option>
-                                        <option value="50">50</option>
-                                    </select>
-                                    entries
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h6 class="fw-bold mb-0" style="color: #334155;">Holiday List</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="input-group d-none d-md-flex" style="width: 200px;">
+                                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted small"></i></span>
+                                        <input type="text" id="search" class="form-control bg-light border-0 shadow-none form-control-sm ps-0" placeholder="Search...">
+                                    </div>
+                                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="location.reload()" title="Refresh">
+                                        <i class="feather-refresh-cw"></i>
+                                    </a>
                                 </div>
-
-                                <div>
-                                    Search:
-                                    <input type="text" id="search" class="form-control form-control-sm d-inline">
-                                </div>
-
                             </div>
 
                             <div class="table-responsive">
@@ -75,23 +67,33 @@
                                                 <td>{{ strtoupper($h->title) }}</td>
                                                 <td>{{ $h->date }}</td>
                                                 <td class="d-flex justify-content-center gap-1">
-
                                                     <a href="{{ route('holidays.edit', $h->id) }}"
-                                                        class="btn btn-light btn-sm action-btn">
-                                                        <i class="feather feather-edit-3"></i>
+                                                        class="avatar-text avatar-md bg-soft-success text-success" title="Edit">
+                                                        <i class="feather-edit-3"></i>
                                                     </a>
 
-                                                    <form action="{{ route('holidays.destroy', $h->id) }}" method="POST"
-                                                        onsubmit="return confirm('Delete this holiday?')">
+                                                    <form id="delete-holiday-{{ $h->id }}" action="{{ route('holidays.destroy', $h->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
-
-                                                        <button class="btn btn-danger btn-sm action-btn">
-                                                            <i class="feather feather-trash"></i>
-                                                        </button>
+                                                        <a href="javascript:void(0);" 
+                                                            onclick="if(confirm('Delete this holiday?')) document.getElementById('delete-holiday-{{ $h->id }}').submit();"
+                                                            class="avatar-text avatar-md bg-soft-danger text-danger" title="Delete">
+                                                            <i class="feather-trash-2"></i>
+                                                        </a>
                                                     </form>
-
                                                 </td>
+                                                <style>
+                                                    .avatar-md {
+                                                        width: 32px !important;
+                                                        height: 32px !important;
+                                                        display: flex !important;
+                                                        align-items: center !important;
+                                                        justify-content: center !important;
+                                                        border-radius: 8px !important;
+                                                        font-size: 14px !important;
+                                                        text-decoration: none !important;
+                                                    }
+                                                </style>
                                             </tr>
                                         @empty
                                             <tr>

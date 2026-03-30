@@ -4,87 +4,56 @@
     <div class="container-fluid">
 
         <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <!-- <div>
-                            <h5 class="fw-bold mb-0">Employee List</h5>
-                            <small class="text-muted">Manage employees and view details</small>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('employees.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-lg"></i> Add Employee
-                            </a>
-                        </div> -->
-        </div>
-
-        <!-- CARD -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-
-                <!-- SHOW + SEARCH -->
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted small fw-bold text-uppercase">Show</span>
-                        <select class="form-select d-inline-block py-1 px-2" style="width: 80px; border-radius: 8px;">
-                            <option>10</option>
-                            <option>25</option>
-                            <option>50</option>
-                        </select>
-                        <span class="text-muted small fw-bold text-uppercase">entries</span>
-                    </div>
-
-                    <div class="d-flex flex-wrap justify-content-center gap-2 w-100 w-md-auto">
-                        <div class="input-group" style="max-width: 350px; flex: 1;">
-                            <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;"><i
-                                    class="bi bi-search text-muted"></i></span>
-                            <input type="text" id="searchInput" class="form-control border-start-0 ps-0"
-                                style="border-radius: 0 10px 10px 0;" placeholder="Search employees...">
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <!-- Filter Button -->
-                            <button class="btn btn-light border" id="filterBtn" onclick="toggleFilter()" title="Filter">
-                                <i class="bi bi-funnel"></i>
-                            </button>
-
-                            <!-- Plus Button (Add Employee) -->
-                            <a href="{{ route('employees.create') }}" class="btn btn-success" title="Add New Employee">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-
-                            <!-- Refresh Button -->
-                            <button class="btn btn-light border" onclick="location.reload()" title="Refresh">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
-
-                            <!-- Delete Selected Button -->
-                            <button class="btn btn-outline-danger" id="deleteSelectedBtn"
-                                onclick="deleteSelectedEmployees()" title="Delete Selected">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
+        <!-- Main Content Card -->
+        <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: #334155;">Employee Management</h5>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
+                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">List</li>
+                        </ol>
+                    </nav>
                 </div>
-
-                <!-- FILTER SECTION (Hidden by default) -->
-                <div id="filterSection"
-                    style="display: none; margin-bottom: 25px; padding: 25px; background: #ffffff; border-radius: 12px; border: 1px solid #edf2f7; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="p-2 bg-primary bg-opacity-10 rounded-3 me-3">
-                            <i class="bi bi-funnel text-primary fs-5"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0">Search Filters</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Right Aligned Search & Actions -->
+                    <div class="input-group d-none d-md-flex" style="width: 250px;">
+                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control bg-light border-0 shadow-none" placeholder="Search..." onkeyup="applyFilters()">
                     </div>
-                    <div class="row g-4">
+                    
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
+                        <i class="feather-filter"></i>
+                    </a>
+
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="location.reload()" title="Refresh">
+                        <i class="feather-refresh-cw"></i>
+                    </a>
+
+                    <a href="{{ route('employees.create') }}" class="avatar-text avatar-md bg-primary text-white" title="Add Employee">
+                        <i class="feather-plus"></i>
+                    </a>
+
+                    @if(isset($employees) && $employees->count() > 0)
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" id="deleteSelectedBtn" onclick="deleteSelectedEmployees()" title="Delete Selected">
+                        <i class="feather-trash-2"></i>
+                    </a>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Collapsible Filter Section -->
+            <div class="collapse" id="filterSection">
+                <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
+                    <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
-                            <input type="text" id="filterEmployeeName" class="form-control"
-                                placeholder="Search name or ID..." onkeyup="applyFilters()" style="border-radius: 8px;">
+                            <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm" placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px;">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                            <select id="filterEmployeeType" class="form-select" onchange="applyFilters()"
-                                style="border-radius: 8px;">
+                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()" style="border-radius: 8px;">
                                 <option value="">All Types</option>
                                 <option value="permanent">Employee</option>
                                 <option value="contract">Worker</option>
@@ -92,40 +61,33 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
-                            <select id="filterDepartment" class="form-select" onchange="applyFilters()"
-                                style="border-radius: 8px;">
+                            <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()" style="border-radius: 8px;">
                                 <option value="">All Departments</option>
-                                <option value="administration">Administration (Admin)</option>
-                                <option value="business_development">Business Development (BD)</option>
-                                <option value="hr">HR Department (HR)</option>
-                                <option value="web_development">Web Development (WD)</option>
-                                <option value="digital_marketing">Digital Marketing (DM)</option>
-                                <option value="web_graphics">Web & Graphics Design (WGD)</option>
+                                <option value="administration">Administration</option>
+                                <option value="business_development">Business Development</option>
+                                <option value="hr">HR Department</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
-                            <select id="filterRole" class="form-select" onchange="applyFilters()"
-                                style="border-radius: 8px;">
-                                <option value="">All Roles</option>
-                                <option value="super_admin">Super Admin</option>
-                                <option value="business_operation_head">Business Operation Head</option>
-                                <option value="hr_executive">HR Executive</option>
-                                <option value="team_leader">Team Leader</option>
-                                <option value="employee">Employee</option>
-                                <option value="hr_marketing">HR Marketing</option>
-                            </select>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-primary w-100 fw-bold shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 38px; border-radius: 8px;">
+                                <i class="feather-check-circle me-1"></i> APPLY FILTERS
+                            </button>
                         </div>
-                    </div>
-                    <div class="mt-4 pt-3 border-top text-end">
-                        <button class="btn btn-light px-4 me-2" onclick="clearFilters()"
-                            style="border-radius: 8px;">RESET</button>
-                        <button class="btn btn-primary px-4" onclick="applyFilters()" style="border-radius: 8px;">APPLY
-                            FILTERS</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- TABLE -->
+            <div class="card-body p-0">
+                <!-- SHOW ENTRIES -->
+                <div class="px-4 py-3 border-bottom d-flex align-items-center gap-2">
+                    <span class="text-muted small fw-bold text-uppercase">Show</span>
+                    <select class="form-select d-inline-block py-1 px-2 border-0 bg-light" style="width: 80px; border-radius: 8px;">
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                    </select>
+                    <span class="text-muted small fw-bold text-uppercase">entries</span>
+                </div>
                 <div class="table-responsive">
                     <table class="table align-middle table-hover" id="employeeTable">
 
@@ -172,7 +134,7 @@
                                                     <a class="dropdown-item d-flex align-items-center gap-2"
                                                         href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})"
                                                         style="color:#6366f1;font-weight:500;">
-                                                        <i class="bi bi-eye-fill" style="color:#6366f1;font-size:16px;"></i>
+                                                        <i class="feather-eye" style="color:#6366f1;font-size:16px;"></i>
                                                         View
                                                     </a>
                                                 </li>
@@ -180,7 +142,7 @@
                                                     <a class="dropdown-item d-flex align-items-center gap-2"
                                                         href="{{ route('employees.edit', $emp->id) }}"
                                                         style="color:#22c55e;font-weight:500;">
-                                                        <i class="bi bi-pencil-square"
+                                                        <i class="feather-edit-3"
                                                             style="color:#22c55e;font-size:16px;"></i> Edit
                                                     </a>
                                                 </li>
@@ -188,7 +150,7 @@
                                                     <a class="dropdown-item d-flex align-items-center gap-2 text-danger"
                                                         href="javascript:void(0)" onclick="deleteEmployee({{ $emp->id }})"
                                                         style="color:#ef4444;font-weight:500;">
-                                                        <i class="bi bi-trash-fill" style="color:#ef4444;font-size:16px;"></i>
+                                                        <i class="feather-trash-2" style="color:#ef4444;font-size:16px;"></i>
                                                         Delete
                                                     </a>
                                                 </li>

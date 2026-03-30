@@ -2,60 +2,70 @@
 
 @section('content')
 <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
-    <!-- Top Header -->
-    <div class="d-flex justify-content-between align-items-center px-4 py-3 bg-white border-bottom shadow-sm mb-4">
-        <div class="d-flex align-items-center">
-            <h5 class="fw-bold mb-0 me-3" style="color: #334155;">Payroll Module</h5>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
-                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">Payroll History</li>
-                </ol>
-            </nav>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-primary px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" style="background: #3858f9; border: none; height: 38px;" onclick="exportPayroll()">
-                <i class="bi bi-file-earmark-arrow-down fs-5"></i> EXPORT REPORT
-            </button>
-            <button class="btn btn-light btn-sm border p-2 shadow-sm bg-white" onclick="window.location.href='{{ route('payroll.calculation') }}'" style="height: 38px; width: 38px; border-color: #e2e8f0 !important;" title="New Calculation">
-                <i class="bi bi-plus text-primary fs-5"></i>
-            </button>
-        </div>
-    </div>
-
+    <!-- Main Content Card -->
     <div class="px-4">
-        <!-- Filter Card -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white;">
-            <div class="card-body p-4">
-                <div class="row g-4 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted mb-2">Employee Name</label>
-                        <select id="employeeFilter" class="form-select border-0 bg-light py-2 px-3 shadow-none fw-bold" style="border-radius: 8px; height: 45px;">
-                            <option value="">Select Employee</option>
-                            @foreach(\App\Models\Employee::all() as $emp)
-                                <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->name }}</option>
-                            @endforeach
-                        </select>
+        <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: #334155;">Payroll History</h5>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
+                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">History</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Right Aligned Search & Actions -->
+                    <div class="input-group d-none d-md-flex" style="width: 250px;">
+                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
+                        <input type="text" id="tableSearch" class="form-control bg-light border-0 shadow-none" placeholder="Search..." onkeyup="applyFilters()">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted mb-2">Month</label>
-                        <input type="month" id="monthFilter" class="form-control border-0 bg-light py-2 px-3 shadow-none fw-bold" 
-                               value="{{ request('month') }}" style="border-radius: 8px; height: 45px;">
-                    </div>
-                    <div class="col-md-4 d-flex gap-2">
-                        <button class="btn btn-primary flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 45px; border-radius: 8px;">
-                            <i class="bi bi-search"></i> SEARCH
-                        </button>
-                        <button class="btn btn-light border px-3 shadow-none" onclick="resetFilters()" style="height: 45px; border-radius: 8px; border-color: #e2e8f0 !important;">
-                            <i class="bi bi-arrow-counterclockwise fs-5"></i>
-                        </button>
+                    
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
+                        <i class="feather-filter"></i>
+                    </a>
+
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportPayroll()" title="Export Report">
+                        <i class="feather-download"></i>
+                    </a>
+
+                    <a href="{{ route('payroll.calculation') }}" class="avatar-text avatar-md bg-primary text-white" title="New Calculation">
+                        <i class="feather-plus"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Collapsible Filter Section -->
+            <div class="collapse" id="filterSection">
+                <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted mb-2">Employee</label>
+                            <select id="employeeFilter" class="form-select border-0 bg-white py-2 px-3 shadow-sm fw-bold" style="border-radius: 8px; height: 40px;">
+                                <option value="">All Employees</option>
+                                @foreach(\App\Models\Employee::all() as $emp)
+                                    <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted mb-2">Month</label>
+                            <input type="month" id="monthFilter" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
+                                   value="{{ request('month') }}" style="border-radius: 8px; height: 40px;">
+                        </div>
+                        <div class="col-md-4 d-flex gap-2">
+                            <button class="btn btn-primary flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
+                                <i class="feather-search"></i> APPLY
+                            </button>
+                            <button class="btn btn-light border px-3 shadow-none" onclick="resetFilters()" style="height: 40px; border-radius: 8px;">
+                                <i class="feather-refresh-cw" style="font-size: 14px;"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Payroll History Table -->
-        <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; background: white;">
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
@@ -95,15 +105,15 @@
                                 </td>
                                 <td class="pe-4 text-center">
                                     <div class="d-flex justify-content-center gap-2">
-                                        <button class="action-btn-outline" onclick="viewPayroll({{ $payroll->id }})">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="action-btn-outline" onclick="downloadSlip({{ $payroll->id }})">
-                                            <i class="bi bi-download"></i>
-                                        </button>
-                                        <button class="action-btn-outline text-danger" onclick="deletePayroll({{ $payroll->id }})">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="viewPayroll({{ $payroll->id }})" title="View">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-warning text-warning" onclick="downloadSlip({{ $payroll->id }})" title="Download">
+                                            <i class="feather-download"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deletePayroll({{ $payroll->id }})" title="Delete">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
