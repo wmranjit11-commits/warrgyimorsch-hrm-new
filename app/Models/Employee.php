@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Employee extends Model
+{
+    protected $fillable = [
+        'name',
+        'email',
+        'mobile_number',
+        'role',
+        'department',
+        'designation',
+        'date_of_joining',
+        'date_of_birth',
+        'gender',
+        'employee_type',
+        'username',
+        'password',
+        'aadhaar_number',
+        'pan_number',
+        'address',
+        'time_in',
+        'time_out',
+        'leave',
+        'photo',
+        'pf',
+        'pf_number',
+        'esi',
+        'esi_number',
+        'insurance',
+        'insurance_provider',
+        'insurance_policy_number',
+        'bank_name',
+        'account_number',
+        'ifsc_code',
+        'basic_salary',
+        'hra',
+        'conveyance_allowance',
+        'medical_allowance',
+        'other_allowance',
+    ];
+}

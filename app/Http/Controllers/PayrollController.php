@@ -1,0 +1,608 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Payroll;
+use App\Models\Attendance;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+
+class PayrollController extends Controller
+{
+    /**
+     * Display Attendance List
+     */
+    public function attendance(Request $request)
+    {
+        $query = Attendance::query();
+        $hasFilter = false;
+
+        // Filter by Date Range
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
+            $hasFilter = true;
+        }
+
+        // Filter by Employee
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+            $hasFilter = true;
+        }
+
+        if (!$hasFilter) {
+            // Default to current month if no filter is provided
+            $query->whereYear('attendance_date', now()->year)
+                  ->whereMonth('attendance_date', now()->month);
+        }
+
+        // Group by Date with Aggregate Counts
+        $attendance = $query->selectRaw('attendance_date, 
+                count(case when status = "present" then 1 end) as present_count,
+                count(case when status = "half_day" then 1 end) as half_day_count,
+                count(case when status = "absent" then 1 end) as absent_count,
+                count(case when status = "leave" then 1 end) as leave_count,
+                count(case when status = "late" then 1 end) as late_count,
+                count(case when total_hours > 9 then 1 end) as overtime_count')
+            ->groupBy('attendance_date')
+            ->orderBy('attendance_date', 'desc')
+            ->paginate(15);
+
+        return view('payroll.attendance', compact('attendance'));
+    }
+
+    /**
+     * Get attendance details for a specific date (AJAX)
+     */
+    public function getAttendanceDetails(Request $request)
+    {
+        $date = $request->date;
+        $details = Attendance::with('employee')
+            ->where('attendance_date', $date)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'date' => Carbon::parse($date)->format('d M Y'),
+            'data' => $details
+        ]);
+    }
+
+    /**
+     * Get attendance records with filtering
+     */
+    public function getAttendance(Request $request)
+    {
+        $query = Attendance::with('employee');
+
+        // Filter by Date Range (Start Date to End Date)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
+        } elseif ($request->filled('year') && $request->filled('month')) {
+            $query->whereYear('attendance_date', $request->year)
+                  ->whereMonth('attendance_date', $request->month);
+        }
+
+        // Filter by employee
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        $attendance = $query->orderBy('attendance_date', 'desc')->paginate(10);
+
+        return view('payroll.attendance', compact('attendance'));
+    }
+
+    /**
+     * Add Attendance - Show form
+     */
+    public function addAttendance()
+    {
+        $employees = Employee::all();
+        return view('payroll.add-attendance', compact('employees'));
+    }
+
+    /**
+     * Store Attendance
+     */
+    public function storeAttendance(Request $request)
+    {
+        try {
+            if (!$request->attendance_date) {
+                throw new \Exception('Attendance date is required.');
+            }
+
+            foreach ($request->employees as $employeeData) {
+                if ($employeeData['employee_id']) {
+                    $status = $employeeData['status'] ?? 'present';
+                    
+                    $checkIn = !empty($employeeData['check_in']) ? $employeeData['check_in'] : null;
+                    $checkOut = !empty($employeeData['check_out']) ? $employeeData['check_out'] : null;
+                    
+                    $totalHours = 0;
+                    if ($checkIn && $checkOut) {
+                        try {
+                            $in = Carbon::createFromFormat('H:i', $checkIn);
+                            $out = Carbon::createFromFormat('H:i', $checkOut);
+                            if ($out->greaterThan($in)) {
+                                $totalHours = $out->diffInMinutes($in) / 60;
+                            }
+                        } catch (\Exception $e) {
+                            $totalHours = 0;
+                        }
+                    }
+
+                    // Update or Create
+                    Attendance::updateOrCreate(
+                        [
+                            'employee_id' => $employeeData['employee_id'],
+                            'attendance_date' => $request->attendance_date
+                        ],
+                        [
+                            'check_in' => $checkIn,
+                            'check_out' => $checkOut,
+                            'status' => $status,
+                            'total_hours' => round($totalHours, 2),
+                        ]
+                    );
+                }
+            }
+
+            return redirect()->route('payroll.attendance', ['start_date' => $request->attendance_date, 'end_date' => $request->attendance_date])
+                ->with('success', 'Attendance records have been updated successfully! ✓');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Display Payroll Calculation page
+     */
+    public function calculation()
+    {
+        return view('payroll.calculation');
+    }
+
+    /**
+     * Calculate and display payroll
+     */
+    public function calculatePayroll(Request $request)
+    {
+        try {
+            $month = $request->month; // Format: YYYY-MM
+            $employeeId = $request->employee_id;
+
+            // Get employee
+            $employee = Employee::findOrFail($employeeId);
+
+            // Check if payroll already exists for this month
+            $existingPayroll = Payroll::where('employee_id', $employeeId)
+                ->where('month', $month)
+                ->first();
+
+            if ($existingPayroll) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payroll for this month already exists',
+                    'payroll' => $existingPayroll,
+                ]);
+            }
+
+            $year = substr($month, 0, 4);
+            $monthNum = substr($month, 5, 2);
+            
+            // Get total days in month
+            $totalDays = Carbon::createFromFormat('Y-m', $month)->daysInMonth;
+
+            // Check if there's any attendance data for this month
+            $totalRecords = Attendance::where('employee_id', $employeeId)
+                ->whereYear('attendance_date', $year)
+                ->whereMonth('attendance_date', $monthNum)
+                ->count();
+
+            if ($totalRecords == 0) {
+                // No attendance records, default to full salary
+                $payableDays = $totalDays;
+            } else {
+                // Calculate absence and late records
+                $absentLeaves = Attendance::where('employee_id', $employeeId)
+                    ->whereYear('attendance_date', $year)
+                    ->whereMonth('attendance_date', $monthNum)
+                    ->whereIn('status', ['absent', 'leave'])
+                    ->count();
+
+                $halfDays = Attendance::where('employee_id', $employeeId)
+                    ->whereYear('attendance_date', $year)
+                    ->whereMonth('attendance_date', $monthNum)
+                    ->where('status', 'half_day')
+                    ->count();
+
+                $lates = Attendance::where('employee_id', $employeeId)
+                    ->whereYear('attendance_date', $year)
+                    ->whereMonth('attendance_date', $monthNum)
+                    ->where('status', 'late')
+                    ->count();
+
+                // Deduct 1 day for each leave/absent, 0.5 for half day, and 0.5 days for each late
+                $payableDays = $totalDays - $absentLeaves - ($halfDays * 0.5) - ($lates * 0.5);
+                if ($payableDays < 0) $payableDays = 0;
+            }
+
+            // Calculate monthly components (Assume stored as ANNUAL in DB per user)
+            $basicSalary = $employee->basic_salary; // Monthly Basic
+            $hra = $employee->hra / 12;
+            $conveyance = $employee->conveyance_allowance / 12;
+            $medical = $employee->medical_allowance / 12;
+            $otherAllowance = $employee->other_allowance / 12;
+
+            $fullMonthGross = $basicSalary + $hra + $conveyance + $medical + $otherAllowance;
+
+            // Calculate deductions based on Monthly Basic
+            $pfDeduction = $employee->pf ? ($basicSalary * 0.12) : 0;
+            $esiDeduction = $employee->esi ? ($basicSalary * 0.0175) : 0;
+            $otherDeduction = 0;
+
+            $fullMonthDeductions = $pfDeduction + $esiDeduction + $otherDeduction;
+            $fullMonthNet = $fullMonthGross - $fullMonthDeductions;
+
+            // Pro-rate based on payable days
+            $grossSalary = ($fullMonthGross / $totalDays) * $payableDays;
+            $netSalary = ($fullMonthNet / $totalDays) * $payableDays;
+            $totalDeductions = ($fullMonthDeductions / $totalDays) * $payableDays;
+
+            $payrollData = [
+                'employee_id' => $employeeId,
+                'month' => $month,
+                'payable_days' => $payableDays,
+                'gross_salary' => round($grossSalary, 2),
+                'basic_salary' => round($basicSalary, 2),
+                'hra' => round($hra, 2),
+                'conveyance_allowance' => round($conveyance, 2),
+                'medical_allowance' => round($medical, 2),
+                'other_allowance' => round($otherAllowance, 2),
+                'deductions' => round($totalDeductions, 2),
+                'pf_deduction' => round($pfDeduction, 2),
+                'esi_deduction' => round($esiDeduction, 2),
+                'other_deduction' => round($otherDeduction, 2),
+                'net_salary' => round($netSalary, 2),
+                'status' => 'pending',
+            ];
+
+            return response()->json([
+                'success' => true,
+                'payroll' => $payrollData,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Store calculated payroll
+     */
+    public function storePayroll(Request $request)
+    {
+        try {
+            Payroll::create($request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payroll saved successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Display payroll list
+     */
+    public function index(Request $request)
+    {
+        $query = Payroll::with('employee');
+
+        // Filter by month
+        if ($request->filled('month')) {
+            $query->where('month', $request->month);
+        }
+
+        // Filter by employee
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $payrolls = $query->orderBy('created_at', 'desc')->paginate(10);
+        return view('payroll.index', compact('payrolls'));
+    }
+
+    /**
+     * Get payroll records with filtering
+     */
+    public function getPayroll(Request $request)
+    {
+        $query = Payroll::with('employee');
+
+        // Filter by month
+        if ($request->filled('month')) {
+            $query->where('month', $request->month);
+        }
+
+        // Filter by employee
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $payrolls = $query->orderBy('month', 'desc')->paginate(10);
+
+        return view('payroll.index', compact('payrolls'));
+    }
+
+    /**
+     * Show payroll record
+     */
+    public function show($id)
+    {
+        $payroll = Payroll::with('employee')->findOrFail($id);
+        return view('payroll.show', compact('payroll'));
+    }
+
+    /**
+     * Export payroll as PDF or CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Payroll::with('employee');
+
+        if ($request->filled('month')) {
+            $query->where('month', $request->month);
+        }
+
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        if ($request->filled('id')) {
+            $query->where('id', $request->id);
+        }
+
+        $payrolls = $query->get();
+
+        if ($payrolls->count() == 1) {
+            $payroll = $payrolls->first();
+            $filename = 'payslip_' . $payroll->employee->name . '_' . $payroll->month . '.csv';
+        } else {
+            $filename = 'payroll_report_' . date('Y-m-d') . '.csv';
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($payrolls) {
+            $file = fopen('php://output', 'w');
+            
+            // Report Header
+            fputcsv($file, ['Company Name', 'PAYROLL SLIP/REPORT']);
+            fputcsv($file, ['Generated On', now()->format('Y-m-d H:i:s')]);
+            fputcsv($file, ['']);
+
+            // CSV Headers
+            fputcsv($file, [
+                'SR.NO', 'EMPLOYEE NAME', 'MONTH', 'PAYABLE DAYS',
+                'BASIC SALARY', 'HRA', 'CONVEYANCE', 'MEDICAL', 'OTHER ALLOWANCE',
+                'PF DEDUCTION', 'ESI DEDUCTION', 'OTHER DEDUCTION',
+                'GROSS SALARY', 'TOTAL DEDUCTIONS', 'NET SALARY', 'STATUS'
+            ]);
+
+            // CSV Data
+            $counter = 1;
+            foreach ($payrolls as $payroll) {
+                fputcsv($file, [
+                    $counter++,
+                    $payroll->employee->name,
+                    $payroll->month,
+                    $payroll->payable_days,
+                    $payroll->basic_salary,
+                    $payroll->hra,
+                    $payroll->conveyance_allowance,
+                    $payroll->medical_allowance,
+                    $payroll->other_allowance,
+                    $payroll->pf_deduction,
+                    $payroll->esi_deduction,
+                    $payroll->other_deduction,
+                    $payroll->gross_salary,
+                    $payroll->deductions,
+                    $payroll->net_salary,
+                    $payroll->status,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export attendance records (CSV)
+     */
+    public function exportAttendance(Request $request)
+    {
+        $query = Attendance::with('employee');
+
+        // Filter by Date Range (Start Date to End Date)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
+        } elseif ($request->filled('year') && $request->filled('month')) {
+            $query->whereYear('attendance_date', $request->year)
+                  ->whereMonth('attendance_date', $request->month);
+        }
+
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        $attendances = $query->orderBy('attendance_date', 'desc')->get();
+
+        if ($request->filled('employee_id') && $attendances->count() > 0) {
+            $empName = $attendances->first()->employee->name;
+            $filename = 'attendance_' . str_replace(' ', '_', $empName) . '_' . date('Y-m-d') . '.csv';
+        } else {
+            $filename = 'attendance_report_' . date('Y-m-d_His') . '.csv';
+        }
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($attendances) {
+            $file = fopen('php://output', 'w');
+            // Invoice-like header
+            fputcsv($file, ['Company Name', 'Payroll Attendance Report']);
+            fputcsv($file, ['Generated On', now()->format('Y-m-d H:i:s')]);
+            fputcsv($file, ['']);
+            fputcsv($file, ['Date', 'Employee Name', 'Designation', 'Check In', 'Check Out', 'Status', 'Hours']);
+
+            foreach ($attendances as $att) {
+                fputcsv($file, [
+                    $att->attendance_date->format('Y-m-d'),
+                    $att->employee->name,
+                    $att->employee->designation ?? 'N/A',
+                    $att->check_in,
+                    $att->check_out,
+                    $att->status,
+                    $att->total_hours,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Update payroll status
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $payroll = Payroll::findOrFail($id);
+            $payroll->update([
+                'status' => $request->status,
+                'payment_date' => $request->status === 'paid' ? now() : null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payroll status updated!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $payroll = Payroll::findOrFail($id);
+            $payroll->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payroll deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Remove the specified attendance record from storage.
+     */
+    public function destroyAttendance($id)
+    {
+        try {
+            $attendance = Attendance::findOrFail($id);
+            $attendance->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Attendance deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Remove all attendance records for a specific date.
+     */
+    public function destroyAttendanceByDate($date)
+    {
+        try {
+            Attendance::where('attendance_date', $date)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'All attendance records for ' . $date . ' deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Bulk remove selected attendance records by date.
+     */
+    public function bulkDestroyAttendance(Request $request)
+    {
+        try {
+            $dates = $request->dates;
+            if (!empty($dates)) {
+                Attendance::whereIn('attendance_date', $dates)->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected attendance records deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+}
