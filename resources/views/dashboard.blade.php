@@ -84,7 +84,7 @@
     </div>
     <!-- [ page-header ] end -->
     <!-- [ Main Content ] start -->
-    <div class="main-content">
+    <div class="main-content pt-4">
         <div class="row">
             <!-- [Invoices Awaiting Payment] start -->
             <div class="col-xxl-3 col-md-6">
@@ -96,144 +96,235 @@
                                     <i class="feather-dollar-sign"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark"><span class="counter">45</span>/<span
-                                            class="counter">76</span></div>
-                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Invoices Awaiting Payment</h3>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Paid in {{ $selectedMonthLabel }}
+                                    </h3>
                                 </div>
                             </div>
-                            <a href="javascript:void(0);" class="">
-                                <i class="feather-more-vertical"></i>
-                            </a>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="pt-4">
                             <div class="d-flex align-items-center justify-content-between">
                                 <a href="javascript:void(0);"
-                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Invoices Awaiting </a>
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">{{ $totalEmpPaid }} Employees
+                                    Paid </a>
                                 <div class="w-100 text-end">
-                                    <span class="fs-12 text-dark">$5,569</span>
-                                    <span class="fs-11 text-muted">(56%)</span>
+                                    <span class="fs-12 text-dark">₹{{ number_format($totalNetSalary, 0) }}</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPaidAmount / $totalNetSalary) * 100) : 0 }}%)</span>
                                 </div>
                             </div>
                             <div class="progress mt-2 ht-3">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 56%"></div>
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- [Invoices Awaiting Payment] end -->
-            <!-- [Converted Leads] start -->
+            <!-- [Pending Amount] start -->
             <div class="col-xxl-3 col-md-6">
                 <div class="card stretch stretch-full">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-4">
                             <div class="d-flex gap-4 align-items-center">
                                 <div class="avatar-text avatar-lg bg-gray-200">
-                                    <i class="feather-cast"></i>
+                                    <i class="feather-clock text-warning"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark"><span class="counter">48</span>/<span
-                                            class="counter">86</span></div>
-                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Converted Leads</h3>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Pending in {{ $selectedMonthLabel }}
+                                    </h3>
                                 </div>
                             </div>
-                            <a href="javascript:void(0);" class="">
-                                <i class="feather-more-vertical"></i>
-                            </a>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="pt-4">
                             <div class="d-flex align-items-center justify-content-between">
                                 <a href="javascript:void(0);"
-                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Converted Leads </a>
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Awaiting Payment </a>
                                 <div class="w-100 text-end">
-                                    <span class="fs-12 text-dark">52 Completed</span>
-                                    <span class="fs-11 text-muted">(63%)</span>
+                                    <span class="fs-12 text-dark">{{ $totalEmpPending }} Employees</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPendingAmount / $totalNetSalary) * 100) : 0 }}%)</span>
                                 </div>
                             </div>
                             <div class="progress mt-2 ht-3">
-                                <div class="progress-bar bg-warning" role="progressbar" style="width: 63%"></div>
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- [Converted Leads] end -->
-            <!-- [Projects In Progress] start -->
+            <!-- [Pending Amount] end -->
+            <!-- [Rejected Amount] start -->
             <div class="col-xxl-3 col-md-6">
                 <div class="card stretch stretch-full">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-4">
                             <div class="d-flex gap-4 align-items-center">
                                 <div class="avatar-text avatar-lg bg-gray-200">
-                                    <i class="feather-briefcase"></i>
+                                    <i class="feather-x-circle text-danger"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark"><span class="counter">16</span>/<span
-                                            class="counter">20</span></div>
-                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Projects In Progress</h3>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Rejected in {{ $selectedMonthLabel }}
+                                    </h3>
                                 </div>
                             </div>
-                            <a href="javascript:void(0);" class="">
-                                <i class="feather-more-vertical"></i>
-                            </a>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="pt-4">
                             <div class="d-flex align-items-center justify-content-between">
                                 <a href="javascript:void(0);"
-                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Projects In Progress </a>
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Payment Failed </a>
                                 <div class="w-100 text-end">
-                                    <span class="fs-12 text-dark">16 Completed</span>
-                                    <span class="fs-11 text-muted">(78%)</span>
+                                    <span class="fs-12 text-dark">Rejected</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalRejectedAmount / $totalNetSalary) * 100) : 0 }}%)</span>
                                 </div>
                             </div>
                             <div class="progress mt-2 ht-3">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 78%"></div>
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- [Projects In Progress] end -->
-            <!-- [Conversion Rate] start -->
+            <!-- [Rejected Amount] end -->
+            <!-- [Total Employees] start -->
             <div class="col-xxl-3 col-md-6">
                 <div class="card stretch stretch-full">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between mb-4">
                             <div class="d-flex gap-4 align-items-center">
                                 <div class="avatar-text avatar-lg bg-gray-200">
-                                    <i class="feather-activity"></i>
+                                    <i class="feather-users text-primary"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark"><span class="counter">46.59</span>%</div>
-                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Conversion Rate</h3>
+                                    <div class="fs-4 fw-bold text-dark">{{ $totalEmployees }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Total Staff</h3>
                                 </div>
                             </div>
-                            <a href="javascript:void(0);" class="">
-                                <i class="feather-more-vertical"></i>
-                            </a>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="pt-4">
                             <div class="d-flex align-items-center justify-content-between">
                                 <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">
-                                    Conversion Rate </a>
+                                    Attendance Rate </a>
                                 <div class="w-100 text-end">
-                                    <span class="fs-12 text-dark">$2,254</span>
-                                    <span class="fs-11 text-muted">(46%)</span>
+                                    <span class="fs-12 text-dark">{{ $attendanceRate }}%</span>
+                                    <span class="fs-11 text-muted">(Today)</span>
                                 </div>
                             </div>
                             <div class="progress mt-2 ht-3">
-                                <div class="progress-bar bg-danger" role="progressbar" style="width: 46%"></div>
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ $attendanceRate }}%"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- [Conversion Rate] end -->
+            <!-- [Total Employees] end -->
             <!-- [Payment Records] start -->
             <div class="col-xxl-8">
                 <div class="card stretch stretch-full">
                     <div class="card-header">
-                        <h5 class="card-title">Payment Record</h5>
+                        <h5 class="card-title">Monthly Payroll Trends</h5>
                         <div class="card-header-action">
                             <div class="card-header-btn">
                                 <div data-bs-toggle="tooltip" title="Delete">
@@ -281,963 +372,820 @@
                         <div class="row g-4">
                             <div class="col-lg-3">
                                 <div class="p-3 border border-dashed rounded">
-                                    <div class="fs-12 text-muted mb-1">Awaiting</div>
-                                    <h6 class="fw-bold text-dark">$5,486</h6>
-                                    <div class="progress mt-2 ht-3">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 81%"></div>
+                                    <div class="fs-12 text-muted mb-1">Pending</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%"></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="p-3 border border-dashed rounded">
-                                    <div class="fs-12 text-muted mb-1">Completed</div>
-                                    <h6 class="fw-bold text-dark">$9,275</h6>
-                                    <div class="progress mt-2 ht-3">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 82%"></div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Paid</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%"></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="p-3 border border-dashed rounded">
-                                    <div class="fs-12 text-muted mb-1">Rejected</div>
-                                    <h6 class="fw-bold text-dark">$3,868</h6>
-                                    <div class="progress mt-2 ht-3">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 68%"></div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Rejected</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%"></div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="p-3 border border-dashed rounded">
-                                    <div class="fs-12 text-muted mb-1">Revenue</div>
-                                    <h6 class="fw-bold text-dark">$50,668</h6>
-                                    <div class="progress mt-2 ht-3">
-                                        <div class="progress-bar bg-dark" role="progressbar" style="width: 75%"></div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Total Salary</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalNetSalary, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- [Payment Records] end -->
-            <!-- [Total Sales] start -->
-            <div class="col-xxl-4">
-                <div class="card stretch stretch-full overflow-hidden">
-                    <div class="bg-primary text-white">
-                        <div class="p-4">
-                            <span class="badge bg-light text-primary text-dark float-end">12%</span>
-                            <div class="text-start">
-                                <h4 class="text-reset">30,569</h4>
-                                <p class="text-reset m-0">Total Sales</p>
+                <!-- [Payment Records] end -->
+                <!-- [Total Sales] start -->
+                <div class="col-xxl-4" style="display: none;">
+                    <div class="card stretch stretch-full overflow-hidden">
+                        <div class="bg-primary text-white">
+                            <div class="p-4">
+                                <span class="badge bg-light text-primary text-dark float-end">12%</span>
+                                <div class="text-start">
+                                    <h4 class="text-reset">30,569</h4>
+                                    <p class="text-reset m-0">Total Sales</p>
+                                </div>
                             </div>
+                            <div id="total-sales-color-graph"></div>
                         </div>
-                        <div id="total-sales-color-graph"></div>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image avatar-lg p-2 rounded">
-                                    <img class="img-fluid" src="assets/images/brand/shopify.png" alt="" />
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image avatar-lg p-2 rounded">
+                                        <img class="img-fluid" src="assets/images/brand/shopify.png" alt="" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);" class="d-block">Shopify eCommerce Store</a>
+                                        <span class="fs-12 text-muted">Development</span>
+                                    </div>
                                 </div>
                                 <div>
-                                    <a href="javascript:void(0);" class="d-block">Shopify eCommerce Store</a>
-                                    <span class="fs-12 text-muted">Development</span>
+                                    <div class="fw-bold text-dark">$1200</div>
+                                    <div class="fs-12 text-end">6 Projects</div>
                                 </div>
                             </div>
-                            <div>
-                                <div class="fw-bold text-dark">$1200</div>
-                                <div class="fs-12 text-end">6 Projects</div>
-                            </div>
-                        </div>
-                        <hr class="border-dashed my-3" />
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image avatar-lg p-2 rounded">
-                                    <img class="img-fluid" src="assets/images/brand/app-store.png" alt="" />
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0);" class="d-block">iOS Apps Development</a>
-                                    <span class="fs-12 text-muted">Development</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fw-bold text-dark">$1450</div>
-                                <div class="fs-12 text-end">3 Projects</div>
-                            </div>
-                        </div>
-                        <hr class="border-dashed my-3" />
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image avatar-lg p-2 rounded">
-                                    <img class="img-fluid" src="assets/images/brand/figma.png" alt="" />
+                            <hr class="border-dashed my-3" />
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image avatar-lg p-2 rounded">
+                                        <img class="img-fluid" src="assets/images/brand/app-store.png" alt="" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);" class="d-block">iOS Apps Development</a>
+                                        <span class="fs-12 text-muted">Development</span>
+                                    </div>
                                 </div>
                                 <div>
-                                    <a href="javascript:void(0);" class="d-block">Figma Dashboard Design</a>
-                                    <span class="fs-12 text-muted">UI/UX Design</span>
+                                    <div class="fw-bold text-dark">$1450</div>
+                                    <div class="fs-12 text-end">3 Projects</div>
                                 </div>
                             </div>
-                            <div>
-                                <div class="fw-bold text-dark">$1250</div>
-                                <div class="fs-12 text-end">5 Projects</div>
+                            <hr class="border-dashed my-3" />
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image avatar-lg p-2 rounded">
+                                        <img class="img-fluid" src="assets/images/brand/figma.png" alt="" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);" class="d-block">Figma Dashboard Design</a>
+                                        <span class="fs-12 text-muted">UI/UX Design</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">$1250</div>
+                                    <div class="fs-12 text-end">5 Projects</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Full
-                        Details</a>
-                </div>
-            </div>
-            <!-- [Total Sales] end !-->
-            <!-- [Mini] start -->
-            <div class="col-lg-4">
-                <div class="card mb-4 stretch stretch-full">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar-text">
-                                <i class="feather feather-star"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold text-dark">Tasks Completed</div>
-                                <div class="fs-12 text-muted">22/35 completed</div>
-                            </div>
-                        </div>
-                        <div class="fs-4 fw-bold text-dark">22/35</div>
-                    </div>
-                    <div class="card-body d-flex align-items-center justify-content-between gap-4">
-                        <div id="task-completed-area-chart"></div>
-                        <div class="fs-12 text-muted text-nowrap">
-                            <span class="fw-semibold text-primary">28% more</span><br />
-                            <span>from last week</span>
-                        </div>
+                        <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Full
+                            Details</a>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card mb-4 stretch stretch-full">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar-text">
-                                <i class="feather feather-file-text"></i>
+                <!-- [Total Sales] end !-->
+                <!-- [Mini] start -->
+                <div class="col-lg-4" style="display: none;">
+                    <div class="card mb-4 stretch stretch-full">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="avatar-text">
+                                    <i class="feather feather-star"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark">Tasks Completed</div>
+                                    <div class="fs-12 text-muted">22/35 completed</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-semibold text-dark">New Tasks</div>
-                                <div class="fs-12 text-muted">0/20 tasks</div>
-                            </div>
+                            <div class="fs-4 fw-bold text-dark">22/35</div>
                         </div>
-                        <div class="fs-4 fw-bold text-dark">5/20</div>
-                    </div>
-                    <div class="card-body d-flex align-items-center justify-content-between gap-4">
-                        <div id="new-tasks-area-chart"></div>
-                        <div class="fs-12 text-muted text-nowrap">
-                            <span class="fw-semibold text-success">34% more</span><br />
-                            <span>from last week</span>
+                        <div class="card-body d-flex align-items-center justify-content-between gap-4">
+                            <div id="task-completed-area-chart"></div>
+                            <div class="fs-12 text-muted text-nowrap">
+                                <span class="fw-semibold text-primary">28% more</span><br />
+                                <span>from last week</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card mb-4 stretch stretch-full">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar-text">
-                                <i class="feather feather-airplay"></i>
+                <div class="col-lg-4" style="display: none;">
+                    <div class="card mb-4 stretch stretch-full">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div class="d-flex gap-3 align-items-center">
+                                <div class="avatar-text">
+                                    <i class="feather feather-file-text"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark">New Tasks</div>
+                                    <div class="fs-12 text-muted">0/20 tasks</div>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-semibold text-dark">Project Done</div>
-                                <div class="fs-12 text-muted">20/30 project</div>
-                            </div>
+                            <div class="fs-4 fw-bold text-dark">5/20</div>
                         </div>
-                        <div class="fs-4 fw-bold text-dark">20/30</div>
-                    </div>
-                    <div class="card-body d-flex align-items-center justify-content-between gap-4">
-                        <div id="project-done-area-chart"></div>
-                        <div class="fs-12 text-muted text-nowrap">
-                            <span class="fw-semibold text-danger">42% more</span><br />
-                            <span>from last week</span>
+                        <div class="card-body d-flex align-items-center justify-content-between gap-4">
+                            <div id="new-tasks-area-chart"></div>
+                            <div class="fs-12 text-muted text-nowrap">
+                                <span class="fw-semibold text-success">34% more</span><br />
+                                <span>from last week</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- [Mini] end !-->
-            <!-- [Leads Overview] start -->
-            <div class="col-xxl-4">
-                <div class="card stretch stretch-full">
-                    <div class="card-header">
-                        <h5 class="card-title">Leads Overview</h5>
-                        <div class="card-header-action">
-                            <div class="card-header-btn">
-                                <div data-bs-toggle="tooltip" title="Delete">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                        data-bs-toggle="remove"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Refresh">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                        data-bs-toggle="refresh"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                        data-bs-toggle="expand"> </a>
+
+                <!--! BEGIN: [Upcoming Schedule] !-->
+                <div class="col-xxl-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header">
+                            <h5 class="card-title">Upcoming Holidays</h5>
+                            <div class="card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete text-primary">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="card-body">
+                            @forelse($upcomingHolidays as $holiday)
+                                @php $hDate = \Carbon\Carbon::parse($holiday->date); @endphp
+                                <div class="p-3 border border-dashed rounded-3 mb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div
+                                                class="wd-50 ht-50 bg-soft-primary text-primary lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
+                                                <span class="fs-18 fw-bold mb-1 d-block">{{ $hDate->format('d') }}</span>
+                                                <span class="fs-10 fw-semibold text-uppercase d-block">{{ $hDate->format('M') }}</span>
+                                            </div>
+                                            <div class="text-dark">
+                                                <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">{{ $holiday->title }}</a>
+                                                <span class="fs-11 fw-normal text-muted text-truncate-1-line">Holiday ({{ $hDate->format('Y') }})</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted">No upcoming holidays.</div>
+                            @endforelse
+                        </div>
+                        <a href="javascript:void(0);"
+                            class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Upcomming Schedule</a>
+                    </div>
+                </div>
+                <!--! END: [Upcoming Schedule] !-->
+                <!-- [Leads Overview] start -->
+                <div class="col-xxl-4" style="display: none;">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header">
+                            <h5 class="card-title">Leads Overview</h5>
+                            <div class="card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                        data-bs-offset="25, 25">
+                                        <div data-bs-toggle="tooltip" title="Options">
+                                            <i class="feather-more-vertical"></i>
+                                        </div>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-at-sign"></i>New</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-calendar"></i>Event</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-bell"></i>Snoozed</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-trash-2"></i>Deleted</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-settings"></i>Settings</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-life-buoy"></i>Tips & Tricks</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body custom-card-action">
+                            <div id="leads-overview-donut"></div>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #3454d1"></span>
+                                        <span>New<span class="fs-10 text-muted ms-1">(20K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #0d519e"></span>
+                                        <span>Contacted<span class="fs-10 text-muted ms-1">(15K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #1976d2"></span>
+                                        <span>Qualified<span class="fs-10 text-muted ms-1">(10K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #1e88e5"></span>
+                                        <span>Working<span class="fs-10 text-muted ms-1">(18K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #2196f3"></span>
+                                        <span>Customer<span class="fs-10 text-muted ms-1">(10K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #42a5f5"></span>
+                                        <span>Proposal<span class="fs-10 text-muted ms-1">(15K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #64b5f6"></span>
+                                        <span>Leads<span class="fs-10 text-muted ms-1">(16K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #90caf9"></span>
+                                        <span>Progress<span class="fs-10 text-muted ms-1">(14K)</span></span>
+                                    </a>
+                                </div>
+                                <div class="col-4">
+                                    <a href="javascript:void(0);"
+                                        class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
+                                        <span class="wd-7 ht-7 rounded-circle d-inline-block"
+                                            style="background-color: #aad6fa"></span>
+                                        <span>Others<span class="fs-10 text-muted ms-1">(10K)</span></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [Leads Overview] end -->
+                <!-- [Latest Leads] start -->
+                <div class="col-xxl-8">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header">
+                            <h5 class="card-title">Recent Payroll History</h5>
+                            <div class="card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                        data-bs-offset="25, 25">
+                                        <div data-bs-toggle="tooltip" title="Options">
+                                            <i class="feather-more-vertical"></i>
+                                        </div>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-at-sign"></i>New</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-calendar"></i>Event</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-bell"></i>Snoozed</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-trash-2"></i>Deleted</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-settings"></i>Settings</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-life-buoy"></i>Tips & Tricks</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body custom-card-action p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th scope="row">Employee</th>
+                                            <th>Month</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentPayrolls as $rp)
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-text avatar-md bg-soft-primary text-primary">
+                                                            {{ substr($rp->employee->name, 0, 1) }}
+                                                        </div>
+                                                        <a href="javascript:void(0);">
+                                                            <span class="d-block text-truncate-1-line">{{ $rp->employee->name }}</span>
+                                                            <span class="fs-12 d-block fw-normal text-muted small text-uppercase">{{ $rp->employee->designation }}</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-gray-200 text-dark">{{ $rp->month }}</span>
+                                                </td>
+                                                <td>₹{{ number_format($rp->net_salary, 0) }}</td>
+                                                <td>
+                                                    <span class="badge {{ $rp->status == 'paid' ? 'bg-soft-success text-success' : 'bg-soft-warning text-warning' }} text-uppercase">
+                                                        {{ $rp->status }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <a href="{{ route('payroll.index') }}" class="avatar-text avatar-md bg-soft-primary text-primary">
+                                                        <i class="feather-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center py-4 text-muted">No recent payrolls found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            @if($recentPayrolls->hasPages())
+                                <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
+                                    <li>
+                                        <a href="{{ $recentPayrolls->previousPageUrl() }}" class="{{ $recentPayrolls->onFirstPage() ? 'opacity-50 pointer-events-none' : '' }}">
+                                            <i class="feather-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    @foreach ($recentPayrolls->getUrlRange(max(1, $recentPayrolls->currentPage() - 2), min($recentPayrolls->lastPage(), $recentPayrolls->currentPage() + 2)) as $page => $url)
+                                        <li>
+                                            <a href="{{ $url }}" class="{{ ($page == $recentPayrolls->currentPage()) ? 'active' : '' }}">{{ $page }}</a>
+                                        </li>
+                                    @endforeach
+                                    <li>
+                                        <a href="{{ $recentPayrolls->nextPageUrl() }}" class="{{ !$recentPayrolls->hasMorePages() ? 'opacity-50 pointer-events-none' : '' }}">
+                                            <i class="feather-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            @else
+                                <div class="fs-12 text-muted">Showing all records</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <!-- [Latest Leads] end -->
+
+                  <!--! BEGIN: [Attendance Analytics] !-->
+                <div class="col-xxl-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header border-bottom-0 pb-0">
+                            <h5 class="card-title">Attendance Analytics</h5>
                             <div class="dropdown">
-                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                    data-bs-offset="25, 25">
-                                    <div data-bs-toggle="tooltip" title="Options">
-                                        <i class="feather-more-vertical"></i>
-                                    </div>
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown">
+                                    <i class="feather-more-vertical"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-at-sign"></i>New</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-calendar"></i>Event</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-bell"></i>Snoozed</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-trash-2"></i>Deleted</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-settings"></i>Settings</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-life-buoy"></i>Tips & Tricks</a>
+                                    <a href="{{ route('payroll.attendance') }}" class="dropdown-item">
+                                        <i class="feather-external-link me-2"></i>
+                                        <span>Full Attendance List</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-body custom-card-action">
-                        <div id="leads-overview-donut"></div>
-                        <div class="row g-2">
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #3454d1"></span>
-                                    <span>New<span class="fs-10 text-muted ms-1">(20K)</span></span>
-                                </a>
+                        <div class="card-body pt-3 text-center">
+                            <div class="py-4 position-relative">
+                                <div class="fs-1 fw-black text-primary mb-1 mt-2">{{ $attendanceRate }}%</div>
+                                <div class="text-muted fw-bold small text-uppercase">Average Attendance Rate</div>
                             </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #0d519e"></span>
-                                    <span>Contacted<span class="fs-10 text-muted ms-1">(15K)</span></span>
-                                </a>
+
+                            <div class="p-3 bg-soft-primary rounded-3 text-start mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Staff Presence Today</span>
+                                    <span class="small fw-black text-primary">{{ $todayPresent }}/{{ $totalEmployees }}</span>
+                                </div>
+                                <div class="progress ht-5 bg-white mb-3">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ $totalEmployees > 0 ? ($todayPresent / $totalEmployees) * 100 : 0 }}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small fw-bold text-dark">Leave Today</span>
+                                    <span class="small fw-black text-danger">{{ $todayLeave ?? 0 }} Staff</span>
+                                </div>
                             </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #1976d2"></span>
-                                    <span>Qualified<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                                </a>
+
+                            <div class="row g-2 text-start">
+                                <div class="col-6 border-end">
+                                    <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
+                                    <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
+                                </div>
+                                <div class="col-6 ps-3">
+                                    <div class="fs-5 fw-bold text-success">{{ $todayPresent }}</div>
+                                    <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
+                                </div>
                             </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #1e88e5"></span>
-                                    <span>Working<span class="fs-10 text-muted ms-1">(18K)</span></span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #2196f3"></span>
-                                    <span>Customer<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #42a5f5"></span>
-                                    <span>Proposal<span class="fs-10 text-muted ms-1">(15K)</span></span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #64b5f6"></span>
-                                    <span>Leads<span class="fs-10 text-muted ms-1">(16K)</span></span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #90caf9"></span>
-                                    <span>Progress<span class="fs-10 text-muted ms-1">(14K)</span></span>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);"
-                                    class="p-2 hstack gap-2 rounded border border-dashed border-gray-5">
-                                    <span class="wd-7 ht-7 rounded-circle d-inline-block"
-                                        style="background-color: #aad6fa"></span>
-                                    <span>Others<span class="fs-10 text-muted ms-1">(10K)</span></span>
-                                </a>
-                            </div>
+                        </div>
+                        <div class="card-footer border-top p-3 bg-light bg-opacity-10 text-center">
+                            <a href="{{ route('payroll.attendance.add') }}" class="fs-12 fw-bold text-primary text-uppercase">
+                                <i class="feather-plus-circle me-1"></i> Add Daily Records
+                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- [Leads Overview] end -->
-            <!-- [Latest Leads] start -->
-            <div class="col-xxl-8">
-                <div class="card stretch stretch-full">
-                    <div class="card-header">
-                        <h5 class="card-title">Latest Leads</h5>
-                        <div class="card-header-action">
-                            <div class="card-header-btn">
-                                <div data-bs-toggle="tooltip" title="Delete">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                        data-bs-toggle="remove"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Refresh">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                        data-bs-toggle="refresh"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                        data-bs-toggle="expand"> </a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                    data-bs-offset="25, 25">
-                                    <div data-bs-toggle="tooltip" title="Options">
-                                        <i class="feather-more-vertical"></i>
+                <!--! END: [Attendance Analytics] !-->
+            </div><!-- row end -->
+            <div class="row pt-4">
+              
+                <!--! BEGIN: [Team Progress] !-->
+                <!-- <div class="col-xxl-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header">
+                            <h5 class="card-title">Team Progress</h5>
+                            <div class="card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
                                     </div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-at-sign"></i>New</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-calendar"></i>Event</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-bell"></i>Snoozed</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-trash-2"></i>Deleted</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-settings"></i>Settings</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-life-buoy"></i>Tips & Tricks</a>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                        data-bs-offset="25, 25">
+                                        <div data-bs-toggle="tooltip" title="Options">
+                                            <i class="feather-more-vertical"></i>
+                                        </div>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-at-sign"></i>New</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-calendar"></i>Event</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-bell"></i>Snoozed</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-trash-2"></i>Deleted</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-settings"></i>Settings</a>
+                                        <a href="javascript:void(0);" class="dropdown-item"><i
+                                                class="feather-life-buoy"></i>Tips & Tricks</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="card-body custom-card-action">
+                            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image">
+                                        <img src="assets/images/avatar/1.png" alt="" class="img-fluid" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);">Alexandra Della</a>
+                                        <div class="fs-11 text-muted">Frontend Developer</div>
+                                    </div>
+                                </div>
+                                <div class="team-progress-1"></div>
+                            </div>
+                            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image">
+                                        <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);">Archie Cantones</a>
+                                        <div class="fs-11 text-muted">UI/UX Designer</div>
+                                    </div>
+                                </div>
+                                <div class="team-progress-2"></div>
+                            </div>
+                            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image">
+                                        <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);">Malanie Hanvey</a>
+                                        <div class="fs-11 text-muted">Backend Developer</div>
+                                    </div>
+                                </div>
+                                <div class="team-progress-3"></div>
+                            </div>
+                            <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-2">
+                                <div class="hstack gap-3">
+                                    <div class="avatar-image">
+                                        <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
+                                    </div>
+                                    <div>
+                                        <a href="javascript:void(0);">Kenneth Hune</a>
+                                        <div class="fs-11 text-muted">Digital Marketer</div>
+                                    </div>
+                                </div>
+                                <div class="team-progress-4"></div>
+                            </div>
+                        </div>
+                        <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Update 30 Min
+                            Ago</a>
                     </div>
-                    <div class="card-body custom-card-action p-0">
+                </div> -->
+                <!--! END: [Team Progress] !-->
+            </div><!-- second row end -->
+            <!-- Monthly Summary Modal [ENHANCED] -->
+        <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-header bg-soft-primary border-0 p-4">
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
+                            <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr class="border-b">
-                                        <th scope="row">Users</th>
-                                        <th>Proposal</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th class="text-end">Actions</th>
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
+                                    <tr>
+                                        <th class="ps-4">Month</th>
+                                        <th>Basic / Earnings</th>
+                                        <th>Deductions</th>
+                                        <th>Net Payable</th>
+                                        <th class="pe-4 text-end">Trends</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="avatar-image">
-                                                    <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
-                                                </div>
-                                                <a href="javascript:void(0);">
-                                                    <span class="d-block">Archie Cantones</span>
-                                                    <span
-                                                        class="fs-12 d-block fw-normal text-muted">arcie.tones@gmail.com</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-gray-200 text-dark">Sent</span>
-                                        </td>
-                                        <td>11/06/2023 10:53</td>
-                                        <td>
-                                            <span class="badge bg-soft-success text-success">Completed</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="avatar-image">
-                                                    <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
-                                                </div>
-                                                <a href="javascript:void(0);">
-                                                    <span class="d-block">Holmes Cherryman</span>
-                                                    <span
-                                                        class="fs-12 d-block fw-normal text-muted">golms.chan@gmail.com</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-gray-200 text-dark">New</span>
-                                        </td>
-                                        <td>11/06/2023 10:53</td>
-                                        <td>
-                                            <span class="badge bg-soft-primary text-primary">In Progress </span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="avatar-image">
-                                                    <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
-                                                </div>
-                                                <a href="javascript:void(0);">
-                                                    <span class="d-block">Malanie Hanvey</span>
-                                                    <span
-                                                        class="fs-12 d-block fw-normal text-muted">lanie.nveyn@gmail.com</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-gray-200 text-dark">Sent</span>
-                                        </td>
-                                        <td>11/06/2023 10:53</td>
-                                        <td>
-                                            <span class="badge bg-soft-success text-success">Completed</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="avatar-image">
-                                                    <img src="assets/images/avatar/5.png" alt="" class="img-fluid" />
-                                                </div>
-                                                <a href="javascript:void(0);">
-                                                    <span class="d-block">Kenneth Hune</span>
-                                                    <span
-                                                        class="fs-12 d-block fw-normal text-muted">nneth.une@gmail.com</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-gray-200 text-dark">Returning</span>
-                                        </td>
-                                        <td>11/06/2023 10:53</td>
-                                        <td>
-                                            <span class="badge bg-soft-warning text-warning">Not Interested</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="avatar-image">
-                                                    <img src="assets/images/avatar/6.png" alt="" class="img-fluid" />
-                                                </div>
-                                                <a href="javascript:void(0);">
-                                                    <span class="d-block">Valentine Maton</span>
-                                                    <span
-                                                        class="fs-12 d-block fw-normal text-muted">alenine.aton@gmail.com</span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-gray-200 text-dark">Sent</span>
-                                        </td>
-                                        <td>11/06/2023 10:53</td>
-                                        <td>
-                                            <span class="badge bg-soft-success text-success">Completed</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="javascript:void(0);"><i class="feather-more-vertical"></i></a>
-                                        </td>
-                                    </tr>
+                                <tbody id="modalHistoryTable">
+                                    <!-- Populated via JS -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
-                            <li>
-                                <a href="javascript:void(0);"><i class="bi bi-arrow-left"></i></a>
-                            </li>
-                            <li><a href="javascript:void(0);" class="active">1</a></li>
-                            <li><a href="javascript:void(0);">2</a></li>
-                            <li>
-                                <a href="javascript:void(0);"><i class="bi bi-dot"></i></a>
-                            </li>
-                            <li><a href="javascript:void(0);">8</a></li>
-                            <li><a href="javascript:void(0);">9</a></li>
-                            <li>
-                                <a href="javascript:void(0);"><i class="bi bi-arrow-right"></i></a>
-                            </li>
-                        </ul>
+                    <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
+                        <div class="w-100 d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                <i class="feather-info me-1"></i> Data shown is aggregated for all employees.
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close Summary</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- [Latest Leads] end -->
-            <!--! BEGIN: [Upcoming Schedule] !-->
-            <div class="col-xxl-4">
-                <div class="card stretch stretch-full">
-                    <div class="card-header">
-                        <h5 class="card-title">Upcoming Schedule</h5>
-                        <div class="card-header-action">
-                            <div class="card-header-btn">
-                                <div data-bs-toggle="tooltip" title="Delete">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                        data-bs-toggle="remove"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Refresh">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                        data-bs-toggle="refresh"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                        data-bs-toggle="expand"> </a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                    data-bs-offset="25, 25">
-                                    <div data-bs-toggle="tooltip" title="Options">
-                                        <i class="feather-more-vertical"></i>
-                                    </div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-at-sign"></i>New</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-calendar"></i>Event</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-bell"></i>Snoozed</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-trash-2"></i>Deleted</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-settings"></i>Settings</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-life-buoy"></i>Tips & Tricks</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <!--! BEGIN: [Events] !-->
-                        <div class="p-3 border border-dashed rounded-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div
-                                        class="wd-50 ht-50 bg-soft-primary text-primary lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                                        <span class="fs-18 fw-bold mb-1 d-block">20</span>
-                                        <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                                    </div>
-                                    <div class="text-dark">
-                                        <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">React
-                                            Dashboard Design</a>
-                                        <span class="fs-11 fw-normal text-muted text-truncate-1-line">11:30am -
-                                            12:30pm</span>
-                                    </div>
-                                </div>
-                                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Janette Dalton">
-                                        <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Michael Ksen">
-                                        <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Socrates Itumay">
-                                        <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Explorer More">
-                                        <i class="feather-more-horizontal"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!--! BEGIN: [Events] !-->
-                        <div class="p-3 border border-dashed rounded-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div
-                                        class="wd-50 ht-50 bg-soft-warning text-warning lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                                        <span class="fs-18 fw-bold mb-1 d-block">30</span>
-                                        <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                                    </div>
-                                    <div class="text-dark">
-                                        <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Admin Design
-                                            Concept</a>
-                                        <span class="fs-11 fw-normal text-muted text-truncate-1-line">10:00am -
-                                            12:00pm</span>
-                                    </div>
-                                </div>
-                                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Janette Dalton">
-                                        <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Michael Ksen">
-                                        <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Explorer More">
-                                        <i class="feather-more-horizontal"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!--! BEGIN: [Events] !-->
-                        <div class="p-3 border border-dashed rounded-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div
-                                        class="wd-50 ht-50 bg-soft-success text-success lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                                        <span class="fs-18 fw-bold mb-1 d-block">17</span>
-                                        <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                                    </div>
-                                    <div class="text-dark">
-                                        <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Standup Team
-                                            Meeting</a>
-                                        <span class="fs-11 fw-normal text-muted text-truncate-1-line">8:00am - 9:00am</span>
-                                    </div>
-                                </div>
-                                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Janette Dalton">
-                                        <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Michael Ksen">
-                                        <img src="assets/images/avatar/3.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Socrates Itumay">
-                                        <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Explorer More">
-                                        <i class="feather-more-horizontal"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <!--! BEGIN: [Events] !-->
-                        <div class="p-3 border border-dashed rounded-3 mb-2">
-                            <div class="d-flex justify-content-between">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div
-                                        class="wd-50 ht-50 bg-soft-danger text-danger lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                                        <span class="fs-18 fw-bold mb-1 d-block">25</span>
-                                        <span class="fs-10 fw-semibold text-uppercase d-block">Dec</span>
-                                    </div>
-                                    <div class="text-dark">
-                                        <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">Zoom Team
-                                            Meeting</a>
-                                        <span class="fs-11 fw-normal text-muted text-truncate-1-line">03:30pm -
-                                            05:30pm</span>
-                                    </div>
-                                </div>
-                                <div class="img-group lh-0 ms-3 justify-content-start d-none d-sm-flex">
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Janette Dalton">
-                                        <img src="assets/images/avatar/2.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Socrates Itumay">
-                                        <img src="assets/images/avatar/4.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/5.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-image avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Marianne Audrey">
-                                        <img src="assets/images/avatar/6.png" class="img-fluid" alt="image" />
-                                    </a>
-                                    <a href="javascript:void(0)" class="avatar-text avatar-md" data-bs-toggle="tooltip"
-                                        data-bs-trigger="hover" title="Explorer More">
-                                        <i class="feather-more-horizontal"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="javascript:void(0);"
-                        class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Upcomming Schedule</a>
-                </div>
-            </div>
-            <!--! END: [Upcoming Schedule] !-->
-            <!--! BEGIN: [Project Status] !-->
-            <div class="col-xxl-4">
-                <div class="card stretch stretch-full">
-                    <div class="card-header">
-                        <h5 class="card-title">Project Status</h5>
-                        <div class="card-header-action">
-                            <div class="card-header-btn">
-                                <div data-bs-toggle="tooltip" title="Delete">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                        data-bs-toggle="remove"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Refresh">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                        data-bs-toggle="refresh"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                        data-bs-toggle="expand"> </a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                    data-bs-offset="25, 25">
-                                    <div data-bs-toggle="tooltip" title="Options">
-                                        <i class="feather-more-vertical"></i>
-                                    </div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-at-sign"></i>New</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-calendar"></i>Event</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-bell"></i>Snoozed</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-trash-2"></i>Deleted</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-settings"></i>Settings</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-life-buoy"></i>Tips & Tricks</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body custom-card-action">
-                        <div class="mb-3">
-                            <div class="mb-4 pb-1 d-flex">
-                                <div class="d-flex w-50 align-items-center me-3">
-                                    <img src="assets/images/brand/app-store.png" alt="laravel-logo" class="me-3"
-                                        width="35" />
-                                    <div>
-                                        <a href="javascript:void(0);" class="text-truncate-1-line">Apps Development</a>
-                                        <div class="fs-11 text-muted">Applications</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-grow-1 align-items-center">
-                                    <div class="progress w-100 me-3 ht-5">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 54%"
-                                            aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <span class="text-muted">54%</span>
-                                </div>
-                            </div>
-                            <hr class="border-dashed my-3" />
-                            <div class="mb-4 pb-1 d-flex">
-                                <div class="d-flex w-50 align-items-center me-3">
-                                    <img src="assets/images/brand/figma.png" alt="figma-logo" class="me-3" width="35" />
-                                    <div>
-                                        <a href="javascript:void(0);" class="text-truncate-1-line">Dashboard Design</a>
-                                        <div class="fs-11 text-muted">App UI Kit</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-grow-1 align-items-center">
-                                    <div class="progress w-100 me-3 ht-5">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 86%"
-                                            aria-valuenow="86" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <span class="text-muted">86%</span>
-                                </div>
-                            </div>
-                            <hr class="border-dashed my-3" />
-                            <div class="mb-4 pb-1 d-flex">
-                                <div class="d-flex w-50 align-items-center me-3">
-                                    <img src="assets/images/brand/facebook.png" alt="vue-logo" class="me-3" width="35" />
-                                    <div>
-                                        <a href="javascript:void(0);" class="text-truncate-1-line">Facebook Marketing</a>
-                                        <div class="fs-11 text-muted">Marketing</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-grow-1 align-items-center">
-                                    <div class="progress w-100 me-3 ht-5">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 90%"
-                                            aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <span class="text-muted">90%</span>
-                                </div>
-                            </div>
-                            <hr class="border-dashed my-3" />
-                            <div class="mb-4 pb-1 d-flex">
-                                <div class="d-flex w-50 align-items-center me-3">
-                                    <img src="assets/images/brand/github.png" alt="react-logo" class="me-3" width="35" />
-                                    <div>
-                                        <a href="javascript:void(0);" class="text-truncate-1-line">React Dashboard
-                                            Github</a>
-                                        <div class="fs-11 text-muted">Dashboard</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-grow-1 align-items-center">
-                                    <div class="progress w-100 me-3 ht-5">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 37%"
-                                            aria-valuenow="37" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <span class="text-muted">37%</span>
-                                </div>
-                            </div>
-                            <hr class="border-dashed my-3" />
-                            <div class="d-flex">
-                                <div class="d-flex w-50 align-items-center me-3">
-                                    <img src="assets/images/brand/paypal.png" alt="sketch-logo" class="me-3" width="35" />
-                                    <div>
-                                        <a href="javascript:void(0);" class="text-truncate-1-line">Paypal Payment
-                                            Gateway</a>
-                                        <div class="fs-11 text-muted">Payment</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex flex-grow-1 align-items-center">
-                                    <div class="progress w-100 me-3 ht-5">
-                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 29%"
-                                            aria-valuenow="29" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <span class="text-muted">29%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Upcomming
-                        Projects</a>
-                </div>
-            </div>
-            <!--! END: [Project Status] !-->
-            <!--! BEGIN: [Team Progress] !-->
-            <div class="col-xxl-4">
-                <div class="card stretch stretch-full">
-                    <div class="card-header">
-                        <h5 class="card-title">Team Progress</h5>
-                        <div class="card-header-action">
-                            <div class="card-header-btn">
-                                <div data-bs-toggle="tooltip" title="Delete">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                        data-bs-toggle="remove"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Refresh">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                        data-bs-toggle="refresh"> </a>
-                                </div>
-                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                        data-bs-toggle="expand"> </a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
-                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                    data-bs-offset="25, 25">
-                                    <div data-bs-toggle="tooltip" title="Options">
-                                        <i class="feather-more-vertical"></i>
-                                    </div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-at-sign"></i>New</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-calendar"></i>Event</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-bell"></i>Snoozed</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-trash-2"></i>Deleted</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-settings"></i>Settings</a>
-                                    <a href="javascript:void(0);" class="dropdown-item"><i
-                                            class="feather-life-buoy"></i>Tips & Tricks</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body custom-card-action">
-                        <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image">
-                                    <img src="assets/images/avatar/1.png" alt="" class="img-fluid" />
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0);">Alexandra Della</a>
-                                    <div class="fs-11 text-muted">Frontend Developer</div>
-                                </div>
-                            </div>
-                            <div class="team-progress-1"></div>
-                        </div>
-                        <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image">
-                                    <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0);">Archie Cantones</a>
-                                    <div class="fs-11 text-muted">UI/UX Designer</div>
-                                </div>
-                            </div>
-                            <div class="team-progress-2"></div>
-                        </div>
-                        <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image">
-                                    <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0);">Malanie Hanvey</a>
-                                    <div class="fs-11 text-muted">Backend Developer</div>
-                                </div>
-                            </div>
-                            <div class="team-progress-3"></div>
-                        </div>
-                        <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-2">
-                            <div class="hstack gap-3">
-                                <div class="avatar-image">
-                                    <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
-                                </div>
-                                <div>
-                                    <a href="javascript:void(0);">Kenneth Hune</a>
-                                    <div class="fs-11 text-muted">Digital Marketer</div>
-                                </div>
-                            </div>
-                            <div class="team-progress-4"></div>
-                        </div>
-                    </div>
-                    <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Update 30 Min
-                        Ago</a>
-                </div>
-            </div>
-            <!--! END: [Team Progress] !-->
         </div>
-    </div>
-    <!-- [ Main Content ] end -->
+            </div>
+        </div>
+        <!-- [ Main Content ] end -->
 @endsection
+
+@push('scripts')
+    <script shadow>
+    $(document).ready(function() {
+        // Initializing the chart with dynamic data from controller
+        var options = {
+            chart: {
+                height: 380,
+                width: "100%",
+                stacked: false,
+                toolbar: { show: false }
+            },
+            stroke: {
+                width: [1, 2, 3],
+                curve: "smooth",
+                lineCap: "round"
+            },
+            plotOptions: {
+                bar: {
+                    endingShape: "rounded",
+                    columnWidth: "30%"
+                }
+            },
+            colors: ["#3858f9", "#34d399", "#fbbf24"], 
+            series: [
+                {
+                    name: "Total Payroll",
+                    type: "area",
+                    data: {!! json_encode($chartTotal) !!}
+                },
+                {
+                    name: "Completed",
+                    type: "bar",
+                    data: {!! json_encode($chartPaid) !!}
+                },
+                {
+                    name: "Pending",
+                    type: "bar",
+                    data: {!! json_encode($chartPending) !!}
+                }
+            ],
+            stroke: {
+                curve: "smooth",
+                width: [2, 0, 0]
+            },
+            fill: {
+                opacity: [0.1, 1, 1],
+                type: ['gradient', 'solid', 'solid'],
+            },
+            markers: { size: 0 },
+            xaxis: {
+                categories: {!! json_encode($chartMonths) !!},
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                labels: {
+                    style: {
+                        fontSize: "10px",
+                        colors: "#A0ACBB"
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(e) {
+                        return "₹" + (e / 1000).toFixed(0) + "K"
+                    },
+                    offsetX: -5,
+                    offsetY: 0,
+                    style: { color: "#A0ACBB" }
+                }
+            },
+            grid: {
+                xaxis: { lines: { show: false } },
+                yaxis: { lines: { show: false } }
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+                y: {
+                    formatter: function(e) {
+                        return "₹" + e.toLocaleString()
+                    }
+                },
+                style: {
+                    fontSize: "12px",
+                    fontFamily: "Inter"
+                }
+            },
+            legend: {
+                show: false,
+                labels: {
+                    fontSize: "12px",
+                    colors: "#A0ACBB"
+                },
+                fontSize: "12px",
+                fontFamily: "Inter"
+            }
+        };
+
+        // Re-render chart to ensure dynamic data is applied over theme defaults
+        setTimeout(function() {
+            const chartContainer = document.querySelector("#payment-records-chart");
+            var chart;
+            if (chartContainer) {
+                chartContainer.innerHTML = '';
+                chart = new ApexCharts(chartContainer, options);
+                chart.render();
+            }
+            // Modal Drill-down Logic
+            var summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
+
+            function showMonthlySummary(month) {
+                fetch(`/dashboard/summary?month=${month}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            let html = '';
+                            data.history.forEach(item => {
+                                html += `
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">${item.month}</div>
+                                            <div class="fs-10 text-muted text-uppercase fw-bold">Financial Record</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">₹${item.earnings.toLocaleString()}</div>
+                                            <div class="fs-10 text-success text-uppercase fw-bold">Total Earnings</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-danger">-₹${item.deductions.toLocaleString()}</div>
+                                            <div class="fs-10 text-muted text-uppercase fw-bold">Total Deducted</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-black text-primary">₹${item.net.toLocaleString()}</div>
+                                            <div class="fs-10 text-muted text-uppercase fw-bold">Net Distributed</div>
+                                        </td>
+                                        <td class="pe-4 text-end">
+                                            <span class="badge bg-soft-primary text-primary fs-10 text-uppercase fw-bold">Analyzed</span>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            document.getElementById('modalHistoryTable').innerHTML = html;
+                            summaryModal.show();
+                        }
+                    });
+            }
+            // Chart Update Logic
+            function updateChartRange(range) {
+                fetch(`/dashboard/chart?range=${range}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            chart.updateSeries(data.series);
+                            chart.updateOptions({
+                                xaxis: { categories: data.labels }
+                            });
+                        }
+                    });
+            }
+        }, 500);
+    });
+    </script>
+@endpush

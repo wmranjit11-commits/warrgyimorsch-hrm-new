@@ -40,9 +40,7 @@ class PayrollController extends Controller
         $attendance = $query->selectRaw('attendance_date, 
                 count(case when status = "present" then 1 end) as present_count,
                 count(case when status = "half_day" then 1 end) as half_day_count,
-                count(case when status = "absent" then 1 end) as absent_count,
-                count(case when status = "leave" then 1 end) as leave_count,
-                count(case when status = "late" then 1 end) as late_count,
+                count(case when status in ("absent", "leave") then 1 end) as leave_count,
                 count(case when total_hours > 9 then 1 end) as overtime_count')
             ->groupBy('attendance_date')
             ->orderBy('attendance_date', 'desc')
@@ -189,48 +187,42 @@ class PayrollController extends Controller
                 ]);
             }
 
-            $year = substr($month, 0, 4);
-            $monthNum = substr($month, 5, 2);
-            
-            // Get total days in month
-            $totalDays = Carbon::createFromFormat('Y-m', $month)->daysInMonth;
+            // Robust Date Parsing (Fixes Feb 28/31 bug)
+            $selectedDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $year = $selectedDate->format('Y');
+            $monthNum = $selectedDate->format('m');
+            $totalDays = $selectedDate->daysInMonth;
 
-            // Check if there's any attendance data for this month
-            $totalRecords = Attendance::where('employee_id', $employeeId)
+            // Get attendance records for this month
+            $attendanceRecords = Attendance::where('employee_id', $employeeId)
                 ->whereYear('attendance_date', $year)
                 ->whereMonth('attendance_date', $monthNum)
-                ->count();
+                ->get();
 
-            if ($totalRecords == 0) {
+            if ($attendanceRecords->count() == 0) {
                 // No attendance records, default to full salary
                 $payableDays = $totalDays;
             } else {
-                // Calculate absence and late records
-                $absentLeaves = Attendance::where('employee_id', $employeeId)
-                    ->whereYear('attendance_date', $year)
-                    ->whereMonth('attendance_date', $monthNum)
-                    ->whereIn('status', ['absent', 'leave'])
-                    ->count();
-
-                $halfDays = Attendance::where('employee_id', $employeeId)
-                    ->whereYear('attendance_date', $year)
-                    ->whereMonth('attendance_date', $monthNum)
-                    ->where('status', 'half_day')
-                    ->count();
-
-                $lates = Attendance::where('employee_id', $employeeId)
-                    ->whereYear('attendance_date', $year)
-                    ->whereMonth('attendance_date', $monthNum)
-                    ->where('status', 'late')
-                    ->count();
-
-                // Deduct 1 day for each leave/absent, 0.5 for half day, and 0.5 days for each late
-                $payableDays = $totalDays - $absentLeaves - ($halfDays * 0.5) - ($lates * 0.5);
+                // Precise Hours-Based Calculation (Requested by User)
+                // If a user works 4 hours, it counts as 0.5 days (4/8)
+                // If a user works 8 hours, it counts as 1.0 days (8/8)
+                $totalHoursWorked = 0;
+                $daysPresent = 0;
+                
+                foreach($attendanceRecords as $record) {
+                    if (in_array($record->status, ['present', 'half_day', 'late'])) {
+                        // Ensure it doesn't exceed 8 hours for base pay calculation (cap at full day pay)
+                        $hours = min(8, $record->total_hours);
+                        $totalHoursWorked += $hours;
+                    }
+                }
+                
+                $payableDays = $totalHoursWorked / 8;
                 if ($payableDays < 0) $payableDays = 0;
             }
 
-            // Calculate monthly components (Assume stored as ANNUAL in DB per user)
-            $basicSalary = $employee->basic_salary; // Monthly Basic
+            // Calculate monthly components
+            $basicSalary = $employee->basic_salary;
             $hra = $employee->hra / 12;
             $conveyance = $employee->conveyance_allowance / 12;
             $medical = $employee->medical_allowance / 12;
@@ -238,7 +230,7 @@ class PayrollController extends Controller
 
             $fullMonthGross = $basicSalary + $hra + $conveyance + $medical + $otherAllowance;
 
-            // Calculate deductions based on Monthly Basic
+            // Deductions based on Full Month Basic
             $pfDeduction = $employee->pf ? ($basicSalary * 0.12) : 0;
             $esiDeduction = $employee->esi ? ($basicSalary * 0.0175) : 0;
             $otherDeduction = 0;
@@ -246,7 +238,7 @@ class PayrollController extends Controller
             $fullMonthDeductions = $pfDeduction + $esiDeduction + $otherDeduction;
             $fullMonthNet = $fullMonthGross - $fullMonthDeductions;
 
-            // Pro-rate based on payable days
+            // Pro-rate based on hours-based payable days
             $grossSalary = ($fullMonthGross / $totalDays) * $payableDays;
             $netSalary = ($fullMonthNet / $totalDays) * $payableDays;
             $totalDeductions = ($fullMonthDeductions / $totalDays) * $payableDays;

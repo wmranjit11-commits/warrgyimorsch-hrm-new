@@ -2,53 +2,62 @@
 
 @section('content')
 <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
-    <!-- Top Header -->
-    <div class="d-flex justify-content-between align-items-center px-4 py-3 bg-white border-bottom shadow-sm mb-4">
-        <div class="d-flex align-items-center">
-            <h5 class="fw-bold mb-0 me-3" style="color: #334155;">Payroll Module</h5>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
-                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">Attendance List</li>
-                </ol>
-            </nav>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-primary px-3 fw-bold d-flex align-items-center gap-2 shadow-sm" style="background: #3858f9; border: none; height: 38px;" onclick="exportAttendance()">
-                <i class="bi bi-file-earmark-arrow-down fs-5"></i> EXPORT DATA
-            </button>
-            <button class="btn btn-light btn-sm border p-2 shadow-sm bg-white" onclick="toggleFilter()" style="height: 38px; width: 38px; border-color: #e2e8f0 !important;">
-                <i class="bi bi-funnel text-muted"></i>
-            </button>
-            <button class="btn btn-light btn-sm border p-2 shadow-sm bg-white" onclick="window.location.href='{{ route('payroll.attendance.add') }}'" style="height: 38px; width: 38px; border-color: #e2e8f0 !important;">
-                <i class="bi bi-plus text-primary fs-5"></i>
-            </button>
-        </div>
-    </div>
+    <!-- Main Content Card -->
+    <div class="px-4 pt-4">
+        <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+                <div>
+                    <h5 class="fw-bold mb-0" style="color: #334155;">Attendance Management</h5>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
+                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">Attendance List</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Right Aligned Search & Actions -->
+                    <div class="input-group d-none d-md-flex" style="width: 250px;">
+                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
+                        <input type="text" id="tableSearch" class="form-control bg-light border-0 shadow-none" placeholder="Search..." onkeyup="applyFilters()">
+                    </div>
+                    
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
+                        <i class="feather-filter"></i>
+                    </a>
 
-    <div class="px-4">
-        <!-- Filter Card matching Saral ERP 'Admin View' -->
-        <div class="card border-0 shadow-sm mb-4" id="filterSection" style="border-radius: 12px; background: white;">
-            <div class="card-body p-4">
-                <div class="row g-4 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
-                        <input type="date" id="startDate" class="form-control border-0 bg-light py-2 px-3 shadow-none fw-bold" 
-                               value="{{ request('start_date') }}" style="border-radius: 8px; height: 45px;">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted mb-2">End Date</label>
-                        <input type="date" id="endDate" class="form-control border-0 bg-light py-2 px-3 shadow-none fw-bold" 
-                               value="{{ request('end_date') }}" style="border-radius: 8px; height: 45px;">
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 45px; border-radius: 8px;">
-                            <i class="bi bi-search"></i> SEARCH
-                        </button>
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportAttendance()" title="Export Data">
+                        <i class="feather-download"></i>
+                    </a>
+
+                    <a href="{{ route('payroll.attendance.add') }}" class="avatar-text avatar-md bg-primary text-white" title="Add Attendance">
+                        <i class="feather-plus"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Collapsible Filter Section -->
+            <div class="collapse" id="filterSection">
+                <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
+                            <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
+                                   value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted mb-2">End Date</label>
+                            <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
+                                   value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
+                                <i class="feather-search"></i> APPLY
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
         @if ($message = Session::get('success'))
             <div class="alert alert-success border-0 shadow-sm mb-4 d-flex align-items-center py-3" role="alert" style="border-radius: 12px; background: #ecfdf5; color: #065f46;">
@@ -58,8 +67,6 @@
             </div>
         @endif
 
-        <!-- Attendance Table -->
-        <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden; background: white;">
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
@@ -86,19 +93,19 @@
                                         <div class="ref-badge badge-yellow clickable" title="View Half Day" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'half_day')">
                                             Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-red clickable" title="View Absent" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'absent')">
-                                            Absent: <span class="fw-bold ms-1">{{ $att->absent_count }}</span>
+                                        <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'leave')">
+                                            Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <button class="action-btn-outline" onclick="openAttendanceDetails('{{ $att->attendance_date }}')">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="action-btn-outline text-danger" onclick="deleteAttendanceByDate('{{ $att->attendance_date }}')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $att->attendance_date }}')" title="View">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deleteAttendanceByDate('{{ $att->attendance_date }}')" title="Delete">
+                                            <i class="feather-trash-2"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -208,9 +215,8 @@
         rows.forEach((item, index) => {
             let match = !filterStatus;
             if (filterStatus === 'present' && item.status === 'present') match = true;
-            if (filterStatus === 'absent' && item.status === 'absent') match = true;
             if (filterStatus === 'half_day' && item.status === 'half_day') match = true;
-            if (filterStatus === 'leave' && item.status === 'leave') match = true;
+            if (filterStatus === 'leave' && (item.status === 'leave' || item.status === 'absent')) match = true;
             if (filterStatus === 'late' && item.status === 'late') match = true;
             if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
 
