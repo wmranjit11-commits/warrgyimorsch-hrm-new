@@ -275,7 +275,7 @@
                                 </div>
                                 <div>
                                     <div class="fs-4 fw-bold text-dark">{{ $totalEmployees }}</div>
-                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Total Staff</h3>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">TOTAL STAFF</h3>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -284,7 +284,12 @@
                                     <i class="feather-more-vertical"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Quick Access</div>
+                                    <a href="{{ route('dashboard') }}" class="dropdown-item">
+                                        <i class="feather-refresh-cw me-2"></i>
+                                        <span>Show All-Time History</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
                                     @for ($i = 0; $i < 6; $i++)
                                         @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
                                         <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
@@ -295,9 +300,9 @@
                                     @endfor
                                     <div class="dropdown-divider"></div>
                                     <a href="javascript:void(0);" class="dropdown-item"
-                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        onclick="showFullYearBreakdown('{{ date('Y') }}')">
                                         <i class="feather-file-text me-2"></i>
-                                        <span>Full Breakdown Details</span>
+                                        <span>Full Yearly Breakdown</span>
                                     </a>
                                 </div>
                             </div>
@@ -1035,45 +1040,42 @@
             chart: {
                 height: 380,
                 width: "100%",
-                stacked: false,
-                toolbar: { show: false }
+                type: "bar",
+                toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif'
             },
             stroke: {
-                width: [1, 2, 3],
-                curve: "smooth",
-                lineCap: "round"
+                width: [0, 0, 0],
+                show: false
             },
             plotOptions: {
                 bar: {
-                    endingShape: "rounded",
-                    columnWidth: "30%"
+                    columnWidth: "45%",
+                    borderRadius: 4,
+                    dataLabels: { position: 'top' }
                 }
             },
-            colors: ["#3858f9", "#34d399", "#fbbf24"], 
+            colors: ["#e2e8f0", "#10b981", "#f59e0b"], 
             series: [
                 {
-                    name: "Total Payroll",
-                    type: "area",
+                    name: "Total Payroll (Expected)",
+                    type: "bar",
                     data: {!! json_encode($chartTotal) !!}
                 },
                 {
-                    name: "Completed",
+                    name: "Completed (Paid)",
                     type: "bar",
                     data: {!! json_encode($chartPaid) !!}
                 },
                 {
-                    name: "Pending",
+                    name: "Pending (Unpaid)",
                     type: "bar",
                     data: {!! json_encode($chartPending) !!}
                 }
             ],
-            stroke: {
-                curve: "smooth",
-                width: [2, 0, 0]
-            },
             fill: {
-                opacity: [0.1, 1, 1],
-                type: ['gradient', 'solid', 'solid'],
+                opacity: [1, 1, 1],
+                type: ['solid', 'solid', 'solid']
             },
             markers: { size: 0 },
             xaxis: {
@@ -1083,44 +1085,43 @@
                 labels: {
                     style: {
                         fontSize: "10px",
-                        colors: "#A0ACBB"
+                        colors: "#64748b",
+                        fontWeight: 600
                     }
                 }
             },
             yaxis: {
                 labels: {
                     formatter: function(e) {
-                        return "₹" + (e / 1000).toFixed(0) + "K"
+                        return "₹" + e.toLocaleString()
                     },
-                    offsetX: -5,
-                    offsetY: 0,
-                    style: { color: "#A0ACBB" }
+                    style: { color: "#64748b", fontWeight: 600 }
                 }
             },
             grid: {
+                borderColor: '#f1f5f9',
+                strokeDashArray: 4,
                 xaxis: { lines: { show: false } },
-                yaxis: { lines: { show: false } }
+                yaxis: { lines: { show: true } }
             },
             dataLabels: { enabled: false },
             tooltip: {
+                shared: true,
+                intersect: false,
                 y: {
                     formatter: function(e) {
                         return "₹" + e.toLocaleString()
                     }
                 },
-                style: {
-                    fontSize: "12px",
-                    fontFamily: "Inter"
-                }
+                theme: 'dark'
             },
             legend: {
-                show: false,
-                labels: {
-                    fontSize: "12px",
-                    colors: "#A0ACBB"
-                },
+                position: 'top',
+                horizontalAlign: 'right',
                 fontSize: "12px",
-                fontFamily: "Inter"
+                fontFamily: "Inter",
+                fontWeight: 600,
+                markers: { radius: 12 }
             }
         };
 

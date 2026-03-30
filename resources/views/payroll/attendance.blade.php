@@ -305,10 +305,14 @@
 
     .ref-badge {
         font-size: 11px;
-        padding: 5px 12px;
+        padding: 6px 12px;
         border-radius: 6px;
-        font-weight: 600;
-        letter-spacing: 0.3px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        min-width: 90px;
+        display: inline-block;
+        text-align: center;
+        text-transform: uppercase;
     }
     .clickable { cursor: pointer; transition: transform 0.1s; }
     .clickable:hover { transform: scale(1.05); }

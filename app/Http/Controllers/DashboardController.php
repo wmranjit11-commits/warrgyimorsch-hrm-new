@@ -16,7 +16,13 @@ class DashboardController extends Controller
         $today = Carbon::today()->toDateString();
 
         // Month Filtering
-        $selectedMonth = $request->get('month', Carbon::now()->format('Y-m'));
+        $selectedMonth = $request->get('month');
+        $hasSelectedMonth = !empty($selectedMonth);
+        
+        if (!$hasSelectedMonth) {
+            $selectedMonth = Carbon::now()->format('Y-m');
+        }
+        
         $selectedDate = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
         $selectedMonthLabel = $selectedDate->format('F Y');
 
@@ -57,7 +63,6 @@ class DashboardController extends Controller
         $chartTotal = [];
         $chartPaid = [];
         $chartPending = [];
-        $chartRejected = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $m = (clone $selectedDate)->subMonths($i);
@@ -65,14 +70,18 @@ class DashboardController extends Controller
             $mValue = $m->format('Y-m');
 
             $chartMonths[] = $mLabel;
-            $chartTotal[] = Payroll::where('month', $mValue)->sum('gross_salary');
+            $chartTotal[] = Payroll::where('month', $mValue)->sum('net_salary');
             $chartPaid[] = Payroll::where('month', $mValue)->where('status', 'paid')->sum('net_salary');
             $chartPending[] = Payroll::where('month', $mValue)->where('status', 'pending')->sum('net_salary');
-            $chartRejected[] = Payroll::where('month', $mValue)->where('status', 'rejected')->sum('net_salary');
         }
 
-        // Recent Activity (Paginated by selected month)
-        $recentPayrolls = Payroll::with('employee')->where('month', $selectedMonth)->latest()->paginate(10);
+        // Recent Activity (Paginated)
+        // User Request: If month select nhi hai to sara data dikhe
+        if (!$hasSelectedMonth) {
+            $recentPayrolls = Payroll::with('employee')->latest()->paginate(10);
+        } else {
+            $recentPayrolls = Payroll::with('employee')->where('month', $selectedMonth)->latest()->paginate(10);
+        }
 
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(4)->get();
@@ -92,12 +101,39 @@ class DashboardController extends Controller
             'chartTotal',
             'chartPaid',
             'chartPending',
-            'chartRejected',
             'selectedMonth',
             'selectedMonthLabel',
             'recentPayrolls',
             'upcomingHolidays'
         ));
+    }
+
+    /**
+     * Get Full Year Breakdown (Requested by User)
+     */
+    public function getFullYearBreakdown(Request $request)
+    {
+        $year = $request->get('year', date('Y'));
+        
+        $data = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $m = Carbon::createFromDate($year, $i, 1)->format('Y-m');
+            $mLabel = Carbon::createFromDate($year, $i, 1)->format('F');
+            
+            $data[] = [
+                'month' => $mLabel,
+                'total_gross' => Payroll::where('month', $m)->sum('gross_salary'),
+                'total_net' => Payroll::where('month', $m)->sum('net_salary'),
+                'staff_count' => Payroll::where('month', $m)->count(),
+                'status' => Payroll::where('month', $m)->where('status', 'pending')->exists() ? 'Pending' : 'Completed'
+            ];
+        }
+        
+        return response()->json([
+            'success' => true,
+            'year' => $year,
+            'breakdown' => $data
+        ]);
     }
 
     public function getMonthlySummary(Request $request)

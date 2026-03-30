@@ -130,7 +130,12 @@ class PayrollController extends Controller
                         }
                     }
 
-                    // Update or Create
+                    // Auto-Leave Logic: If no check-in, set status to 'leave'
+                    if (empty($checkIn)) {
+                        $status = 'leave';
+                        $checkOut = null; // Ensure no check-out if no check-in
+                    }
+
                     Attendance::updateOrCreate(
                         [
                             'employee_id' => $employeeData['employee_id'],
@@ -210,9 +215,14 @@ class PayrollController extends Controller
                 $daysPresent = 0;
                 
                 foreach($attendanceRecords as $record) {
-                    if (in_array($record->status, ['present', 'half_day', 'late'])) {
+                    // Include 'leave' in payable days (Paid Leave policy)
+                    // If you want Unpaid Leave, remove 'leave' from this array
+                    if (in_array($record->status, ['present', 'half_day', 'late', 'leave'])) {
                         // Ensure it doesn't exceed 8 hours for base pay calculation (cap at full day pay)
-                        $hours = min(8, $record->total_hours);
+                        $hours = ($record->status === 'half_day') ? 4 : 8; // Default full day for late/leave
+                        if ($record->status === 'present' || $record->status === 'late') {
+                            $hours = min(8, $record->total_hours ?: 8);
+                        }
                         $totalHoursWorked += $hours;
                     }
                 }
@@ -221,12 +231,12 @@ class PayrollController extends Controller
                 if ($payableDays < 0) $payableDays = 0;
             }
 
-            // Calculate monthly components
+            // Calculate monthly components (Removed / 12 as they are monthly components)
             $basicSalary = $employee->basic_salary;
-            $hra = $employee->hra / 12;
-            $conveyance = $employee->conveyance_allowance / 12;
-            $medical = $employee->medical_allowance / 12;
-            $otherAllowance = $employee->other_allowance / 12;
+            $hra = $employee->hra;
+            $conveyance = $employee->conveyance_allowance;
+            $medical = $employee->medical_allowance;
+            $otherAllowance = $employee->other_allowance;
 
             $fullMonthGross = $basicSalary + $hra + $conveyance + $medical + $otherAllowance;
 
@@ -242,17 +252,23 @@ class PayrollController extends Controller
             $grossSalary = ($fullMonthGross / $totalDays) * $payableDays;
             $netSalary = ($fullMonthNet / $totalDays) * $payableDays;
             $totalDeductions = ($fullMonthDeductions / $totalDays) * $payableDays;
+            
+            // Salary Loss Detail (Requested by User)
+            $salaryLoss = $fullMonthGross - $grossSalary;
+            $unpaidDays = $totalDays - $payableDays;
 
             $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $month,
-                'payable_days' => $payableDays,
-                'gross_salary' => round($grossSalary, 2),
+                'payable_days' => round($payableDays, 1),
+                'unpaid_days' => round($unpaidDays, 1),
+                'salary_loss' => round($salaryLoss, 2),
                 'basic_salary' => round($basicSalary, 2),
                 'hra' => round($hra, 2),
                 'conveyance_allowance' => round($conveyance, 2),
                 'medical_allowance' => round($medical, 2),
                 'other_allowance' => round($otherAllowance, 2),
+                'gross_salary' => round($grossSalary, 2),
                 'deductions' => round($totalDeductions, 2),
                 'pf_deduction' => round($pfDeduction, 2),
                 'esi_deduction' => round($esiDeduction, 2),

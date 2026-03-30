@@ -51,44 +51,45 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex flex-column align-items-center gap-2">
-                                        <div class="form-check form-switch p-0 m-0">
-                                            <input class="form-check-input check-toggle shadow-none" type="checkbox" 
-                                                   id="toggle_in_{{ $index }}" 
-                                                   onchange="toggleInput('in', {{ $index }}, this)"
-                                                   style="float: none;">
-                                        </div>
-                                        <div class="input-wrapper">
-                                            <input type="time" name="employees[{{ $index }}][check_in]" 
-                                                   id="input_in_{{ $index }}"
-                                                   class="form-control time-input shadow-none" 
+                                    <div class="d-flex align-items-center">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;"><i class="bi bi-clock text-muted"></i></span>
+                                            <input type="time" name="employees[{{ $index }}][check_in]" id="input_in_{{ $index }}" 
+                                                   class="form-control border-start-0 bg-white fw-bold small py-2 shadow-none" 
+                                                   style="border-radius: 0 8px 8px 0;"
                                                    onchange="calculateDuration({{ $index }})">
                                         </div>
                                     </div>
+                                    <div class="form-check form-switch ms-2 mt-2">
+                                        <input class="form-check-input shadow-none" type="checkbox" id="toggle_in_{{ $index }}" 
+                                               onchange="toggleInput('in', {{ $index }}, this)" style="cursor: pointer; width: 40px; height: 20px;">
+                                    </div>
                                 </td>
-                                <td class="text-center">
-                                    <div class="d-flex flex-column align-items-center gap-2">
-                                        <div class="form-check form-switch p-0 m-0">
-                                            <input class="form-check-input check-toggle shadow-none" type="checkbox" 
-                                                   id="toggle_out_{{ $index }}" 
-                                                   onchange="toggleInput('out', {{ $index }}, this)"
-                                                   style="float: none;" disabled>
-                                        </div>
-                                        <div class="input-wrapper">
-                                            <input type="time" name="employees[{{ $index }}][check_out]" 
-                                                   id="input_out_{{ $index }}"
-                                                   class="form-control time-input shadow-none" 
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;"><i class="bi bi-clock-history text-muted"></i></span>
+                                            <input type="time" name="employees[{{ $index }}][check_out]" id="input_out_{{ $index }}" 
+                                                   class="form-control border-start-0 bg-white fw-bold small py-2 shadow-none" 
+                                                   disabled
+                                                   style="border-radius: 0 8px 8px 0;"
                                                    onchange="calculateDuration({{ $index }})">
                                         </div>
+                                    </div>
+                                    <div class="form-check form-switch ms-2 mt-2">
+                                        <input class="form-check-input shadow-none" type="checkbox" id="toggle_out_{{ $index }}" 
+                                               disabled
+                                               onchange="toggleInput('out', {{ $index }}, this)" style="cursor: pointer; width: 40px; height: 20px;">
                                     </div>
                                 </td>
                                 <td class="text-center">
                                     <span class="fw-bold text-muted small" id="duration_{{ $index }}">--</span>
                                 </td>
                                 <td class="pe-4">
-                                    <select name="employees[{{ $index }}][status]" class="form-select border-0 bg-light fw-bold small py-2 shadow-none" style="border-radius: 8px; cursor: pointer;">
+                                    <select name="employees[{{ $index }}][status]" id="status_{{ $index }}" class="form-select border-0 bg-light fw-bold small py-2 shadow-none" style="border-radius: 8px; cursor: pointer;">
+                                        <option value="leave" selected>Leave</option>
                                         <option value="present">Present</option>
                                         <option value="half_day">Half Day</option>
-                                        <option value="leave">Leave</option>
                                         <option value="late">Late</option>
                                     </select>
                                 </td>
@@ -138,9 +139,28 @@
     }
 
     function calculateDuration(index) {
-        const inTime = document.getElementById(`input_in_${index}`).value;
-        const outTime = document.getElementById(`input_out_${index}`).value;
+        const inInput = document.getElementById(`input_in_${index}`);
+        const outInput = document.getElementById(`input_out_${index}`);
+        const outToggle = document.getElementById(`toggle_out_${index}`);
+        const statusSelect = document.getElementById(`status_${index}`);
+        const inTime = inInput.value;
+        const outTime = outInput.value;
         const display = document.getElementById(`duration_${index}`);
+
+        // Auto-Status Logic
+        if (inTime) {
+            outInput.disabled = false;
+            outToggle.disabled = false;
+            if (statusSelect.value === 'leave') {
+                statusSelect.value = 'present'; // Auto-switch to present if they checked in
+            }
+        } else {
+            outInput.disabled = true;
+            outInput.value = '';
+            outToggle.disabled = true;
+            outToggle.checked = false;
+            statusSelect.value = 'leave'; // Auto-switch to leave if no check-in
+        }
 
         if (inTime && outTime) {
             const start = new Date(`2000-01-01T${inTime}:00`);

@@ -134,8 +134,20 @@
                                 </div>
                                 <div class="col-6">
                                     <div class="p-3 bg-light rounded-3">
+                                        <div class="text-muted small mb-1">Unpaid Days</div>
+                                        <div class="fw-bold fs-5 text-danger" id="resultUnpaidDays">0</div>
+                                    </div>
+                                </div>
+                                <div class="col-4 mt-2">
+                                    <div class="p-3 bg-light rounded-3">
                                         <div class="text-muted small mb-1">Month</div>
                                         <div class="fw-bold fs-6" id="resultMonth">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <div class="p-3 bg-soft-danger rounded-3 border border-danger border-opacity-10">
+                                        <div class="text-danger small fw-bold text-uppercase mb-1" style="font-size: 10px;">Total Salary Cut</div>
+                                        <div class="fw-bold fs-5 text-danger" id="resultSalaryLoss">₹ 0.00</div>
                                     </div>
                                 </div>
                             </div>
@@ -150,10 +162,10 @@
         </div>
 
         <div id="noCalculation" class="text-center py-5">
-            <div class="py-5">
-                <i class="bi bi-calculator text-muted" style="font-size: 4rem; opacity: 0.1;"></i>
-                <p class="text-muted mt-3 fw-bold fs-5">Calculate Salary Report</p>
-                <p class="text-muted small">Select an employee and period to generate the payroll statement.</p>
+            <div class="py-5" style="border: 2px dashed #e2e8f0; border-radius: 16px; background: #f8fafc;">
+                <i class="bi bi-calculator text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="text-dark mt-3 fw-bold fs-5 mb-1">Payroll Ready to Generate</p>
+                <p class="text-muted small">Select an employee and month above to start the calculation.</p>
             </div>
         </div>
     </div>
@@ -209,6 +221,10 @@
         document.getElementById('tableOtherDeduction').textContent = '₹ 0.00';
         document.getElementById('tableTotalDeductions').textContent = '₹ ' + f(p.deductions);
         document.getElementById('tableNetSalary').textContent = '₹ ' + f(p.net_salary);
+        
+        // Loss Breakdown
+        document.getElementById('resultUnpaidDays').textContent = p.unpaid_days;
+        document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
     }
 
     function savePayroll() {
