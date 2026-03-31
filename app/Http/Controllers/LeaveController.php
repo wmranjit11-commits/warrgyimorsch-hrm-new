@@ -31,7 +31,8 @@ class LeaveController extends Controller
         $history = LeaveAllotment::with('employee')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
-            ->paginate(15);
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('leave.allotment', compact('employees', 'allotments', 'selectedMonth', 'history'));
     }

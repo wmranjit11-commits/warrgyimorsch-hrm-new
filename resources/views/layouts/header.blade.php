@@ -21,7 +21,7 @@
                 </a>
             </div>
             <!--! [End] nxl-navigation-toggle !-->
-            <!--! [Start] nxl-lavel-mega-menu-toggle !-->
+            {{-- <!--! [Start] nxl-lavel-mega-menu-toggle !-->
             <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
                 <a href="javascript:void(0);" id="nxl-lavel-mega-menu-open">
                     <i class="feather-align-left"></i>
@@ -1771,7 +1771,7 @@
                 </div>
                 <!--! [End] nxl-lavel-mega-menu-wrapper !-->
             </div>
-            <!--! [End] nxl-lavel-mega-menu !-->
+            <!--! [End] nxl-lavel-mega-menu !--> --}}
         </div>
         <!--! [End] Header Left !-->
         <!--! [Start] Header Right !-->
