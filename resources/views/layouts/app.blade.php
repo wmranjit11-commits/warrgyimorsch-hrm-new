@@ -56,6 +56,55 @@
             }
         }
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Toast UI configuration
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end', // Aap isko 'center', 'top', ya 'bottom-end' bhi kar sakte hain
+            showConfirmButton: false,
+            timer: 3000, // 3 seconds tak dikhega
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Success Alert
+        @if(Session::has('success'))
+            Toast.fire({
+                icon: 'success',
+                title: "{{ Session::get('success') }}"
+            });
+        @endif
+
+        // Error Alert
+        @if(Session::has('error'))
+            Toast.fire({
+                icon: 'error',
+                title: "{{ Session::get('error') }}"
+            });
+        @endif
+
+        // Warning Alert
+        @if(Session::has('warning'))
+            Toast.fire({
+                icon: 'warning',
+                title: "{{ Session::get('warning') }}"
+            });
+        @endif
+
+        // Info Alert
+        @if(Session::has('info'))
+            Toast.fire({
+                icon: 'info',
+                title: "{{ Session::get('info') }}"
+            });
+        @endif
+    </script>
     @yield('modals')
     @stack('modals')
     @stack('scripts')
