@@ -15,20 +15,20 @@
 
                             <h6 class="fw-bold mb-4" style="color: #334155;"><i class="feather-calendar me-2"></i>New Holiday</h6>
 
-                            <form method="POST" action="{{ route('holidays.store') }}">
+                            <form id="holidayForm">
                                 @csrf
 
                                 <div class="mb-3">
-                                    <input type="text" name="title" class="form-control" placeholder="Enter Holiday Name"
+                                    <input type="text" name="title" id="holidayTitle" class="form-control" placeholder="Enter Holiday Name"
                                         required>
                                 </div>
 
                                 <div class="mb-3">
-                                    <input type="date" name="date" class="form-control" value="{{ date('Y-m-d') }}"
+                                    <input type="date" name="date" id="holidayDate" class="form-control" value="{{ date('Y-m-d') }}"
                                         required>
                                 </div>
 
-                                <button class="btn btn-primary btn-sm">SAVE</button>
+                                <button type="submit" class="btn btn-primary btn-sm">SAVE</button>
                             </form>
 
                         </div>
@@ -72,15 +72,11 @@
                                                         <i class="feather-edit-3"></i>
                                                     </a>
 
-                                                    <form id="delete-holiday-{{ $h->id }}" action="{{ route('holidays.destroy', $h->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <a href="javascript:void(0);" 
-                                                            onclick="if(confirm('Delete this holiday?')) document.getElementById('delete-holiday-{{ $h->id }}').submit();"
-                                                            class="avatar-text avatar-md bg-soft-danger text-danger" title="Delete">
-                                                            <i class="feather-trash-2"></i>
-                                                        </a>
-                                                    </form>
+                                                    <a href="javascript:void(0);" 
+                                                        onclick="deleteHoliday({{ $h->id }})"
+                                                        class="avatar-text avatar-md bg-soft-danger text-danger" title="Delete">
+                                                        <i class="feather-trash-2"></i>
+                                                    </a>
                                                 </td>
                                                 <style>
                                                     .avatar-md {
@@ -151,14 +147,88 @@
         });
     </script>
 
-    <!-- UPPERCASE SCRIPT -->
     <script>
         document.querySelectorAll('.uppercase').forEach(input => {
             input.addEventListener('input', function () {
                 this.value = this.value.toUpperCase();
             });
         });
+
+        // AJAX Add Holiday
+        document.getElementById('holidayForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('holidayTitle').value;
+            const date = document.getElementById('holidayDate').value;
+
+            fetch('{{ route("holidays.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ title, date })
+            })
+            .then(res => {
+                if (res.ok || res.redirected) {
+                    showToast('Holiday added successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Error adding holiday', 'error');
+                }
+            })
+            .catch(() => showToast('Something went wrong!', 'error'));
+        });
+
+        // AJAX Delete Holiday
+        function deleteHoliday(id) {
+            fetch('/holidays/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(res => {
+                if (res.ok || res.redirected) {
+                    showToast('Holiday deleted successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Error deleting holiday', 'error');
+                }
+            })
+            .catch(() => showToast('Something went wrong!', 'error'));
+        }
+
+        // Toast function
+        function showToast(message, type) {
+            const toast = document.getElementById('customToast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            toastMsg.textContent = message;
+            toast.className = 'custom-toast';
+            if (type === 'success') {
+                toast.classList.add('toast-success');
+                toastIcon.innerHTML = '\u2713';
+            } else {
+                toast.classList.add('toast-error');
+                toastIcon.innerHTML = '\u2717';
+            }
+            toast.classList.add('toast-show');
+            setTimeout(() => { toast.classList.remove('toast-show'); }, 2000);
+        }
+
+        // Show session flash as toast
+        @if(session('success'))
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('{{ session("success") }}', 'success');
+            });
+        @endif
     </script>
+
+    <!-- Toast Notification -->
+    <div id="customToast" class="custom-toast">
+        <span id="toastIcon" class="toast-icon"></span>
+        <span id="toastMessage"></span>
+    </div>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -201,6 +271,39 @@
             .table-section {
                 padding-left: 0;
             }
+        }
+
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-toast.toast-show { transform: translateX(0); }
+        .custom-toast.toast-success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .custom-toast.toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
         }
     </style>
 

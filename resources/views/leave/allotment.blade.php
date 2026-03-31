@@ -293,11 +293,14 @@
         .then(res => res.json())
         .then(data => {
             if(data.success) {
-                alert('Allotments saved successfully');
-                window.location.reload();
+                showToast('Allotments saved successfully!', 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                alert('Error saving allotments');
+                showToast('Error saving allotments', 'error');
             }
+        })
+        .catch(() => {
+            showToast('Something went wrong!', 'error');
         });
     }
 
@@ -319,7 +322,30 @@
             feather.replace();
         }
     });
+
+    function showToast(message, type) {
+        const toast = document.getElementById('customToast');
+        const toastMsg = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+        toastMsg.textContent = message;
+        toast.className = 'custom-toast';
+        if (type === 'success') {
+            toast.classList.add('toast-success');
+            toastIcon.innerHTML = '\u2713';
+        } else {
+            toast.classList.add('toast-error');
+            toastIcon.innerHTML = '\u2717';
+        }
+        toast.classList.add('toast-show');
+        setTimeout(() => { toast.classList.remove('toast-show'); }, 2000);
+    }
 </script>
+
+<!-- Toast Notification -->
+<div id="customToast" class="custom-toast">
+    <span id="toastIcon" class="toast-icon"></span>
+    <span id="toastMessage"></span>
+</div>
 
 <style>
     .bg-soft-primary { background-color: rgba(56, 88, 249, 0.08); }
@@ -333,5 +359,38 @@
     /* REMOVE ALL BLUR EFFECTS */
     .modal-backdrop.show { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: rgba(0, 0, 0, 0.5) !important; }
     .modal-content { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+    .custom-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 14px 24px;
+        border-radius: 12px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        transform: translateX(120%);
+        transition: transform 0.4s ease;
+        font-family: 'Inter', sans-serif;
+    }
+    .custom-toast.toast-show { transform: translateX(0); }
+    .custom-toast.toast-success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+    .custom-toast.toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    .toast-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 800;
+    }
 </style>
 @endsection

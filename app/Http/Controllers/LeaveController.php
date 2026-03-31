@@ -22,7 +22,7 @@ class LeaveController extends Controller
         
         $month = $selectedMonth;
 
-        $employees = Employee::all();
+        $employees = Employee::orderBy('name', 'asc')->get();
         $allotments = LeaveAllotment::where('month', $month)
             ->where('year', $year)
             ->get()
