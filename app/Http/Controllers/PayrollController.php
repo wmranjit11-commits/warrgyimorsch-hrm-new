@@ -7,6 +7,9 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Imports\AttendanceImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
 
 class PayrollController extends Controller
 {
@@ -305,6 +308,32 @@ class PayrollController extends Controller
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function import(Request $request)
+    {
+        // 1. Validation Logic
+        $validator = Validator::make($request->all(), [
+            'import_file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->with('warning', 'Warning: Please upload a valid Excel or CSV file!');
+        }
+
+        try {
+            if ($request->file('import_file')->getSize() == 0) {
+                return back()->with('warning', 'Warning: The uploaded Excel file is empty.');
+            }
+
+            // 2. Import Process
+            Excel::import(new AttendanceImport, $request->file('import_file'));
+            
+            return back()->with('success', 'Success: Attendance data imported successfully!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error: Something went wrong. ' . $e->getMessage());
         }
     }
 

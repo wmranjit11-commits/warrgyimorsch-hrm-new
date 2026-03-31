@@ -1,96 +1,138 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
-    <!-- Top Header matching Saral ERP -->
-    <div class="d-flex justify-content-between align-items-center px-4 py-3 bg-white border-bottom shadow-sm mb-4">
-        <div class="d-flex align-items-center">
-            <h5 class="fw-bold mb-0 me-3" style="color: #334155;">Payroll Module</h5>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
-                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">Add Attendance</li>
-                </ol>
-            </nav>
+<div class="page-header d-flex align-items-center">
+    <div class="page-header-left">
+        <div class="page-header-title">
+            <h5 class="m-b-10">Payroll Module</h5>
         </div>
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item">Add Attendance</li>
+        </ul>
     </div>
 
-    <div class="px-4 pt-4">
+    <div class="dropdown d-inline-block ms-auto float-end">
+    <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance">
+        <i class="fas fa-upload"></i>
+    </a>
+
+    <div class="dropdown-menu dropdown-menu-end p-4 shadow-sm border-0" style="width: 320px;">
+        <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold text-dark mb-2">Import Attendance (Excel)</label>
+                <input type="file" class="form-control" name="import_file" accept=".xlsx, .xls, .csv" required>
+            </div>
+                        
+            <button type="submit" class="btn btn-success w-100 fw-bold">
+                <i class="fas fa-file-import me-2"></i> UPLOAD & CALCULATE
+            </button>
+        </form>
+    </div>
+</div>
+</div>
+<div style="padding: 30px;"> 
+    {{-- <h2 style="margin-bottom: 20px; color: #333;">Add Attendance</h2> --}}
+
+    {{-- <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px dashed #3858f9;">
+    <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <label style="font-weight: bold; color: #333;">Import Attendance (Excel):</label>
+            <input type="file" name="import_file" accept=".xlsx, .xls, .csv" required>
+            <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                UPLOAD & CALCULATE
+            </button>
+        </div>
+        <small style="color: #666; display: block; margin-top: 5px;">
+            Columns needed: <strong>employee_id, date, check_in, check_out, status</strong>
+        </small>
+    </form>
+</div> --}}
+    
+    <!-- Debug Info -->
+    <div style="background: #f0f8ff; padding: 10px; margin-bottom: 15px; border-radius: 4px; border-left: 4px solid #3858f9;">
+        <small style="color: #0066cc;">
+            <strong>Debug:</strong> Total Employees Found: <strong>{{ count($employees) }}</strong>
+        </small>
+    </div>
+
+    <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
         <form action="{{ route('payroll.attendance.store') }}" method="POST">
             @csrf
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white; overflow: hidden;">
-                <div class="card-header bg-white border-0 px-4 py-4 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-dark">Add Attendance</h5>
-                    <div class="d-flex align-items-center gap-3">
-                        <label class="small fw-bold text-muted mb-0">Attendance Date:</label>
-                        <div class="input-group" style="width: 220px;">
-                            <span class="input-group-text bg-light border-0" style="border-radius: 8px 0 0 8px;"><i class="bi bi-calendar3 text-muted"></i></span>
-                            <input type="date" name="attendance_date" class="form-control border-0 bg-light fw-bold small p-2 shadow-none" 
-                                   value="{{ date('Y-m-d') }}" required style="border-radius: 0 8px 8px 0;">
-                        </div>
-                    </div>
-                </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
+                <input type="date" name="attendance_date" value="{{ date('Y-m-d') }}" required 
+                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px;">
+            </div>
 
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead style="background: #ffffff; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;">
-                            <tr>
-                                <th class="ps-4 py-3 text-muted small fw-bold text-uppercase" style="width: 25%; letter-spacing: 0.5px;">EMPLOYEE NAME</th>
-                                <th class="py-3 text-muted small fw-bold text-uppercase text-center" style="width: 20%; letter-spacing: 0.5px;">CHECK IN</th>
-                                <th class="py-3 text-muted small fw-bold text-uppercase text-center" style="width: 20%; letter-spacing: 0.5px;">CHECK OUT</th>
-                                <th class="py-3 text-muted small fw-bold text-uppercase text-center" style="width: 15%; letter-spacing: 0.5px;">TOTAL TIME</th>
-                                <th class="pe-4 py-3 text-muted small fw-bold text-uppercase" style="width: 20%; letter-spacing: 0.5px;">STATUS</th>
+            @if(count($employees) == 0)
+                <div style="background: #fff3cd; padding: 20px; border-radius: 4px; border: 1px solid #ffc107; color: #856404;">
+                    <strong>⚠️ No Employees Found</strong>
+                    <p style="margin: 10px 0 0 0;">Please add employees first before marking attendance.</p>
+                    <a href="{{ route('employees.create') }}" style="color: #0066cc; text-decoration: none; font-weight: bold;">+ Add Employee Now</a>
+                </div>
+            @else
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                <th style="padding: 15px; text-align: left; border-right: 1px solid #ddd; font-weight: bold;">Employee Name</th>
+                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check In</th>
+                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check Out</th>
+                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 110px;">Total Time</th>
+                                <th style="padding: 15px; text-align: left; font-weight: bold; width: 130px;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($employees as $index => $emp)
-                            <tr class="border-bottom hover-row">
-                                <td class="ps-4 py-4">
-                                    <div class="fw-bold text-dark fs-6">{{ $emp->name }}</div>
+                            <tr style="border-bottom: 1px solid #ddd; background: {{ $loop->even ? '#fafafa' : 'white' }};">
+                                <td style="padding: 15px; border-right: 1px solid #ddd; font-weight: 500;">
+                                    {{ $emp->name }}
                                     <input type="hidden" name="employees[{{ $index }}][employee_id]" value="{{ $emp->id }}">
                                 </td>
-                                <td class="text-center">
-                                    <div class="d-flex flex-column align-items-center gap-2">
-                                    <div class="d-flex align-items-center">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;"><i class="bi bi-clock text-muted"></i></span>
-                                            <input type="time" name="employees[{{ $index }}][check_in]" id="input_in_{{ $index }}" 
-                                                   class="form-control border-start-0 bg-white fw-bold small py-2 shadow-none" 
-                                                   style="border-radius: 0 8px 8px 0;"
-                                                   onchange="calculateDuration({{ $index }})">
-                                        </div>
+                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
+                                    <div style="margin-bottom: 8px;">
+                                        <input type="time" name="employees[{{ $index }}][check_in]" 
+                                               id="check_in_{{ $index }}"
+                                               onchange="calculateDuration({{ $index }})"
+                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center;">
                                     </div>
-                                    <div class="form-check form-switch ms-2 mt-2">
-                                        <input class="form-check-input shadow-none" type="checkbox" id="toggle_in_{{ $index }}" 
-                                               onchange="toggleInput('in', {{ $index }}, this)" style="cursor: pointer; width: 40px; height: 20px;">
-                                    </div>
+                                    <label style="font-size: 12px; cursor: pointer;">
+                                        <input type="checkbox" id="toggle_in_{{ $index }}" 
+                                               onchange="setNowTime('check_in_{{ $index }}', {{ $index }})">
+                                        <span>Set Now</span>
+                                    </label>
                                 </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;"><i class="bi bi-clock-history text-muted"></i></span>
-                                            <input type="time" name="employees[{{ $index }}][check_out]" id="input_out_{{ $index }}" 
-                                                   class="form-control border-start-0 bg-white fw-bold small py-2 shadow-none" 
-                                                   disabled
-                                                   style="border-radius: 0 8px 8px 0;"
-                                                   onchange="calculateDuration({{ $index }})">
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch ms-2 mt-2">
-                                        <input class="form-check-input shadow-none" type="checkbox" id="toggle_out_{{ $index }}" 
+                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
+                                    <div style="margin-bottom: 8px;">
+                                        <input type="time" name="employees[{{ $index }}][check_out]" 
+                                               id="check_out_{{ $index }}"
                                                disabled
-                                               onchange="toggleInput('out', {{ $index }}, this)" style="cursor: pointer; width: 40px; height: 20px;">
+                                               onchange="calculateDuration({{ $index }})"
+                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: #f5f5f5;">
                                     </div>
+                                    <label style="font-size: 12px; cursor: pointer;">
+                                        <input type="checkbox" id="toggle_out_{{ $index }}" 
+                                               disabled
+                                               onchange="setNowTime('check_out_{{ $index }}', {{ $index }})">
+                                        <span>Set Now</span>
+                                    </label>
                                 </td>
-                                <td class="text-center">
-                                    <span class="fw-bold text-muted small" id="duration_{{ $index }}">--</span>
+                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
+                                    <span id="duration_{{ $index }}" style="font-weight: bold; color: #999;">--</span>
                                 </td>
-                                <td class="pe-4">
-                                    <select name="employees[{{ $index }}][status]" id="status_{{ $index }}" class="form-select border-0 bg-light fw-bold small py-2 shadow-none" style="border-radius: 8px; cursor: pointer;">
-                                        <option value="leave" selected>Leave</option>
-                                        <option value="present">Present</option>
+                                <td style="padding: 15px;">
+                                    <select name="employees[{{ $index }}][status]" 
+                                            id="status_{{ $index }}"
+                                            style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
+                                        <option value="present" selected>Present</option>
+                                        <option value="absent">Absent</option>
                                         <option value="half_day">Half Day</option>
-                                        <option value="late">Late</option>
+                                        <option value="leave">Leave</option>
                                     </select>
                                 </td>
                             </tr>
@@ -98,149 +140,68 @@
                         </tbody>
                     </table>
                 </div>
-                
-                <div class="card-footer bg-white border-0 p-4 text-end">
-                    <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm" style="background: #3858f9; border: none; border-radius: 8px;">
+
+                <div style="margin-top: 25px; text-align: right;">
+                    <button type="submit" 
+                            style="padding: 12px 40px; background: #3858f9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">
                         SAVE ATTENDANCE
                     </button>
                 </div>
-            </div>
+            @endif
         </form>
     </div>
 </div>
 
 <script>
-    function toggleInput(type, index, toggle) {
-        const input = document.getElementById(`input_${type}_${index}`);
-        const outToggle = document.getElementById(`toggle_out_${index}`);
+    function setNowTime(fieldId, index) {
+        const field = document.getElementById(fieldId);
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        field.value = hours + ':' + minutes;
         
-        if (toggle.checked) {
-            // Automatically capture current time
-            const now = new Date();
-            input.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-            
-            // Visual Active State
-            input.classList.add('active');
-            
-            // Lock inputs (Immutable)
-            input.readOnly = true;
-            input.style.pointerEvents = 'none';
-            input.tabIndex = -1;
-            
-            // Lock toggle (Immutable)
-            toggle.style.pointerEvents = 'none';
-            toggle.tabIndex = -1;
-
-            if (type === 'in' && outToggle) {
-                outToggle.disabled = false;
-            }
+        // Enable checkout if check-in is set
+        if (fieldId.includes('check_in')) {
+            const checkOutField = document.getElementById('check_out_' + index);
+            const checkOutToggle = document.getElementById('toggle_out_' + index);
+            checkOutField.disabled = false;
+            checkOutField.style.background = 'white';
+            checkOutToggle.disabled = false;
         }
+        
         calculateDuration(index);
     }
 
     function calculateDuration(index) {
-        const inInput = document.getElementById(`input_in_${index}`);
-        const outInput = document.getElementById(`input_out_${index}`);
-        const outToggle = document.getElementById(`toggle_out_${index}`);
-        const statusSelect = document.getElementById(`status_${index}`);
-        const inTime = inInput.value;
-        const outTime = outInput.value;
-        const display = document.getElementById(`duration_${index}`);
-
-        // Auto-Status Logic
-        if (inTime) {
-            outInput.disabled = false;
-            outToggle.disabled = false;
-            if (statusSelect.value === 'leave') {
-                statusSelect.value = 'present'; // Auto-switch to present if they checked in
+        const checkInField = document.getElementById('check_in_' + index);
+        const checkOutField = document.getElementById('check_out_' + index);
+        const durationDisplay = document.getElementById('duration_' + index);
+        
+        const checkIn = checkInField.value;
+        const checkOut = checkOutField.value;
+        
+        if (checkIn && checkOut) {
+            const [inHours, inMinutes] = checkIn.split(':').map(Number);
+            const [outHours, outMinutes] = checkOut.split(':').map(Number);
+            
+            let inTotal = inHours * 60 + inMinutes;
+            let outTotal = outHours * 60 + outMinutes;
+            
+            if (outTotal < inTotal) {
+                outTotal += 24 * 60;
             }
-        } else {
-            outInput.disabled = true;
-            outInput.value = '';
-            outToggle.disabled = true;
-            outToggle.checked = false;
-            statusSelect.value = 'leave'; // Auto-switch to leave if no check-in
-        }
-
-        if (inTime && outTime) {
-            const start = new Date(`2000-01-01T${inTime}:00`);
-            let end = new Date(`2000-01-01T${outTime}:00`);
             
-            if (end < start) end = new Date(`2000-01-02T${outTime}:00`);
+            const diffMinutes = outTotal - inTotal;
+            const hours = Math.floor(diffMinutes / 60);
+            const minutes = diffMinutes % 60;
             
-            const diff = (end - start) / 1000 / 60 / 60; // hours
-            display.innerText = diff.toFixed(1) + ' hrs';
-            display.classList.remove('text-muted');
-            display.classList.add('text-primary');
+            durationDisplay.textContent = hours + 'h ' + minutes + 'm';
+            durationDisplay.style.color = '#3858f9';
         } else {
-            display.innerText = '--';
-            display.classList.add('text-muted');
-            display.classList.remove('text-primary');
+            durationDisplay.textContent = '--';
+            durationDisplay.style.color = '#999';
         }
     }
 </script>
-
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    
-    .breadcrumb-item + .breadcrumb-item::before { content: ">"; color: #94a3b8; }
-    
-    .time-input {
-        background: #f1f5f9 !important;
-        border: none !important;
-        border-radius: 8px !important;
-        text-align: center;
-        font-weight: 600;
-        font-size: 14px;
-        color: #64748b;
-        padding: 8px;
-        width: 140px;
-        transition: all 0.2s;
-    }
-    
-    .time-input.active {
-        background: #ffffff !important;
-        color: #1e293b;
-        box-shadow: 0 0 0 1px #e2e8f0, 0 2px 4px rgba(0,0,0,0.05) !important;
-    }
-    
-    .check-toggle:checked {
-        background-color: #3858f9 !important;
-        border-color: #3858f9 !important;
-        box-shadow: 0 0 8px rgba(56, 88, 249, 0.4) !important;
-    }
-    
-    .hover-row:hover { background-color: #fbfcfe; }
-    
-    /* Modern Switch Styling with Visible Thumb */
-    .form-switch .form-check-input {
-        width: 46px !important;
-        height: 24px !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3.5' fill='rgba%280, 0, 0, 0.2%29'/%3e%3c/svg%3e") !important;
-        background-position: left 2px center !important;
-        background-size: 18px !important;
-        cursor: pointer;
-        transition: background-position 0.15s ease-in-out, background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        background-repeat: no-repeat;
-        border: 1px solid #cbd5e1 !important;
-    }
-    .form-switch .form-check-input:checked,
-    .form-switch .form-check-input[checked] {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3.5' fill='%23ffffff'/%3e%3c/svg%3e") !important;
-        background-color: #3858f9 !important;
-        border-color: #3858f9 !important;
-        background-position: right 2px center !important;
-        box-shadow: 0 0 10px rgba(56, 88, 249, 0.3) !important;
-    }
-    .form-switch .form-check-input:focus {
-        border-color: #3858f9 !important;
-        box-shadow: 0 0 0 0.25rem rgba(56, 88, 249, 0.1) !important;
-    }
-    .form-switch .form-check-input:disabled, 
-    .form-switch .form-check-input[style*="pointer-events: none"] {
-        opacity: 0.8 !important;
-        cursor: not-allowed;
-    }
-</style>
 @endsection
 
