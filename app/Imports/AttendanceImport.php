@@ -33,7 +33,7 @@ class AttendanceImport implements ToModel, WithHeadingRow
                 $checkOut->addDay();
             }
 
-            $totalMinutes = $checkOut->diffInMinutes($checkIn);
+            $totalMinutes = $checkIn->diffInMinutes($checkOut);
             $totalHours = round($totalMinutes / 60, 2);
 
             return new Attendance([
