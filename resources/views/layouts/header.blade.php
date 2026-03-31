@@ -39,7 +39,7 @@
                 <!--! [Start] nxl-lavel-mega-menu-wrapper !-->
                 <div class="nxl-lavel-mega-menu-wrapper d-flex gap-3">
                     <!--! [Start] nxl-lavel-menu !-->
-                    <div class="dropdown nxl-h-item nxl-lavel-menu">
+                    <!-- <div class="dropdown nxl-h-item nxl-lavel-menu">
                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-primary text-white"
                             data-bs-toggle="dropdown" data-bs-auto-close="outside">
                             <i class="feather-plus"></i>
@@ -409,7 +409,7 @@
                                 <span>Add New Items</span>
                             </a>
                         </div>
-                    </div>
+                    </div> -->
                     <!--! [End] nxl-lavel-menu !-->
                     <!--! [Start] nxl-h-item nxl-mega-menu !-->
                     <div class="dropdown nxl-h-item nxl-mega-menu">

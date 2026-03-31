@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\LeaveApplicationController;
 
 
 Route::get('/', function () {
@@ -80,7 +82,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payroll/{id}', [PayrollController::class, 'show'])->name('payroll.show');
     Route::post('/payroll/{id}/status', [PayrollController::class, 'updateStatus'])->name('payroll.status');
     Route::delete('/payroll/{id}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
+});
 
+// LEAVE MODULE ROUTES
+Route::middleware(['auth'])->group(function () {
+    Route::get('/leave/allotment', [LeaveController::class, 'allotment'])->name('leave.allotment');
+    Route::post('/leave/allotment', [LeaveController::class, 'storeAllotment'])->name('leave.storeAllotment');
+    Route::get('/leave/balance', [LeaveController::class, 'balanceList'])->name('leave.balance');
+    Route::get('/api/leave/balance', [LeaveController::class, 'apiBalanceList']);
+
+    // LEAVE APPLICATIONS
+    Route::get('/leave/history', [LeaveApplicationController::class, 'index'])->name('leave.history');
+    Route::get('/leave/export', [LeaveApplicationController::class, 'export'])->name('leave.export');
+    Route::post('/leave/apply', [LeaveApplicationController::class, 'store'])->name('leave.apply');
+    Route::post('/leave/action', [LeaveApplicationController::class, 'updateAction'])->name('leave.updateAction');
+    Route::delete('/leave/application/{id}', [LeaveApplicationController::class, 'destroy'])->name('leave.application.destroy');
+    Route::get('/api/leave/details/{id}', [LeaveApplicationController::class, 'getDetails']);
+    Route::get('/api/leave/employee/{employeeId}', [LeaveApplicationController::class, 'getEmployeeLeaves']);
 });
 
 Route::middleware('auth')->group(function () {

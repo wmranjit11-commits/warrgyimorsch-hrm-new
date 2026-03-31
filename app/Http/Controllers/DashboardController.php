@@ -18,11 +18,11 @@ class DashboardController extends Controller
         // Month Filtering
         $selectedMonth = $request->get('month');
         $hasSelectedMonth = !empty($selectedMonth);
-        
+
         if (!$hasSelectedMonth) {
             $selectedMonth = Carbon::now()->format('Y-m');
         }
-        
+
         $selectedDate = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
         $selectedMonthLabel = $selectedDate->format('F Y');
 
@@ -43,7 +43,7 @@ class DashboardController extends Controller
                 ->whereYear('attendance_date', $selectedDate->year)
                 ->whereIn('status', ['present', 'half_day', 'late', 'leave', 'absent'])
                 ->count();
-            
+
             $todayPresent = $daysInMonth > 0 ? round($monthPresent / $daysInMonth) : 0;
             $todayLeave = 0; // Average leave is complex, default to 0 for past summary
             $attendanceRate = ($totalEmployees > 0 && $daysInMonth > 0) ? round(($monthPresent / ($totalEmployees * $daysInMonth)) * 100, 1) : 0;
@@ -114,12 +114,12 @@ class DashboardController extends Controller
     public function getFullYearBreakdown(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        
+
         $data = [];
         for ($i = 1; $i <= 12; $i++) {
             $m = Carbon::createFromDate($year, $i, 1)->format('Y-m');
             $mLabel = Carbon::createFromDate($year, $i, 1)->format('F');
-            
+
             $data[] = [
                 'month' => $mLabel,
                 'total_gross' => Payroll::where('month', $m)->sum('gross_salary'),
@@ -128,7 +128,7 @@ class DashboardController extends Controller
                 'status' => Payroll::where('month', $m)->where('status', 'pending')->exists() ? 'Pending' : 'Completed'
             ];
         }
-        
+
         return response()->json([
             'success' => true,
             'year' => $year,

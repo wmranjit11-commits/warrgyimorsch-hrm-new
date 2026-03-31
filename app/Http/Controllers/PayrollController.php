@@ -33,7 +33,7 @@ class PayrollController extends Controller
         if (!$hasFilter) {
             // Default to current month if no filter is provided
             $query->whereYear('attendance_date', now()->year)
-                  ->whereMonth('attendance_date', now()->month);
+                ->whereMonth('attendance_date', now()->month);
         }
 
         // Group by Date with Aggregate Counts
@@ -78,7 +78,7 @@ class PayrollController extends Controller
             $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
         } elseif ($request->filled('year') && $request->filled('month')) {
             $query->whereYear('attendance_date', $request->year)
-                  ->whereMonth('attendance_date', $request->month);
+                ->whereMonth('attendance_date', $request->month);
         }
 
         // Filter by employee
@@ -113,10 +113,10 @@ class PayrollController extends Controller
             foreach ($request->employees as $employeeData) {
                 if ($employeeData['employee_id']) {
                     $status = $employeeData['status'] ?? 'present';
-                    
+
                     $checkIn = !empty($employeeData['check_in']) ? $employeeData['check_in'] : null;
                     $checkOut = !empty($employeeData['check_out']) ? $employeeData['check_out'] : null;
-                    
+
                     $totalHours = 0;
                     if ($checkIn && $checkOut) {
                         try {
@@ -179,18 +179,10 @@ class PayrollController extends Controller
             // Get employee
             $employee = Employee::findOrFail($employeeId);
 
-            // Check if payroll already exists for this month
+            // Check if payroll already exists for this month (Used for warning or updating)
             $existingPayroll = Payroll::where('employee_id', $employeeId)
                 ->where('month', $month)
                 ->first();
-
-            if ($existingPayroll) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payroll for this month already exists',
-                    'payroll' => $existingPayroll,
-                ]);
-            }
 
             // Robust Date Parsing (Fixes Feb 28/31 bug)
             $selectedDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -213,8 +205,8 @@ class PayrollController extends Controller
                 // If a user works 8 hours, it counts as 1.0 days (8/8)
                 $totalHoursWorked = 0;
                 $daysPresent = 0;
-                
-                foreach($attendanceRecords as $record) {
+
+                foreach ($attendanceRecords as $record) {
                     // Include 'leave' in payable days (Paid Leave policy)
                     // If you want Unpaid Leave, remove 'leave' from this array
                     if (in_array($record->status, ['present', 'half_day', 'late', 'leave'])) {
@@ -226,36 +218,39 @@ class PayrollController extends Controller
                         $totalHoursWorked += $hours;
                     }
                 }
-                
+
                 $payableDays = $totalHoursWorked / 8;
-                if ($payableDays < 0) $payableDays = 0;
+                if ($payableDays < 0)
+                    $payableDays = 0;
             }
 
-            // Calculate monthly components (Removed / 12 as they are monthly components)
-            $basicSalary = $employee->basic_salary;
-            $hra = $employee->hra;
-            $conveyance = $employee->conveyance_allowance;
-            $medical = $employee->medical_allowance;
-            $otherAllowance = $employee->other_allowance;
+            // Convert Annual CTC to Monthly Base (Requested by User: "sal ki mili hogi na bro")
+            $monthlyBasic = $employee->basic_salary / 12;
+            $monthlyHRA = $employee->hra / 12;
+            $monthlyConveyance = $employee->conveyance_allowance / 12;
+            $monthlyMedical = $employee->medical_allowance / 12;
+            $monthlyOther = $employee->other_allowance / 12;
 
-            $fullMonthGross = $basicSalary + $hra + $conveyance + $medical + $otherAllowance;
+            $fullMonthGross = $monthlyBasic + $monthlyHRA + $monthlyConveyance + $monthlyMedical + $monthlyOther;
 
-            // Deductions based on Full Month Basic
-            $pfDeduction = $employee->pf ? ($basicSalary * 0.12) : 0;
-            $esiDeduction = $employee->esi ? ($basicSalary * 0.0175) : 0;
-            $otherDeduction = 0;
+            // Pro-rate every individual component for absolute transparency
+            $pBasic = ($monthlyBasic / $totalDays) * $payableDays;
+            $pHRA = ($monthlyHRA / $totalDays) * $payableDays;
+            $pConveyance = ($monthlyConveyance / $totalDays) * $payableDays;
+            $pMedical = ($monthlyMedical / $totalDays) * $payableDays;
+            $pOtherAllowance = ($monthlyOther / $totalDays) * $payableDays;
 
-            $fullMonthDeductions = $pfDeduction + $esiDeduction + $otherDeduction;
-            $fullMonthNet = $fullMonthGross - $fullMonthDeductions;
-
-            // Pro-rate based on hours-based payable days
-            $grossSalary = ($fullMonthGross / $totalDays) * $payableDays;
-            $netSalary = ($fullMonthNet / $totalDays) * $payableDays;
-            $totalDeductions = ($fullMonthDeductions / $totalDays) * $payableDays;
-            
-            // Salary Loss Detail (Requested by User)
+            $grossSalary = $pBasic + $pHRA + $pConveyance + $pMedical + $pOtherAllowance;
             $salaryLoss = $fullMonthGross - $grossSalary;
             $unpaidDays = $totalDays - $payableDays;
+
+            // Pro-rate Deductions
+            $pPF = $employee->pf ? ($pBasic * 0.12) : 0;
+            $pESI = $employee->esi ? ($pBasic * 0.0175) : 0;
+            $pOtherDeduction = 0;
+
+            $totalDeductions = $pPF + $pESI + $pOtherDeduction;
+            $netSalary = $grossSalary - $totalDeductions;
 
             $payrollData = [
                 'employee_id' => $employeeId,
@@ -263,16 +258,16 @@ class PayrollController extends Controller
                 'payable_days' => round($payableDays, 1),
                 'unpaid_days' => round($unpaidDays, 1),
                 'salary_loss' => round($salaryLoss, 2),
-                'basic_salary' => round($basicSalary, 2),
-                'hra' => round($hra, 2),
-                'conveyance_allowance' => round($conveyance, 2),
-                'medical_allowance' => round($medical, 2),
-                'other_allowance' => round($otherAllowance, 2),
+                'basic_salary' => round($pBasic, 2),
+                'hra' => round($pHRA, 2),
+                'conveyance_allowance' => round($pConveyance, 2),
+                'medical_allowance' => round($pMedical, 2),
+                'other_allowance' => round($pOtherAllowance, 2),
                 'gross_salary' => round($grossSalary, 2),
                 'deductions' => round($totalDeductions, 2),
-                'pf_deduction' => round($pfDeduction, 2),
-                'esi_deduction' => round($esiDeduction, 2),
-                'other_deduction' => round($otherDeduction, 2),
+                'pf_deduction' => round($pPF, 2),
+                'esi_deduction' => round($pESI, 2),
+                'other_deduction' => round($pOtherDeduction, 2),
                 'net_salary' => round($netSalary, 2),
                 'status' => 'pending',
             ];
@@ -295,7 +290,11 @@ class PayrollController extends Controller
     public function storePayroll(Request $request)
     {
         try {
-            Payroll::create($request->all());
+            $data = $request->all();
+            Payroll::updateOrCreate(
+                ['employee_id' => $data['employee_id'], 'month' => $data['month']],
+                $data
+            );
 
             return response()->json([
                 'success' => true,
@@ -406,7 +405,7 @@ class PayrollController extends Controller
 
         $callback = function () use ($payrolls) {
             $file = fopen('php://output', 'w');
-            
+
             // Report Header
             fputcsv($file, ['Company Name', 'PAYROLL SLIP/REPORT']);
             fputcsv($file, ['Generated On', now()->format('Y-m-d H:i:s')]);
@@ -414,10 +413,22 @@ class PayrollController extends Controller
 
             // CSV Headers
             fputcsv($file, [
-                'SR.NO', 'EMPLOYEE NAME', 'MONTH', 'PAYABLE DAYS',
-                'BASIC SALARY', 'HRA', 'CONVEYANCE', 'MEDICAL', 'OTHER ALLOWANCE',
-                'PF DEDUCTION', 'ESI DEDUCTION', 'OTHER DEDUCTION',
-                'GROSS SALARY', 'TOTAL DEDUCTIONS', 'NET SALARY', 'STATUS'
+                'SR.NO',
+                'EMPLOYEE NAME',
+                'MONTH',
+                'PAYABLE DAYS',
+                'BASIC SALARY',
+                'HRA',
+                'CONVEYANCE',
+                'MEDICAL',
+                'OTHER ALLOWANCE',
+                'PF DEDUCTION',
+                'ESI DEDUCTION',
+                'OTHER DEDUCTION',
+                'GROSS SALARY',
+                'TOTAL DEDUCTIONS',
+                'NET SALARY',
+                'STATUS'
             ]);
 
             // CSV Data
@@ -461,7 +472,7 @@ class PayrollController extends Controller
             $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
         } elseif ($request->filled('year') && $request->filled('month')) {
             $query->whereYear('attendance_date', $request->year)
-                  ->whereMonth('attendance_date', $request->month);
+                ->whereMonth('attendance_date', $request->month);
         }
 
         if ($request->filled('employee_id')) {

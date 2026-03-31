@@ -42,4 +42,9 @@ class Employee extends Model
         'medical_allowance',
         'other_allowance',
     ];
+
+    public function leaveAllotments()
+    {
+        return $this->hasMany(LeaveAllotment::class);
+    }
 }
