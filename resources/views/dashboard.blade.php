@@ -557,8 +557,11 @@
                                                     </span>
                                                 </td>
                                                 <td class="text-end">
-                                                    <div class="d-flex flex-column align-items-end">
-                                                        <a href="{{ route('payroll.index') }}" class="avatar-text avatar-sm bg-soft-primary text-primary" title="View Details">
+                                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                                        <a href="{{ route('payroll.export', ['id' => $rp->id, 'format' => 'pdf']) }}" class="avatar-text avatar-md bg-soft-info text-info" title="Download PDF">
+                                                            <i class="feather-download"></i>
+                                                        </a>
+                                                        <a href="{{ route('payroll.show', $rp->id) }}" class="avatar-text avatar-sm bg-soft-primary text-primary" title="View Details">
                                                             <i class="feather-eye"></i>
                                                         </a>
                                                     </div>

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Imports\AttendanceImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayrollController extends Controller
 {
@@ -294,7 +295,7 @@ class PayrollController extends Controller
     {
         try {
             $data = $request->all();
-            Payroll::updateOrCreate(
+            $payroll = Payroll::updateOrCreate(
                 ['employee_id' => $data['employee_id'], 'month' => $data['month']],
                 $data
             );
@@ -302,6 +303,7 @@ class PayrollController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Payroll saved successfully!',
+                'payroll_id' => $payroll->id,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -425,6 +427,17 @@ class PayrollController extends Controller
             $filename = 'payslip_' . $payroll->employee->name . '_' . $payroll->month . '.csv';
         } else {
             $filename = 'payroll_report_' . date('Y-m-d') . '.csv';
+        }
+
+        // NEW: Default to PDF format for a professional workflow
+        $format = $request->query('format', 'pdf');
+
+        if ($format === 'pdf') {
+            if ($payrolls->count() == 1) {
+                return $this->downloadPdf($payrolls->first()->id);
+            } else {
+                return $this->bulkDownloadPdf($request);
+            }
         }
 
         $headers = [
@@ -653,4 +666,47 @@ class PayrollController extends Controller
         }
     }
 
+    /**
+     * Download individual PDF payslip
+     */
+    public function downloadPdf($id)
+    {
+        $payroll = Payroll::with('employee')->findOrFail($id);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.payslip_pdf', compact('payroll'));
+        
+        $filename = 'payslip_' . str_replace(' ', '_', $payroll->employee->name) . '_' . $payroll->month . '.pdf';
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Bulk download PDF payslips for a month/filter
+     */
+    public function bulkDownloadPdf(Request $request)
+    {
+        $query = Payroll::with('employee');
+
+        if ($request->filled('month')) {
+            $query->where('month', $request->month);
+        }
+
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $payrolls = $query->get();
+
+        if ($payrolls->count() == 0) {
+            return back()->with('warning', 'No payroll records found for the selected filter.');
+        }
+
+        // Generate a single PDF with all slips separated by page breaks
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.bulk_payslip_pdf', compact('payrolls'));
+        
+        $filename = 'bulk_payslips_' . ($request->month ?? date('Y-m')) . '.pdf';
+        return $pdf->download($filename);
+    }
 }

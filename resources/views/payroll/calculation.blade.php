@@ -165,10 +165,16 @@
                                     </div>
                                 </div>
 
-                                <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm"
-                                    style="background: #3858f9; border: none; border-radius: 12px;" onclick="savePayroll()">
-                                    <i class="bi bi-check2-circle me-2 fs-5"></i> SUBMIT PAYROLL
-                                </button>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary py-3 fw-bold shadow-sm"
+                                        style="background: #3858f9; border: none; border-radius: 12px;" onclick="savePayroll()">
+                                        <i class="bi bi-check2-circle me-2 fs-5"></i> SUBMIT PAYROLL
+                                    </button>
+                                    <button class="btn btn-soft-danger py-2 fw-bold d-none" id="downloadAfterSave"
+                                        style="border-radius: 10px;" onclick="downloadCurrentPdf()">
+                                        <i class="bi bi-file-earmark-pdf me-2"></i> DOWNLOAD PAYSLIP (PDF)
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -251,11 +257,27 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = "{{ route('payroll.index') }}?success=Payroll+Submitted";
+                        // Instead of redirect, show download option
+                        const btn = document.getElementById('downloadAfterSave');
+                        btn.classList.remove('d-none');
+                        
+                        // Change submit button to Done
+                        const submitBtn = event.target.closest('button');
+                        submitBtn.innerHTML = '<i class="bi bi-check-all me-2"></i> SAVED SUCCESSFULLY';
+                        submitBtn.className = "btn btn-success py-3 fw-bold shadow-sm w-100";
+                        submitBtn.disabled = true;
+
+                        // Set global payroll ID for downloading
+                        window.lastSavedPayrollId = data.payroll_id; // need controller to return this
                     } else {
                         alert(data.message);
                     }
                 });
+        }
+
+        function downloadCurrentPdf() {
+            if(!window.lastSavedPayrollId) return;
+            window.location.href = `{{ route('payroll.export') }}?id=${window.lastSavedPayrollId}&format=pdf`;
         }
 
         function f(n) { return parseFloat(n).toLocaleString('en-IN', { minimumFractionDigits: 2 }); }

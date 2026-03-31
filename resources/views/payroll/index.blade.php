@@ -26,7 +26,7 @@
                         <i class="feather-filter"></i>
                     </a>
 
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportPayroll()" title="Export Report">
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportPayroll('pdf')" title="Download All (PDF)">
                         <i class="feather-download"></i>
                     </a>
 
@@ -108,7 +108,7 @@
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="viewPayroll({{ $payroll->id }})" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
-                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-warning text-warning" onclick="downloadSlip({{ $payroll->id }})" title="Download">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="downloadSlip({{ $payroll->id }}, 'pdf')" title="Download PDF">
                                             <i class="feather-download"></i>
                                         </a>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deletePayroll({{ $payroll->id }})" title="Delete">
@@ -195,8 +195,8 @@
             });
     }
 
-    function downloadSlip(id) {
-        window.location.href = `{{ route('payroll.export') }}?id=${id}`;
+    function downloadSlip(id, format = 'csv') {
+        window.location.href = `{{ route('payroll.export') }}?id=${id}&format=${format}`;
     }
 
     function deletePayroll(id) {
@@ -226,10 +226,10 @@
         });
     }
 
-    function exportPayroll() {
+    function exportPayroll(format = 'csv') {
         const month = document.getElementById('monthFilter').value;
         const empId = document.getElementById('employeeFilter').value;
-        window.location.href = `{{ route('payroll.export') }}?month=${month}&employee_id=${empId}`;
+        window.location.href = `{{ route('payroll.export') }}?month=${month}&employee_id=${empId}&format=${format}`;
     }
 </script>
 
