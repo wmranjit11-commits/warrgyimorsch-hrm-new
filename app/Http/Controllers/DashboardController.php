@@ -75,13 +75,11 @@ class DashboardController extends Controller
             $chartPending[] = Payroll::where('month', $mValue)->where('status', 'pending')->sum('net_salary');
         }
 
-        // Recent Activity (Paginated)
-        // User Request: If month select nhi hai to sara data dikhe
-        if (!$hasSelectedMonth) {
-            $recentPayrolls = Payroll::with('employee')->latest()->paginate(10);
-        } else {
-            $recentPayrolls = Payroll::with('employee')->where('month', $selectedMonth)->latest()->paginate(10);
-        }
+        // Recent Activity (Filtered by Month)
+        $recentPayrolls = Payroll::with('employee')
+            ->where('month', $selectedMonth)
+            ->latest()
+            ->paginate(10);
 
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();

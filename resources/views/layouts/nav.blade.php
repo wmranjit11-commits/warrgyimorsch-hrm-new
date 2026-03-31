@@ -14,15 +14,11 @@
                 <li class="nxl-item nxl-caption">
                     <label>Navigation</label>
                 </li>
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
+                <li class="nxl-item">
+                    <a href="{{ route('dashboard') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-airplay"></i></span>
-                        <span class="nxl-mtext">Dashboards</span><span class="nxl-arrow"><i
-                                class="feather-chevron-right"></i></span>
+                        <span class="nxl-mtext">Dashboard</span>
                     </a>
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item"><a class="nxl-link" href="{{ route('dashboard') }}">CRM</a></li>
-                    </ul>
                 </li>
 
 
@@ -191,26 +187,6 @@
                             <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
                             <span class="nxl-mtext">Payment</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="payment.html">Payment</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="invoice-view.html">Invoice View</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="invoice-create.html">Invoice Create</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-users"></i></span>
-                            <span class="nxl-mtext">Customers</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="customers.html">Customers</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="customers-view.html">Customers View</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="customers-create.html">Customers Create</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-alert-circle"></i></span>
                             <span class="nxl-mtext">Leads</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
@@ -348,9 +324,8 @@
                 <div class="card-body">
                     <i class="feather-sunrise fs-4 text-dark"></i>
                     <h6 class="mt-4 text-dark fw-bolder">Downloading Center</h6>
-                    <p class="fs-11 my-3 text-dark">Duralux is a production ready CRM to get started up and running
-                        easily.</p>
-                    <a href="javascript:void(0);" class="btn btn-primary text-dark w-100">Download Now</a>
+                    <p class="fs-11 my-3 text-dark">Warrgyizmorsch HRM is a production ready system to manage your employee data and payroll easily.</p>
+                    <a href="javascript:void(0);" class="btn btn-primary w-100">Download Now</a>
                 </div>
             </div>
         </div>
