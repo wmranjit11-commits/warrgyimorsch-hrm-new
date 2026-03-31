@@ -318,13 +318,11 @@ class PayrollController extends Controller
             'import_file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
-        // Agar user galat file type upload karta hai, toh WARNING alert aayega
         if ($validator->fails()) {
             return back()->with('warning', 'Warning: Please upload a valid Excel or CSV file!');
         }
 
         try {
-            // Agar file selected hai par usme koi data nahi hai (0 kb size)
             if ($request->file('import_file')->getSize() == 0) {
                 return back()->with('warning', 'Warning: The uploaded Excel file is empty.');
             }
@@ -332,11 +330,9 @@ class PayrollController extends Controller
             // 2. Import Process
             Excel::import(new AttendanceImport, $request->file('import_file'));
             
-            // 3. SUCCESS Alert (Sab kuch sahi hone par)
             return back()->with('success', 'Success: Attendance data imported successfully!');
 
         } catch (\Exception $e) {
-            // 4. ERROR Alert (Database ya server side koi issue aane par)
             return back()->with('error', 'Error: Something went wrong. ' . $e->getMessage());
         }
     }
