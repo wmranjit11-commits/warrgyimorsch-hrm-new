@@ -345,7 +345,7 @@
                                         data-bs-toggle="expand"> </a>
                                 </div>
                             </div>
-                            <div class="dropdown">
+                            <!-- <div class="dropdown">
                                 <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
                                     data-bs-offset="25, 25">
                                     <div data-bs-toggle="tooltip" title="Options">
@@ -367,7 +367,7 @@
                                     <a href="javascript:void(0);" class="dropdown-item"><i
                                             class="feather-life-buoy"></i>Tips & Tricks</a>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div class="card-body custom-card-action p-0">
@@ -554,9 +554,9 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            @forelse($upcomingHolidays as $holiday)
+                            @forelse($upcomingHolidays as $index => $holiday)
                                 @php $hDate = \Carbon\Carbon::parse($holiday->date); @endphp
-                                <div class="p-3 border border-dashed rounded-3 mb-3">
+                                <div class="p-3 border border-dashed rounded-3 mb-3 holiday-slide-item {{ $index >= 4 ? 'd-none' : '' }}" data-index="{{ $index }}">
                                     <div class="d-flex justify-content-between">
                                         <div class="d-flex align-items-center gap-3">
                                             <div
@@ -574,9 +574,20 @@
                             @empty
                                 <div class="text-center py-4 text-muted">No upcoming holidays.</div>
                             @endforelse
+
+                            @if(count($upcomingHolidays) > 4)
+                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                    <a href="javascript:void(0);" id="prev-holiday" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                        <i class="feather-chevron-left fs-20"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" id="next-holiday" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                        <i class="feather-chevron-right fs-20"></i>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
-                        <a href="javascript:void(0);"
-                            class="card-footer fs-11 fw-bold text-uppercase text-center py-4">Upcomming Schedule</a>
+                        <a href="{{ route('holidays.index') }}"
+                            class="card-footer fs-11 fw-bold text-uppercase text-center py-4">View Full Holiday Calendar</a>
                     </div>
                 </div>
                 <!--! END: [Upcoming Schedule] !-->
@@ -1029,6 +1040,9 @@
         </div>
             </div>
         </div>
+        
+        <!-- Holiday Modal Deleted -->
+
         <!-- [ Main Content ] end -->
 @endsection
 
@@ -1185,6 +1199,61 @@
                             });
                         }
                     });
+            }
+
+            // Holiday Slider Logic
+            let currentHolidayPage = 0;
+            const holidaysPerPage = 4;
+            const totalHolidays = {{ count($upcomingHolidays) }};
+            const holidayItems = document.querySelectorAll('.holiday-slide-item');
+            const prevHolidayBtn = document.getElementById('prev-holiday');
+            const nextHolidayBtn = document.getElementById('next-holiday');
+
+            function updateHolidayView() {
+                holidayItems.forEach((item, index) => {
+                    const start = currentHolidayPage * holidaysPerPage;
+                    const end = start + holidaysPerPage;
+                    if (index >= start && index < end) {
+                        item.classList.remove('d-none');
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+
+                // Update Button States
+                if (currentHolidayPage === 0) {
+                    prevHolidayBtn.classList.add('disabled');
+                    prevHolidayBtn.style.opacity = '0.5';
+                } else {
+                    prevHolidayBtn.classList.remove('disabled');
+                    prevHolidayBtn.style.opacity = '1';
+                }
+
+                if ((currentHolidayPage + 1) * holidaysPerPage >= totalHolidays) {
+                    nextHolidayBtn.classList.add('disabled');
+                    nextHolidayBtn.style.opacity = '0.5';
+                } else {
+                    nextHolidayBtn.classList.remove('disabled');
+                    nextHolidayBtn.style.opacity = '1';
+                }
+            }
+
+            if (nextHolidayBtn) {
+                nextHolidayBtn.addEventListener('click', function() {
+                    if ((currentHolidayPage + 1) * holidaysPerPage < totalHolidays) {
+                        currentHolidayPage++;
+                        updateHolidayView();
+                    }
+                });
+            }
+
+            if (prevHolidayBtn) {
+                prevHolidayBtn.addEventListener('click', function() {
+                    if (currentHolidayPage > 0) {
+                        currentHolidayPage--;
+                        updateHolidayView();
+                    }
+                });
             }
         }, 500);
     });

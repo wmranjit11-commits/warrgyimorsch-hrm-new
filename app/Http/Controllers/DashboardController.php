@@ -84,7 +84,7 @@ class DashboardController extends Controller
         }
 
         // Upcoming Holidays
-        $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(4)->get();
+        $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();
 
         return view('dashboard', compact(
             'totalEmployees',
