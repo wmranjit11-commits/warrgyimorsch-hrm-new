@@ -140,15 +140,15 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="fw-bold text-muted">Basic Salary</label>
-                                        <p class="text-dark">₹ {{ number_format($employee->basic_salary ?? 0, 2) }}</p>
+                                        <p class="text-dark">Rs. {{ number_format($employee->basic_salary ?? 0, 2) }}</p>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="fw-bold text-muted">HRA</label>
-                                        <p class="text-dark">₹ {{ number_format($employee->hra ?? 0, 2) }}</p>
+                                        <p class="text-dark">Rs. {{ number_format($employee->hra ?? 0, 2) }}</p>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="fw-bold text-muted">Conveyance Allowance</label>
-                                        <p class="text-dark">₹ {{ number_format($employee->conveyance_allowance ?? 0, 2) }}
+                                        <p class="text-dark">Rs. {{ number_format($employee->conveyance_allowance ?? 0, 2) }}
                                         </p>
                                     </div>
                                 </div>

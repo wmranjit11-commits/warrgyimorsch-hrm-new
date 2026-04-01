@@ -42,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
 
     // API - GET EMPLOYEE JSON
     Route::get('/api/employees/{id}', [EmployeeController::class, 'getJson']);
+    Route::get('/api/employees/{employee_id}/attendance', [PayrollController::class, 'getEmployeeAttendance']);
 
 });
 

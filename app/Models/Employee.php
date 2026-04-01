@@ -43,8 +43,26 @@ class Employee extends Model
         'other_allowance',
     ];
 
+    protected $appends = ['photo_url'];
+
     public function leaveAllotments()
     {
         return $this->hasMany(LeaveAllotment::class);
+    }
+
+    /**
+     * Get the full URL for the employee's photo.
+     */
+    public function getPhotoUrlAttribute()
+    {
+        if (!$this->photo) return null;
+        
+        // Handle direct public uploads
+        if (str_starts_with($this->photo, 'uploads/')) {
+            return asset($this->photo);
+        }
+        
+        // Handle storage-based uploads
+        return asset('storage/' . $this->photo);
     }
 }

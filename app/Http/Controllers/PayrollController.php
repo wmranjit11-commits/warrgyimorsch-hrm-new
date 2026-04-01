@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Payroll;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Holiday;
+use App\Exports\MonthlyAttendanceExport;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Imports\AttendanceImport;
@@ -14,44 +16,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayrollController extends Controller
 {
-    /**
-     * Display Attendance List
-     */
-    public function attendance(Request $request)
-    {
-        $query = Attendance::query();
-        $hasFilter = false;
-
-        // Filter by Date Range
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
-            $hasFilter = true;
-        }
-
-        // Filter by Employee
-        if ($request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
-            $hasFilter = true;
-        }
-
-        if (!$hasFilter) {
-            // Default to current month if no filter is provided
-            $query->whereYear('attendance_date', now()->year)
-                ->whereMonth('attendance_date', now()->month);
-        }
-
-        // Group by Date with Aggregate Counts
-        $attendance = $query->selectRaw('attendance_date, 
-                count(case when status = "present" then 1 end) as present_count,
-                count(case when status = "half_day" then 1 end) as half_day_count,
-                count(case when status in ("absent", "leave") then 1 end) as leave_count,
-                count(case when total_hours > 9 then 1 end) as overtime_count')
-            ->groupBy('attendance_date')
-            ->orderBy('attendance_date', 'desc')
-            ->paginate(15);
-
-        return view('payroll.attendance', compact('attendance'));
-    }
 
     /**
      * Get attendance details for a specific date (AJAX)
@@ -71,28 +35,87 @@ class PayrollController extends Controller
     }
 
     /**
-     * Get attendance records with filtering
+     * Get attendance records with filtering (Consolidated)
      */
+    public function attendance(Request $request)
+    {
+        $startDate = $request->start_date ?: date('Y-m-01');
+        $endDate = $request->end_date ?: date('Y-m-t');
+
+        // Handle full month selection
+        if ($request->filled('month')) {
+            $monthDate = \Carbon\Carbon::parse($request->month . '-01');
+            $startDate = $monthDate->copy()->startOfMonth()->toDateString();
+            $endDate = $monthDate->copy()->endOfMonth()->toDateString();
+        }
+
+        // Fetch attendance grouped by date with counts
+        $attendanceData = Attendance::whereBetween('attendance_date', [$startDate, $endDate])
+            ->selectRaw("attendance_date, 
+                        COUNT(CASE WHEN LOWER(status) IN ('present', 'late') THEN 1 END) as present_count,
+                        COUNT(CASE WHEN LOWER(status) = 'absent' THEN 1 END) as absent_count,
+                        COUNT(CASE WHEN LOWER(status) = 'half_day' THEN 1 END) as half_day_count,
+                        COUNT(CASE WHEN LOWER(status) = 'leave' THEN 1 END) as leave_count,
+                        COUNT(CASE WHEN total_hours > 9 THEN 1 END) as overtime_count,
+                        COUNT(*) as total_count")
+            ->groupBy('attendance_date')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                // Formatting the date key to ensure perfect string matching in the date loop
+                return [date('Y-m-d', strtotime($item->attendance_date)) => $item];
+            });
+
+        // Fetch Holidays for the range
+        $holidays = Holiday::whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->keyBy('date');
+
+        // Generate dates from the start of the month/range up to 'today' (or endDate if past)
+        $datesData = [];
+        $current = \Carbon\Carbon::parse($startDate);
+        $end = \Carbon\Carbon::parse($endDate);
+
+        // Don't show future dates in the history
+        $today = \Carbon\Carbon::today();
+        if ($end->gt($today)) {
+            $end = $today;
+        }
+
+        while ($current->lte($end)) {
+            $dateStr = $current->toDateString();
+            $isHoliday = isset($holidays[$dateStr]);
+            $datesData[] = (object)[
+                'attendance_date' => $dateStr,
+                'is_holiday' => $isHoliday,
+                'holiday_title' => $isHoliday ? $holidays[$dateStr]->title : null,
+                'count' => $attendanceData[$dateStr]->total_count ?? 0,
+                'present' => $attendanceData[$dateStr]->present_count ?? 0,
+                'absent' => $attendanceData[$dateStr]->absent_count ?? 0,
+                'half_day' => $attendanceData[$dateStr]->half_day_count ?? 0,
+                'leave' => $attendanceData[$dateStr]->leave_count ?? 0,
+                'overtime' => $attendanceData[$dateStr]->overtime_count ?? 0
+            ];
+            $current->addDay();
+        }
+
+        // Sort descending to show latest records first
+        $datesData = collect($datesData)->filter(function($item) {
+            // Only show dates with records, holidays, or Today/Yesterday (if today is the month being viewed)
+            $isToday = $item->attendance_date === date('Y-m-d');
+            return $item->count > 0 || $item->is_holiday || $isToday;
+        })->sortByDesc('attendance_date');
+        
+        return view('payroll.attendance', [
+            'attendance_dates' => $datesData,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'current_month' => date('Y-m', strtotime($startDate))
+        ]);
+    }
+
     public function getAttendance(Request $request)
     {
-        $query = Attendance::with('employee');
-
-        // Filter by Date Range (Start Date to End Date)
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
-        } elseif ($request->filled('year') && $request->filled('month')) {
-            $query->whereYear('attendance_date', $request->year)
-                ->whereMonth('attendance_date', $request->month);
-        }
-
-        // Filter by employee
-        if ($request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
-        }
-
-        $attendance = $query->orderBy('attendance_date', 'desc')->paginate(10);
-
-        return view('payroll.attendance', compact('attendance'));
+        return $this->attendance($request);
     }
 
     /**
@@ -126,9 +149,13 @@ class PayrollController extends Controller
                         try {
                             $in = Carbon::createFromFormat('H:i', $checkIn);
                             $out = Carbon::createFromFormat('H:i', $checkOut);
-                            if ($out->greaterThan($in)) {
-                                $totalHours = $out->diffInMinutes($in) / 60;
+
+                            // Handle night shifts (check-out after midnight)
+                            if ($out->lessThan($in)) {
+                                $out->addDay();
                             }
+
+                            $totalHours = $out->diffInMinutes($in) / 60;
                         } catch (\Exception $e) {
                             $totalHours = 0;
                         }
@@ -149,13 +176,14 @@ class PayrollController extends Controller
                             'check_in' => $checkIn,
                             'check_out' => $checkOut,
                             'status' => $status,
-                            'total_hours' => round($totalHours, 2),
+                            'total_hours' => max(0, round($totalHours, 2)),
                         ]
                     );
                 }
             }
 
-            return redirect()->route('payroll.attendance', ['start_date' => $request->attendance_date, 'end_date' => $request->attendance_date])
+            $targetMonth = date('Y-m', strtotime($request->attendance_date));
+            return redirect()->route('payroll.attendance', ['month' => $targetMonth])
                 ->with('success', 'Attendance records have been updated successfully! ✓');
         } catch (\Exception $e) {
             return back()->with('error', 'Error: ' . $e->getMessage())
@@ -168,7 +196,8 @@ class PayrollController extends Controller
      */
     public function calculation()
     {
-        return view('payroll.calculation');
+        $employees = Employee::orderBy('name')->get();
+        return view('payroll.calculation', compact('employees'));
     }
 
     /**
@@ -180,81 +209,85 @@ class PayrollController extends Controller
             $month = $request->month; // Format: YYYY-MM
             $employeeId = $request->employee_id;
 
+            // 1. Future Month Restriction (Allow current and past months)
+            $selectedDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $currentMonthStart = Carbon::now()->startOfMonth();
+
+            if ($selectedDate->gt($currentMonthStart)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: You cannot calculate payroll for future months.',
+                ]);
+            }
+
             // Get employee
             $employee = Employee::findOrFail($employeeId);
 
-            // Check if payroll already exists for this month (Used for warning or updating)
-            $existingPayroll = Payroll::where('employee_id', $employeeId)
-                ->where('month', $month)
-                ->first();
-
-            // Robust Date Parsing (Fixes Feb 28/31 bug)
-            $selectedDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
             $year = $selectedDate->format('Y');
             $monthNum = $selectedDate->format('m');
+            $startOfMonth = $selectedDate->copy()->startOfMonth()->toDateString();
+            $endOfMonth = $selectedDate->copy()->endOfMonth()->toDateString();
+
+            // 2. Fetch Holidays for this month (Index Friendly)
+            $holidaysCount = \App\Models\Holiday::whereBetween('date', [$startOfMonth, $endOfMonth])->count();
+
+            // 3. Get attendance stats for this month in ONE query (Lightning Fast)
+            $stats = Attendance::where('employee_id', $employeeId)
+                ->whereBetween('attendance_date', [$startOfMonth, $endOfMonth])
+                ->selectRaw("
+                    COUNT(*) as total_attendance,
+                    SUM(CASE 
+                        WHEN LOWER(status) = 'half_day' THEN 4 
+                        WHEN LOWER(status) IN ('present', 'late') THEN IFNULL(CASE WHEN total_hours > 8 THEN 8 ELSE total_hours END, 8)
+                        ELSE 0 
+                    END) as total_hours_worked
+                ")
+                ->first();
+
+            $hasAttendance = $stats->total_attendance > 0;
+            $totalHoursWorked = (float)$stats->total_hours_worked ?: 0;
+
             $totalDays = $selectedDate->daysInMonth;
+            $workedDays = $totalHoursWorked / 8;
 
-            // Get attendance records for this month
-            $attendanceRecords = Attendance::where('employee_id', $employeeId)
-                ->whereYear('attendance_date', $year)
-                ->whereMonth('attendance_date', $monthNum)
-                ->get();
-
-            if ($attendanceRecords->count() == 0) {
-                // No attendance records, default to full salary
-                $payableDays = $totalDays;
-            } else {
-                // Precise Hours-Based Calculation (Requested by User)
-                // If a user works 4 hours, it counts as 0.5 days (4/8)
-                // If a user works 8 hours, it counts as 1.0 days (8/8)
-                $totalHoursWorked = 0;
-                $daysPresent = 0;
-
-                foreach ($attendanceRecords as $record) {
-                    // Include 'leave' in payable days (Paid Leave policy)
-                    // If you want Unpaid Leave, remove 'leave' from this array
-                    if (in_array($record->status, ['present', 'half_day', 'late', 'leave'])) {
-                        // Ensure it doesn't exceed 8 hours for base pay calculation (cap at full day pay)
-                        $hours = ($record->status === 'half_day') ? 4 : 8; // Default full day for late/leave
-                        if ($record->status === 'present' || $record->status === 'late') {
-                            $hours = min(8, $record->total_hours ?: 8);
-                        }
-                        $totalHoursWorked += $hours;
-                    }
-                }
-
-                $payableDays = $totalHoursWorked / 8;
-                if ($payableDays < 0)
-                    $payableDays = 0;
+            if (!$hasAttendance) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error: This employee has no attendance marked for this month. Calculation skipped.',
+                ]);
             }
 
-            // Convert Annual CTC to Monthly Base (Requested by User: "sal ki mili hogi na bro")
-            $monthlyBasic = $employee->basic_salary / 12;
-            $monthlyHRA = $employee->hra / 12;
-            $monthlyConveyance = $employee->conveyance_allowance / 12;
-            $monthlyMedical = $employee->medical_allowance / 12;
-            $monthlyOther = $employee->other_allowance / 12;
+            // 5. Calculate Payable Days (Worked + 1.5 Allowed + Holidays)
+            $allowedLeaves = 1.5;
+            $payableDays = $workedDays + $allowedLeaves + $holidaysCount;
 
-            $fullMonthGross = $monthlyBasic + $monthlyHRA + $monthlyConveyance + $monthlyMedical + $monthlyOther;
+            // Cap at total days in month
+            if ($payableDays > $totalDays) {
+                $payableDays = $totalDays;
+            }
 
-            // Pro-rate every individual component for absolute transparency
-            $pBasic = ($monthlyBasic / $totalDays) * $payableDays;
-            $pHRA = ($monthlyHRA / $totalDays) * $payableDays;
-            $pConveyance = ($monthlyConveyance / $totalDays) * $payableDays;
-            $pMedical = ($monthlyMedical / $totalDays) * $payableDays;
-            $pOtherAllowance = ($monthlyOther / $totalDays) * $payableDays;
+            // 5. Calculate Salary Components (Pro-rated Basic Salary Only)
+            $rawBasic = $employee->basic_salary ?? 0;
+            $monthlyBasic = (float) str_replace(',', '', $rawBasic);
 
-            $grossSalary = $pBasic + $pHRA + $pConveyance + $pMedical + $pOtherAllowance;
-            $salaryLoss = $fullMonthGross - $grossSalary;
-            $unpaidDays = $totalDays - $payableDays;
+            // Pro-rate Basic Salary based on Payable Days
+            // If totalDays is 0 (shouldn't happen), default to 30 to avoid division by zero
+            $daysInMonth = $totalDays > 0 ? $totalDays : 30;
+            $pBasic = max(0, ($monthlyBasic / $daysInMonth) * $payableDays);
 
-            // Pro-rate Deductions
-            $pPF = $employee->pf ? ($pBasic * 0.12) : 0;
-            $pESI = $employee->esi ? ($pBasic * 0.0175) : 0;
-            $pOtherDeduction = 0;
+            // All other components are explicitly 0 as per "Basic Only" policy
+            $pHRA = 0;
+            $pConveyance = 0;
+            $pMedical = 0;
+            $pOther = 0;
 
-            $totalDeductions = $pPF + $pESI + $pOtherDeduction;
-            $netSalary = $grossSalary - $totalDeductions;
+            $grossSalary = $pBasic;
+            $salaryLoss = max(0, $monthlyBasic - $pBasic);
+            $unpaidDays = max(0, $totalDays - $payableDays);
+
+            // No PF/ESI/Deductions as requested ("pe pf vagera kuchnhi ketgea")
+            $totalDeductions = 0;
+            $netSalary = max(0, $grossSalary);
 
             $payrollData = [
                 'employee_id' => $employeeId,
@@ -266,12 +299,12 @@ class PayrollController extends Controller
                 'hra' => round($pHRA, 2),
                 'conveyance_allowance' => round($pConveyance, 2),
                 'medical_allowance' => round($pMedical, 2),
-                'other_allowance' => round($pOtherAllowance, 2),
+                'other_allowance' => round($pOther, 2),
                 'gross_salary' => round($grossSalary, 2),
-                'deductions' => round($totalDeductions, 2),
-                'pf_deduction' => round($pPF, 2),
-                'esi_deduction' => round($pESI, 2),
-                'other_deduction' => round($pOtherDeduction, 2),
+                'deductions' => 0,
+                'pf_deduction' => 0,
+                'esi_deduction' => 0,
+                'other_deduction' => 0,
                 'net_salary' => round($netSalary, 2),
                 'status' => 'pending',
             ];
@@ -279,6 +312,13 @@ class PayrollController extends Controller
             return response()->json([
                 'success' => true,
                 'payroll' => $payrollData,
+                'details' => [
+                    'worked_days' => round($workedDays, 1),
+                    'allowed_leaves' => $allowedLeaves,
+                    'holidays' => $holidaysCount,
+                    'total_payable' => round($payableDays, 1),
+                    'days_in_month' => $daysInMonth,
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -289,12 +329,67 @@ class PayrollController extends Controller
     }
 
     /**
+     * Get monthly attendance summary for an employee (AJAX)
+     */
+    public function getEmployeeAttendance(Request $request)
+    {
+        try {
+            $employeeId = $request->employee_id;
+            $month = $request->month; // YYYY-MM
+
+            // 1. Validate Month (Restrict Future Calculation)
+            $inputDate = Carbon::parse($month . '-01')->startOfMonth();
+            $currentMonthStart = Carbon::now()->startOfMonth();
+
+            if ($inputDate->gt($currentMonthStart)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot view attendance for future months.'
+                ], 400);
+            }
+
+            $totalDays = $inputDate->daysInMonth;
+            $year = $inputDate->year;
+            $monthNum = $inputDate->month;
+
+            $attendance = Attendance::where('employee_id', $employeeId)
+                ->whereYear('attendance_date', $year)
+                ->whereMonth('attendance_date', $monthNum)
+                ->orderBy('attendance_date', 'asc')
+                ->get();
+
+            // Fetch Holidays for context
+            $holidays = \App\Models\Holiday::whereYear('date', $year)
+                ->whereMonth('date', $monthNum)
+                ->get()
+                ->pluck('date')
+                ->toArray();
+
+            return response()->json([
+                'success' => true,
+                'data' => $attendance,
+                'holidays' => $holidays,
+                'month_name' => $inputDate->format('F Y')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * Store calculated payroll
      */
     public function storePayroll(Request $request)
     {
         try {
             $data = $request->all();
+            
+            // Clean numeric fields
+            $cols = ['payable_days', 'unpaid_days', 'salary_loss', 'gross_salary', 'basic_salary', 'net_salary'];
+            foreach($cols as $c) {
+                if(isset($data[$c])) $data[$c] = (float) str_replace(',', '', $data[$c]);
+            }
+
             $payroll = Payroll::updateOrCreate(
                 ['employee_id' => $data['employee_id'], 'month' => $data['month']],
                 $data
@@ -331,7 +426,7 @@ class PayrollController extends Controller
 
             // 2. Import Process
             Excel::import(new AttendanceImport, $request->file('import_file'));
-            
+
             return back()->with('success', 'Success: Attendance data imported successfully!');
 
         } catch (\Exception $e) {
@@ -507,9 +602,12 @@ class PayrollController extends Controller
      */
     public function exportAttendance(Request $request)
     {
-        $query = Attendance::with('employee');
+        if ($request->type === 'monthly_sheet') {
+            return $this->exportMonthlyAttendanceSheet($request);
+        }
 
-        // Filter by Date Range (Start Date to End Date)
+        $query = Attendance::with('employee');
+        // ... existing vertical export logic ...
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
         } elseif ($request->filled('year') && $request->filled('month')) {
@@ -523,12 +621,7 @@ class PayrollController extends Controller
 
         $attendances = $query->orderBy('attendance_date', 'desc')->get();
 
-        if ($request->filled('employee_id') && $attendances->count() > 0) {
-            $empName = $attendances->first()->employee->name;
-            $filename = 'attendance_' . str_replace(' ', '_', $empName) . '_' . date('Y-m-d') . '.csv';
-        } else {
-            $filename = 'attendance_report_' . date('Y-m-d_His') . '.csv';
-        }
+        $filename = 'attendance_report_' . date('Y-m-d_His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -536,28 +629,36 @@ class PayrollController extends Controller
 
         $callback = function () use ($attendances) {
             $file = fopen('php://output', 'w');
-            // Invoice-like header
-            fputcsv($file, ['Company Name', 'Payroll Attendance Report']);
-            fputcsv($file, ['Generated On', now()->format('Y-m-d H:i:s')]);
-            fputcsv($file, ['']);
-            fputcsv($file, ['Date', 'Employee Name', 'Designation', 'Check In', 'Check Out', 'Status', 'Hours']);
+            fputcsv($file, ['EMPLOYEE', 'DATE', 'CHECK IN', 'CHECK OUT', 'STATUS', 'DURATION']);
 
             foreach ($attendances as $att) {
                 fputcsv($file, [
-                    $att->attendance_date->format('Y-m-d'),
                     $att->employee->name,
-                    $att->employee->designation ?? 'N/A',
+                    $att->attendance_date,
                     $att->check_in,
                     $att->check_out,
                     $att->status,
-                    $att->total_hours,
+                    $att->total_hours . ' hrs'
                 ]);
             }
-
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export Monthly Attendance Sheet (Matrix Format)
+     */
+    private function exportMonthlyAttendanceSheet(Request $request)
+    {
+        $year = $request->year ?: date('Y');
+        $month = $request->month ?: date('m');
+        $date = Carbon::createFromDate($year, $month, 1);
+        
+        $filename = 'Monthly_Attendance_' . $date->format('F_Y') . '.xlsx';
+        
+        return Excel::download(new MonthlyAttendanceExport($year, $month), $filename);
     }
 
     /**
@@ -667,19 +768,25 @@ class PayrollController extends Controller
     }
 
     /**
-     * Download individual PDF payslip
+     * Download individual PDF payslip (Optimized for size)
      */
     public function downloadPdf($id)
     {
         $payroll = Payroll::with('employee')->findOrFail($id);
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.payslip_pdf', compact('payroll'));
         
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.payslip_pdf', compact('payroll'))
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Helvetica'
+            ]);
+
         $filename = 'payslip_' . str_replace(' ', '_', $payroll->employee->name) . '_' . $payroll->month . '.pdf';
         return $pdf->download($filename);
     }
 
     /**
-     * Bulk download PDF payslips for a month/filter
+     * Bulk download PDF payslips for a month/filter (Optimized)
      */
     public function bulkDownloadPdf(Request $request)
     {
@@ -704,8 +811,13 @@ class PayrollController extends Controller
         }
 
         // Generate a single PDF with all slips separated by page breaks
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.bulk_payslip_pdf', compact('payrolls'));
-        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.bulk_payslip_pdf', compact('payrolls'))
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isFontSubsettingEnabled' => true,
+                'defaultFont' => 'Helvetica'
+            ]);
+
         $filename = 'bulk_payslips_' . ($request->month ?? date('Y-m')) . '.pdf';
         return $pdf->download($filename);
     }

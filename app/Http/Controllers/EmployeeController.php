@@ -81,8 +81,10 @@ class EmployeeController extends Controller
 
             // Handle photo upload
             if ($request->hasFile('photo')) {
-                $path = $request->file('photo')->store('employees', 'public');
-                $employee->update(['photo' => $path]);
+                $file = $request->file('photo');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/employees'), $filename);
+                $employee->update(['photo' => 'uploads/employees/' . $filename]);
             }
 
             return redirect()->route('employees.index')
@@ -175,13 +177,15 @@ class EmployeeController extends Controller
             $updateData['password'] = $request->password;
         }
 
-        $employee->update($updateData);
-
         // Handle photo upload
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('employees', 'public');
-            $employee->update(['photo' => $path]);
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/employees'), $filename);
+            $updateData['photo'] = 'uploads/employees/' . $filename;
         }
+
+        $employee->update($updateData);
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee updated successfully! ✓');

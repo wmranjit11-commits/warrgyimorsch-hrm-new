@@ -288,108 +288,29 @@
                         <!-- <div class="row align-items-center"> -->
 
 
-                        <!-- PF, ESI, Insurance Toggles and Fields -->
+                        <!-- PHOTO UPLOAD SECTION -->
                         <div class="col-md-12 mt-4">
                             <div class="row g-3">
-                                <!-- PF Section -->
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="pf" id="pfToggle">
-                                        <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
-                                    </div>
-                                    <div id="pfField" style="display: none;">
-                                        <label class="fw-bold small">PF No.</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                            <input type="text" name="pf_number" class="form-control" placeholder="PF No.">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- ESI Section -->
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="esi" id="esiToggle">
-                                        <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
-                                    </div>
-                                    <div id="esiField" style="display: none;">
-                                        <label class="fw-bold small">ESI No.</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                            <input type="text" name="esi_number" class="form-control" placeholder="ESI No.">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Insurance Section -->
-                                <div class="col-md-4">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="insurance"
-                                            id="insuranceToggle">
-                                        <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
-                                    </div>
-                                    <div id="insuranceFields" style="display: none;">
-                                        <div class="mb-2">
-                                            <label class="fw-bold small">Provider</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                                <input type="text" name="insurance_provider" class="form-control"
-                                                    placeholder="Insurance Company">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="fw-bold small">Policy Number</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                                                <input type="text" name="insurance_policy_number" class="form-control"
-                                                    placeholder="Policy Number">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- LEFT SIDE -->
-                                <div class="col-md-4 d-flex align-items-center mt-3 mt:md-3">
-
-                                    <!-- Hidden Input -->
+                                <div class="col-md-4 d-flex align-items-center">
                                     <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
-
-                                    <!-- Image Box -->
                                     <div onclick="document.getElementById('photoInput').click()"
                                         class="bg-light border d-flex align-items-center justify-content-center"
                                         style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
-
                                         <img id="previewImg" src=""
                                             style="width:100%; height:100%; object-fit:cover; display:none;">
-
                                         <span id="placeholderText" style="color:#888;">200x200</span>
                                     </div>
-
-                                    <!-- TEXT SIDE -->
                                     <div class="ms-3">
                                         <label class="fw-bold d-block">Upload Photo</label>
-                                        <small class="text-muted d-block"># Upload your profile</small>
-                                        <small class="text-muted d-block"># Avatar size 150x150</small>
                                         <small class="text-muted d-block"># Max upload size 2mb</small>
-                                        <small class="text-muted d-block"># Allowed file types: png, jpg, jpeg</small>
+                                        <small class="text-muted d-block"># Allowed: png, jpg, jpeg</small>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
 
                         <!-- JS for Toggle Logic -->
                         <script>
-                            document.getElementById('pfToggle').addEventListener('change', function () {
-                                document.getElementById('pfField').style.display = this.checked ? 'block' : 'none';
-                            });
-                            document.getElementById('esiToggle').addEventListener('change', function () {
-                                document.getElementById('esiField').style.display = this.checked ? 'block' : 'none';
-                            });
-                            document.getElementById('insuranceToggle').addEventListener('change', function () {
-                                document.getElementById('insuranceFields').style.display = this.checked ? 'block' : 'none';
-                            });
-
                             document.getElementById('photoInput').addEventListener('change', function (event) {
                                 const file = event.target.files[0];
                                 if (file) {

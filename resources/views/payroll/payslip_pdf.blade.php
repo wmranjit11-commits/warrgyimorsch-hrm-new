@@ -10,7 +10,7 @@
         }
 
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 10px;
             line-height: 1.5;
             color: #333;
@@ -200,18 +200,26 @@
         <table class="header-top">
             <tr>
                 <td style="width: 40%; vertical-align: middle;">
-                    <!-- Real Logo Image (logo-blue.png) -->
-                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/logo-blue.png'))) }}"
-                        style="width: 180px; height: auto; display: block;">
+                    <!-- Direct Path Logo for Speed & Size -->
+                    @php
+                        $logoPath = public_path('assets/images/logo-blue.png');
+                        $logoData = '';
+                        if (file_exists($logoPath)) {
+                            $logoData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+                        }
+                    @endphp
+                    @if($logoData)
+                        <img src="{{ $logoData }}" style="width: 170px; height: auto; display: block;">
+                    @else
+                        <h2 style="color: #1e3a8a; margin: 0;">{{ config('app.name') }}</h2>
+                    @endif
                 </td>
                 <td style="width: 60%;">
                     <div class="company-address-box">
                         <div class="company-name-header">Warrgyizmorsch Pvt. Ltd.</div>
-                        NH 8, Industries Area, near Skoda Showroom, next to<br>
-                        Meridian Marble and Decorative Stones Pvt. Ltd,<br>
-                        Amberi, Sukher, Rajasthan 313001<br>
-                        info@warrgyizmorsch.com | www.warrgyizmorsch.com<br>
-                        +91 76655 04555
+                        Shobhagpura, Udaipur, Rajasthan 313001<br>
+                        info@warrgyizmorsch.com | https://warrgyizmorsch.com/<br>
+                        +91 9257874994
                     </div>
                 </td>
             </tr>
@@ -239,7 +247,7 @@
             </tr>
             <tr>
                 <td class="label">Gross Salary:</td>
-                <td class="value">₹{{ number_format($payroll->gross_salary, 2) }}</td>
+                <td class="value">Rs.{{ number_format($payroll->employee->basic_salary, 2) }}</td>
                 <td class="label">Account No.:</td>
                 <td class="value">{{ $payroll->employee->account_number ?? '998877665544' }}</td>
             </tr>
@@ -250,17 +258,17 @@
                 <td class="value">{{ $payroll->payable_days }}</td>
             </tr>
             <tr>
-                <td class="label">PAN:</td>
-                <td class="value">{{ $payroll->employee->pan_number ?? 'ABCDE1234F' }}</td>
+                <td class="label">Processing Month:</td>
+                <td class="value">{{ \Carbon\Carbon::parse($payroll->month)->format('F Y') }}</td>
                 <td class="label">Leaves:</td>
                 <td class="value">{{ \Carbon\Carbon::parse($payroll->month)->daysInMonth - $payroll->payable_days }}
                 </td>
             </tr>
             <tr>
-                <td class="label">Processing Month:</td>
-                <td class="value">{{ \Carbon\Carbon::parse($payroll->month)->format('F Y') }}</td>
                 <td class="label">Department:</td>
                 <td class="value">Web Development</td>
+                <td class="label">&nbsp;</td>
+                <td class="value">&nbsp;</td>
             </tr>
         </table>
 
@@ -268,77 +276,35 @@
         <table class="section-split">
             <thead>
                 <tr>
-                    <th style="border-right: 1px solid #e2e8f0;">Earnings</th>
-                    <th>Deductions</th>
+                    <th style="text-align: left; background-color: #f8fafc; color: #1e3a8a; padding: 10px;">Particulars
+                    </th>
+                    <th style="text-align: right; background-color: #f8fafc; color: #1e3a8a; padding: 10px;">Amount</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td class="col-50" style="border-right: 1px solid #e2e8f0;">
-                        <table class="inner-table">
-                            <tr>
-                                <td>Basic</td>
-                                <td class="text-right">₹{{ number_format($payroll->basic_salary, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>HRA</td>
-                                <td class="text-right">₹{{ number_format($payroll->hra, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Medical Allowance</td>
-                                <td class="text-right">₹{{ number_format($payroll->medical_allowance, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Other Allowances</td>
-                                <td class="text-right">₹{{ number_format($payroll->other_allowance, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Conveyance Allowance</td>
-                                <td class="text-right">₹{{ number_format($payroll->conveyance_allowance, 2) }}</td>
-                            </tr>
-                            <tr class="bold">
-                                <td style="border-top: 1px solid #e2e8f0;">Total Earnings</td>
-                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">
-                                    ₹{{ number_format($payroll->gross_salary, 2) }}</td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td class="col-50">
-                        <table class="inner-table">
-                            <tr>
-                                <td>TDS</td>
-                                <td class="text-right">₹0.00</td>
-                            </tr>
-                            <tr>
-                                <td>PF</td>
-                                <td class="text-right">₹{{ number_format($payroll->pf_deduction, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>ESI / ECS</td>
-                                <td class="text-right">₹{{ number_format($payroll->esi_deduction, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Other Cuts</td>
-                                <td class="text-right">₹{{ number_format($payroll->other_deduction, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                                <td class="text-right">&nbsp;</td>
-                            </tr>
-                            <tr class="bold">
-                                <td style="border-top: 1px solid #e2e8f0;">Total Deduction</td>
-                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">
-                                    ₹{{ number_format($payroll->deductions, 2) }}</td>
-                            </tr>
-                        </table>
-                    </td>
+                    <td style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Monthly Basic Salary (Total)</td>
+                    <td style="text-align: right; padding: 10px; border-bottom: 2px solid #e2e8f0; font-weight: bold;">
+                        Rs.{{ number_format($payroll->employee->basic_salary, 2) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; color: #dc2626; border-bottom: 2px solid #e2e8f0;">Absence Deduction /
+                        Loss (Cut)</td>
+                    <td
+                        style="text-align: right; padding: 10px; border-bottom: 2px solid #e2e8f0; color: #dc2626; font-weight: bold;">
+                        - Rs.{{ number_format($payroll->salary_loss, 2) }}</td>
+                </tr>
+                <tr style="background-color: #f8fafc;">
+                    <td style="padding: 10px; font-weight: bold;">Total Earned (Actual)</td>
+                    <td style="text-align: right; padding: 10px; font-weight: bold; color: #16a34a;">
+                        Rs.{{ number_format($payroll->gross_salary, 2) }}</td>
                 </tr>
             </tbody>
         </table>
 
         <!-- High-contrast Net Pay Callout -->
         <div class="net-payment-bar">
-            <span class="net-payment-text">Net Payment: ₹{{ number_format($payroll->net_salary, 2) }}</span>
+            <span class="net-payment-text">Net Payment: Rs.{{ number_format($payroll->net_salary, 2) }}</span>
         </div>
 
         <div class="footer-note">

@@ -10,6 +10,8 @@ class Payroll extends Model
         'employee_id',
         'month',
         'payable_days',
+        'unpaid_days',
+        'salary_loss',
         'gross_salary',
         'basic_salary',
         'hra',

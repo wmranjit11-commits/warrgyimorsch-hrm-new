@@ -37,23 +37,27 @@ class DashboardController extends Controller
             $todayLeave = Attendance::where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
             $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100, 1) : 0;
         } else {
-            // For past months, show average based on actual days in that month
-            $daysInMonth = $selectedDate->daysInMonth;
+            // For past months, show average based on actual days that had attendance marked
+            $uniqueDaysCount = Attendance::whereMonth('attendance_date', $selectedDate->month)
+                ->whereYear('attendance_date', $selectedDate->year)
+                ->distinct('attendance_date')
+                ->count('attendance_date');
+
             $monthPresent = Attendance::whereMonth('attendance_date', $selectedDate->month)
                 ->whereYear('attendance_date', $selectedDate->year)
-                ->whereIn('status', ['present', 'half_day', 'late', 'leave', 'absent'])
+                ->whereIn('status', ['present', 'half_day', 'late'])
                 ->count();
 
-            $todayPresent = $daysInMonth > 0 ? round($monthPresent / $daysInMonth) : 0;
-            $todayLeave = 0; // Average leave is complex, default to 0 for past summary
-            $attendanceRate = ($totalEmployees > 0 && $daysInMonth > 0) ? round(($monthPresent / ($totalEmployees * $daysInMonth)) * 100, 1) : 0;
+            $todayPresent = $uniqueDaysCount > 0 ? round($monthPresent / $uniqueDaysCount) : 0;
+            $todayLeave = 0; 
+            $attendanceRate = ($totalEmployees > 0 && $uniqueDaysCount > 0) ? round(($monthPresent / ($totalEmployees * $uniqueDaysCount)) * 100, 1) : 0;
         }
 
         // Payroll Metrics (Selected Month)
-        $totalPaidAmount = Payroll::where('month', $selectedMonth)->where('status', 'paid')->sum('net_salary');
-        $totalPendingAmount = Payroll::where('month', $selectedMonth)->where('status', 'pending')->sum('net_salary');
-        $totalRejectedAmount = Payroll::where('month', $selectedMonth)->where('status', 'rejected')->sum('net_salary');
-        $totalNetSalary = Payroll::where('month', $selectedMonth)->sum('net_salary');
+        $totalPaidAmount = max(0, Payroll::where('month', $selectedMonth)->where('status', 'paid')->sum('net_salary'));
+        $totalPendingAmount = max(0, Payroll::where('month', $selectedMonth)->where('status', 'pending')->sum('net_salary'));
+        $totalRejectedAmount = max(0, Payroll::where('month', $selectedMonth)->where('status', 'rejected')->sum('net_salary'));
+        $totalNetSalary = max(0, Payroll::where('month', $selectedMonth)->sum('net_salary'));
 
         $totalEmpPaid = Payroll::where('month', $selectedMonth)->where('status', 'paid')->count();
         $totalEmpPending = Payroll::where('month', $selectedMonth)->where('status', 'pending')->count();
@@ -146,29 +150,22 @@ class DashboardController extends Controller
             $mLabel = $m->format('M Y');
 
             $basic = Payroll::where('month', $mValue)->sum('basic_salary');
-            $hra = Payroll::where('month', $mValue)->sum('hra');
-            $medical = Payroll::where('month', $mValue)->sum('medical_allowance');
-            $conveyance = Payroll::where('month', $mValue)->sum('conveyance_allowance');
-            $other_allw = Payroll::where('month', $mValue)->sum('other_allowance');
-
-            $pf = Payroll::where('month', $mValue)->sum('pf_deduction');
-            $esi = Payroll::where('month', $mValue)->sum('esi_deduction');
-            $other_ded = Payroll::where('month', $mValue)->sum('other_deduction');
+            $net = Payroll::where('month', $mValue)->sum('net_salary');
 
             $history[] = [
                 'month' => $mLabel,
-                'earnings' => $basic + $hra + $medical + $conveyance + $other_allw,
-                'deductions' => $pf + $esi + $other_ded,
-                'net' => Payroll::where('month', $mValue)->sum('net_salary'),
+                'earnings' => $basic,
+                'deductions' => 0,
+                'net' => $net,
                 'details' => [
                     'basic' => $basic,
-                    'hra' => $hra,
-                    'medical' => $medical,
-                    'conveyance' => $conveyance,
-                    'other_allw' => $other_allw,
-                    'pf' => $pf,
-                    'esi' => $esi,
-                    'other_ded' => $other_ded
+                    'hra' => 0,
+                    'medical' => 0,
+                    'conveyance' => 0,
+                    'other_allw' => 0,
+                    'pf' => 0,
+                    'esi' => 0,
+                    'other_ded' => 0
                 ]
             ];
         }

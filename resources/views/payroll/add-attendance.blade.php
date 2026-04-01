@@ -52,154 +52,232 @@
     </form>
 </div> --}}
     
-    <!-- Debug Info -->
-    <div style="background: #f0f8ff; padding: 10px; margin-bottom: 15px; border-radius: 4px; border-left: 4px solid #3858f9;">
-        <small style="color: #0066cc;">
-            <strong>Debug:</strong> Total Employees Found: <strong>{{ count($employees) }}</strong>
-        </small>
-    </div>
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+                <form action="{{ route('payroll.attendance.store') }}" method="POST">
+                    @csrf
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">Daily Attendance Marking</h5>
+                            <p class="text-muted small mb-0">Record check-in and check-out times for employees</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <label class="fw-bold small text-muted text-uppercase mb-0">Date:</label>
+                            <input type="date" name="attendance_date" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required 
+                                   class="form-control border-0 bg-light shadow-none fw-bold" 
+                                   style="border-radius: 12px; width: 180px; height: 45px; padding-left: 15px;">
+                        </div>
+                    </div>
 
-    <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <form action="{{ route('payroll.attendance.store') }}" method="POST">
-            @csrf
-            
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
-                <input type="date" name="attendance_date" value="{{ date('Y-m-d') }}" required 
-                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px;">
+                    <div class="card-body p-0">
+                        @if(count($employees) == 0)
+                            <div class="p-5 text-center">
+                                <div class="mb-3 text-warning">
+                                    <i class="bi bi-exclamation-circle fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold">No Employees Found</h5>
+                                <p class="text-muted">Please add employees first before marking attendance.</p>
+                                <a href="{{ route('employees.create') }}" class="btn btn-primary btn-sm rounded-pill px-4">
+                                    <i class="bi bi-person-plus me-2"></i> Add Employee
+                                </a>
+                            </div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
+                                    <thead class="bg-light">
+                                            <tr>
+                                                <th class="ps-4 py-3 border-0 text-muted small text-uppercase fw-bold" style="width: 250px;">Employee</th>
+                                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">In Time (Check-In)</th>
+                                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">Out Time (Check-Out)</th>
+                                                <th class="py-3 border-0 text-muted small text-uppercase fw-bold text-center">Duration</th>
+                                                <th class="pe-4 py-3 border-0 text-muted small text-uppercase fw-bold text-center">Status</th>
+                                            </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($employees as $index => $emp)
+                                        <input type="hidden" name="employees[{{ $index }}][employee_id]" value="{{ $emp->id }}">
+                                        <tr class="border-bottom hover-row" style="height: 100px;">
+                                            <td class="ps-4 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <div class="bg-soft-primary text-primary d-flex align-items-center justify-content-center rounded-circle fw-bold" style="width: 42px; height: 42px; font-size: 14px;">
+                                                            {{ strtoupper(substr($emp->name, 0, 1)) }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <div class="fw-bold text-dark" style="font-size: 14px;">{{ $emp->name }}</div>
+                                                        <div class="text-muted small">EC{{ str_pad($emp->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 text-center">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <div id="check_in_display_{{ $index }}" class="time-box mb-2">--:--</div>
+                                                    <div class="form-check form-switch p-0">
+                                                        <input class="form-check-input ms-0" type="checkbox" role="switch" 
+                                                               id="check_in_toggle_{{ $index }}" 
+                                                               style="width: 45px; height: 22px; cursor: pointer;"
+                                                               onchange="toggleCheckIn({{ $index }})">
+                                                        <input type="hidden" name="employees[{{ $index }}][check_in]" id="check_in_{{ $index }}">
+                                                    </div>
+                                                    <label class="small text-muted fw-bold mt-1" style="font-size: 9px; letter-spacing: 0.5px;">CHECK IN</label>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 text-center">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <div id="check_out_display_{{ $index }}" class="time-box mb-2">--:--</div>
+                                                    <div class="form-check form-switch p-0">
+                                                        <input class="form-check-input ms-0" type="checkbox" role="switch" 
+                                                               id="check_out_toggle_{{ $index }}" 
+                                                               style="width: 45px; height: 22px; cursor: pointer;"
+                                                               onchange="toggleCheckOut({{ $index }})">
+                                                        <input type="hidden" name="employees[{{ $index }}][check_out]" id="check_out_{{ $index }}">
+                                                    </div>
+                                                    <label class="small text-muted fw-bold mt-1" style="font-size: 9px; letter-spacing: 0.5px;">CHECK OUT</label>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 text-center align-middle">
+                                                <span id="duration_{{ $index }}" class="badge rounded-pill bg-light text-dark fw-bold px-3 py-2" style="font-size: 12px; min-width: 80px;">--</span>
+                                            </td>
+                                            <td class="pe-4 py-3 text-center align-middle">
+                                                <select name="employees[{{ $index }}][status]" id="status_{{ $index }}"
+                                                        class="form-select border-0 bg-light fw-bold mx-auto" 
+                                                        style="border-radius: 8px; font-size: 12px; width: 130px; height: 40px; box-shadow: none;">
+                                                    <option value="absent" selected>Absent</option>
+                                                    <option value="present">Present</option>
+                                                    <option value="half_day">Half Day</option>
+                                                    <option value="leave">Leave</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @endif
+                        </div>
+
+                    @if(count($employees) > 0)
+                        <div class="card-footer bg-white border-0 p-4 text-center">
+                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-lg" 
+                                    style="background: #3858f9; border: none; border-radius: 12px; transition: all 0.3s; transform: translateY(0);">
+                                <i class="bi bi-check2-circle me-2"></i> Post Attendance Data
+                            </button>
+                        </div>
+                    @endif
+                </form>
             </div>
-
-            @if(count($employees) == 0)
-                <div style="background: #fff3cd; padding: 20px; border-radius: 4px; border: 1px solid #ffc107; color: #856404;">
-                    <strong>⚠️ No Employees Found</strong>
-                    <p style="margin: 10px 0 0 0;">Please add employees first before marking attendance.</p>
-                    <a href="{{ route('employees.create') }}" style="color: #0066cc; text-decoration: none; font-weight: bold;">+ Add Employee Now</a>
-                </div>
-            @else
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead>
-                            <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
-                                <th style="padding: 15px; text-align: left; border-right: 1px solid #ddd; font-weight: bold;">Employee Name</th>
-                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check In</th>
-                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check Out</th>
-                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 110px;">Total Time</th>
-                                <th style="padding: 15px; text-align: left; font-weight: bold; width: 130px;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($employees as $index => $emp)
-                            <tr style="border-bottom: 1px solid #ddd; background: {{ $loop->even ? '#fafafa' : 'white' }};">
-                                <td style="padding: 15px; border-right: 1px solid #ddd; font-weight: 500;">
-                                    {{ $emp->name }}
-                                    <input type="hidden" name="employees[{{ $index }}][employee_id]" value="{{ $emp->id }}">
-                                </td>
-                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
-                                    <div style="margin-bottom: 8px;">
-                                        <input type="time" name="employees[{{ $index }}][check_in]" 
-                                               id="check_in_{{ $index }}"
-                                               onchange="calculateDuration({{ $index }})"
-                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center;">
-                                    </div>
-                                    <label style="font-size: 12px; cursor: pointer;">
-                                        <input type="checkbox" id="toggle_in_{{ $index }}" 
-                                               onchange="setNowTime('check_in_{{ $index }}', {{ $index }})">
-                                        <span>Set Now</span>
-                                    </label>
-                                </td>
-                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
-                                    <div style="margin-bottom: 8px;">
-                                        <input type="time" name="employees[{{ $index }}][check_out]" 
-                                               id="check_out_{{ $index }}"
-                                               disabled
-                                               onchange="calculateDuration({{ $index }})"
-                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: #f5f5f5;">
-                                    </div>
-                                    <label style="font-size: 12px; cursor: pointer;">
-                                        <input type="checkbox" id="toggle_out_{{ $index }}" 
-                                               disabled
-                                               onchange="setNowTime('check_out_{{ $index }}', {{ $index }})">
-                                        <span>Set Now</span>
-                                    </label>
-                                </td>
-                                <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
-                                    <span id="duration_{{ $index }}" style="font-weight: bold; color: #999;">--</span>
-                                </td>
-                                <td style="padding: 15px;">
-                                    <select name="employees[{{ $index }}][status]" 
-                                            id="status_{{ $index }}"
-                                            style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
-                                        <option value="present" selected>Present</option>
-                                        <option value="absent">Absent</option>
-                                        <option value="half_day">Half Day</option>
-                                        <option value="leave">Leave</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="margin-top: 25px; text-align: right;">
-                    <button type="submit" 
-                            style="padding: 12px 40px; background: #3858f9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">
-                        SAVE ATTENDANCE
-                    </button>
-                </div>
-            @endif
-        </form>
+        </div>
     </div>
 </div>
 
+<style>
+    .bg-soft-primary { background: #eef2ff !important; }
+    .hover-row:hover { background-color: #f8faff; }
+    .form-control:focus, .form-select:focus { box-shadow: 0 0 0 3px rgba(56, 88, 249, 0.1); background: #fff !important; border: 1px solid #3858f9 !important; }
+    .form-check-input:checked { background-color: #3858f9; border-color: #3858f9; }
+    
+    /* Better time input styling for AM/PM */
+    input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(34%) sepia(87%) saturate(2658%) hue-rotate(224deg) brightness(98%) contrast(98%);
+        cursor: pointer;
+    }
+    .time-box {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-weight: 700;
+        color: #3858f9;
+        font-size: 12px;
+        min-height: 28px;
+        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+</style>
+
 <script>
-    function setNowTime(fieldId, index) {
-        const field = document.getElementById(fieldId);
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        field.value = hours + ':' + minutes;
+    function toggleCheckIn(index) {
+        const toggle = document.getElementById('check_in_toggle_' + index);
+        const display = document.getElementById('check_in_display_' + index);
+        const input = document.getElementById('check_in_' + index);
         
-        // Enable checkout if check-in is set
-        if (fieldId.includes('check_in')) {
-            const checkOutField = document.getElementById('check_out_' + index);
-            const checkOutToggle = document.getElementById('toggle_out_' + index);
-            checkOutField.disabled = false;
-            checkOutField.style.background = 'white';
-            checkOutToggle.disabled = false;
+        if (toggle.checked) {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            input.value = time;
+            display.innerText = formatToAMPM(time);
+        } else {
+            input.value = '';
+            display.innerText = '--:--';
         }
-        
+        syncStatus(index);
         calculateDuration(index);
     }
 
-    function calculateDuration(index) {
-        const checkInField = document.getElementById('check_in_' + index);
-        const checkOutField = document.getElementById('check_out_' + index);
-        const durationDisplay = document.getElementById('duration_' + index);
+    function toggleCheckOut(index) {
+        const toggle = document.getElementById('check_out_toggle_' + index);
+        const display = document.getElementById('check_out_display_' + index);
+        const input = document.getElementById('check_out_' + index);
         
-        const checkIn = checkInField.value;
-        const checkOut = checkOutField.value;
+        if (toggle.checked) {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            input.value = time;
+            display.innerText = formatToAMPM(time);
+        } else {
+            input.value = '';
+            display.innerText = '--:--';
+        }
+        syncStatus(index);
+        calculateDuration(index);
+    }
+
+    function syncStatus(index) {
+        const inT = document.getElementById('check_in_toggle_' + index);
+        const outT = document.getElementById('check_out_toggle_' + index);
+        const status = document.getElementById('status_' + index);
+        
+        if (inT.checked || outT.checked) {
+            status.value = 'present';
+        } else {
+            status.value = 'absent';
+        }
+    }
+
+    function formatToAMPM(time) {
+        if (!time) return '--:--';
+        let [h, m] = time.split(':');
+        let ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${m} ${ampm}`;
+    }
+
+    function calculateDuration(index) {
+        const checkIn = document.getElementById('check_in_' + index).value;
+        const checkOut = document.getElementById('check_out_' + index).value;
+        const durationDisplay = document.getElementById('duration_' + index);
+        const st = document.getElementById('status_' + index);
         
         if (checkIn && checkOut) {
-            const [inHours, inMinutes] = checkIn.split(':').map(Number);
-            const [outHours, outMinutes] = checkOut.split(':').map(Number);
+            const [inH, inM] = checkIn.split(':').map(Number);
+            const [outH, outM] = checkOut.split(':').map(Number);
+            let diff = (outH * 60 + outM) - (inH * 60 + inM);
+            if (diff < 0) diff += 24 * 60;
             
-            let inTotal = inHours * 60 + inMinutes;
-            let outTotal = outHours * 60 + outMinutes;
+            const hours = diff / 60;
+            const h = Math.floor(hours);
+            const m = diff % 60;
             
-            if (outTotal < inTotal) {
-                outTotal += 24 * 60;
-            }
-            
-            const diffMinutes = outTotal - inTotal;
-            const hours = Math.floor(diffMinutes / 60);
-            const minutes = diffMinutes % 60;
-            
-            durationDisplay.textContent = hours + 'h ' + minutes + 'm';
-            durationDisplay.style.color = '#3858f9';
+            durationDisplay.textContent = h + 'h ' + m + 'm';
+            durationDisplay.className = 'badge rounded-pill bg-soft-primary text-primary fw-bold px-3 py-2';
         } else {
             durationDisplay.textContent = '--';
-            durationDisplay.style.color = '#999';
+            durationDisplay.className = 'badge rounded-pill bg-light text-dark fw-bold px-3 py-2';
         }
     }
 </script>

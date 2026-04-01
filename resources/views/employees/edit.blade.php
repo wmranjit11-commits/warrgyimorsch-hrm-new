@@ -313,119 +313,44 @@
                                 </div>
                             </div>
 
-                            <!-- PF, ESI, Insurance Toggles and Fields -->
-                            <div class="col-md-12 mt-4">
-                                <div class="row g-3">
-                                    <!-- PF Section -->
-                                    <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ $employee->pf ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
-                                        </div>
-                                        <div id="pfField" style="display: {{ $employee->pf ? 'block' : 'none' }};">
-                                            <label class="fw-bold small">PF No.</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                                <input type="text" name="pf_number" class="form-control"
-                                                    placeholder="PF No."
-                                                    value="{{ old('pf_number', $employee->pf_number) }}">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- ESI Section -->
-                                    <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ $employee->esi ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
-                                        </div>
-                                        <div id="esiField" style="display: {{ $employee->esi ? 'block' : 'none' }};">
-                                            <label class="fw-bold small">ESI No.</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                                <input type="text" name="esi_number" class="form-control"
-                                                    placeholder="ESI No."
-                                                    value="{{ old('esi_number', $employee->esi_number) }}">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Insurance Section -->
-                                    <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="insurance"
-                                                id="insuranceToggle" {{ $employee->insurance ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
-                                        </div>
-                                        <div id="insuranceFields"
-                                            style="display: {{ $employee->insurance ? 'block' : 'none' }};">
-                                            <div class="mb-2">
-                                                <label class="fw-bold small">Provider</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                                    <input type="text" name="insurance_provider" class="form-control"
-                                                        placeholder="Insurance Company"
-                                                        value="{{ old('insurance_provider', $employee->insurance_provider) }}">
+                                    <!-- PHOTO UPLOAD SECTION -->
+                                    <div class="col-md-12 mt-4">
+                                        <div class="row g-3">
+                                            <div class="col-md-4 d-flex align-items-center">
+                                                <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
+                                                <div onclick="document.getElementById('photoInput').click()"
+                                                    class="bg-light border d-flex align-items-center justify-content-center"
+                                                    style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
+                                                    <img id="previewImg"
+                                                        src="{{ $employee->photo ? '/storage/' . $employee->photo : '' }}"
+                                                        style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
+                                                    <span id="placeholderText"
+                                                        style="color:#888; display: {{ $employee->photo ? 'none' : 'block' }};">200x200</span>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <label class="fw-bold small">Policy Number</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                                                    <input type="text" name="insurance_policy_number" class="form-control"
-                                                        placeholder="Policy Number"
-                                                        value="{{ old('insurance_policy_number', $employee->insurance_policy_number) }}">
+                                                <div class="ms-3">
+                                                    <label class="fw-bold d-block">Upload Photo</label>
+                                                    <small class="text-muted d-block"># Max upload size 2mb</small>
+                                                    <small class="text-muted d-block"># Allowed: png, jpg, jpeg</small>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- PHOTO UPLOAD SIDE -->
-                                    <div class="col-md-4 d-flex align-items-center mt-3 mt:md-3">
-                                        <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
-                                        <div onclick="document.getElementById('photoInput').click()"
-                                            class="bg-light border d-flex align-items-center justify-content-center"
-                                            style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
-                                            <img id="previewImg"
-                                                src="{{ $employee->photo ? '/storage/' . $employee->photo : '' }}"
-                                                style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
-                                            <span id="placeholderText"
-                                                style="color:#888; display: {{ $employee->photo ? 'none' : 'block' }};">200x200</span>
-                                        </div>
-                                        <div class="ms-3">
-                                            <label class="fw-bold d-block">Upload Photo</label>
-                                            <small class="text-muted d-block"># Max upload size 2mb</small>
-                                            <small class="text-muted d-block"># Allowed: png, jpg, jpeg</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- JS for Toggle Logic -->
-                            <script>
-                                document.getElementById('pfToggle').addEventListener('change', function () {
-                                    document.getElementById('pfField').style.display = this.checked ? 'block' : 'none';
-                                });
-                                document.getElementById('esiToggle').addEventListener('change', function () {
-                                    document.getElementById('esiField').style.display = this.checked ? 'block' : 'none';
-                                });
-                                document.getElementById('insuranceToggle').addEventListener('change', function () {
-                                    document.getElementById('insuranceFields').style.display = this.checked ? 'block' : 'none';
-                                });
-
-                                document.getElementById('photoInput').addEventListener('change', function (event) {
-                                    const file = event.target.files[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = function (e) {
-                                            document.getElementById('previewImg').src = e.target.result;
-                                            document.getElementById('previewImg').style.display = 'block';
-                                            document.getElementById('placeholderText').style.display = 'none';
-                                        }
-                                        reader.readAsDataURL(file);
-                                    }
-                                });
-                            </script>
+                                    <!-- JS for Photo Preview -->
+                                    <script>
+                                        document.getElementById('photoInput').addEventListener('change', function (event) {
+                                            const file = event.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = function (e) {
+                                                    document.getElementById('previewImg').src = e.target.result;
+                                                    document.getElementById('previewImg').style.display = 'block';
+                                                    document.getElementById('placeholderText').style.display = 'none';
+                                                }
+                                                reader.readAsDataURL(file);
+                                            }
+                                        });
+                                    </script>
                         </div>
                         <div class="text-end mt-4">
                             <button type="button" class="btn btn-primary" onclick="nextTab('bank')">

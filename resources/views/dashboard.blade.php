@@ -96,7 +96,7 @@
                                     <i class="feather-dollar-sign"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</div>
+                                    <div class="fs-4 fw-bold text-dark">Rs.{{ number_format($totalPaidAmount, 0) }}</div>
                                     <h3 class="fs-13 fw-semibold text-truncate-1-line">Paid in {{ $selectedMonthLabel }}
                                     </h3>
                                 </div>
@@ -131,7 +131,7 @@
                                     class="fs-12 fw-medium text-muted text-truncate-1-line">{{ $totalEmpPaid }} Employees
                                     Paid </a>
                                 <div class="w-100 text-end">
-                                    <span class="fs-12 text-dark">₹{{ number_format($totalNetSalary, 0) }}</span>
+                                    <span class="fs-12 text-dark">Rs.{{ number_format($totalNetSalary, 0) }}</span>
                                     <span
                                         class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPaidAmount / $totalNetSalary) * 100) : 0 }}%)</span>
                                 </div>
@@ -156,7 +156,7 @@
                                     <i class="feather-clock text-warning"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</div>
+                                    <div class="fs-4 fw-bold text-dark">Rs.{{ number_format($totalPendingAmount, 0) }}</div>
                                     <h3 class="fs-13 fw-semibold text-truncate-1-line">Pending in {{ $selectedMonthLabel }}
                                     </h3>
                                 </div>
@@ -215,7 +215,7 @@
                                     <i class="feather-x-circle text-danger"></i>
                                 </div>
                                 <div>
-                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</div>
+                                    <div class="fs-4 fw-bold text-dark">Rs.{{ number_format($totalRejectedAmount, 0) }}</div>
                                     <h3 class="fs-13 fw-semibold text-truncate-1-line">Rejected in {{ $selectedMonthLabel }}
                                     </h3>
                                 </div>
@@ -378,7 +378,7 @@
                             <div class="col-lg-3">
                                 <div class="p-3 border border-dashed rounded">
                                     <div class="fs-12 text-muted mb-1">Pending</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</h6>
+                                        <h6 class="fw-bold text-dark">Rs.{{ number_format($totalPendingAmount, 0) }}</h6>
                                         <div class="progress mt-2 ht-3">
                                             <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%"></div>
                                         </div>
@@ -387,7 +387,7 @@
                                 <div class="col-lg-3">
                                     <div class="p-3 border border-dashed rounded">
                                         <div class="fs-12 text-muted mb-1">Paid</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</h6>
+                                        <h6 class="fw-bold text-dark">Rs.{{ number_format($totalPaidAmount, 0) }}</h6>
                                         <div class="progress mt-2 ht-3">
                                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%"></div>
                                         </div>
@@ -396,7 +396,7 @@
                                 <div class="col-lg-3">
                                     <div class="p-3 border border-dashed rounded">
                                         <div class="fs-12 text-muted mb-1">Rejected</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</h6>
+                                        <h6 class="fw-bold text-dark">Rs.{{ number_format($totalRejectedAmount, 0) }}</h6>
                                         <div class="progress mt-2 ht-3">
                                             <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%"></div>
                                         </div>
@@ -405,7 +405,7 @@
                                 <div class="col-lg-3">
                                     <div class="p-3 border border-dashed rounded">
                                         <div class="fs-12 text-muted mb-1">Total Salary</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalNetSalary, 0) }}</h6>
+                                        <h6 class="fw-bold text-dark">Rs.{{ number_format($totalNetSalary, 0) }}</h6>
                                         <div class="progress mt-2 ht-3">
                                             <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
                                         </div>
@@ -550,7 +550,7 @@
                                                 <td>
                                                     <span class="badge bg-gray-200 text-dark">{{ $rp->month }}</span>
                                                 </td>
-                                                <td>₹{{ number_format($rp->net_salary, 0) }}</td>
+                                                <td>Rs.{{ number_format($rp->net_salary, 0) }}</td>
                                                 <td>
                                                     <span class="badge {{ $rp->status == 'paid' ? 'bg-soft-success text-success' : 'bg-soft-warning text-warning' }} text-uppercase">
                                                         {{ $rp->status }}
@@ -561,9 +561,9 @@
                                                         <a href="{{ route('payroll.export', ['id' => $rp->id, 'format' => 'pdf']) }}" class="avatar-text avatar-md bg-soft-info text-info" title="Download PDF">
                                                             <i class="feather-download"></i>
                                                         </a>
-                                                        <a href="{{ route('payroll.show', $rp->id) }}" class="avatar-text avatar-sm bg-soft-primary text-primary" title="View Details">
+                                                        <!-- <a href="{{ route('payroll.show', $rp->id) }}" class="avatar-text avatar-sm bg-soft-primary text-primary" title="View Details">
                                                             <i class="feather-eye"></i>
-                                                        </a>
+                                                        </a> -->
                                                     </div>
                                                 </td>
                                             </tr>
@@ -875,7 +875,7 @@
             yaxis: {
                 labels: {
                     formatter: function(e) {
-                        return "₹" + e.toLocaleString()
+                        return "Rs." + e.toLocaleString()
                     },
                     style: { color: "#64748b", fontWeight: 600 }
                 }
@@ -892,7 +892,7 @@
                 intersect: false,
                 y: {
                     formatter: function(e) {
-                        return "₹" + e.toLocaleString()
+                        return "Rs." + e.toLocaleString()
                     }
                 },
                 theme: 'dark'
@@ -933,15 +933,15 @@
                                             <div class="fs-10 text-muted text-uppercase fw-bold">Financial Record</div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold text-dark">₹${item.earnings.toLocaleString()}</div>
+                                            <div class="fw-bold text-dark">Rs.${item.earnings.toLocaleString()}</div>
                                             <div class="fs-10 text-success text-uppercase fw-bold">Total Earnings</div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold text-danger">-₹${item.deductions.toLocaleString()}</div>
+                                            <div class="fw-bold text-danger">-Rs.${item.deductions.toLocaleString()}</div>
                                             <div class="fs-10 text-muted text-uppercase fw-bold">Total Deducted</div>
                                         </td>
                                         <td>
-                                            <div class="fw-black text-primary">₹${item.net.toLocaleString()}</div>
+                                            <div class="fw-black text-primary">Rs.${item.net.toLocaleString()}</div>
                                             <div class="fs-10 text-muted text-uppercase fw-bold">Net Distributed</div>
                                         </td>
                                         <td class="pe-4 text-end">
