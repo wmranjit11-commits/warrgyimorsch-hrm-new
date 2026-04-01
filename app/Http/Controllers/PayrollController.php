@@ -11,6 +11,7 @@ use App\Imports\AttendanceImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Container\Attributes\Log;
 
 class PayrollController extends Controller
 {
@@ -313,31 +314,51 @@ class PayrollController extends Controller
         }
     }
 
-    public function import(Request $request)
-    {
-        // 1. Validation Logic
+  public function import(Request $request)
+{
+    try {
+
+        // 1. Validation
         $validator = Validator::make($request->all(), [
-            'import_file' => 'required|mimes:xlsx,xls,csv',
+            'import_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
         ]);
 
         if ($validator->fails()) {
-            return back()->with('warning', 'Warning: Please upload a valid Excel or CSV file!');
+            return back()->with('error', $validator->errors()->first());
         }
 
-        try {
-            if ($request->file('import_file')->getSize() == 0) {
-                return back()->with('warning', 'Warning: The uploaded Excel file is empty.');
-            }
+        $file = $request->file('import_file');
 
-            // 2. Import Process
-            Excel::import(new AttendanceImport, $request->file('import_file'));
-            
-            return back()->with('success', 'Success: Attendance data imported successfully!');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error: Something went wrong. ' . $e->getMessage());
+        // 2. Empty file check
+        if (!$file || $file->getSize() == 0) {
+            return back()->with('error', 'Uploaded file is empty.');
         }
+
+        // 3. Import run
+        Excel::import(new AttendanceImport, $file);
+
+        return back()->with('success', 'Attendance imported successfully!');
+
+    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+
+        // Excel row-wise errors
+        $messages = [];
+
+        foreach ($e->failures() as $failure) {
+            $messages[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+        }
+
+        return back()->with('error', implode(' | ', $messages));
+
+    } catch (\Throwable $e) {
+
+        // 4. Log error (important for debugging)
+        Log::error('Attendance Import Error: ' . $e->getMessage());
+
+        // 5. User-friendly message
+        return back()->with('error', 'Something went wrong! Please check your file format.');
     }
+}
 
     /**
      * Display payroll list

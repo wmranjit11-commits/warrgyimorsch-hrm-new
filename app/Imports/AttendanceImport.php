@@ -9,26 +9,49 @@ use PhpOffice\PhpSpreadsheet\Shared\Date; // Ye line zarur add karein
 use Carbon\Carbon;
 
 class AttendanceImport implements ToModel, WithHeadingRow
+{public function model(array $row)
 {
-    public function model(array $row)
-    {
-        try {
-            // 1. Excel Serial Date ko PHP Date mein convert karna
-            $formattedDate = is_numeric($row['date']) 
-                ? Carbon::instance(Date::excelToDateTimeObject($row['date']))->format('Y-m-d')
-                : Carbon::parse($row['date'])->format('Y-m-d');
+    try {
 
-            // 2. Check-in aur Check-out ko handle karna
-            // Agar Excel mein time cell format 'Time' hai, to excelToDateTimeObject use karein
-            $checkIn = is_numeric($row['check_in'])
-                ? Carbon::instance(Date::excelToDateTimeObject($row['check_in']))
-                : Carbon::parse($row['check_in']);
+        // Column mapping (header nahi hai)
+        $employeeId = $row[0] ?? null;
+        $dateTimeRaw = $row[1] ?? null;
 
-            $checkOut = is_numeric($row['check_out'])
-                ? Carbon::instance(Date::excelToDateTimeObject($row['check_out']))
-                : Carbon::parse($row['check_out']);
+        if (!$employeeId || !$dateTimeRaw) {
+            return null; // skip invalid row
+        }
 
-            // 3. Calculation logic
+        // DateTime parse
+        $dateTime = is_numeric($dateTimeRaw) 
+            ? Carbon::instance(Date::excelToDateTimeObject($dateTimeRaw))
+            : Carbon::parse($dateTimeRaw);
+
+        $formattedDate = $dateTime->format('Y-m-d');
+        $time = $dateTime->format('H:i:s');
+
+        // Check existing
+        $attendance = Attendance::where('employee_id', $employeeId)
+            ->where('attendance_date', $formattedDate)
+            ->first();
+
+        if (!$attendance) {
+
+            // First entry = check_in
+            return new Attendance([
+                'employee_id'     => $employeeId,
+                'attendance_date' => $formattedDate,
+                'check_in'        => $time,
+                'check_out'       => null,
+                'total_hours'     => 0,
+                'status'          => 'present',
+            ]);
+
+        } else {
+
+            // Second entry = check_out
+            $checkIn = Carbon::parse($attendance->check_in);
+            $checkOut = Carbon::parse($time);
+
             if ($checkOut->lt($checkIn)) {
                 $checkOut->addDay();
             }
@@ -36,17 +59,18 @@ class AttendanceImport implements ToModel, WithHeadingRow
             $totalMinutes = $checkIn->diffInMinutes($checkOut);
             $totalHours = round($totalMinutes / 60, 2);
 
-            return new Attendance([
-                'employee_id'     => $row['employee_id'],
-                'attendance_date' => $formattedDate,
-                'check_in'        => $checkIn->format('H:i:s'),
-                'check_out'       => $checkOut->format('H:i:s'),
-                'total_hours'     => $totalHours,
-                'status'          => $row['status'] ?? 'present',
+            $attendance->update([
+                'check_out' => $checkOut->format('H:i:s'),
+                'total_hours' => $totalHours,
             ]);
-        } catch (\Exception $e) {
-            // Agar koi error aaye to skip ya log karein
-            return null;
         }
+
+        return null;
+
+    } catch (\Exception $e) {
+        \Log::error('Import Error: ' . $e->getMessage());
+        return null;
     }
+}
+
 }

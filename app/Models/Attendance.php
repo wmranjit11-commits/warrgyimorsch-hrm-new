@@ -17,7 +17,14 @@ class Attendance extends Model
 
     protected $casts = [
         'attendance_date' => 'date',
+        'check_in' => 'datetime:H:i:s',
+        'check_out' => 'datetime:H:i:s',
         'total_hours' => 'float',
+    ];
+
+    // Optional: default status
+    protected $attributes = [
+        'status' => 'present',
     ];
 
     public function employee()
