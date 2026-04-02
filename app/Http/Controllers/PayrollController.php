@@ -11,7 +11,7 @@ use App\Imports\AttendanceImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Container\Attributes\Log;
+use Illuminate\Support\Facades\Log;
 
 class PayrollController extends Controller
 {
@@ -314,11 +314,9 @@ class PayrollController extends Controller
         }
     }
 
-  public function import(Request $request)
+public function import(Request $request)
 {
     try {
-
-        // 1. Validation
         $validator = Validator::make($request->all(), [
             'import_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
         ]);
@@ -329,34 +327,20 @@ class PayrollController extends Controller
 
         $file = $request->file('import_file');
 
-        // 2. Empty file check
         if (!$file || $file->getSize() == 0) {
             return back()->with('error', 'Uploaded file is empty.');
         }
 
-        // 3. Import run
-        Excel::import(new AttendanceImport, $file);
+        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\AttendanceImport, $file);
 
         return back()->with('success', 'Attendance imported successfully!');
 
-    } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-
-        // Excel row-wise errors
-        $messages = [];
-
-        foreach ($e->failures() as $failure) {
-            $messages[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
-        }
-
-        return back()->with('error', implode(' | ', $messages));
-
     } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('Attendance Import Controller Error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+        ]);
 
-        // 4. Log error (important for debugging)
-        Log::error('Attendance Import Error: ' . $e->getMessage());
-
-        // 5. User-friendly message
-        return back()->with('error', 'Something went wrong! Please check your file format.');
+        return back()->with('error', $e->getMessage());
     }
 }
 

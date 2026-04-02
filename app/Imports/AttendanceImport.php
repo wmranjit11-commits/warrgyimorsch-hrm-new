@@ -3,74 +3,92 @@
 namespace App\Imports;
 
 use App\Models\Attendance;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use PhpOffice\PhpSpreadsheet\Shared\Date; // Ye line zarur add karein
-use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class AttendanceImport implements ToModel, WithHeadingRow
-{public function model(array $row)
+{
+    public function model(array $row)
 {
     try {
+        $employeeId  = $row['employee_id'] ?? null;
+        $dateTimeRaw = $row['attendence_date'] ?? null;
 
-        // Column mapping (header nahi hai)
-        $employeeId = $row[0] ?? null;
-        $dateTimeRaw = $row[1] ?? null;
-
-        if (!$employeeId || !$dateTimeRaw) {
-            return null; // skip invalid row
+        if (empty($employeeId) || empty($dateTimeRaw)) {
+            return null;
         }
 
-        // DateTime parse
-        $dateTime = is_numeric($dateTimeRaw) 
-            ? Carbon::instance(Date::excelToDateTimeObject($dateTimeRaw))
-            : Carbon::parse($dateTimeRaw);
+        if (is_numeric($dateTimeRaw)) {
+            $punchDateTime = Carbon::instance(Date::excelToDateTimeObject($dateTimeRaw));
+        } elseif ($dateTimeRaw instanceof \DateTimeInterface) {
+            $punchDateTime = Carbon::instance($dateTimeRaw);
+        } else {
+            $punchDateTime = Carbon::parse(trim((string) $dateTimeRaw));
+        }
 
-        $formattedDate = $dateTime->format('Y-m-d');
-        $time = $dateTime->format('H:i:s');
+        $attendanceDate = $punchDateTime->format('Y-m-d');
+        $punchTime      = $punchDateTime->format('H:i:s');
 
-        // Check existing
-        $attendance = Attendance::where('employee_id', $employeeId)
-            ->where('attendance_date', $formattedDate)
+        // Sirf open attendance uthao
+        $openAttendance = Attendance::where('employee_id', $employeeId)
+            ->whereNull('check_out')
+            ->orderByDesc('attendance_date')
+            ->orderByDesc('check_in')
             ->first();
 
-        if (!$attendance) {
+        // Agar open attendance mila to usko close karne ki koshish karo
+        if ($openAttendance && $openAttendance->check_in) {
+            $checkInDateTime = Carbon::parse(
+                $openAttendance->attendance_date . ' ' . $openAttendance->check_in
+            );
 
-            // First entry = check_in
-            return new Attendance([
-                'employee_id'     => $employeeId,
-                'attendance_date' => $formattedDate,
-                'check_in'        => $time,
-                'check_out'       => null,
-                'total_hours'     => 0,
-                'status'          => 'present',
-            ]);
+            $maxAllowed = $checkInDateTime->copy()->addHours(12);
 
-        } else {
+            if (
+                $punchDateTime->greaterThan($checkInDateTime) &&
+                $punchDateTime->lessThanOrEqualTo($maxAllowed)
+            ) {
+                $totalMinutes = $checkInDateTime->diffInMinutes($punchDateTime);
+                $totalHours   = round($totalMinutes / 60, 2);
 
-            // Second entry = check_out
-            $checkIn = Carbon::parse($attendance->check_in);
-            $checkOut = Carbon::parse($time);
+                $openAttendance->update([
+                    'check_out'   => $punchTime,
+                    'total_hours' => $totalHours,
+                ]);
 
-            if ($checkOut->lt($checkIn)) {
-                $checkOut->addDay();
+                return null;
             }
-
-            $totalMinutes = $checkIn->diffInMinutes($checkOut);
-            $totalHours = round($totalMinutes / 60, 2);
-
-            $attendance->update([
-                'check_out' => $checkOut->format('H:i:s'),
-                'total_hours' => $totalHours,
-            ]);
         }
 
-        return null;
+        // Duplicate IN avoid karo (optional but useful)
+        $duplicateIn = Attendance::where('employee_id', $employeeId)
+            ->whereDate('attendance_date', $attendanceDate)
+            ->where('check_in', $punchTime)
+            ->exists();
 
-    } catch (\Exception $e) {
-        \Log::error('Import Error: ' . $e->getMessage());
+        if ($duplicateIn) {
+            return null;
+        }
+
+        // Naya check-in
+        return new Attendance([
+            'employee_id'     => $employeeId,
+            'attendance_date' => $attendanceDate,
+            'check_in'        => $punchTime,
+            'check_out'       => null,
+            'total_hours'     => 0,
+            'status'          => 'present',
+        ]);
+
+    } catch (\Throwable $e) {
+        Log::error('Attendance row import error: ' . $e->getMessage(), [
+            'row' => $row,
+        ]);
+
         return null;
     }
 }
-
 }
