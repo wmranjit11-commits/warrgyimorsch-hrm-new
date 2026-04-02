@@ -65,57 +65,122 @@
                         <div class="card border-0 shadow-sm mb-5"
                             style="border-radius: 16px; background: white; overflow: hidden; border: 1px solid #e2e8f0 !important;">
                             <div class="card-header bg-white border-bottom px-4 py-3 text-center">
-                                <h6 class="fw-bold mb-0 text-dark text-uppercase letter-spacing-1" style="letter-spacing: 1px;">Payroll Summary</h6>
+                                <h6 class="fw-bold mb-0 text-dark text-uppercase letter-spacing-1"
+                                    style="letter-spacing: 1px;">Payroll Summary</h6>
                             </div>
                             <div class="card-body p-4 p-md-5">
                                 <div class="row justify-content-center">
                                     <div class="col-md-11">
                                         <div class="bg-light p-4 rounded-4 border mb-4">
                                             <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
-                                                <span class="text-muted fw-bold">Full Monthly Basic</span>
+                                                <span class="text-muted fw-bold">Full Monthly Gross</span>
                                                 <span class="fw-bold text-dark fs-5" id="resMonthlyBasic"></span>
                                             </div>
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span class="text-muted small">Payable Days</span>
-                                                <span class="fw-bold text-dark" id="resPayableDays">0</span>
+
+                                            <!-- Earnings Section -->
+                                            <div class="mb-4">
+                                                <label class="small fw-bold text-primary text-uppercase mb-2"
+                                                    style="font-size: 10px; letter-spacing: 0.5px;">Earnings
+                                                    (Pro-rated)</label>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted small">Basic Salary</span>
+                                                    <span class="fw-bold text-dark small" id="resPBasic">Rs. 0.00</span>
+                                                </div>
+                                                <div id="hraRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">HRA</span>
+                                                    <span class="fw-bold text-dark small" id="resPHRA">Rs. 0.00</span>
+                                                </div>
+                                                <div id="convRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">Conveyance</span>
+                                                    <span class="fw-bold text-dark small" id="resPConv">Rs. 0.00</span>
+                                                </div>
+                                                <div id="medRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">Medical</span>
+                                                    <span class="fw-bold text-dark small" id="resPMed">Rs. 0.00</span>
+                                                </div>
+                                                <div id="otherRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">Other Allowance</span>
+                                                    <span class="fw-bold text-dark small" id="resPOther">Rs. 0.00</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                                                    <span class="fw-bold text-dark small">Gross Salary</span>
+                                                    <span class="fw-bold text-dark small" id="resGross">Rs. 0.00</span>
+                                                </div>
                                             </div>
 
-                                            <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
-                                                <span class="text-muted small">Total Deductions</span>
-                                                <span class="fw-bold text-danger" id="resSalaryLoss">- Rs. 0.00</span>
+                                            <!-- Deductions Section -->
+                                            <div class="mb-4">
+                                                <label class="small fw-bold text-danger text-uppercase mb-2"
+                                                    style="font-size: 10px; letter-spacing: 0.5px;">Deductions</label>
+                                                <div id="pfRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">PF (12% of Basic)</span>
+                                                    <span class="fw-bold text-danger small" id="resPF">- Rs. 0.00</span>
+                                                </div>
+                                                <div id="esiRow" class="d-flex justify-content-between mb-1"
+                                                    style="display: none !important;">
+                                                    <span class="text-muted small">ESI (0.75% of Gross)</span>
+                                                    <span class="fw-bold text-danger small" id="resESI">- Rs. 0.00</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                                                    <span class="text-muted small">Total Deductions</span>
+                                                    <span class="fw-bold text-danger small" id="resTotalDeductions">- Rs.
+                                                        0.00</span>
+                                                </div>
                                             </div>
-                                            
-                                            <div class="row g-3 mb-4">
-                                                <div class="col-6">
-                                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 10px;">Worked Days</div>
-                                                        <h5 class="mb-0 fw-bold text-primary" id="brkWorked">0d</h5>
+
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6 col-md">
+                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
+                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
+                                                            style="font-size: 8px;">Actual Presents</div>
+                                                        <h6 class="mb-0 fw-bold text-primary" id="brkWorked">0d</h6>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
-                                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 10px;">Holidays</div>
-                                                        <h5 class="mb-0 fw-bold text-info" id="brkHolidays">0d</h5>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
+                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
+                                                            style="font-size: 8px;">Marked Leaves</div>
+                                                        <h6 class="mb-0 fw-bold text-warning" id="brkLeaves">0d</h6>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
-                                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 10px;">Paid Off</div>
-                                                        <h5 class="mb-0 fw-bold text-success" id="brkAllowed">0d</h5>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
+                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
+                                                            style="font-size: 8px;">Paid Offs</div>
+                                                        <h6 class="mb-0 fw-bold text-info" id="brkPaidOffs">0d</h6>
                                                     </div>
                                                 </div>
-                                                <div class="col-6">
-                                                    <div class="p-3 bg-white rounded-3 border text-center shadow-sm">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 10px;">Unpaid Days</div>
-                                                        <h5 class="mb-0 fw-bold text-danger" id="brkUnpaid">0d</h5>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
+                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
+                                                            style="font-size: 8px;">Leave Credit</div>
+                                                        <h6 class="mb-0 fw-bold text-success" id="brkAllowed">0d</h6>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md">
+                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
+                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
+                                                            style="font-size: 8px;">LWP Days</div>
+                                                        <h6 class="mb-0 fw-bold text-danger" id="brkUnpaid">0d</h6>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="pt-3 border-top mt-2">
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <h4 class="mb-0 fw-bold text-dark">Net Payable</h4>
-                                                    <h3 class="mb-0 fw-bold text-primary" id="resNetPayable" style="font-size: 2.2rem; letter-spacing: -1px;"></h3>
+                                                    <div>
+                                                        <h4 class="mb-0 fw-bold text-dark">Net Payable</h4>
+                                                        <span class="text-muted small fw-bold text-uppercase"
+                                                            style="font-size: 9px;">Payable Days: <span
+                                                                id="resPayableDays">0</span></span>
+                                                    </div>
+                                                    <h3 class="mb-0 fw-bold text-primary" id="resNetPayable"
+                                                        style="font-size: 2.2rem; letter-spacing: -1px;"></h3>
                                                 </div>
                                             </div>
                                         </div>
@@ -124,7 +189,8 @@
 
                                 <div class="d-grid gap-2 mt-2 px-md-3">
                                     <button class="btn btn-primary py-3 fw-bold shadow-sm" id="submitPayrollBtn"
-                                        style="background: #3858f9; border: none; border-radius: 12px; font-size: 1.1rem;" onclick="savePayroll()">
+                                        style="background: #3858f9; border: none; border-radius: 12px; font-size: 1.1rem;"
+                                        onclick="savePayroll()">
                                         <i class="bi bi-check2-circle me-2 fs-5"></i> CONFIRM & SAVE PAYROLL
                                     </button>
                                 </div>
@@ -146,13 +212,15 @@
 
     <!-- Success Toast -->
     <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 9999;">
-        <div id="successToast" class="toast align-items-center border-0 shadow-lg" role="alert" style="border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); min-width: 320px;">
+        <div id="successToast" class="toast align-items-center border-0 shadow-lg" role="alert"
+            style="border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); min-width: 320px;">
             <div class="d-flex">
                 <div class="toast-body text-white fw-bold d-flex align-items-center gap-2 py-3 px-4">
                     <i class="bi bi-check-circle-fill fs-5"></i>
                     <span id="toastMessage">Payroll saved successfully! Redirecting...</span>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-3 m-auto shadow-none" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto shadow-none"
+                    data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -187,21 +255,36 @@
                         const p = data.payroll;
                         const d = p.details || {};
                         const monthlyBasic = parseFloat(p.monthly_salary || (parseFloat(p.basic_salary) + parseFloat(p.salary_loss)));
-                        
-                        document.getElementById('resMonthlyBasic').textContent = 'Rs. ' + f(monthlyBasic);
+
+                        document.getElementById('resMonthlyBasic').textContent = 'Rs. ' + f(p.monthly_salary);
                         document.getElementById('resPayableDays').textContent = (p.payable_days || 0);
-                        document.getElementById('resSalaryLoss').textContent = '- Rs. ' + f(p.salary_loss);
                         document.getElementById('resNetPayable').textContent = 'Rs. ' + f(p.net_salary);
 
+                        // Pro-rated Components
+                        document.getElementById('resPBasic').textContent = 'Rs. ' + f(p.basic_salary);
+
+                        // Earnings row visibility
+                        updateRow('hraRow', 'resPHRA', p.hra);
+                        updateRow('convRow', 'resPConv', p.conveyance_allowance);
+                        updateRow('medRow', 'resPMed', p.medical_allowance);
+                        updateRow('otherRow', 'resPOther', p.other_allowance);
+                        document.getElementById('resGross').textContent = 'Rs. ' + f(p.gross_salary);
+
+                        // Deductions row visibility
+                        updateRow('pfRow', 'resPF', p.pf_deduction, true);
+                        updateRow('esiRow', 'resESI', p.esi_deduction, true);
+                        document.getElementById('resTotalDeductions').textContent = '- Rs. ' + f(p.deductions);
+
                         // Detailed Summary Breakdown
-                        document.getElementById('brkWorked').innerText = (d.worked_days || 0) + 'd';
-                        document.getElementById('brkUnpaid').innerText = (p.unpaid_days || 0) + 'd';
-                        document.getElementById('brkAllowed').innerText = (d.allowed_leaves || 0) + 'd';
-                        document.getElementById('brkHolidays').innerText = (d.holidays || 0) + 'd';
+                        document.getElementById('brkWorked').innerText = (d.worked_days || 0) + ' Day Present';
+                        document.getElementById('brkLeaves').innerText = (d.leaves_taken || 0) + ' Day Leave';
+                        document.getElementById('brkUnpaid').innerText = (d.absent_days || 0) + ' Day Absent';
+                        document.getElementById('brkAllowed').innerText = (d.allowed_leaves || 0) + ' Leave Adj.';
+                        document.getElementById('brkPaidOffs').innerText = (d.paid_offs || 0) + ' Paid Offs';
 
                         noCalc.style.display = 'none';
                         document.getElementById('calculationResult').style.display = 'block';
-                        
+
                         const btn = document.getElementById('submitPayrollBtn');
                         btn.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> SUBMIT PAYROLL';
                         btn.style.borderRadius = '12px';
@@ -216,6 +299,18 @@
                     alert('An error occurred during calculation. Please check the console for details.');
                     noCalc.innerHTML = '<div class="py-5"><i class="bi bi-exclamation-circle text-danger fs-1"></i><p class="mt-3 fw-bold text-danger">Calculation Failed. Please retry.</p></div>';
                 });
+        }
+
+        function updateRow(rowId, spanId, value, isDeduction = false) {
+            const row = document.getElementById(rowId);
+            const span = document.getElementById(spanId);
+            const val = parseFloat(value) || 0;
+            if (val > 0) {
+                row.style.setProperty('display', 'flex', 'important');
+                span.textContent = (isDeduction ? '- ' : '') + 'Rs. ' + f(val);
+            } else {
+                row.style.setProperty('display', 'none', 'important');
+            }
         }
 
 

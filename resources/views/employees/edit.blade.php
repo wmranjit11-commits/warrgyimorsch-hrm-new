@@ -157,12 +157,12 @@
                                     <select name="role" class="form-control" required>
                                         <option value="">Select Role</option>
                                         <option value="super_admin" {{ old('role', $employee->role) == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                        <option value="business_operation_head" {{ old('role', $employee->role) == 'business_operation_head' ? 'selected' : '' }}>Business
-                                            Operation Head</option>
-                                        <option value="hr_executive" {{ old('role', $employee->role) == 'hr_executive' ? 'selected' : '' }}>HR Executive</option>
+                                        <option value="admin" {{ old('role', $employee->role) == 'admin' ? 'selected' : '' }}>
+                                            Admin</option>
+                                        <option value="manager" {{ old('role', $employee->role) == 'manager' ? 'selected' : '' }}>Manager</option>
                                         <option value="team_leader" {{ old('role', $employee->role) == 'team_leader' ? 'selected' : '' }}>Team Leader</option>
                                         <option value="employee" {{ old('role', $employee->role) == 'employee' ? 'selected' : '' }}>Employee</option>
-                                        <option value="hr_marketing" {{ old('role', $employee->role) == 'hr_marketing' ? 'selected' : '' }}>HR Marketing</option>
+                                        <option value="hr_exec" {{ old('role', $employee->role) == 'hr_exec' ? 'selected' : '' }}>HR Exec</option>
                                     </select>
                                 </div>
                             </div>
@@ -181,17 +181,25 @@
                                     <span class="input-group-text"><i class="feather-users"></i></span>
                                     <select name="department" class="form-control" required>
                                         <option value="">Select department...</option>
-                                        <option value="administration" {{ old('department', $employee->department) == 'administration' ? 'selected' : '' }}>Administration
-                                            (Admin)</option>
-                                        <option value="business_development" {{ old('department', $employee->department) == 'business_development' ? 'selected' : '' }}>Business
-                                            Development (BD)</option>
-                                        <option value="hr" {{ old('department', $employee->department) == 'hr' ? 'selected' : '' }}>HR Department (HR)</option>
-                                        <option value="web_development" {{ old('department', $employee->department) == 'web_development' ? 'selected' : '' }}>Web Development
-                                            (WD)</option>
+                                        <option value="software_development" {{ old('department', $employee->department) == 'software_development' ? 'selected' : '' }}>Software
+                                            Development</option>
+                                        <option value="mobile_app_development" {{ old('department', $employee->department) == 'mobile_app_development' ? 'selected' : '' }}>Mobile App
+                                            Development</option>
+                                        <option value="ui_ux_design" {{ old('department', $employee->department) == 'ui_ux_design' ? 'selected' : '' }}>UI/UX Design
+                                        </option>
+                                        <option value="quality_assurance" {{ old('department', $employee->department) == 'quality_assurance' ? 'selected' : '' }}>Quality
+                                            Assurance (QA)</option>
+                                        <option value="devops_infrastructure" {{ old('department', $employee->department) == 'devops_infrastructure' ? 'selected' : '' }}>DevOps &
+                                            Infrastructure</option>
                                         <option value="digital_marketing" {{ old('department', $employee->department) == 'digital_marketing' ? 'selected' : '' }}>Digital
-                                            Marketing (DM)</option>
-                                        <option value="web_graphics" {{ old('department', $employee->department) == 'web_graphics' ? 'selected' : '' }}>Web & Graphics
-                                            Design (WGD)</option>
+                                            Marketing</option>
+                                        <option value="sales_business_development" {{ old('department', $employee->department) == 'sales_business_development' ? 'selected' : '' }}>Sales
+                                            & Business Development</option>
+                                        <option value="hr" {{ old('department', $employee->department) == 'hr' ? 'selected' : '' }}>Human Resources (HR)</option>
+                                        <option value="finance_accounts" {{ old('department', $employee->department) == 'finance_accounts' ? 'selected' : '' }}>Finance &
+                                            Accounts</option>
+                                        <option value="management_administration" {{ old('department', $employee->department) == 'management_administration' ? 'selected' : '' }}>
+                                            Management / Administration</option>
                                     </select>
                                 </div>
                             </div>
@@ -201,25 +209,42 @@
                                     <span class="input-group-text"><i class="feather-users"></i></span>
                                     <select name="designation" class="form-control" required>
                                         <option value="">Select designation...</option>
-                                        <option value="plant head" {{ old('designation', $employee->designation) == 'plant head' ? 'selected' : '' }}>Plant Head / Production Manager</option>
-                                        <option value="production supervisor" {{ old('designation', $employee->designation) == 'production supervisor' ? 'selected' : '' }}>
-                                            Factory/Production Supervisor</option>
-                                        <option value="machine operator" {{ old('designation', $employee->designation) == 'machine operator' ? 'selected' : '' }}>Machine
-                                            Operator</option>
-                                        <option value="polisher" {{ old('designation', $employee->designation) == 'polisher' ? 'selected' : '' }}>Polisher</option>
-                                        <option value="maintenance engineer" {{ old('designation', $employee->designation) == 'maintenance engineer' ? 'selected' : '' }}>Maintenance
-                                            Technician/Engineer</option>
-                                        <option value="qc engineer" {{ old('designation', $employee->designation) == 'qc engineer' ? 'selected' : '' }}>Quality Control (QC) Technician/Engineer</option>
-                                        <option value="production worker" {{ old('designation', $employee->designation) == 'production worker' ? 'selected' : '' }}>Production
-                                            Worker / Helper</option>
-                                        <option value="finishing engineer" {{ old('designation', $employee->designation) == 'finishing engineer' ? 'selected' : '' }}>Finishing
+                                        <option value="project_manager" {{ old('designation', $employee->designation) == 'project_manager' ? 'selected' : '' }}>Project Manager
+                                        </option>
+                                        <option value="team_lead" {{ old('designation', $employee->designation) == 'team_lead' ? 'selected' : '' }}>Team Lead</option>
+                                        <option value="senior_software_engineer" {{ old('designation', $employee->designation) == 'senior_software_engineer' ? 'selected' : '' }}>Senior
+                                            Software Engineer</option>
+                                        <option value="software_engineer" {{ old('designation', $employee->designation) == 'software_engineer' ? 'selected' : '' }}>Software
                                             Engineer</option>
-                                        <option value="bdm" {{ old('designation', $employee->designation) == 'bdm' ? 'selected' : '' }}>Business Development Manager (BDM) / Executive</option>
-                                        <option value="sales manager" {{ old('designation', $employee->designation) == 'sales manager' ? 'selected' : '' }}>Sales Manager / Sales Representative
-                                            (Domestic/International)</option>
-                                        <option value="logistics executive" {{ old('designation', $employee->designation) == 'logistics executive' ? 'selected' : '' }}>Logistics
-                                            Executive / Telecaller Executive / Purchase Executive</option>
-                                        <option value="hr manager" {{ old('designation', $employee->designation) == 'hr manager' ? 'selected' : '' }}>Human Resources (HR) Manager / Executive</option>
+                                        <option value="junior_software_engineer" {{ old('designation', $employee->designation) == 'junior_software_engineer' ? 'selected' : '' }}>Junior
+                                            Software Engineer</option>
+                                        <option value="frontend_developer" {{ old('designation', $employee->designation) == 'frontend_developer' ? 'selected' : '' }}>Frontend
+                                            Developer</option>
+                                        <option value="backend_developer" {{ old('designation', $employee->designation) == 'backend_developer' ? 'selected' : '' }}>Backend
+                                            Developer</option>
+                                        <option value="full_stack_developer" {{ old('designation', $employee->designation) == 'full_stack_developer' ? 'selected' : '' }}>Full Stack
+                                            Developer</option>
+                                        <option value="mobile_app_developer" {{ old('designation', $employee->designation) == 'mobile_app_developer' ? 'selected' : '' }}>Mobile App
+                                            Developer (iOS/Android)</option>
+                                        <option value="ui_ux_designer" {{ old('designation', $employee->designation) == 'ui_ux_designer' ? 'selected' : '' }}>UI/UX Designer
+                                        </option>
+                                        <option value="qa_engineer" {{ old('designation', $employee->designation) == 'qa_engineer' ? 'selected' : '' }}>QA Engineer / Tester
+                                        </option>
+                                        <option value="devops_engineer" {{ old('designation', $employee->designation) == 'devops_engineer' ? 'selected' : '' }}>DevOps Engineer
+                                        </option>
+                                        <option value="system_administrator" {{ old('designation', $employee->designation) == 'system_administrator' ? 'selected' : '' }}>System
+                                            Administrator</option>
+                                        <option value="seo_specialist" {{ old('designation', $employee->designation) == 'seo_specialist' ? 'selected' : '' }}>SEO Specialist
+                                        </option>
+                                        <option value="content_writer" {{ old('designation', $employee->designation) == 'content_writer' ? 'selected' : '' }}>Content Writer
+                                        </option>
+                                        <option value="hr_manager" {{ old('designation', $employee->designation) == 'hr_manager' ? 'selected' : '' }}>HR Manager /
+                                            Executive</option>
+                                        <option value="bde_sales_executive" {{ old('designation', $employee->designation) == 'bde_sales_executive' ? 'selected' : '' }}>BDE / Sales
+                                            Executive</option>
+                                        <option value="accountant" {{ old('designation', $employee->designation) == 'accountant' ? 'selected' : '' }}>Accountant</option>
+                                        <option value="office_assistant" {{ old('designation', $employee->designation) == 'office_assistant' ? 'selected' : '' }}>Office
+                                            Assistant</option>
                                     </select>
                                 </div>
                             </div>
@@ -309,48 +334,113 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-calendar"></i></span>
                                     <input type="number" name="leave" class="form-control"
-                                        value="{{ old('leave', $employee->leave) }}">
+                                        value="{{ old('leave', $employee->leave) }}" step="0.5">
+                                </div>
+                            </div>
+                            <!-- Statutory Toggles -->
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" style="width: 40px; height: 20px;" {{ $employee->pf ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold ms-2" for="pfToggle">PF</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" style="width: 40px; height: 20px;" {{ $employee->esi ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold ms-2" for="esiToggle">ESI</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" name="insurance" id="insToggle" style="width: 40px; height: 20px;" {{ $employee->insurance ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold ms-2" for="insToggle">Insurance</label>
                                 </div>
                             </div>
 
-                                    <!-- PHOTO UPLOAD SECTION -->
-                                    <div class="col-md-12 mt-4">
-                                        <div class="row g-3">
-                                            <div class="col-md-4 d-flex align-items-center">
-                                                <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
-                                                <div onclick="document.getElementById('photoInput').click()"
-                                                    class="bg-light border d-flex align-items-center justify-content-center"
-                                                    style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
-                                                    <img id="previewImg"
-                                                        src="{{ $employee->photo ? '/storage/' . $employee->photo : '' }}"
-                                                        style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
-                                                    <span id="placeholderText"
-                                                        style="color:#888; display: {{ $employee->photo ? 'none' : 'block' }};">200x200</span>
-                                                </div>
-                                                <div class="ms-3">
-                                                    <label class="fw-bold d-block">Upload Photo</label>
-                                                    <small class="text-muted d-block"># Max upload size 2mb</small>
-                                                    <small class="text-muted d-block"># Allowed: png, jpg, jpeg</small>
-                                                </div>
-                                            </div>
+                            <!-- Dynamic Input Fields -->
+                            <div class="col-md-4" id="pf_div" style="display: {{ $employee->pf ? 'block' : 'none' }};">
+                                <label class="fw-bold">PF Number</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="feather-hash"></i></span>
+                                    <input type="text" name="pf_number" class="form-control" placeholder="Enter PF Number" value="{{ old('pf_number', $employee->pf_number) }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" id="esi_div" style="display: {{ $employee->esi ? 'block' : 'none' }};">
+                                <label class="fw-bold">ESI Number</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="feather-hash"></i></span>
+                                    <input type="text" name="esi_number" class="form-control" placeholder="Enter ESI Number" value="{{ old('esi_number', $employee->esi_number) }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" id="ins_prov_div" style="display: {{ $employee->insurance ? 'block' : 'none' }};">
+                                <label class="fw-bold">Insurance Provider</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="feather-shield"></i></span>
+                                    <input type="text" name="insurance_provider" class="form-control" placeholder="Provider Name" value="{{ old('insurance_provider', $employee->insurance_provider) }}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" id="ins_pol_div" style="display: {{ $employee->insurance ? 'block' : 'none' }};">
+                                <label class="fw-bold">Policy Number</label>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text"><i class="feather-file-text"></i></span>
+                                    <input type="text" name="insurance_policy_number" class="form-control" placeholder="Policy Number" value="{{ old('insurance_policy_number', $employee->insurance_policy_number) }}">
+                                </div>
+                            </div>
+
+                            <script>
+                                document.getElementById('pfToggle').addEventListener('change', function() {
+                                    document.getElementById('pf_div').style.display = this.checked ? 'block' : 'none';
+                                });
+                                document.getElementById('esiToggle').addEventListener('change', function() {
+                                    document.getElementById('esi_div').style.display = this.checked ? 'block' : 'none';
+                                });
+                                document.getElementById('insToggle').addEventListener('change', function() {
+                                    const isChecked = this.checked;
+                                    document.getElementById('ins_prov_div').style.display = isChecked ? 'block' : 'none';
+                                    document.getElementById('ins_pol_div').style.display = isChecked ? 'block' : 'none';
+                                });
+                            </script>
+                            <!-- PHOTO UPLOAD SECTION -->
+                            <div class="col-md-12 mt-4">
+                                <div class="row g-3">
+                                    <div class="col-md-4 d-flex align-items-center">
+                                        <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
+                                        <div onclick="document.getElementById('photoInput').click()"
+                                            class="bg-light border d-flex align-items-center justify-content-center"
+                                            style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
+                                            <img id="previewImg"
+                                                src="{{ $employee->photo ? '/storage/' . $employee->photo : '' }}"
+                                                style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
+                                            <span id="placeholderText"
+                                                style="color:#888; display: {{ $employee->photo ? 'none' : 'block' }};">200x200</span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <label class="fw-bold d-block">Upload Photo</label>
+                                            <small class="text-muted d-block"># Max upload size 2mb</small>
+                                            <small class="text-muted d-block"># Allowed: png, jpg, jpeg</small>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <!-- JS for Photo Preview -->
-                                    <script>
-                                        document.getElementById('photoInput').addEventListener('change', function (event) {
-                                            const file = event.target.files[0];
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.onload = function (e) {
-                                                    document.getElementById('previewImg').src = e.target.result;
-                                                    document.getElementById('previewImg').style.display = 'block';
-                                                    document.getElementById('placeholderText').style.display = 'none';
-                                                }
-                                                reader.readAsDataURL(file);
-                                            }
-                                        });
-                                    </script>
+                            <!-- JS for Photo Preview -->
+                            <script>
+                                document.getElementById('photoInput').addEventListener('change', function (event) {
+                                    const file = event.target.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            document.getElementById('previewImg').src = e.target.result;
+                                            document.getElementById('previewImg').style.display = 'block';
+                                            document.getElementById('placeholderText').style.display = 'none';
+                                        }
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                            </script>
                         </div>
                         <div class="text-end mt-4">
                             <button type="button" class="btn btn-primary" onclick="nextTab('bank')">
@@ -363,28 +453,28 @@
                     <div class="tab-pane fade" id="bank" role="tabpanel" aria-labelledby="bank-tab">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="fw-bold">Bank Name <span class="text-danger">*</span></label>
+                                <label class="fw-bold">Bank Name</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-home"></i></span>
                                     <input type="text" name="bank_name" class="form-control" placeholder="Bank Name"
-                                        value="{{ old('bank_name', $employee->bank_name) }}" required>
+                                        value="{{ old('bank_name', $employee->bank_name) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Account Number <span class="text-danger">*</span></label>
+                                <label class="fw-bold">Account Number</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-hash"></i></span>
                                     <input type="text" name="account_number" class="form-control"
                                         placeholder="Account Number"
-                                        value="{{ old('account_number', $employee->account_number) }}" required>
+                                        value="{{ old('account_number', $employee->account_number) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">IFSC Code <span class="text-danger">*</span></label>
+                                <label class="fw-bold">IFSC Code</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-key"></i></span>
                                     <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code"
-                                        value="{{ old('ifsc_code', $employee->ifsc_code) }}" required>
+                                        value="{{ old('ifsc_code', $employee->ifsc_code) }}">
                                 </div>
                             </div>
                         </div>

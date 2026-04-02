@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ATTENDANCE ROUTES
     Route::get('/payroll/attendance', [PayrollController::class, 'attendance'])->name('payroll.attendance');
+    Route::get('/payroll/attendance/detailed', [PayrollController::class, 'attendanceDetailed'])->name('payroll.attendance.detailed');
     Route::get('/payroll/attendance/get', [PayrollController::class, 'getAttendance'])->name('payroll.attendance.get');
     Route::get('/payroll/attendance/add', [PayrollController::class, 'addAttendance'])->name('payroll.attendance.add');
     Route::post('/payroll/attendance', [PayrollController::class, 'storeAttendance'])->name('payroll.attendance.store');

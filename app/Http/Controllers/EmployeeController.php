@@ -36,10 +36,8 @@ class EmployeeController extends Controller
                 'department' => 'required|string',
                 'designation' => 'required|string',
                 'role' => 'required|string',
-                'bank_name' => 'required|string|max:255',
-                'account_number' => 'required|string|max:50',
-                'ifsc_code' => 'required|string|max:20',
                 'basic_salary' => 'required|numeric|min:0',
+                'leave' => 'nullable|numeric|min:0',
             ]);
 
             // Create employee with all fields
@@ -135,6 +133,8 @@ class EmployeeController extends Controller
             'department' => 'required|string',
             'designation' => 'required|string',
             'role' => 'required|string',
+            'basic_salary' => 'required|numeric|min:0',
+            'leave' => 'nullable|numeric|min:0',
         ]);
 
         $updateData = [

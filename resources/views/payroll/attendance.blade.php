@@ -2,14 +2,55 @@
 
 @section('content')
     <style>
-        .bg-soft-success { background: rgba(34, 197, 94, 0.12) !important; color: #16a34a !important; border: 1px solid rgba(34, 197, 94, 0.2); }
-        .bg-soft-danger { background: rgba(239, 68, 68, 0.12) !important; color: #dc2626 !important; border: 1px solid rgba(239, 68, 68, 0.2); }
-        .bg-soft-warning { background: rgba(245, 158, 11, 0.12) !important; color: #d97706 !important; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .bg-soft-info { background: rgba(6, 182, 212, 0.12) !important; color: #0891b2 !important; border: 1px solid rgba(6, 182, 212, 0.2); }
-        .bg-soft-primary { background: rgba(56, 88, 249, 0.12) !important; color: #3858f9 !important; border: 1px solid rgba(56, 88, 249, 0.2); }
-        .bg-soft-dark { background: rgba(30, 41, 59, 0.08) !important; color: #1e293b !important; border: 1px solid rgba(30, 41, 59, 0.15); }
-        .badge-att { padding: 0.6rem 1rem; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .badge-att:hover { transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .bg-soft-success {
+            background: rgba(34, 197, 94, 0.12) !important;
+            color: #16a34a !important;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .bg-soft-danger {
+            background: rgba(239, 68, 68, 0.12) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .bg-soft-warning {
+            background: rgba(245, 158, 11, 0.12) !important;
+            color: #d97706 !important;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .bg-soft-info {
+            background: rgba(6, 182, 212, 0.12) !important;
+            color: #0891b2 !important;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .bg-soft-primary {
+            background: rgba(56, 88, 249, 0.12) !important;
+            color: #3858f9 !important;
+            border: 1px solid rgba(56, 88, 249, 0.2);
+        }
+
+        .bg-soft-dark {
+            background: rgba(30, 41, 59, 0.08) !important;
+            color: #1e293b !important;
+            border: 1px solid rgba(30, 41, 59, 0.15);
+        }
+
+        .badge-att {
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .badge-att:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Main Content Card -->
@@ -122,7 +163,8 @@
                                 <tr class="border-bottom hover-row">
                                     <td class="ps-4 py-3 text-dark fw-bold">
                                         {{ \Carbon\Carbon::parse($att->attendance_date)->format('d-m-Y') }}
-                                        <div class="small text-muted fw-normal">{{ \Carbon\Carbon::parse($att->attendance_date)->format('l') }}</div>
+                                        <div class="small text-muted fw-normal">
+                                            {{ \Carbon\Carbon::parse($att->attendance_date)->format('l') }}</div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
@@ -134,69 +176,69 @@
                                             @endif
 
                                             @if($att->count > 0)
-                                                <div class="badge-att bg-soft-success clickable" title="Click to view Present employees"
-                                                     onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'present')">
-                                                    <i class="bi bi-person-check-fill me-2"></i>
-                                                    <span class="small fw-bold">{{ $att->present }} Present</span>
-                                                </div>
-                                                <div class="badge-att bg-soft-warning clickable" title="Click to view Half Day records"
-                                                     onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'half_day')">
-                                                    <i class="bi bi-clock-fill me-2"></i>
-                                                    <span class="small fw-bold">{{ $att->half_day }} Half Day</span>
-                                                </div>
-                                                <div class="badge-att bg-soft-dark clickable" title="Click to view Overtime performance"
-                                                     onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'overtime')">
-                                                    <i class="bi bi-alarm-fill me-2"></i>
-                                                    <span class="small fw-bold">{{ $att->overtime }} Overtime</span>
-                                                </div>
-                                                <div class="badge-att bg-soft-info clickable" title="Click to view Leave records"
-                                                     onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'leave')">
-                                                    <i class="bi bi-calendar-event-fill me-2"></i>
-                                                    <span class="small fw-bold">{{ $att->leave }} Leave</span>
-                                                </div>
-                                                <div class="badge-att bg-soft-danger clickable" title="Click to view Absent employees"
-                                                     onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'absent')">
-                                                    <i class="bi bi-person-x-fill me-2"></i>
-                                                    <span class="small fw-bold">{{ $att->absent }} Absent</span>
-                                                </div>
+                                                <div class="badge-att bg-soft-successclickable" title="Click to view Present employees"
+                                                                 onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'present')">
+                                                                <i class="bi bi-person-check-fill me-2"></i>
+                                                                <span class="small fw-bold">{{ $att->present }} Present</span>
+                                                            </div>
+                                                            <div class="badge-att bg-soft-warning clickable" title="Click to view Half Day records"
+                                                                 onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'half_day')">
+                                                                <i class="bi bi-clock-fill me-2"></i>
+                                                                <span class="small fw-bold">{{ $att->half_day }} Half Day</span>
+                                                            </div>
+                                                            <div class="badge-att bg-soft-dark clickable" title="Click to view Overtime performance"
+                                                                 onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'overtime')">
+                                                                <i class="bi bi-alarm-fill me-2"></i>
+                                                                <span class="small fw-bold">{{ $att->overtime }} Overtime</span>
+                                                            </div>
+                                                            <div class="badge-att bg-soft-info clickable" title="Click to view Leave records"
+                                                                 onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'leave')">
+                                                                <i class="bi bi-calendar-event-fill me-2"></i>
+                                                                <span class="small fw-bold">{{ $att->leave }} Leave</span>
+                                                            </div>
+                                                            <div class="badge-att bg-soft-danger clickable" title="Click to view Absent employees"
+                                                                 onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'absent')">
+                                                                <i class="bi bi-person-x-fill me-2"></i>
+                                                                <span class="small fw-bold">{{ $att->absent }} Absent</span>
+                                                            </div>
                                             @elseif(!$att->is_holiday)
-                                                <span class="text-muted small italic">No attendance marked for this date</span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    <td class="pe-4 text-end">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="javascript:void(0);"
-                                                class="avatar-text avatar-md bg-soft-primary text-primary"
-                                                onclick="openAttendanceDetails('{{ $att->attendance_date }}')" title="View Details">
-                                                <i class="feather-eye"></i>
-                                            </a>
-                                            @if($att->count > 0)
-                                                <a href="javascript:void(0);"
-                                                    class="avatar-text avatar-md bg-soft-danger text-danger"
-                                                    onclick="deleteAttendanceByDate('{{ $att->attendance_date }}')" title="Delete All">
-                                                    <i class="feather-trash-2"></i>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
+                                                        <span class="text-muted small italic">No attendance marked for this date</span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <a href="javascript:void(0);"
+                                                        class="avatar-text avatar-md bg-soft-primary text-primary"
+                                                        onclick="openAttendanceDetails('{{ $att->attendance_date }}')" title="View Details">
+                                                        <i class="feather-eye"></i>
+                                                    </a>
+                                                    @if($att->count > 0)
+                                                        <a href="javascript:void(0);"
+                                                            class="avatar-text avatar-md bg-soft-danger text-danger"
+                                                            onclick="deleteAttendanceByDate('{{ $att->attendance_date }}')" title="Delete All">
+                                                            <i class="feather-trash-2"></i>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
                             @empty
-                                <tr>
-                                    <td colspan="3" class="text-center py-5">
-                                        <div class="py-5">
-                                            <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.2;"></i>
-                                            <p class="text-muted mt-3 fw-bold">No Attendance Records Found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5">
+                                            <div class="py-5">
+                                                <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.2;"></i>
+                                                <p class="text-muted mt-3 fw-bold">No Attendance Records Found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 @endsection
 
 @push('modals')
@@ -293,7 +335,7 @@
             rows.forEach((item, index) => {
                 let match = !filterStatus;
                 let itemStatus = item.status.toLowerCase();
-                
+
                 if (filterStatus === 'present' && (itemStatus === 'present' || itemStatus === 'late')) match = true;
                 if (filterStatus === 'absent' && itemStatus === 'absent') match = true;
                 if (filterStatus === 'half_day' && itemStatus === 'half_day') match = true;

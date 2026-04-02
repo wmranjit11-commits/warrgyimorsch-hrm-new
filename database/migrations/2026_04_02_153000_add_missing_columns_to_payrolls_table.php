@@ -30,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('payrolls', function (Blueprint $table) {
-            $table->dropColumn('salary_loss');
+            $table->dropColumn(['unpaid_days', 'salary_loss', 'monthly_salary']);
         });
     }
 };

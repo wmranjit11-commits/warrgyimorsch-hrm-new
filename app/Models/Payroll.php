@@ -23,6 +23,7 @@ class Payroll extends Model
         'esi_deduction',
         'other_deduction',
         'net_salary',
+        'monthly_salary',
         'status',
         'payment_date',
         'remarks',

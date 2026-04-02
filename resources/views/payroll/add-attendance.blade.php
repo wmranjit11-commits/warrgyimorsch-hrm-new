@@ -113,26 +113,32 @@
                                             </td>
                                             <td class="py-3 text-center">
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <div id="check_in_display_{{ $index }}" class="time-box mb-2">--:--</div>
+                                                    <input type="time" id="check_in_input_{{ $index }}" name="employees[{{ $index }}][check_in]" 
+                                                           class="form-control form-control-sm text-center fw-bold mb-2 p-1 shadow-none border-0 bg-light" 
+                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px;"
+                                                           onchange="manualTimeChange({{ $index }})">
+                                                    
                                                     <div class="form-check form-switch p-0">
                                                         <input class="form-check-input ms-0" type="checkbox" role="switch" 
                                                                id="check_in_toggle_{{ $index }}" 
                                                                style="width: 45px; height: 22px; cursor: pointer;"
                                                                onchange="toggleCheckIn({{ $index }})">
-                                                        <input type="hidden" name="employees[{{ $index }}][check_in]" id="check_in_{{ $index }}">
                                                     </div>
                                                     <label class="small text-muted fw-bold mt-1" style="font-size: 9px; letter-spacing: 0.5px;">CHECK IN</label>
                                                 </div>
                                             </td>
                                             <td class="py-3 text-center">
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <div id="check_out_display_{{ $index }}" class="time-box mb-2">--:--</div>
+                                                    <input type="time" id="check_out_input_{{ $index }}" name="employees[{{ $index }}][check_out]" 
+                                                           class="form-control form-control-sm text-center fw-bold mb-2 p-1 shadow-none border-0 bg-light" 
+                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px;"
+                                                           onchange="manualTimeChange({{ $index }})">
+
                                                     <div class="form-check form-switch p-0">
                                                         <input class="form-check-input ms-0" type="checkbox" role="switch" 
                                                                id="check_out_toggle_{{ $index }}" 
                                                                style="width: 45px; height: 22px; cursor: pointer;"
                                                                onchange="toggleCheckOut({{ $index }})">
-                                                        <input type="hidden" name="employees[{{ $index }}][check_out]" id="check_out_{{ $index }}">
                                                     </div>
                                                     <label class="small text-muted fw-bold mt-1" style="font-size: 9px; letter-spacing: 0.5px;">CHECK OUT</label>
                                                 </div>
@@ -203,17 +209,18 @@
 <script>
     function toggleCheckIn(index) {
         const toggle = document.getElementById('check_in_toggle_' + index);
-        const display = document.getElementById('check_in_display_' + index);
-        const input = document.getElementById('check_in_' + index);
+        const input = document.getElementById('check_in_input_' + index);
         
         if (toggle.checked) {
             const now = new Date();
             const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
             input.value = time;
-            display.innerText = formatToAMPM(time);
+            input.classList.remove('bg-light');
+            input.classList.add('bg-white', 'border');
         } else {
             input.value = '';
-            display.innerText = '--:--';
+            input.classList.remove('bg-white', 'border');
+            input.classList.add('bg-light');
         }
         syncStatus(index);
         calculateDuration(index);
@@ -221,18 +228,40 @@
 
     function toggleCheckOut(index) {
         const toggle = document.getElementById('check_out_toggle_' + index);
-        const display = document.getElementById('check_out_display_' + index);
-        const input = document.getElementById('check_out_' + index);
+        const input = document.getElementById('check_out_input_' + index);
         
         if (toggle.checked) {
             const now = new Date();
             const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
             input.value = time;
-            display.innerText = formatToAMPM(time);
+            input.classList.remove('bg-light');
+            input.classList.add('bg-white', 'border');
         } else {
             input.value = '';
-            display.innerText = '--:--';
+            input.classList.remove('bg-white', 'border');
+            input.classList.add('bg-light');
         }
+        syncStatus(index);
+        calculateDuration(index);
+    }
+
+    function manualTimeChange(index) {
+        const inI = document.getElementById('check_in_input_' + index);
+        const outI = document.getElementById('check_out_input_' + index);
+        const inT = document.getElementById('check_in_toggle_' + index);
+        const outT = document.getElementById('check_out_toggle_' + index);
+
+        if (inI.value) {
+            inT.checked = true;
+            inI.classList.remove('bg-light');
+            inI.classList.add('bg-white', 'border');
+        }
+        if (outI.value) {
+            outT.checked = true;
+            outI.classList.remove('bg-light');
+            outI.classList.add('bg-white', 'border');
+        }
+
         syncStatus(index);
         calculateDuration(index);
     }
@@ -243,25 +272,16 @@
         const status = document.getElementById('status_' + index);
         
         if (inT.checked || outT.checked) {
-            status.value = 'present';
+            if (status.value === 'absent') status.value = 'present';
         } else {
             status.value = 'absent';
         }
     }
 
-    function formatToAMPM(time) {
-        if (!time) return '--:--';
-        let [h, m] = time.split(':');
-        let ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        return `${h}:${m} ${ampm}`;
-    }
-
     function calculateDuration(index) {
-        const checkIn = document.getElementById('check_in_' + index).value;
-        const checkOut = document.getElementById('check_out_' + index).value;
+        const checkIn = document.getElementById('check_in_input_' + index).value;
+        const checkOut = document.getElementById('check_out_input_' + index).value;
         const durationDisplay = document.getElementById('duration_' + index);
-        const st = document.getElementById('status_' + index);
         
         if (checkIn && checkOut) {
             const [inH, inM] = checkIn.split(':').map(Number);
@@ -269,11 +289,10 @@
             let diff = (outH * 60 + outM) - (inH * 60 + inM);
             if (diff < 0) diff += 24 * 60;
             
-            const hours = diff / 60;
-            const h = Math.floor(hours);
-            const m = diff % 60;
+            const hours = Math.floor(diff / 60);
+            const minutes = diff % 60;
             
-            durationDisplay.textContent = h + 'h ' + m + 'm';
+            durationDisplay.textContent = hours + 'h ' + minutes + 'm';
             durationDisplay.className = 'badge rounded-pill bg-soft-primary text-primary fw-bold px-3 py-2';
         } else {
             durationDisplay.textContent = '--';

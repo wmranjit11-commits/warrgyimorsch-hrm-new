@@ -19,11 +19,11 @@
                         <span>Back</span>
                     </a>
                 </div>
-                <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
+                `<!-- <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
                     <div id="reportrange" class="reportrange-picker d-flex align-items-center">
                         <span class="reportrange-picker-field"></span>
-                    </div>
-                    <div class="dropdown filter-dropdown">
+                    </div> -->
+                    <!-- <div class="dropdown filter-dropdown">
                         <a class="btn btn-md btn-light-brand" data-bs-toggle="dropdown" data-bs-offset="0, 10"
                             data-bs-auto-close="outside">
                             <i class="feather-filter me-2"></i>
@@ -72,8 +72,8 @@
                                 <span>Manage Filter</span>
                             </a>
                         </div>
-                    </div>
-                </div>
+                    </div> -->
+                <!-- </div> -->`
             </div>
             <div class="d-md-none d-flex align-items-center">
                 <a href="javascript:void(0)" class="page-header-right-open-toggle">

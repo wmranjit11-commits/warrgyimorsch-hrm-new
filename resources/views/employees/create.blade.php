@@ -31,27 +31,33 @@
                 border-radius: 0 !important;
                 border-bottom: 1px solid #eee !important;
             }
+
             .nav-tabs .nav-link.active {
                 background: #fff !important;
                 border-left: 4px solid #6366f1 !important;
             }
+
             .card.stretch {
                 border-radius: 0 !important;
                 margin: -15px !important;
             }
+
             .tab-content {
                 padding: 15px !important;
             }
+
             .page-header {
                 padding: 15px !important;
                 flex-direction: column !important;
                 align-items: flex-start !important;
             }
+
             .page-header-right {
                 margin-top: 10px !important;
                 margin-left: 0 !important;
                 width: 100% !important;
             }
+
             .btn-lg {
                 width: 100% !important;
                 margin-bottom: 10px !important;
@@ -92,20 +98,20 @@
             <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row" id="employeeTab" role="tablist"
                 style="background: #f8f9fa; border-radius: 10px 10px 0 0; border-bottom: 2px solid #dee2e6;">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold active w-100" id="personal-tab"
-                        data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
+                    <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
+                        data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-person-circle me-2"></i>Personal Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold w-100" id="bank-tab" type="button"
-                        data-bs-toggle="tab" data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
+                    <button class="nav-link fw-bold w-100" id="bank-tab" type="button" data-bs-toggle="tab"
+                        data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-bank2 me-2"></i>Bank Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold w-100" id="salary-tab"
-                        data-bs-toggle="tab" data-bs-target="#salary" type="button" role="tab" aria-controls="salary" aria-selected="false"
+                    <button class="nav-link fw-bold w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
+                        type="button" role="tab" aria-controls="salary" aria-selected="false"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-cash-coin me-2"></i>Salary Details</button>
                 </li>
@@ -148,12 +154,11 @@
                                 <select name="role" class="form-control" required>
                                     <option value="">Select Role</option>
                                     <option value="super_admin">Super Admin</option>
-                                    <option value="business_operation_head">Business Operation Head</option>
-                                    <option value="hr_executive">HR Executive</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="manager">Manager</option>
                                     <option value="team_leader">Team Leader</option>
                                     <option value="employee">Employee</option>
-                                    <option value="hr_marketing">HR Marketing</option>
-                                    <!-- aur add kare option yahan -->
+                                    <option value="hr_exec">HR Exec</option>
                                 </select>
                             </div>
                         </div>
@@ -171,13 +176,16 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="department" class="form-control" required>
                                     <option value="">Select department...</option>
-                                    <option value="administration">Administration (Admin)</option>
-                                    <option value="business_development">Business Development (BD)</option>
-                                    <option value="hr">HR Department (HR)</option>
-                                    <option value="web_development">Web Development (WD)</option>
-                                    <option value="digital_marketing">Digital Marketing (DM)</option>
-                                    <option value="web_graphics">Web & Graphics Design (WGD)</option>
-                                    <!-- aur add karo jo chahiye -->
+                                    <option value="software_development">Software Development</option>
+                                    <option value="mobile_app_development">Mobile App Development</option>
+                                    <option value="ui_ux_design">UI/UX Design</option>
+                                    <option value="quality_assurance">Quality Assurance (QA)</option>
+                                    <option value="devops_infrastructure">DevOps & Infrastructure</option>
+                                    <option value="digital_marketing">Digital Marketing</option>
+                                    <option value="sales_business_development">Sales & Business Development</option>
+                                    <option value="hr">Human Resources (HR)</option>
+                                    <option value="finance_accounts">Finance & Accounts</option>
+                                    <option value="management_administration">Management / Administration</option>
                                 </select>
                             </div>
                         </div>
@@ -187,21 +195,25 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="designation" class="form-control" required>
                                     <option value="">Select designation...</option>
-                                    <option value="plant head">Plant Head / Production Manager</option>
-                                    <option value="production supervisor">Factory/Production Supervisor</option>
-                                    <option value="machine operator">Machine Operator</option>
-                                    <option value="polisher">Polisher</option>
-                                    <option value="maintenance engineer">Maintenance Technician/Engineer</option>
-                                    <option value="qc engineer">Quality Control (QC) Technician/Engineer</option>
-                                    <option value="production worker">Production Worker / Helper</option>
-                                    <option value="finishing engineer">Finishing Engineer</option>
-                                    <option value="bdm">Business Development Manager (BDM) / Executive</option>
-                                    <option value="sales manager">Sales Manager / Sales Representative
-                                        (Domestic/International)</option>
-                                    <option value="logistics executive">Logistics Executive / Telecaller Executive /
-                                        Purchase Executive</option>
-                                    <option value="hr manager">Human Resources (HR) Manager / Executive</option>
-                                    <!-- add aur options yahan -->
+                                    <option value="project_manager">Project Manager</option>
+                                    <option value="team_lead">Team Lead</option>
+                                    <option value="senior_software_engineer">Senior Software Engineer</option>
+                                    <option value="software_engineer">Software Engineer</option>
+                                    <option value="junior_software_engineer">Junior Software Engineer</option>
+                                    <option value="frontend_developer">Frontend Developer</option>
+                                    <option value="backend_developer">Backend Developer</option>
+                                    <option value="full_stack_developer">Full Stack Developer</option>
+                                    <option value="mobile_app_developer">Mobile App Developer (iOS/Android)</option>
+                                    <option value="ui_ux_designer">UI/UX Designer</option>
+                                    <option value="qa_engineer">QA Engineer / Tester</option>
+                                    <option value="devops_engineer">DevOps Engineer</option>
+                                    <option value="system_administrator">System Administrator</option>
+                                    <option value="seo_specialist">SEO Specialist</option>
+                                    <option value="content_writer">Content Writer</option>
+                                    <option value="hr_manager">HR Manager / Executive</option>
+                                    <option value="bde_sales_executive">BDE / Sales Executive</option>
+                                    <option value="accountant">Accountant</option>
+                                    <option value="office_assistant">Office Assistant</option>
                                 </select>
                             </div>
                         </div>
@@ -282,12 +294,75 @@
                             <label class="fw-bold">Leave</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="number" name="leave" class="form-control" value="0">
+                                <input type="number" name="leave" class="form-control" value="0" step="0.5">
                             </div>
                         </div>
-                        <!-- <div class="row align-items-center"> -->
+                        <!-- Statutory Toggles -->
+                        <div class="col-md-4 d-flex align-items-center">
+                            <div class="form-check form-switch mt-4">
+                                <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" style="width: 40px; height: 20px;">
+                                <label class="form-check-label fw-bold ms-2" for="pfToggle">PF</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                            <div class="form-check form-switch mt-4">
+                                <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" style="width: 40px; height: 20px;">
+                                <label class="form-check-label fw-bold ms-2" for="esiToggle">ESI</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                            <div class="form-check form-switch mt-4">
+                                <input class="form-check-input" type="checkbox" name="insurance" id="insToggle" style="width: 40px; height: 20px;">
+                                <label class="form-check-label fw-bold ms-2" for="insToggle">Insurance</label>
+                            </div>
+                        </div>
 
+                        <!-- Dynamic Input Fields -->
+                        <div class="col-md-4" id="pf_div" style="display: none;">
+                            <label class="fw-bold">PF Number</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="feather-hash"></i></span>
+                                <input type="text" name="pf_number" class="form-control" placeholder="Enter PF Number">
+                            </div>
+                        </div>
 
+                        <div class="col-md-4" id="esi_div" style="display: none;">
+                            <label class="fw-bold">ESI Number</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="feather-hash"></i></span>
+                                <input type="text" name="esi_number" class="form-control" placeholder="Enter ESI Number">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="ins_prov_div" style="display: none;">
+                            <label class="fw-bold">Insurance Provider</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="feather-shield"></i></span>
+                                <input type="text" name="insurance_provider" class="form-control" placeholder="Provider Name">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="ins_pol_div" style="display: none;">
+                            <label class="fw-bold">Policy Number</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="feather-file-text"></i></span>
+                                <input type="text" name="insurance_policy_number" class="form-control" placeholder="Policy Number">
+                            </div>
+                        </div>
+
+                        <script>
+                            document.getElementById('pfToggle').addEventListener('change', function() {
+                                document.getElementById('pf_div').style.display = this.checked ? 'block' : 'none';
+                            });
+                            document.getElementById('esiToggle').addEventListener('change', function() {
+                                document.getElementById('esi_div').style.display = this.checked ? 'block' : 'none';
+                            });
+                            document.getElementById('insToggle').addEventListener('change', function() {
+                                const isChecked = this.checked;
+                                document.getElementById('ins_prov_div').style.display = isChecked ? 'block' : 'none';
+                                document.getElementById('ins_pol_div').style.display = isChecked ? 'block' : 'none';
+                            });
+                        </script>
                         <!-- PHOTO UPLOAD SECTION -->
                         <div class="col-md-12 mt-4">
                             <div class="row g-3">
@@ -336,25 +411,24 @@
                 <div class="tab-pane fade" id="bank" role="tabpanel" aria-labelledby="bank-tab">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="fw-bold">Bank Name <span class="text-danger">*</span></label>
+                            <label class="fw-bold">Bank Name</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="text" name="bank_name" class="form-control" placeholder="Bank Name" required>
+                                <input type="text" name="bank_name" class="form-control" placeholder="Bank Name">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="fw-bold">Account Number <span class="text-danger">*</span></label>
+                            <label class="fw-bold">Account Number</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-hash"></i></span>
-                                <input type="text" name="account_number" class="form-control" placeholder="Account Number"
-                                    required>
+                                <input type="text" name="account_number" class="form-control" placeholder="Account Number">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="fw-bold">IFSC Code <span class="text-danger">*</span></label>
+                            <label class="fw-bold">IFSC Code</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-key"></i></span>
-                                <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code" required>
+                                <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code">
                             </div>
                         </div>
                     </div>
@@ -374,39 +448,40 @@
                             <label class="fw-bold">Basic Salary <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input" placeholder="Basic Salary"
-                                    required>
+                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input"
+                                    placeholder="Basic Salary" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">HRA</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="number" name="hra" id="hra" class="form-control salary-input" placeholder="HRA">
+                                <input type="number" name="hra" id="hra" class="form-control salary-input"
+                                    placeholder="HRA">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Conveyance Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-truck"></i></span>
-                                <input type="number" name="conveyance_allowance" id="conveyance_allowance" class="form-control salary-input"
-                                    placeholder="Conveyance Allowance">
+                                <input type="number" name="conveyance_allowance" id="conveyance_allowance"
+                                    class="form-control salary-input" placeholder="Conveyance Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Medical Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-activity"></i></span>
-                                <input type="number" name="medical_allowance" id="medical_allowance" class="form-control salary-input"
-                                    placeholder="Medical Allowance">
+                                <input type="number" name="medical_allowance" id="medical_allowance"
+                                    class="form-control salary-input" placeholder="Medical Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Other Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-gift"></i></span>
-                                <input type="number" name="other_allowance" id="other_allowance" class="form-control salary-input"
-                                    placeholder="Other Allowance">
+                                <input type="number" name="other_allowance" id="other_allowance"
+                                    class="form-control salary-input" placeholder="Other Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -478,7 +553,7 @@
         }
 
         // Form Submit Validation
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', function (e) {
             const requiredFields = this.querySelectorAll('[required]');
             let missingFields = [];
 
@@ -496,7 +571,7 @@
                 e.preventDefault();
                 const message = "Cannot submit. Please fill these required fields:\n- " + missingFields.join("\n- ");
                 alert(message);
-                
+
                 // Switch to the first tab with an error
                 const firstInvalid = this.querySelector('.is-invalid');
                 if (firstInvalid) {
@@ -519,7 +594,7 @@
             const conveyance = parseFloat(document.getElementById('conveyance_allowance').value) || 0;
             const medical = parseFloat(document.getElementById('medical_allowance').value) || 0;
             const other = parseFloat(document.getElementById('other_allowance').value) || 0;
-            
+
             const total = basic + hra + conveyance + medical + other;
             document.getElementById('total_salary').value = total.toFixed(2);
         }

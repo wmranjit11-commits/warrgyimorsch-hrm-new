@@ -49,7 +49,7 @@ class MonthlyAttendanceExport implements FromCollection, WithHeadings, ShouldAut
                     return Carbon::parse($item->date)->format('M j');
                 });
 
-            $p = 0; $a = 0; $h = 0; $l = 0; $ot = 0;
+            $p = 0; $a = 0; $h = 0; $l = 0; $po = 0; $ot = 0;
             
             for ($d = 1; $d <= $daysInMonth; $d++) {
                 $checkDate = Carbon::createFromDate($this->year, $this->month, $d);
@@ -58,41 +58,30 @@ class MonthlyAttendanceExport implements FromCollection, WithHeadings, ShouldAut
                 $holiday = $holidays->get($dayStr);
                 
                 if ($record) {
-                    $statusMap = [
-                        'present' => 'PRESENT',
-                        'absent' => 'ABSENT',
-                        'half_day' => 'HALF DAY',
-                        'leave' => 'LEAVE',
-                        'late' => 'LATE'
-                    ];
-                    $status = $statusMap[strtolower($record->status)] ?? strtoupper($record->status);
-                    $row[] = $status;
-                    
                     $statusLower = strtolower($record->status);
+                    $row[] = strtoupper($record->status);
+                    
                     if ($statusLower === 'present' || $statusLower === 'late') $p++;
                     elseif ($statusLower === 'absent') $a++;
                     elseif ($statusLower === 'half_day') $h++;
                     elseif ($statusLower === 'leave') $l++;
 
-                    // Calculate overtime (hours > 8)
                     if ($record->total_hours > 8) {
                         $ot += ($record->total_hours - 8);
                     }
                 } elseif ($holiday) {
-                    $row[] = 'HOLIDAY (' . strtoupper($holiday->title) . ')';
-                    $p++; // Paid day
+                    $row[] = 'HOLIDAY';
+                    $po++; // Paid Off
+                } elseif ($checkDate->isSunday()) {
+                    $row[] = 'SUNDAY';
+                    $po++; // Paid Off
                 } else {
-                    if ($checkDate->isSunday()) {
-                        $row[] = 'SUNDAY';
-                        $p++; 
-                    } else {
-                        $row[] = '';
-                    }
+                    $row[] = '';
                 }
             }
 
-            $paidDays = $p + ($h * 0.5) + $l;
-            $row = array_merge($row, [$p, $a, $h, $l, $paidDays, round($ot, 2)]);
+            $paidDays = $p + ($h * 0.5) + $l + $po;
+            $row = array_merge($row, [$p, $po, $a, $h, $l, $paidDays, round($ot, 2)]);
             $data->push($row);
         }
 
@@ -109,7 +98,7 @@ class MonthlyAttendanceExport implements FromCollection, WithHeadings, ShouldAut
             $checkDate = Carbon::createFromDate($this->year, $this->month, $i);
             $headings[] = $checkDate->format('M d');
         }
-        return array_merge($headings, ['TOTAL PRESENT', 'TOTAL ABSENT', 'TOTAL HALF DAY', 'TOTAL LEAVE', 'PAID DAYS', 'OVERTIME (HRS)']);
+        return array_merge($headings, ['ACTUAL PRESENT', 'PAID OFFS', 'TOTAL ABSENT', 'TOTAL HALF DAY', 'TOTAL LEAVE', 'TOTAL PAID DAYS', 'OVERTIME (HRS)']);
     }
 
     public function styles(Worksheet $sheet)
