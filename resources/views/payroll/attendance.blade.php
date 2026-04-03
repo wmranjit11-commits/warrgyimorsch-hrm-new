@@ -299,6 +299,7 @@
     <!-- Edit Attendance Modal -->
     <div class="modal fade" id="editAttendanceModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(4px);">
         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
                 <div class="modal-header border-0 pb-0 pt-4 px-4">
                     <h5 class="modal-title fw-bold">Edit Punch Times</h5>
                     <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
