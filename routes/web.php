@@ -72,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/payroll/attendance/{id}', [PayrollController::class, 'destroyAttendance'])->name('payroll.attendance.destroy');
     Route::delete('/payroll/attendance/date/{date}', [PayrollController::class, 'destroyAttendanceByDate'])->name('payroll.attendance.destroyByDate');
     Route::post('/payroll/attendance/delete-bulk', [PayrollController::class, 'bulkDestroyAttendance'])->name('payroll.attendance.bulkDestroy');
+    Route::patch('/payroll/attendance/{id}', [PayrollController::class, 'updateAttendanceRecord'])->name('payroll.attendance.update');
 
     // PAYROLL CALCULATION ROUTES
     Route::get('/payroll/calculation', [PayrollController::class, 'calculation'])->name('payroll.calculation');

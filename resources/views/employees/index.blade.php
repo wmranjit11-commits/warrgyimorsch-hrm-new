@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid px-4 pt-4">
 
         <!-- HEADER -->
         <!-- Main Content Card -->
-        <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
-            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center"
                 style="border-radius: 12px 12px 0 0;">
                 <div>
-                    <h5 class="fw-bold mb-0" style="color: #334155;">Employee Management</h5>
+                    <h5 class="fw-bold mb-0">Employee Portfolio</h5>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
                             <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a>
@@ -52,26 +52,26 @@
 
             <!-- Collapsible Filter Section -->
             <div class="collapse" id="filterSection">
-                <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
+                <div class="card-body border-bottom bg-body-tertiary p-4">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
-                            <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm"
-                                placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px;">
+                            <label class="form-label fw-bold text-muted text-uppercase mb-2" style="font-size: 11px; letter-spacing: 0.5px;">Employee Name / ID</label>
+                            <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm fw-bold px-3"
+                                placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 38px; font-size: 13px; line-height: 1.5; padding-top: 0; padding-bottom: 0;">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()"
-                                style="border-radius: 8px;">
+                            <label class="form-label fw-bold text-muted text-uppercase mb-2" style="font-size: 11px; letter-spacing: 0.5px;">Employee Type</label>
+                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm fw-bold px-3" onchange="applyFilters()"
+                                style="border-radius: 8px; height: 38px; font-size: 13px; line-height: 1.2; padding-top: 0; padding-bottom: 0;">
                                 <option value="">All Types</option>
                                 <option value="permanent">Employee</option>
                                 <option value="contract">Worker</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
-                            <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()"
-                                style="border-radius: 8px;">
+                            <label class="form-label fw-bold text-muted text-uppercase mb-2" style="font-size: 11px; letter-spacing: 0.5px;">Department</label>
+                            <select id="filterDepartment" class="form-select border-0 shadow-sm fw-bold px-3" onchange="applyFilters()"
+                                style="border-radius: 8px; height: 38px; font-size: 13px; line-height: 1.2; padding-top: 0; padding-bottom: 0;">
                                 <option value="">All Departments</option>
                                 <option value="software_development">Software Development</option>
                                 <option value="mobile_app_development">Mobile App Development</option>
@@ -86,9 +86,9 @@
                             </select>
                         </div>
                         <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary w-100 fw-bold shadow-sm" onclick="applyFilters()"
-                                style="background: #3858f9; border: none; height: 38px; border-radius: 8px;">
-                                <i class="feather-check-circle me-1"></i> APPLY FILTERS
+                            <button class="btn btn-primary w-100 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" onclick="applyFilters()"
+                                style="background: #3858f9; border: none; height: 38px; border-radius: 8px; font-size: 13px;">
+                                <i class="feather-check-circle"></i> APPLY FILTERS
                             </button>
                         </div>
                     </div>
@@ -107,7 +107,7 @@
                     </select>
                     <span class="text-muted small fw-bold text-uppercase">entries</span>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive main-employee-table-wrapper">
                     <table class="table align-middle table-hover" id="employeeTable">
 
                         <thead class="bg-light">
@@ -139,17 +139,19 @@
                                     </td>
 
                                     <td style="padding: 12px;" data-employee-id="{{ $emp->id }}">
-                                        <div class="dropdown">
+                                        <div class="dropdown dropup">
                                             <a href="javascript:void(0)"
                                                 class="fw-bold text-decoration-none dropdown-toggle-no-caret"
-                                                style="color:#3858f9; font-size: 14px;" data-bs-toggle="dropdown"
+                                                style="color:#3858f9; font-size: 14px;" 
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport"
                                                 aria-expanded="false">
                                                 {{ $emp->name }}
                                                 <span class="text-muted fw-normal ms-1"
                                                     style="font-size: 11px;">(EC{{ str_pad($emp->id, 4, '0', STR_PAD_LEFT) }})</span>
                                             </a>
                                             <ul class="dropdown-menu border-0 shadow-lg"
-                                                style="border-radius: 12px; min-width: 160px; padding: 10px;">
+                                                style="border-radius: 12px; min-width: 160px; padding: 10px; z-index: 9999;">
                                                 <li>
                                                     <a class="dropdown-item py-2 d-flex align-items-center"
                                                         href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})">
@@ -231,14 +233,16 @@
                     </table>
                 </div>
 
-                <!-- PAGINATION -->
+                <!-- PAGINATION FOOTER -->
                 @if($employees->count())
-                    <div class="d-flex justify-content-between align-items-center mt-4">
-                        <div class="text-muted small">
-                            Showing {{ $employees->firstItem() }} to {{ $employees->lastItem() }} of {{ $employees->total() }}
-                            entries
+                    <div class="px-4 py-3 border-top bg-light-soft d-flex justify-content-between align-items-center" 
+                         style="border-radius: 0 0 12px 12px; background-color: #fcfdfe;">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-soft-primary text-primary px-3 py-2 fw-medium" style="font-size: 11px; border-radius: 6px;">
+                                <i class="bi bi-info-circle me-1"></i> Showing {{ $employees->firstItem() }} to {{ $employees->lastItem() }} of {{ $employees->total() }} entries
+                            </span>
                         </div>
-                        <div>
+                        <div class="pagination-modern">
                             {{ $employees->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
@@ -408,6 +412,53 @@
             padding: 5px 12px !important;
             font-size: 11px !important;
         }
+
+        /* Fix Dropdown Clipping - Scoped to main table only */
+        .main-employee-table-wrapper {
+            overflow: visible !important;
+        }
+        
+        .card-body.p-0 {
+            overflow: visible !important;
+        }
+        
+        .dropdown-menu {
+            z-index: 9999 !important;
+        }
+
+        /* Ensure the dropup doesn't get hidden by the header */
+        /* Pagination Modern Styling */
+        .pagination-modern .page-link {
+            border: none;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 12px;
+            margin: 0 2px;
+            border-radius: 6px !important;
+            transition: all 0.2s;
+        }
+
+        .pagination-modern .page-item.active .page-link {
+            background-color: #3858f9 !important;
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(56, 88, 249, 0.2);
+        }
+
+        .pagination-modern .page-link:hover:not(.active) {
+            background-color: #f1f5f9;
+            color: #3858f9;
+        }
+
+        .bg-light-soft {
+            background-color: #fcfdfe !important;
+        }
+    </style>
+
+    <style>
+        .card-header {
+            position: relative;
+            z-index: 10;
         }
 
         #employeeTable {
@@ -434,10 +485,6 @@
             color: #555;
             font-weight: 600;
             font-size: 13px;
-        }
-
-            {
-            background-color: #f9f9f9;
         }
 
         table tbody tr:nth-child(even) {
@@ -993,62 +1040,66 @@
         function deleteEmployee(empId = null) {
             const id = empId || window.currentEmployeeId;
             if (!id) {
-                alert('No employee selected');
+                Swal.fire('Error', 'No employee selected', 'error');
                 return;
             }
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This employee will be permanently deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, Delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch(`/employees/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'same-origin'
-            })
-                .then(res => {
-                    if (res.status === 200 || res.status === 204 || res.ok) {
-                        // Close modal if open
-                        const modal = bootstrap.Offcanvas.getInstance(document.getElementById('employeeModal'));
-                        if (modal) modal.hide();
-
-                        // Remove row from table
-                        const row = document.getElementById(`emp-row-${id}`);
-                        if (row) {
-                            row.classList.add('fade-out'); // Add a fade-out effect
-                            setTimeout(() => {
-                                row.remove();
-                                // Check if table is empty
-                                const visibleRows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)").length;
-                                if (visibleRows === 0) {
-                                    const tbody = document.querySelector("#employeeTable tbody");
-                                    const noResultsRow = document.createElement('tr');
-                                    noResultsRow.id = 'noResultsRow';
-                                    noResultsRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted">No employees found. <a href="{{ route('employees.create') }}">Add one</a></td>';
-                                    tbody.appendChild(noResultsRow);
-                                }
-                            }, 400);
+                    fetch(`/employees/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove row from table
+                            const row = document.getElementById(`emp-row-${id}`);
+                            if (row) {
+                                row.classList.add('fade-out');
+                                setTimeout(() => {
+                                    row.remove();
+                                    // Check if table is empty
+                                    const visibleRows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)").length;
+                                    if (visibleRows === 0) {
+                                        location.reload(); // Reload to show empty state
+                                    }
+                                }, 400);
+                            }
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Employee has been deleted.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error(data.message || 'Error deleting employee');
                         }
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Employee deleted successfully!'
-                        });
-                    } else {
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Error deleting employee'
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error('Delete Error:', err);
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Error deleting employee'
+                    })
+                    .catch(err => {
+                        console.error('Delete Error:', err);
+                        Swal.fire('Error', err.message || 'Something went wrong!', 'error');
                     });
-                });
+                }
+            });
         }
 
         // Tab switching function
@@ -1252,10 +1303,14 @@
                         const date = new Date(month + '-01');
                         const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
+                        const [y, m] = month.split('-').map(Number);
                         for (let day = 1; day <= lastDay; day++) {
                             const dateStr = `${month}-${String(day).padStart(2, '0')}`;
                             const record = recordMap[dateStr];
+                            // Construct date locally to avoid UTC issues
+                            const dateObj = new Date(y, m - 1, day);
                             const isHoliday = holidays.includes(dateStr);
+                            const isSunday = dateObj.getDay() === 0;
 
                             let statusHtml = '<span class="badge bg-light text-muted">No Record</span>';
                             let hours = '-';
@@ -1269,15 +1324,35 @@
 
                                 statusHtml = `<span class="badge ${badgeClass}">${record.status.replace('_', ' ').toUpperCase()}</span>`;
 
-                                hours = record.total_hours || '-';
-                                } else if (isHoliday) {
-                                    statusHtml = '<span class="badge bg-primary">HOLIDAY</span>';
+                                // Dynamic Hours Calculation (Fixes -23 bug and missing values)
+                                let displayHours = record.total_hours;
+                                if ((!displayHours || parseFloat(displayHours) <= 0) && record.check_in && record.check_out) {
+                                    try {
+                                        const [inH, inM] = record.check_in.split(':').map(Number);
+                                        const [outH, outM] = record.check_out.split(':').map(Number);
+                                        
+                                        let inDate = new Date(2000, 0, 1, inH, inM);
+                                        let outDate = new Date(2000, 0, 1, outH, outM);
+                                        
+                                        if (outDate < inDate) outDate.setDate(outDate.getDate() + 1);
+                                        
+                                        const diffMs = outDate - inDate;
+                                        displayHours = (diffMs / (1000 * 60 * 60)).toFixed(2);
+                                    } catch(e) { displayHours = '-'; }
                                 }
+                                hours = (displayHours && displayHours !== '-') ? displayHours + ' hrs' : '-';
+                            } else if (isHoliday) {
+                                statusHtml = '<span class="badge bg-primary">HOLIDAY</span>';
+                            } else if (isSunday) {
+                                statusHtml = '<span class="badge bg-soft-primary text-primary border border-primary-subtle">SUNDAY</span>';
+                            }
 
-                                html += `
-                                                    <tr>
-                                                        <td class="fw-bold">${day} ${new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short' })}</td>
-                                                        <td>${statusHtml}</td>
+                            html += `
+                                                <tr class="${isSunday ? 'bg-light bg-opacity-50' : ''}">
+                                                    <td class="fw-bold ${isSunday ? 'text-primary' : ''}">
+                                                        ${day} <span class="small opacity-75">${dateObj.toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                                                    </td>
+                                                    <td>${statusHtml}</td>
                                                         <td class="text-center">${hours}</td>
                                                     </tr>
                                                 `;
@@ -1310,7 +1385,8 @@
                                     Month</label>
                                 <input type="month" id="attMonthSelect"
                                     class="form-control border-0 shadow-none bg-white py-1 px-3 fw-bold"
-                                    onchange="fetchAttendance()" style="border-radius: 8px;">
+                                    onchange="fetchAttendance()" style="border-radius: 8px; cursor: pointer;"
+                                    onclick="this.showPicker()">
                             </div>
 
                             <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">

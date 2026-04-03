@@ -84,10 +84,13 @@ class PayrollController extends Controller
         while ($current->lte($end)) {
             $dateStr = $current->toDateString();
             $isHoliday = isset($holidays[$dateStr]);
+            $isSunday = $current->isSunday();
+            
             $datesData[] = (object) [
                 'attendance_date' => $dateStr,
                 'is_holiday' => $isHoliday,
-                'holiday_title' => $isHoliday ? $holidays[$dateStr]->title : null,
+                'is_sunday' => $isSunday,
+                'holiday_title' => $isHoliday ? $holidays[$dateStr]->title : ($isSunday ? 'Weekly Off' : null),
                 'count' => $attendanceData[$dateStr]->total_count ?? 0,
                 'present' => $attendanceData[$dateStr]->present_count ?? 0,
                 'absent' => $attendanceData[$dateStr]->absent_count ?? 0,
@@ -100,9 +103,9 @@ class PayrollController extends Controller
 
         // Sort descending to show latest records first
         $datesData = collect($datesData)->filter(function ($item) {
-            // Only show dates with records, holidays, or Today/Yesterday (if today is the month being viewed)
+            // Only show dates with records, holidays, Sundays, or Today
             $isToday = $item->attendance_date === date('Y-m-d');
-            return $item->count > 0 || $item->is_holiday || $isToday;
+            return $item->count > 0 || $item->is_holiday || $item->is_sunday || $isToday;
         })->sortByDesc('attendance_date');
 
         return view('payroll.attendance', [
@@ -151,7 +154,8 @@ class PayrollController extends Controller
     public function addAttendance()
     {
         $employees = Employee::all();
-        return view('payroll.add-attendance', compact('employees'));
+        $holidays = Holiday::all()->pluck('title', 'date');
+        return view('payroll.add-attendance', compact('employees', 'holidays'));
     }
 
     /**
@@ -188,10 +192,12 @@ class PayrollController extends Controller
                         }
                     }
 
-                    // Auto-Leave Logic: If no check-in, set status to 'leave'
-                    if (empty($checkIn)) {
+                    // Auto-Leave Logic: If no check-in, set status to 'leave' UNLESS there is a check-out (for fixing later)
+                    if (empty($checkIn) && !empty($checkOut)) {
+                        $status = 'present'; // Allow to be edited later
+                    } elseif (empty($checkIn)) {
                         $status = 'leave';
-                        $checkOut = null; // Ensure no check-out if no check-in
+                        $checkOut = null; 
                     }
 
                     Attendance::updateOrCreate(
@@ -335,19 +341,8 @@ class PayrollController extends Controller
                 $current->addDay();
             }
 
-            // 4. Final Rule: If NO worked days (punches), then NO Sunday/Holiday pay and NO adjustment
-            $totalDaysInRange = (int) $calcStart->diffInDays($rangeEndForStats) + 1;
-            $adjustment = 0;
-            if ($workedDays > 0) {
-                $adjustment = min($absentDaysTotal, 1.5);
-            } else {
-                // Force zero payable days if no actual attendance (punches) was recorded
-                $paidOffDays = 0;
-                $leavesCount = 0; // Don't even show leaves if no work was done
-                $absentDaysTotal = $totalDaysInRange; // Everything is absent
-            }
-
-            $payableDays = $workedDays + $paidOffDays + $adjustment;
+            // 4. Simplified Rule: No automatic adjustment. User handles it manually.
+            $payableDays = $workedDays + $paidOffDays;
 
             // Limit payable days to total days in the month
             if ($payableDays > $totalDaysInMonth) {
@@ -370,7 +365,11 @@ class PayrollController extends Controller
             $pOther = round($fullOther * $prorateFactor, 2);
 
             $grossSalary = round($pBasic + $pHRA + $pConv + $pMed + $pOther, 2);
-            $salaryLoss = round(($fullBasic + $fullHRA + $fullConv + $fullMed + $fullOther) - $grossSalary, 2);
+            
+            // Period Potential: Total possible earnings for the elapsed days so far
+            $totalDaysInRange = $rangeEndForStats->diffInDays($calcStart) + 1;
+            $periodPotential = round(($fullBasic + $fullHRA + $fullConv + $fullMed + $fullOther) * ($totalDaysInRange / $totalDaysInMonth), 2);
+            $salaryLoss = round($periodPotential - $grossSalary, 2); 
 
             // 6. Deductions
             $pfDeduction = 0;
@@ -383,14 +382,14 @@ class PayrollController extends Controller
                 $esiDeduction = round($grossSalary * 0.0075, 2);
             }
 
-            $totalDeductions = round($pfDeduction + $esiDeduction, 2);
-            $netSalary = round($grossSalary - $totalDeductions, 2);
+            $totalDeductions = round($pfDeduction + $esiDeduction + $salaryLoss, 2);
+            $netSalary = round($periodPotential - $totalDeductions, 2); 
 
             $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $monthStr,
                 'payable_days' => round($payableDays, 1),
-                'unpaid_days' => round($totalDaysInMonth - $payableDays, 1), // This remains the actual LWP for data recording
+                'unpaid_days' => round($totalDaysInRange - $payableDays, 1),
                 'salary_loss' => $salaryLoss,
                 'basic_salary' => $pBasic,
                 'hra' => $pHRA,
@@ -405,6 +404,12 @@ class PayrollController extends Controller
                 'net_salary' => $netSalary,
                 'status' => 'pending',
                 'monthly_salary' => ($fullBasic + $fullHRA + $fullConv + $fullMed + $fullOther),
+                'full_hra' => $fullHRA,
+                'full_conveyance' => $fullConv,
+                'full_medical' => $fullMed,
+                'full_other' => $fullOther,
+                'has_pf' => !empty($employee->pf_number),
+                'has_esi' => !empty($employee->esi_number),
             ];
 
             return response()->json([
@@ -412,12 +417,13 @@ class PayrollController extends Controller
                 'payroll' => $payrollData,
                 'details' => [
                     'worked_days' => round($workedDays, 1),
-                    'absent_days' => round($absentDaysTotal - $adjustment, 1),
+                    'absent_days' => round($absentDaysTotal, 1),
                     'leaves_taken' => round($leavesCount, 1),
                     'paid_offs' => $paidOffDays,
-                    'allowed_leaves' => $adjustment,
+                    'allowed_leaves' => 0,
                     'total_payable' => round($payableDays, 1),
                     'days_in_month' => $totalDaysInMonth,
+                    'total_days_in_range' => $totalDaysInRange,
                     'calc_up_to' => $rangeEndForStats->toDateString(),
                     'debug_log' => $debugLog
                 ]
@@ -867,6 +873,61 @@ class PayrollController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Selected attendance records deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Update an individual attendance record
+     */
+    public function updateAttendanceRecord(Request $request, $id)
+    {
+        try {
+            $attendance = Attendance::findOrFail($id);
+            $checkIn = $request->check_in;
+            $checkOut = $request->check_out;
+
+            $totalHours = 0;
+            $status = $attendance->status;
+
+            if ($checkIn && $checkOut) {
+                $in = Carbon::parse($checkIn);
+                $out = Carbon::parse($checkOut);
+
+                // Handle night shifts
+                if ($out->lessThan($in)) {
+                    $out->addDay();
+                }
+
+                $totalHours = $out->diffInMinutes($in) / 60;
+                
+                // If it's a punch update, we assume they are present/late unless it's a leave
+                if ($status === 'absent' || $status === 'leave') {
+                    $status = 'present';
+                }
+            } elseif (empty($checkIn) && !empty($checkOut)) {
+                $status = 'present'; // Allow fixing later
+                $totalHours = 0;
+            } elseif (empty($checkIn)) {
+                $status = 'leave';
+                $checkOut = null;
+            }
+
+            $attendance->update([
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'status' => $status,
+                'total_hours' => round($totalHours, 2),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Attendance updated successfully!',
             ]);
         } catch (\Exception $e) {
             return response()->json([

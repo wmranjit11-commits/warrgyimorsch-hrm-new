@@ -3,9 +3,9 @@
 @section('content')
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Main Content Card -->
-        <div class="px-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
-                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+        <div class="px-4 pt-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center"
                     style="border-radius: 12px 12px 0 0;">
                     <div>
                         <h5 class="fw-bold mb-0" style="color: #334155;">Payroll History</h5>
@@ -49,10 +49,10 @@
                     <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted mb-2">Employee</label>
+                                <label class="form-label fw-bold text-muted mb-2" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Employee</label>
                                 <select id="employeeFilter"
-                                    class="form-select border-0 bg-white py-2 px-3 shadow-sm fw-bold"
-                                    style="border-radius: 8px; height: 40px;">
+                                    class="form-select border-0 bg-white px-3 fw-bold shadow-sm"
+                                    style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.5;">
                                     <option value="">All Employees</option>
                                     @foreach(\App\Models\Employee::all() as $emp)
                                         <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
@@ -61,20 +61,21 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted mb-2">Month</label>
+                                <label class="form-label fw-bold text-muted mb-2" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Month</label>
                                 <input type="month" id="monthFilter"
-                                    class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
-                                    value="{{ request('month') }}" style="border-radius: 8px; height: 40px;">
+                                    class="form-control border-0 bg-white px-3 fw-bold shadow-sm"
+                                    value="{{ request('month') }}" style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.5;"
+                                    onclick="this.showPicker()">
                             </div>
                             <div class="col-md-4 d-flex gap-2">
                                 <button
                                     class="btn btn-primary flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
-                                    style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
+                                    style="background: #3858f9; border: none; height: 38px; border-radius: 8px; font-size: 13px;">
                                     <i class="feather-search"></i> APPLY
                                 </button>
                                 <button class="btn btn-light border px-3 shadow-none" onclick="resetFilters()"
-                                    style="height: 40px; border-radius: 8px;">
+                                    style="height: 38px; border-radius: 8px;">
                                     <i class="feather-refresh-cw" style="font-size: 14px;"></i>
                                 </button>
                             </div>

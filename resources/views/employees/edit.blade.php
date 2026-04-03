@@ -253,6 +253,7 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-calendar"></i></span>
                                     <input type="date" name="date_of_joining" class="form-control"
+                                        style="cursor: pointer;" onclick="this.showPicker()"
                                         value="{{ old('date_of_joining', $employee->date_of_joining) }}">
                                 </div>
                             </div>
@@ -261,6 +262,7 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-calendar"></i></span>
                                     <input type="date" name="date_of_birth" class="form-control"
+                                        style="cursor: pointer;" onclick="this.showPicker()"
                                         value="{{ old('date_of_birth', $employee->date_of_birth) }}">
                                 </div>
                             </div>
@@ -318,6 +320,7 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-clock"></i></span>
                                     <input type="time" name="time_in" class="form-control"
+                                        style="cursor: pointer;" onclick="this.showPicker()"
                                         value="{{ old('time_in', $employee->time_in) }}">
                                 </div>
                             </div>
@@ -326,6 +329,7 @@
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-clock"></i></span>
                                     <input type="time" name="time_out" class="form-control"
+                                        style="cursor: pointer;" onclick="this.showPicker()"
                                         value="{{ old('time_out', $employee->time_out) }}">
                                 </div>
                             </div>

@@ -31,9 +31,9 @@
                 <div class="card-body p-4">
                     <div class="row g-4 align-items-end">
                         <div class="col-md-5">
-                            <label class="form-label small fw-bold text-muted mb-2">Employee Name</label>
-                            <select id="employeeSelect" class="form-select border-0 bg-light py-2 px-3 shadow-none fw-bold"
-                                style="border-radius: 8px; height: 45px;">
+                            <label class="form-label fw-bold text-muted mb-2" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Employee Name</label>
+                            <select id="employeeSelect" class="form-select border-0 bg-light px-3 shadow-none fw-bold"
+                                style="border-radius: 8px; height: 38px; font-size: 13px;">
                                 <option value="">Select Employee</option>
                                 @foreach ($employees as $emp)
                                     <option value="{{ $emp->id }}">{{ $emp->name }}</option>
@@ -41,16 +41,16 @@
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-bold text-muted mb-2">Month</label>
+                            <label class="form-label fw-bold text-muted mb-2" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">Month</label>
                             <input type="month" id="monthSelect"
-                                class="form-control border-0 bg-light py-2 px-3 shadow-none fw-bold"
-                                value="{{ date('Y-m') }}" max="{{ date('Y-m') }}" style="border-radius: 8px; height: 45px;">
+                                class="form-control border-0 bg-light px-3 shadow-none fw-bold"
+                                value="{{ date('Y-m') }}" max="{{ date('Y-m') }}" style="border-radius: 8px; height: 38px; font-size: 13px;">
                         </div>
                         <div class="col-md-2">
                             <button
                                 class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                 onclick="calculatePayroll()"
-                                style="background: #3858f9; border: none; height: 45px; border-radius: 8px;">
+                                style="background: #3858f9; border: none; height: 38px; border-radius: 8px; font-size: 13px;">
                                 <i class="bi bi-calculator"></i> CALCULATE
                             </button>
                         </div>
@@ -121,6 +121,10 @@
                                                     <span class="text-muted small">PF (12% of Basic)</span>
                                                     <span class="fw-bold text-danger small" id="resPF">- Rs. 0.00</span>
                                                 </div>
+                                                <div id="lossRow" class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted small">Salary Loss (LWP)</span>
+                                                    <span class="fw-bold text-danger small" id="resLoss">- Rs. 0.00</span>
+                                                </div>
                                                 <div id="esiRow" class="d-flex justify-content-between mb-1"
                                                     style="display: none !important;">
                                                     <span class="text-muted small">ESI (0.75% of Gross)</span>
@@ -133,51 +137,18 @@
                                                 </div>
                                             </div>
 
-                                            <div class="row g-2 mb-3">
-                                                <div class="col-6 col-md">
-                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
-                                                            style="font-size: 8px;">Actual Presents</div>
-                                                        <h6 class="mb-0 fw-bold text-primary" id="brkWorked">0d</h6>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md">
-                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
-                                                            style="font-size: 8px;">Marked Leaves</div>
-                                                        <h6 class="mb-0 fw-bold text-warning" id="brkLeaves">0d</h6>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md">
-                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
-                                                            style="font-size: 8px;">Paid Offs</div>
-                                                        <h6 class="mb-0 fw-bold text-info" id="brkPaidOffs">0d</h6>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md">
-                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
-                                                            style="font-size: 8px;">Leave Credit</div>
-                                                        <h6 class="mb-0 fw-bold text-success" id="brkAllowed">0d</h6>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md">
-                                                    <div class="p-2 bg-white rounded-3 border text-center shadow-sm h-100">
-                                                        <div class="small fw-bold text-muted text-uppercase mb-1"
-                                                            style="font-size: 8px;">LWP Days</div>
-                                                        <h6 class="mb-0 fw-bold text-danger" id="brkUnpaid">0d</h6>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <!-- Summary Boxes Removed to reduce clutter as per user request -->
 
                                             <div class="pt-3 border-top mt-2">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div>
                                                         <h4 class="mb-0 fw-bold text-dark">Net Payable</h4>
-                                                        <span class="text-muted small fw-bold text-uppercase"
-                                                            style="font-size: 9px;">Payable Days: <span
-                                                                id="resPayableDays">0</span></span>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="text-muted small fw-bold text-uppercase" style="font-size: 10px;">Payable Days:</span>
+                                                            <input type="number" id="resPayableDays" class="form-control form-control-sm border-0 fw-bold text-primary text-center px-1" 
+                                                                step="0.5" min="0" max="31" oninput="updateCalculations()"
+                                                                style="width: 65px; height: 30px; background: #ebf0ff; border-radius: 6px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                                        </div>
                                                     </div>
                                                     <h3 class="mb-0 fw-bold text-primary" id="resNetPayable"
                                                         style="font-size: 2.2rem; letter-spacing: -1px;"></h3>
@@ -227,18 +198,19 @@
 
     <script>
         let currentPayrollData = null;
+        let baseSalaryData = null; // Stores full month values for pro-rata recalculation
 
         function calculatePayroll() {
-            const month = document.getElementById('monthSelect').value;
+            const monthInput = document.getElementById('monthSelect').value;
             const employeeId = document.getElementById('employeeSelect').value;
 
-            if (!month || !employeeId) {
+            if (!monthInput || !employeeId) {
                 alert('Please select both month and employee');
                 return;
             }
 
             const noCalc = document.getElementById('noCalculation');
-            noCalc.innerHTML = '<div class="py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 fw-bold text-primary">Calculating...</p></div>';
+            noCalc.innerHTML = '<div class="py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 fw-bold text-primary">Calculating Attendance & Pro-rata...</p></div>';
 
             fetch('{{ route("payroll.calculate") }}', {
                 method: 'POST',
@@ -246,48 +218,52 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ month, employee_id: employeeId })
+                body: JSON.stringify({ month: monthInput, employee_id: employeeId })
             })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         currentPayrollData = data.payroll;
                         const p = data.payroll;
-                        const d = p.details || {};
-                        const monthlyBasic = parseFloat(p.monthly_salary || (parseFloat(p.basic_salary) + parseFloat(p.salary_loss)));
+                        const d = data.details || {};
+                        
+                        // Extract actual days in selected month for accurate pro-rata calculation
+                        const selDate = new Date(monthInput + '-01');
+                        const daysInMonth = new Date(selDate.getFullYear(), selDate.getMonth() + 1, 0).getDate();
+                        
+                        // Use elapsed days so far for ongoing months
+                        const rangeDays = d.total_days_in_range || daysInMonth;
 
-                        document.getElementById('resMonthlyBasic').textContent = 'Rs. ' + f(p.monthly_salary);
-                        document.getElementById('resPayableDays').textContent = (p.payable_days || 0);
-                        document.getElementById('resNetPayable').textContent = 'Rs. ' + f(p.net_salary);
+                        baseSalaryData = {
+                            monthly_salary: parseFloat(p.monthly_salary),
+                            hra: parseFloat(p.full_hra || 0),
+                            conv: parseFloat(p.full_conveyance || 0),
+                            med: parseFloat(p.full_medical || 0),
+                            other: parseFloat(p.full_other || 0),
+                            days_divisor: daysInMonth,
+                            range_days: rangeDays 
+                        };
 
-                        // Pro-rated Components
-                        document.getElementById('resPBasic').textContent = 'Rs. ' + f(p.basic_salary);
-
-                        // Earnings row visibility
-                        updateRow('hraRow', 'resPHRA', p.hra);
-                        updateRow('convRow', 'resPConv', p.conveyance_allowance);
-                        updateRow('medRow', 'resPMed', p.medical_allowance);
-                        updateRow('otherRow', 'resPOther', p.other_allowance);
-                        document.getElementById('resGross').textContent = 'Rs. ' + f(p.gross_salary);
-
-                        // Deductions row visibility
-                        updateRow('pfRow', 'resPF', p.pf_deduction, true);
-                        updateRow('esiRow', 'resESI', p.esi_deduction, true);
-                        document.getElementById('resTotalDeductions').textContent = '- Rs. ' + f(p.deductions);
-
-                        // Detailed Summary Breakdown
-                        document.getElementById('brkWorked').innerText = (d.worked_days || 0) + ' Day Present';
-                        document.getElementById('brkLeaves').innerText = (d.leaves_taken || 0) + ' Day Leave';
-                        document.getElementById('brkUnpaid').innerText = (d.absent_days || 0) + ' Day Absent';
-                        document.getElementById('brkAllowed').innerText = (d.allowed_leaves || 0) + ' Leave Adj.';
-                        document.getElementById('brkPaidOffs').innerText = (d.paid_offs || 0) + ' Paid Offs';
+                        // Initialize Manual Input with calculated value
+                        const payableDaysInput = document.getElementById('resPayableDays');
+                        payableDaysInput.value = p.payable_days || 0;
+                        
+                        // Update UI Header to show we are calculating for a partial period
+                        const label = document.getElementById('resMonthlyBasic').previousElementSibling;
+                        if (rangeDays < daysInMonth) {
+                            label.innerText = "Full Gross (Target Period)";
+                        } else {
+                            label.innerText = "Full Monthly Gross";
+                        }
+                        
+                        // First render
+                        renderPayrollUI();
 
                         noCalc.style.display = 'none';
                         document.getElementById('calculationResult').style.display = 'block';
 
                         const btn = document.getElementById('submitPayrollBtn');
-                        btn.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> SUBMIT PAYROLL';
-                        btn.style.borderRadius = '12px';
+                        btn.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> CONFIRM & SAVE PAYROLL';
                         btn.disabled = false;
                     } else {
                         alert(data.message || 'Error occurred');
@@ -299,6 +275,85 @@
                     alert('An error occurred during calculation. Please check the console for details.');
                     noCalc.innerHTML = '<div class="py-5"><i class="bi bi-exclamation-circle text-danger fs-1"></i><p class="mt-3 fw-bold text-danger">Calculation Failed. Please retry.</p></div>';
                 });
+        }
+
+        // Live Recalculation Core Logic
+        function updateCalculations() {
+            if (!baseSalaryData) return;
+
+            const days = parseFloat(document.getElementById('resPayableDays').value) || 0;
+            const div = baseSalaryData.days_divisor;
+
+            // Pro-rate Base Earnings
+            const proRatedBasic = (baseSalaryData.monthly_salary / div) * days;
+            
+            // Sync current data object
+            currentPayrollData.payable_days = days;
+            currentPayrollData.basic_salary = proRatedBasic.toFixed(2);
+            
+            // Recalculate Deductions (Standard rules)
+            // PF = 12% of pro-rated basic (capped at 1800 often, but following current code)
+            const pf = proRatedBasic * 0.12;
+            currentPayrollData.pf_deduction = pf.toFixed(2);
+            
+            // ESI = 0.75% of pro-rated gross (approx for now, will calculate properly in render)
+            // Actually, keep it simple: total deductions = PF + whatever else was there
+            
+            renderPayrollUI();
+        }
+
+        function renderPayrollUI() {
+            const p = currentPayrollData;
+            const b = baseSalaryData;
+            const days = parseFloat(p.payable_days) || 0;
+            const div = b.days_divisor;
+
+            // Potential Earnings for the period (e.g. 2 days of April = ~1333)
+            const potentialPeriodGross = (b.monthly_salary / div) * b.range_days;
+            document.getElementById('resMonthlyBasic').textContent = 'Rs. ' + f(potentialPeriodGross);
+            document.getElementById('resPBasic').textContent = 'Rs. ' + f(p.basic_salary);
+
+            // Pro-rate other earnings on the fly
+            const proHRA = (b.hra / div) * days;
+            const proConv = (b.conv / div) * days;
+            const proMed = (b.med / div) * days;
+            const proOther = (b.other / div) * days;
+
+            updateRow('hraRow', 'resPHRA', proHRA);
+            updateRow('convRow', 'resPConv', proConv);
+            updateRow('medRow', 'resPMed', proMed);
+            updateRow('otherRow', 'resPOther', proOther);
+
+            const actualGross = parseFloat(p.basic_salary) + proHRA + proConv + proMed + proOther;
+            document.getElementById('resGross').textContent = 'Rs. ' + f(actualGross);
+            p.gross_salary = actualGross.toFixed(2);
+
+            // Re-sync Deductions
+            let pf = 0;
+            if (p.has_pf) pf = parseFloat(p.basic_salary) * 0.12;
+            
+            let esi = 0;
+            if (p.has_esi) esi = actualGross * 0.0075;
+
+            // Salary Loss is specifically the difference between what they COULD have earned so far vs what they DID
+            const salaryLoss = potentialPeriodGross - actualGross;
+            updateRow('lossRow', 'resLoss', salaryLoss, true);
+            
+            updateRow('pfRow', 'resPF', pf, true);
+            updateRow('esiRow', 'resESI', esi, true);
+            
+            const totalDeductions = pf + esi + salaryLoss;
+            document.getElementById('resTotalDeductions').textContent = '- Rs. ' + f(totalDeductions);
+            
+            p.pf_deduction = pf.toFixed(2);
+            p.esi_deduction = esi.toFixed(2);
+            p.salary_loss = salaryLoss.toFixed(2);
+            p.deductions = totalDeductions.toFixed(2);
+
+            // Final Net is Potential minus Deductions (which now makes intuitive sense)
+            const net = potentialPeriodGross - totalDeductions;
+            document.getElementById('resNetPayable').textContent = 'Rs. ' + f(net);
+            p.net_salary = net.toFixed(2);
         }
 
         function updateRow(rowId, spanId, value, isDeduction = false) {

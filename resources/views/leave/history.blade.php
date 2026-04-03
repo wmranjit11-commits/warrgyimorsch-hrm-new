@@ -41,10 +41,10 @@
             <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
                 <form action="{{ route('leave.history') }}" method="GET" class="row g-3">
                     <div class="col-md-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Search By Category</label>
-                        <select name="category" class="form-select border-0 bg-light"
-                            style="border-radius: 10px; height: 45px;">
+                        <label class="form-label fw-bold text-muted text-uppercase mb-2"
+                            style="letter-spacing: 0.5px; font-size: 11px;">Search By Category</label>
+                        <select name="category" class="form-select border-0 bg-light px-3 fw-bold"
+                            style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.2;">
                             <option value="">Select Category</option>
                             <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Leave</option>
                             <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Leave</option>
@@ -53,10 +53,10 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Search By Status</label>
-                        <select name="status" class="form-select border-0 bg-light"
-                            style="border-radius: 10px; height: 45px;">
+                        <label class="form-label fw-bold text-muted text-uppercase mb-2"
+                            style="letter-spacing: 0.5px; font-size: 11px;">Search By Status</label>
+                        <select name="status" class="form-select border-0 bg-light px-3 fw-bold"
+                            style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.2;">
                             <option value="">Select Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
@@ -65,23 +65,25 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">From Date</label>
-                        <input type="date" name="from_date" class="form-control border-0 bg-light"
-                            value="{{ request('from_date') }}" style="border-radius: 10px; height: 45px;">
+                        <label class="form-label fw-bold text-muted text-uppercase mb-2"
+                            style="letter-spacing: 0.5px; font-size: 11px;">From Date</label>
+                        <input type="date" name="from_date" class="form-control border-0 bg-light px-3 fw-bold shadow-sm"
+                            value="{{ request('from_date') }}" style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.5; cursor: pointer;"
+                            onclick="this.showPicker()">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Upto Date</label>
-                        <input type="date" name="to_date" class="form-control border-0 bg-light"
-                            value="{{ request('to_date') }}" style="border-radius: 10px; height: 45px;">
+                        <label class="form-label fw-bold text-muted text-uppercase mb-2"
+                            style="letter-spacing: 0.5px; font-size: 11px;">Upto Date</label>
+                        <input type="date" name="to_date" class="form-control border-0 bg-light px-3 fw-bold shadow-sm"
+                            value="{{ request('to_date') }}" style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.5; cursor: pointer;"
+                            onclick="this.showPicker()">
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary fw-bold flex-grow-1"
-                            style="border-radius: 10px; height: 45px; background: #3858f9; border: none;">Search</button>
+                            style="border-radius: 8px; height: 38px; background: #3858f9; border: none; font-size: 13px;">Search</button>
                         <a href="{{ route('leave.history') }}"
                             class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
-                            style="border-radius: 10px; height: 45px; width: 100px;">Reset</a>
+                            style="border-radius: 8px; height: 38px; width: 100px; font-size: 13px;">Reset</a>
                     </div>
                 </form>
             </div>
@@ -89,7 +91,7 @@
 
         <!-- Table Section -->
         <div class="px-4 pb-5">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -248,21 +250,24 @@
                         <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
                                 class="text-danger">*</span></label>
                         <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" required onchange="calculateDays()"
+                            style="border-radius: 8px; height: 38px; font-size: 13px; cursor: pointer;"
+                            onclick="this.showPicker()" required onchange="calculateDays()"
                             min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-4" id="endDateWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
                         <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
+                            style="border-radius: 8px; height: 38px; font-size: 13px; cursor: pointer;"
+                            onclick="this.showPicker()" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-4" id="startTimeWrapper" style="display: none;">
                         <label class="form-label small fw-bold text-muted text-uppercase">Start Time <span
                                 class="text-danger">*</span></label>
                         <input type="time" name="start_time" id="startTime" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" onchange="calculateDays()">
+                            style="border-radius: 8px; height: 38px; font-size: 13px; cursor: pointer;"
+                            onclick="this.showPicker()" onchange="calculateDays()">
                     </div>
 
                     <div class="col-md-4">

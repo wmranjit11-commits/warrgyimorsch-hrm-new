@@ -44,10 +44,10 @@
                             </h6>
                             <div class="row g-2">
                                 <div class="col-12">
-                                    <label class="form-label small fw-bold text-muted mb-1 text-uppercase">Select Allotment
+                                    <label class="form-label fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">Select Allotment
                                         Month</label>
-                                    <select id="monthSelect" class="form-select border-0 bg-light fw-bold"
-                                        style="border-radius: 10px; height: 48px; border: 1.5px solid #f1f5f9; padding-left: 15px;"
+                                    <select id="monthSelect" class="form-select border-0 bg-light fw-bold px-3 shadow-sm"
+                                        style="border-radius: 8px; height: 38px; font-size: 13px;"
                                         onchange="updateView()">
                                         @foreach(range(1, 12) as $m)
                                             <option value="{{ sprintf('%02d', $m) }}" {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}>
@@ -105,8 +105,8 @@
                             <button
                                 class="btn btn-primary px-5 py-2 fw-bold shadow-sm hstack gap-2 justify-content-center w-100"
                                 onclick="saveAllotments()"
-                                style="background: #3858f9; border: none; border-radius: 10px; height: 52px; font-size: 15px;">
-                                <i data-feather="save" style="width: 18px; height: 18px;"></i> SAVE ALLOTMENTS
+                                style="background: #3858f9; border: none; border-radius: 8px; height: 38px; font-size: 13px;">
+                                <i data-feather="save" style="width: 16px; height: 16px;"></i> SAVE ALLOTMENTS
                             </button>
                         </div>
                     </div>
@@ -131,13 +131,13 @@
                                         </select>
                                         <span class="text-muted small fw-bold text-nowrap">entries</span>
                                     </div>
-                                    <div class="input-group" style="width: 220px;">
+                                    <div class="input-group shadow-sm" style="width: 220px; height: 38px; border-radius: 8px; overflow: hidden;">
                                         <span class="input-group-text bg-light border-0"
-                                            style="border-radius: 10px 0 0 10px; border-right: 0;"><i data-feather="search"
+                                            style="border-right: 0;"><i data-feather="search"
                                                 style="width: 14px; height: 14px;" class="text-muted"></i></span>
-                                        <input type="text" class="form-control form-control-sm border-0 bg-light px-2"
-                                            placeholder="Search history..." id="historySearch"
-                                            style="border-radius: 0 10px 10px 0; height: 36px; box-shadow: none;">
+                                        <input type="text" class="form-control border-0 bg-light px-2 fw-bold"
+                                            placeholder="Search items..." id="historySearch"
+                                            style="height: 38px; box-shadow: none; font-size: 12px;">
                                     </div>
                                 </div>
                             </div>

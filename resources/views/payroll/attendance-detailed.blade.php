@@ -28,7 +28,7 @@
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted">Select Month</label>
                             <input type="month" name="month" class="form-control border-0 shadow-sm fw-bold"
-                                value="{{ $month }}" onchange="this.form.submit()">
+                                value="{{ $month }}" onchange="this.form.submit()" onclick="this.showPicker()">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">Search Employee</label>
@@ -84,7 +84,9 @@
                                     <td class="ps-4 py-3">
                                         <div class="fw-bold text-dark">{{ date('d-m-Y', strtotime($att->attendance_date)) }}
                                         </div>
-                                        <div class="small text-muted">{{ date('D', strtotime($att->attendance_date)) }}</div>
+                                        <div class="small {{ date('N', strtotime($att->attendance_date)) == 7 ? 'text-primary fw-bold' : 'text-muted' }}">
+                                            {{ date('D', strtotime($att->attendance_date)) }}
+                                        </div>
                                     </td>
                                     <td><span class="badge bg-light text-dark border fw-bold">{{ $att->employee_id }}</span>
                                     </td>

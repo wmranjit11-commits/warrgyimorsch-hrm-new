@@ -27,6 +27,7 @@
                     <label class="fw-bold">Date</label>
                     <input type="date" name="date"
                         class="form-control"
+                        style="cursor: pointer;" onclick="this.showPicker()"
                         value="{{ $holiday->date }}" required>
                 </div>
 

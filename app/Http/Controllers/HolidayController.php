@@ -22,7 +22,7 @@ class HolidayController extends Controller
     $holidays = Holiday::when($search, function ($q) use ($search) {
         $q->where('title', 'like', "%$search%");
     })
-    ->orderBy('date', 'desc')
+    ->orderBy('date', 'asc')
     ->paginate($perPage)
     ->withQueryString();
 

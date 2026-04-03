@@ -221,14 +221,16 @@
                             <label class="fw-bold">Date of Joining</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_joining" class="form-control">
+                                <input type="date" name="date_of_joining" class="form-control"
+                                    style="cursor: pointer;" onclick="this.showPicker()">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Date of Birth</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_birth" class="form-control">
+                                <input type="date" name="date_of_birth" class="form-control"
+                                    style="cursor: pointer;" onclick="this.showPicker()">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -280,14 +282,16 @@
                             <label class="fw-bold">Time In</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_in" class="form-control" value="09:00">
+                                <input type="time" name="time_in" class="form-control" value="09:00"
+                                    style="cursor: pointer;" onclick="this.showPicker()">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time Out</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_out" class="form-control" value="19:00">
+                                <input type="time" name="time_out" class="form-control" value="19:00"
+                                    style="cursor: pointer;" onclick="this.showPicker()">
                             </div>
                         </div>
                         <div class="col-md-4">

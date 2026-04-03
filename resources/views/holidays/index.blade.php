@@ -19,16 +19,17 @@
                                 @csrf
 
                                 <div class="mb-3">
-                                    <input type="text" name="title" id="holidayTitle" class="form-control" placeholder="Enter Holiday Name"
-                                        required>
+                                    <input type="text" name="title" id="holidayTitle" class="form-control border-0 bg-light px-3 fw-bold shadow-sm" placeholder="Enter Holiday Name"
+                                        style="height: 38px; font-size: 13px; border-radius: 8px;" required>
                                 </div>
 
                                 <div class="mb-3">
-                                    <input type="date" name="date" id="holidayDate" class="form-control" value="{{ date('Y-m-d') }}"
-                                        required>
+                                    <input type="date" name="date" id="holidayDate" class="form-control border-0 bg-light px-3 fw-bold shadow-sm" value="{{ date('Y-m-d') }}"
+                                        style="height: 38px; font-size: 13px; border-radius: 8px; padding-top: 0; padding-bottom: 0; line-height: 1.5; cursor: pointer;"
+                                        onclick="this.showPicker()" required>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary btn-sm">SAVE</button>
+                                <button type="submit" class="btn btn-primary fw-bold w-100 shadow-sm" style="height: 38px; font-size: 13px; border-radius: 8px; background: #3858f9; border: none;">SAVE HOLIDAY</button>
                             </form>
 
                         </div>
@@ -39,9 +40,9 @@
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h6 class="fw-bold mb-0" style="color: #334155;">Holiday List</h6>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="input-group d-none d-md-flex" style="width: 200px;">
+                                    <div class="input-group d-none d-md-flex shadow-sm" style="width: 220px; border-radius: 8px; overflow: hidden; height: 38px;">
                                         <span class="input-group-text bg-light border-0"><i class="feather-search text-muted small"></i></span>
-                                        <input type="text" id="search" class="form-control bg-light border-0 shadow-none form-control-sm ps-0" placeholder="Search...">
+                                        <input type="text" id="search" class="form-control bg-light border-0 shadow-none ps-0 fw-bold" placeholder="Search..." style="height: 38px; font-size: 13px;">
                                     </div>
                                     <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="location.reload()" title="Refresh">
                                         <i class="feather-refresh-cw"></i>

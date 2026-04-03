@@ -63,10 +63,15 @@
                             <p class="text-muted small mb-0">Record check-in and check-out times for employees</p>
                         </div>
                         <div class="d-flex align-items-center gap-3">
+                            <div id="dateOffBadge" class="badge bg-soft-primary text-primary px-3 py-2 fw-bold" style="display:none; border-radius:8px;">
+                                <i class="bi bi-calendar-x-fill me-1"></i> <span id="dateOffText">OFF-DAY</span>
+                            </div>
                             <label class="fw-bold small text-muted text-uppercase mb-0">Date:</label>
-                            <input type="date" name="attendance_date" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required 
+                            <input type="date" name="attendance_date" id="attendance_date_input" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required 
                                    class="form-control border-0 bg-light shadow-none fw-bold" 
-                                   style="border-radius: 12px; width: 180px; height: 45px; padding-left: 15px;">
+                                   style="border-radius: 12px; width: 180px; height: 45px; padding-left: 15px; cursor: pointer;"
+                                   onclick="this.showPicker()"
+                                   onchange="checkIfOffDay()">
                         </div>
                     </div>
 
@@ -115,8 +120,9 @@
                                                 <div class="d-flex flex-column align-items-center">
                                                     <input type="time" id="check_in_input_{{ $index }}" name="employees[{{ $index }}][check_in]" 
                                                            class="form-control form-control-sm text-center fw-bold mb-2 p-1 shadow-none border-0 bg-light" 
-                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px;"
-                                                           onchange="manualTimeChange({{ $index }})">
+                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px; cursor: pointer;"
+                                                           onchange="manualTimeChange({{ $index }})"
+                                                           onclick="this.showPicker()">
                                                     
                                                     <div class="form-check form-switch p-0">
                                                         <input class="form-check-input ms-0" type="checkbox" role="switch" 
@@ -131,8 +137,9 @@
                                                 <div class="d-flex flex-column align-items-center">
                                                     <input type="time" id="check_out_input_{{ $index }}" name="employees[{{ $index }}][check_out]" 
                                                            class="form-control form-control-sm text-center fw-bold mb-2 p-1 shadow-none border-0 bg-light" 
-                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px;"
-                                                           onchange="manualTimeChange({{ $index }})">
+                                                           style="height: 32px; width: 100px; font-size: 13px; border-radius: 8px; cursor: pointer;"
+                                                           onchange="manualTimeChange({{ $index }})"
+                                                           onclick="this.showPicker()">
 
                                                     <div class="form-check form-switch p-0">
                                                         <input class="form-check-input ms-0" type="checkbox" role="switch" 
@@ -299,6 +306,41 @@
             durationDisplay.className = 'badge rounded-pill bg-light text-dark fw-bold px-3 py-2';
         }
     }
+    // Holidays passed from backend
+    const holidays = @json($holidays ?? []);
+
+    function checkIfOffDay() {
+        const input = document.getElementById('attendance_date_input');
+        const badge = document.getElementById('dateOffBadge');
+        const text = document.getElementById('dateOffText');
+        
+        if (!input.value) return;
+        
+        const date = new Date(input.value);
+        const dateStr = input.value; // YYYY-MM-DD
+        const isSunday = date.getDay() === 0;
+        const holidayTitle = holidays[dateStr];
+        
+        if (isSunday || holidayTitle) {
+            badge.style.display = 'inline-flex';
+            badge.classList.remove('bg-soft-primary', 'text-primary', 'bg-soft-danger', 'text-danger');
+            
+            if (holidayTitle) {
+                text.innerText = 'HOLIDAY: ' + holidayTitle;
+                badge.classList.add('bg-soft-danger', 'text-danger');
+            } else {
+                text.innerText = 'WEEKLY OFF (SUNDAY)';
+                badge.classList.add('bg-soft-primary', 'text-primary');
+            }
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', function() {
+        checkIfOffDay();
+    });
 </script>
 @endsection
 
