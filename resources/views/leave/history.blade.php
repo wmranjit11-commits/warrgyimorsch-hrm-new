@@ -8,7 +8,10 @@
         <!-- Top Header -->
         <div class="px-4 py-3 bg-white border-bottom shadow-sm mb-4">
             <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                        <i class="bi bi-arrow-left fs-5"></i>
+                    </a>
                     <div>
                         <h5 class="fw-bold mb-0" style="color: #334155;">Leave History</h5>
                         <nav aria-label="breadcrumb">
@@ -46,8 +49,8 @@
                         <select name="category" class="form-select border-0 bg-light px-3 fw-bold"
                             style="border-radius: 8px; height: 38px; font-size: 13px; padding-top: 0; padding-bottom: 0; line-height: 1.2;">
                             <option value="">Select Category</option>
-                            <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Leave</option>
-                            <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Leave</option>
+                            <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Day</option>
+                            <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Day</option>
                             <option value="gatepass" {{ request('category') == 'gatepass' ? 'selected' : '' }}>Gatepass Leave
                             </option>
                         </select>
@@ -134,7 +137,12 @@
                                         <td><span class="fw-semibold text-dark">{{ $leave->leave_type }}</span></td>
                                         <td>
                                             <span class="badge bg-light text-dark fw-bold border"
-                                                style="font-size: 10px;">{{ strtoupper($leave->leave_category) }}</span>
+                                                style="font-size: 10px;">
+                                                @if($leave->leave_category === 'full') FULL DAY
+                                                @elseif($leave->leave_category === 'half') HALF DAY
+                                                @else {{ strtoupper($leave->leave_category) }}
+                                                @endif
+                                            </span>
                                         </td>
                                         <td class="small text-muted">
                                             <div class="fw-bold text-dark">{{ $leave->start_date->format('d-M-Y') }}</div>
@@ -185,13 +193,13 @@
     </div>
 
     <!-- APPLY LEAVE MODAL -->
-    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="applyLeaveModal" style="width: 650px;">
-        <div class="offcanvas-header bg-white border-bottom p-4">
+    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="applyLeaveModal" style="width: 100%; max-width: 650px;">
+        <div class="offcanvas-header border-bottom p-4">
             <h5 class="offcanvas-title fw-bold" id="applyLeaveModalLabel">Apply For Leave</h5>
             <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas"
                 aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body p-4 bg-light bg-opacity-10">
+        <div class="offcanvas-body p-4">
             <form id="applyLeaveForm">
                 @csrf
                 <div class="row g-4">
@@ -215,16 +223,16 @@
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
-                        <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 50px;">
+                        <div class="d-flex gap-3 p-2 rounded-3 shadow-sm border" style="height: 50px;">
                             <div class="form-check d-flex align-items-center mb-0 ps-4">
                                 <input class="form-check-input" type="radio" name="leave_category" value="full" id="catFull"
                                     checked onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catFull">Full</label>
+                                <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
                                 <input class="form-check-input" type="radio" name="leave_category" value="half" id="catHalf"
                                     onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catHalf">Half</label>
+                                <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
                                 <input class="form-check-input" type="radio" name="leave_category" value="gatepass"
@@ -237,7 +245,7 @@
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Type <span
                                 class="text-danger">*</span></label>
-                        <select name="leave_type" id="leaveType" class="form-select border-0 bg-white shadow-sm"
+                        <select name="leave_type" id="leaveType" class="form-select border-0 shadow-sm"
                             style="height: 50px; border-radius: 10px;" required>
                             <option value="">Select Type...</option>
                             <option value="Paid Leave">Paid Leave</option>
@@ -300,13 +308,13 @@
     </div>
 
     <!-- LEAVE ACTION MODAL -->
-    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="leaveActionModal" style="width: 600px;">
-        <div class="offcanvas-header bg-white border-bottom p-4">
+    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="leaveActionModal" style="width: 100%; max-width: 600px;">
+        <div class="offcanvas-header border-bottom p-4">
             <h5 class="offcanvas-title fw-bold" id="leaveActionModalLabel">Leave Action Page</h5>
             <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas"
                 aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body p-4 bg-light bg-opacity-10">
+        <div class="offcanvas-body p-4">
             <div id="actionModalContent">
                 <div class="mb-4 d-flex align-items-center">
                     <div class="bg-soft-primary p-2 rounded-3 me-3">
@@ -314,7 +322,7 @@
                     </div>
                     <div>
                         <span class="small fw-bold text-muted text-uppercase d-block">Application ID</span>
-                        <span id="displayAppCode" class="fw-bold text-dark fs-5">-</span>
+                        <span id="displayAppCode" class="fw-bold fs-5">-</span>
                     </div>
                 </div>
 
@@ -343,15 +351,15 @@
     </div>
 
     <!-- RESTORED TABBED VIEW PORTFOLIO MODAL -->
-    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="viewLeaveModal" style="width: 800px;">
-        <div class="offcanvas-header bg-white border-bottom p-4">
+    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="viewLeaveModal" style="width: 100%; max-width: 800px;">
+        <div class="offcanvas-header border-bottom p-4">
             <div class="d-flex align-items-center w-100">
                 <div class="avatar-text bg-soft-primary text-primary fw-bold me-3 shadow-sm"
                     style="width: 50px; height: 50px; font-size: 20px;">
                     <span id="viewAvatarLetter">E</span>
                 </div>
                 <div class="flex-grow-1">
-                    <h5 class="fw-bold mb-0 text-dark" id="viewEmployeeName">Employee Name</h5>
+                    <h5 class="fw-bold mb-0" id="viewEmployeeName">Employee Name</h5>
                     <span class="text-muted small fw-bold text-uppercase d-block mt-1"
                         style="letter-spacing: 0.5px;">Employee Portfolio</span>
                 </div>
@@ -359,9 +367,9 @@
                     aria-label="Close"></button>
             </div>
         </div>
-        <div class="offcanvas-body p-0 bg-light bg-opacity-25">
+        <div class="offcanvas-body p-0">
             <!-- Tabs -->
-            <ul class="nav nav-tabs nav-tabs-custom px-4 bg-white border-bottom shadow-sm" id="viewTabs" role="tablist">
+            <ul class="nav nav-tabs nav-tabs-custom px-4 border-bottom shadow-sm" id="viewTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold text-uppercase py-3" id="details-tab" data-bs-toggle="tab"
                         data-bs-target="#detailsContent" type="button" role="tab"
@@ -379,7 +387,7 @@
                 <div class="tab-pane fade show active p-4" id="detailsContent" role="tabpanel">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <div class="bg-white p-3 rounded-4 shadow-sm border h-100">
+                            <div class="p-3 rounded-4 shadow-sm border h-100">
                                 <label class="small fw-bold text-muted text-uppercase d-block mb-1">Leave Info</label>
                                 <div class="fw-bold text-dark" id="viewLeaveType">-</div>
                                 <span id="viewCategoryBadge"
@@ -387,7 +395,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="bg-white p-3 rounded-4 shadow-sm border h-100">
+                            <div class="p-3 rounded-4 shadow-sm border h-100">
                                 <label class="small fw-bold text-muted text-uppercase d-block mb-1">Duration & Days</label>
                                 <div id="viewTotalDays" class="fw-bold text-primary fs-5">-</div>
                             </div>

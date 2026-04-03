@@ -4,17 +4,13 @@
     <div class="container-fluid">
 
         <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{{ route('employees.index') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
             <div>
                 <h5 class="fw-bold mb-0">Employee Details</h5>
-                <small class="text-muted">{{ $employee->name }}
-                    (EC{{ str_pad($employee->id, 4, '0', STR_PAD_LEFT) }})</small>
-            </div>
-
-            <div class="d-flex gap-2">
-                <a href="{{ route('employees.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Back
-                </a>
+                <small class="text-muted">{{ $employee->name }} (EC{{ str_pad($employee->id, 4, '0', STR_PAD_LEFT) }})</small>
             </div>
         </div>
 

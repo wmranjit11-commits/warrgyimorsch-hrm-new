@@ -7,16 +7,21 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px;">
                 <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center"
                     style="border-radius: 12px 12px 0 0;">
-                    <div>
-                        <h5 class="fw-bold mb-0" style="color: #334155;">Payroll History</h5>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="#"
-                                        class="text-decoration-none text-muted small">Home</a></li>
-                                <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
-                                    aria-current="page">History</li>
-                            </ol>
-                        </nav>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #334155;">Payroll History</h5>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="#"
+                                            class="text-decoration-none text-muted small">Home</a></li>
+                                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
+                                        aria-current="page">History</li>
+                                </ol>
+                            </nav>
+                        </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <!-- Right Aligned Search & Actions -->
@@ -176,20 +181,20 @@
     <div class="modal fade" id="payrollDetailModal" tabindex="-1" aria-labelledby="payrollModalLabel" aria-hidden="true"
         data-bs-backdrop="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; background: #fff; overflow: hidden;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
                 <div class="modal-header border-0 px-4 py-3" style="background: #3858f9; color: #ffffff;">
                     <h5 class="modal-title fw-bold" id="payrollModalLabel"><i class="bi bi-file-earmark-text-fill me-2"></i>
                         Payroll Statement</h5>
                     <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-0 bg-white" id="payrollModalBody"
+                <div class="modal-body p-0" id="payrollModalBody"
                     style="min-height: 400px; max-height: 80vh; overflow-y: auto;">
                     <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
                         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 px-4 py-3 bg-light">
+                <div class="modal-footer border-0 px-4 py-3">
                     <button type="button" class="btn btn-secondary fw-bold px-4 shadow-none" data-bs-dismiss="modal"
                         style="border-radius: 8px;">CLOSE</button>
                 </div>

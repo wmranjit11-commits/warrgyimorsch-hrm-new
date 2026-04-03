@@ -15,7 +15,7 @@
             <div class="page-header-right-items">
                 <div class="d-flex d-md-none">
                     <a href="javascript:void(0)" class="page-header-right-close-toggle">
-                        <i class="feather-arrow-left me-2"></i>
+                        <i class="bi bi-arrow-left fs-5"></i>
                         <span>Back</span>
                     </a>
                 </div>
@@ -770,7 +770,7 @@
         <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                    <div class="modal-header bg-soft-primary border-0 p-4">
+                    <div class="modal-header bg-primary bg-opacity-10 border-0 p-4">
                         <div>
                             <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
                             <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
@@ -780,7 +780,7 @@
                     <div class="modal-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
+                                <thead class="bg-body-secondary text-uppercase fs-10 fw-800 text-muted">
                                     <tr>
                                         <th class="ps-4">Month</th>
                                         <th>Basic / Earnings</th>
@@ -795,7 +795,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
+                    <div class="modal-footer border-0 p-4 bg-body-tertiary">
                         <div class="w-100 d-flex justify-content-between align-items-center">
                             <div class="text-muted small">
                                 <i class="feather-info me-1"></i> Data shown is aggregated for all employees.

@@ -8,16 +8,21 @@
         <div class="card border-0 shadow-sm" style="border-radius: 12px;">
             <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center"
                 style="border-radius: 12px 12px 0 0;">
-                <div>
-                    <h5 class="fw-bold mb-0">Employee Portfolio</h5>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a>
-                            </li>
-                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">
-                                List</li>
-                        </ol>
-                    </nav>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                        <i class="bi bi-arrow-left fs-5"></i>
+                    </a>
+                    <div>
+                        <h5 class="fw-bold mb-0">Employee Portfolio</h5>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a>
+                                </li>
+                                <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">
+                                    List</li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <div class="input-group d-none d-md-flex" style="width: 200px;">
@@ -258,7 +263,7 @@
 
     <!-- RIGHT SIDE MODAL FOR EMPLOYEE DETAILS -->
     <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="employeeModal"
-        aria-labelledby="employeeModalLabel">
+        aria-labelledby="employeeModalLabel" style="width: 100%; max-width: 600px;">
         <div class="offcanvas-header p-3 p-md-4"
             style="background: #0f172a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <div class="d-flex align-items-center gap-3">
@@ -287,7 +292,7 @@
                     style="opacity: 0.8;"></button>
             </div>
         </div>
-        <div class="offcanvas-body p-0" id="employeeDetails" style="background: #ffffff;">
+        <div class="offcanvas-body p-0" id="employeeDetails">
             <div class="d-flex align-items-center justify-content-center h-100" style="min-height: 400px;">
                 <div class="text-center">
                     <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
@@ -1371,16 +1376,16 @@
                 style="filter: none !important; backdrop-filter: none !important;">
                 <div class="modal-dialog modal-dialog-centered" style="filter: none !important; backdrop-filter: none !important;">
                     <div class="modal-content border-0 shadow-lg"
-                        style="border-radius: 12px; background-color: #ffffff !important; filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;">
+                        style="border-radius: 12px; filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;">
                         <div class="modal-header border-bottom-0 p-4 pb-0"
-                            style="background:#ffffff; border-radius: 12px 12px 0 0;">
-                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="attModalTitle">
+                            style="border-radius: 12px 12px 0 0;">
+                            <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="attModalTitle">
                                 <i class="bi bi-calendar-check text-primary"></i> Attendance View
                             </h5>
                             <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body p-4">
-                            <div class="d-flex align-items-center gap-3 mb-4 bg-light p-3 rounded-3 border">
+                            <div class="d-flex align-items-center gap-3 mb-4 bg-body-secondary p-3 rounded-3 border">
                                 <label class="small fw-bold text-muted text-uppercase mb-0" style="min-width: 100px;">Change
                                     Month</label>
                                 <input type="month" id="attMonthSelect"

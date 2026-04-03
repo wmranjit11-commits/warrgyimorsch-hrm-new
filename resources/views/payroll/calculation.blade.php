@@ -7,16 +7,21 @@
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white;">
                 <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
                     style="border-radius: 12px 12px 0 0;">
-                    <div>
-                        <h5 class="fw-bold mb-0" style="color: #334155;">Payroll Module</h5>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="#"
-                                        class="text-decoration-none text-muted small">Home</a></li>
-                                <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
-                                    aria-current="page">Calculation</li>
-                            </ol>
-                        </nav>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ route('payroll.index') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #334155;">Payroll Module</h5>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="#"
+                                            class="text-decoration-none text-muted small">Home</a></li>
+                                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
+                                        aria-current="page">Calculation</li>
+                                </ol>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>

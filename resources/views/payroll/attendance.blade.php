@@ -58,16 +58,21 @@
             <div class="card border-0 shadow-sm" style="border-radius: 12px;">
                 <div class="card-header border-bottom py-3 d-flex justify-content-between align-items-center"
                     style="border-radius: 12px 12px 0 0;">
-                    <div>
-                        <h5 class="fw-bold mb-0">Attendance Management</h5>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0">
-                                <li class="breadcrumb-item"><a href="#"
-                                        class="text-decoration-none text-muted small">Home</a></li>
-                                <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
-                                    aria-current="page">Attendance List</li>
-                            </ol>
-                        </nav>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                        <div>
+                            <h5 class="fw-bold mb-0">Daily Attendance Records</h5>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="#"
+                                            class="text-decoration-none text-muted small">Home</a></li>
+                                    <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;"
+                                        aria-current="page">Attendance</li>
+                                </ol>
+                            </nav>
+                        </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <!-- Right Aligned Search & Actions -->
@@ -258,10 +263,10 @@
 @endsection
 
 @push('modals')
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="attendanceDetailOffcanvas" style="width: 900px;">
-        <div class="offcanvas-header border-bottom px-4 py-3 bg-white shadow-sm">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="attendanceDetailOffcanvas" style="width: 100%; max-width: 900px;">
+        <div class="offcanvas-header border-bottom px-4 py-3 bg-body-tertiary">
             <div class="d-flex flex-column">
-                <h5 class="offcanvas-title fw-bold" style="color: #334155;">Record for <span id="offcanvasDate"
+                <h5 class="offcanvas-title fw-bold">Record for <span id="offcanvasDate"
                         class="text-primary"></span></h5>
                 <div id="statusIndicator" class="small fw-bold text-muted mt-1">Showing All Records</div>
             </div>
@@ -294,12 +299,11 @@
     <!-- Edit Attendance Modal -->
     <div class="modal fade" id="editAttendanceModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(4px);">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-                <div class="modal-header border-0 pb-0 pt-4 px-4 bg-white">
-                    <h5 class="modal-title fw-bold" style="color: #334155;">Edit Punch Times</h5>
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Edit Punch Times</h5>
                     <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4 bg-white">
+                <div class="modal-body p-4">
                     <input type="hidden" id="edit_att_id">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -323,7 +327,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-4 bg-white">
+                <div class="modal-footer border-0 p-4">
                     <button type="button" class="btn btn-light px-4 py-2 border-0 fw-bold"
                         style="border-radius: 10px; background: #f1f5f9; color: #64748b;"
                         data-bs-dismiss="modal">Cancel</button>

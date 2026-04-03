@@ -3,21 +3,19 @@
 @section('content')
     <!-- [ page-header ] start -->
     <div class="page-header">
-        <div class="page-header-left d-flex align-items-center">
-            <div class="page-header-title">
-                <h5 class="m-b-10">Edit Employee</h5>
-            </div>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('employees.index') }}">Employees</a></li>
-                <li class="breadcrumb-item">Edit</li>
-            </ul>
-        </div>
-        <div class="page-header-right ms-auto">
-            <div class="page-header-right-items">
-                <a href="{{ route('employees.index') }}" class="btn btn-md btn-light-brand">
-                    <i class="feather-arrow-left me-2"></i> Back to List
-                </a>
+        <div class="page-header-left d-flex align-items-center gap-3">
+            <a href="{{ route('employees.index') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <div>
+                <div class="page-header-title">
+                    <h5 class="m-b-10">Edit Employee</h5>
+                </div>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('employees.index') }}">Employees</a></li>
+                    <li class="breadcrumb-item">Edit</li>
+                </ul>
             </div>
         </div>
     </div>

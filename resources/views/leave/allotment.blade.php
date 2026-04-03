@@ -8,7 +8,10 @@
         <!-- Top Header -->
         <div class="px-4 py-3 bg-white border-bottom shadow-sm mb-4">
             <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('leave.history') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                        <i class="bi bi-arrow-left fs-5"></i>
+                    </a>
                     <div>
                         <h5 class="fw-bold mb-0" style="color: #334155;">Leave Management</h5>
                         <nav aria-label="breadcrumb">
@@ -198,31 +201,30 @@
         <div class="modal fade" id="leaveBalanceModal" tabindex="-1" aria-labelledby="leaveBalanceModalLabel" aria-hidden="true"
             style="z-index: 9999 !important;">
             <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content border border-2 shadow-lg"
-                    style="border-radius: 12px; overflow: hidden; background: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;">
-                    <div class="modal-header bg-white border-bottom p-4">
+                <div class="modal-content border shadow-lg"
+                    style="border-radius: 12px; overflow: hidden;">
+                    <div class="modal-header border-bottom p-4">
                         <div>
-                            <h5 class="modal-title fw-bold text-dark mb-1" id="leaveBalanceModalLabel" style="font-size: 20px;">
+                            <h5 class="modal-title fw-bold mb-1" id="leaveBalanceModalLabel" style="font-size: 20px;">
                                 Leave Balance Inventory</h5>
                             <p class="text-muted small mb-0 fw-bold text-uppercase" style="letter-spacing: 1px;">Live status for
                                 all employees</p>
                         </div>
                         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"
-                            style="background-color: #f1f5f9; border-radius: 50%; padding: 10px;"></button>
+                            style="border-radius: 50%; padding: 10px;"></button>
                     </div>
-                    <div class="modal-body p-4 bg-white" style="background-color: #ffffff !important;">
-                        <div class="input-group mb-4" style="border-radius: 10px; overflow: hidden; border: 2px solid #e2e8f0;">
-                            <span class="input-group-text bg-white border-0 ps-3"><i data-feather="search"
+                    <div class="modal-body p-4">
+                        <div class="input-group mb-4" style="border-radius: 10px; overflow: hidden; border: 1px solid var(--bs-border-color);">
+                            <span class="input-group-text border-0 ps-3"><i data-feather="search"
                                     style="width: 16px; height: 16px;" class="text-primary"></i></span>
-                            <input type="text" id="balanceSearch" class="form-control border-0 bg-white px-3 fw-bold text-dark"
+                            <input type="text" id="balanceSearch" class="form-control border-0 px-3 fw-bold"
                                 placeholder="Search by employee name..."
                                 style="height: 54px; box-shadow: none; font-size: 15px;">
                         </div>
 
-                        <div class="table-responsive rounded-3 border"
-                            style="border-color: #e2e8f0 !important; background: #ffffff;">
+                        <div class="table-responsive rounded-3 border">
                             <table class="table table-hover align-middle mb-0">
-                                <thead style="background: #f8fafc;">
+                                <thead class="bg-body-secondary">
                                     <tr class="text-muted fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 1px;">
                                         <th class="ps-4 py-3 border-0">Employee</th>
                                         <th class="text-center py-3 border-0">Total Allotted</th>
@@ -230,20 +232,20 @@
                                         <th class="text-center pe-4 py-3 border-0">Available</th>
                                     </tr>
                                 </thead>
-                                <tbody id="balanceTableBody" class="bg-white">
+                                <tbody id="balanceTableBody">
                                     <!-- Populated via AJAX -->
                                     <tr>
                                         <td colspan="4" class="text-center py-5">
                                             <div class="spinner-border text-primary" role="status"
                                                 style="width: 2rem; height: 2rem;"></div>
-                                            <div class="mt-3 text-dark fw-bold">Fetching latest records...</div>
+                                            <div class="mt-3 fw-bold">Fetching latest records...</div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-top p-3">
+                    <div class="modal-footer border-top p-3">
                         <button type="button" class="btn btn-dark fw-bold px-5 py-2 rounded-pill shadow-sm"
                             data-bs-dismiss="modal" style="background: #0f172a; border: none;">DISMISS LIST</button>
                     </div>

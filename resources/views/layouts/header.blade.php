@@ -32,7 +32,7 @@
             <div class="nxl-drp-link nxl-lavel-mega-menu">
                 <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
                     <a href="javascript:void(0)" id="nxl-lavel-mega-menu-hide">
-                        <i class="feather-arrow-left me-2"></i>
+                        <i class="bi bi-arrow-left fs-5"></i>
                         <span>Back</span>
                     </a>
                 </div>

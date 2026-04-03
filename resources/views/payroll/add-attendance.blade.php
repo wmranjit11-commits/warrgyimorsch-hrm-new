@@ -58,9 +58,14 @@
                 <form action="{{ route('payroll.attendance.store') }}" method="POST">
                     @csrf
                     <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="fw-bold mb-1 text-dark">Daily Attendance Marking</h5>
-                            <p class="text-muted small mb-0">Record check-in and check-out times for employees</p>
+                        <div class="d-flex align-items-center gap-3">
+                            <a href="{{ route('payroll.attendance') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(56, 88, 249, 0.2);">
+                                <i class="bi bi-arrow-left fs-5"></i>
+                            </a>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">Daily Attendance Marking</h5>
+                                <p class="text-muted small mb-0">Record check-in and check-out times for employees</p>
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div id="dateOffBadge" class="badge bg-soft-primary text-primary px-3 py-2 fw-bold" style="display:none; border-radius:8px;">

@@ -5,6 +5,20 @@
     <div class="main-content">
         <div class="container-fluid">
 
+            <div class="card shadow-sm custom-card mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-brand text-primary fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff;">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #334155;">Holiday Management</h5>
+                            <p class="text-muted small mb-0">Manage company holidays and observances</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow-sm custom-card">
                 <div class="card-body">
 
@@ -13,7 +27,7 @@
                         <!-- LEFT FORM -->
                         <div class="col-lg-4 col-md-5 form-section">
 
-                            <h6 class="fw-bold mb-4" style="color: #334155;"><i class="feather-calendar me-2"></i>New Holiday</h6>
+                            <h6 class="fw-bold mb-4" style="color: #334155;"><i class="feather-plus-circle me-2 text-primary"></i>New Holiday</h6>
 
                             <form id="holidayForm">
                                 @csrf

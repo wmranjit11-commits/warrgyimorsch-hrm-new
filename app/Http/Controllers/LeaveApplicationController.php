@@ -7,6 +7,9 @@ use App\Models\LeaveApplication;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+use App\Exports\LeaveApplicationsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class LeaveApplicationController extends Controller
 {
     public function index(Request $request)
@@ -82,37 +85,9 @@ class LeaveApplicationController extends Controller
         }
 
         $leaves = $query->orderBy('created_at', 'desc')->get();
+        $filename = "leave_applications_" . date('Y-m-d_H-m-s') . ".xlsx";
 
-        $filename = "leave_applications_" . date('Y-m-d_H-i-s') . ".csv";
-        $headers = [
-            "Content-Type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-        ];
-
-        $callback = function() use ($leaves) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Sr.No.', 'Employee Name', 'Status', 'Leave Type', 'Category', 'Start Date', 'End Date', 'Start Time', 'End Time', 'Total Days', 'Reason', 'Message']);
-
-            foreach ($leaves as $key => $leave) {
-                fputcsv($file, [
-                    $key + 1,
-                    $leave->employee->name,
-                    ucfirst($leave->status),
-                    $leave->leave_type,
-                    strtoupper($leave->leave_category),
-                    $leave->start_date->format('d-m-Y'),
-                    $leave->end_date ? $leave->end_date->format('d-m-Y') : '-',
-                    $leave->start_time ? Carbon::parse($leave->start_time)->format('h:i A') : '-',
-                    $leave->end_time ? Carbon::parse($leave->end_time)->format('h:i A') : '-',
-                    $leave->total_days,
-                    $leave->reason,
-                    $leave->message,
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new LeaveApplicationsExport($leaves), $filename);
     }
 
     public function updateAction(Request $request)
