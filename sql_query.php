@@ -1,0 +1,1 @@
+ALTER TABLE `employees` ADD `employee_id` INT(6) NOT NULL AFTER `id`;

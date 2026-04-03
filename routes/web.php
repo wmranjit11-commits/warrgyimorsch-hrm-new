@@ -10,7 +10,7 @@ use App\Http\Controllers\LeaveApplicationController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 use App\Http\Controllers\DashboardController;

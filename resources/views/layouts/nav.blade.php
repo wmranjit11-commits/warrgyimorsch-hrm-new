@@ -323,9 +323,19 @@
             <div class="card text-center">
                 <div class="card-body">
                     <i class="feather-sunrise fs-4 text-dark"></i>
-                    <h6 class="mt-4 text-dark fw-bolder">Downloading Center</h6>
-                    <p class="fs-11 my-3 text-dark">Warrgyizmorsch HRM is a production ready system to manage your employee data and payroll easily.</p>
-                    <a href="javascript:void(0);" class="btn btn-primary w-100">Download Now</a>
+                    <h6 class="mt-4 text-dark fw-bolder">{{ auth()->user()->name}} </h6>
+                    <p class="fs-11 my-3 text-dark"> {{auth()->user()->email}}</p>
+                    <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <a href="{{ route('logout') }}" class="btn btn-primary w-100"
+                                onclick="event.preventDefault(); this.closest('form').submit();">
+                                <i class="feather-log-out"></i>
+                                <span>&nbsp;Logout</span>
+                            </a>
+                        </form>
+
+                  
                 </div>
             </div>
         </div>
