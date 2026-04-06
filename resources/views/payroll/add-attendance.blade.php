@@ -8,51 +8,33 @@
         </div>
         <ul class="breadcrumb">
             <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
-            <li class="breadcrumb-item">Add Attendance</li>
+            <li class="breadcrumb-item">{{ isset($is_edit) ? 'Edit Attendance' : 'Add Attendance' }}</li>
         </ul>
     </div>
 
+    @if(!isset($is_edit))
     <div class="dropdown d-inline-block ms-auto float-end">
-    <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance">
-        <i class="fas fa-upload"></i>
-    </a>
+        <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance">
+            <i class="fas fa-upload"></i>
+        </a>
 
-    <div class="dropdown-menu dropdown-menu-end p-4 shadow-sm border-0" style="width: 320px;">
-        <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            
-            <div class="mb-3">
-                <label class="form-label fw-bold text-dark mb-2">Import Attendance (Excel)</label>
-                <input type="file" class="form-control" name="import_file" accept=".xlsx, .xls, .csv" required>
-            </div>
-                        
-            <button type="submit" class="btn btn-success w-100 fw-bold">
-                <i class="fas fa-file-import me-2"></i> UPLOAD & CALCULATE
-            </button>
-        </form>
-    </div>
-</div>
-</div>
-<div style="padding: 30px;"> 
-    {{-- <h2 style="margin-bottom: 20px; color: #333;">Add Attendance</h2> --}}
-
-    {{-- <div style="background: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px dashed #3858f9;">
-    <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <label style="font-weight: bold; color: #333;">Import Attendance (Excel):</label>
-            <input type="file" name="import_file" accept=".xlsx, .xls, .csv" required>
-            <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                UPLOAD & CALCULATE
-            </button>
+        <div class="dropdown-menu dropdown-menu-end p-4 shadow-sm border-0" style="width: 320px;">
+            <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark mb-2">Import Attendance (Excel)</label>
+                    <input type="file" class="form-control" name="import_file" accept=".xlsx, .xls, .csv" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100 fw-bold">
+                    <i class="fas fa-file-import me-2"></i> UPLOAD & CALCULATE
+                </button>
+            </form>
         </div>
-        <small style="color: #666; display: block; margin-top: 5px;">
-            Columns needed: <strong>employee_id, date, check_in, check_out, status</strong>
-        </small>
-    </form>
-</div> --}}
-    
-    <!-- Debug Info -->
+    </div>
+    @endif
+</div>
+
+<div style="padding: 30px;">
     <div style="background: #f0f8ff; padding: 10px; margin-bottom: 15px; border-radius: 4px; border-left: 4px solid #3858f9;">
         <small style="color: #0066cc;">
             <strong>Debug:</strong> Total Employees Found: <strong>{{ count($employees) }}</strong>
@@ -65,8 +47,14 @@
             
             <div style="margin-bottom: 25px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
-                <input type="date" name="attendance_date" value="{{ date('Y-m-d') }}" required 
-                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px;">
+                <input type="date" name="attendance_date" 
+                       value="{{ $edit_date ?? date('Y-m-d') }}" 
+                       {{ isset($is_edit) ? 'readonly' : 'required' }} 
+                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px; background: {{ isset($is_edit) ? '#f5f5f5' : 'white' }};">
+                
+                @if(isset($is_edit))
+                    <small style="color: #d9534f; margin-left: 10px;">Date cannot be changed in edit mode.</small>
+                @endif
             </div>
 
             @if(count($employees) == 0)
@@ -98,6 +86,7 @@
                                     <div style="margin-bottom: 8px;">
                                         <input type="time" name="employees[{{ $index }}][check_in]" 
                                                id="check_in_{{ $index }}"
+                                               value="{{ $emp->old_check_in ?? '' }}"
                                                onchange="calculateDuration({{ $index }})"
                                                style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center;">
                                     </div>
@@ -111,28 +100,32 @@
                                     <div style="margin-bottom: 8px;">
                                         <input type="time" name="employees[{{ $index }}][check_out]" 
                                                id="check_out_{{ $index }}"
-                                               disabled
+                                               value="{{ $emp->old_check_out ?? '' }}"
+                                               {{ isset($emp->old_check_in) ? '' : 'disabled' }}
                                                onchange="calculateDuration({{ $index }})"
-                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: #f5f5f5;">
+                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: {{ isset($emp->old_check_in) ? 'white' : '#f5f5f5' }};">
                                     </div>
                                     <label style="font-size: 12px; cursor: pointer;">
                                         <input type="checkbox" id="toggle_out_{{ $index }}" 
-                                               disabled
+                                               {{ isset($emp->old_check_in) ? '' : 'disabled' }}
                                                onchange="setNowTime('check_out_{{ $index }}', {{ $index }})">
                                         <span>Set Now</span>
                                     </label>
                                 </td>
                                 <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
-                                    <span id="duration_{{ $index }}" style="font-weight: bold; color: #999;">--</span>
+                                    <span id="duration_{{ $index }}" style="font-weight: bold; color: {{ (isset($emp->old_duration) && $emp->old_duration != '--') ? '#3858f9' : '#999' }};">
+                                        {{ $emp->old_duration ?? '--' }}
+                                    </span>
                                 </td>
                                 <td style="padding: 15px;">
                                     <select name="employees[{{ $index }}][status]" 
                                             id="status_{{ $index }}"
                                             style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
-                                        <option value="present" selected>Present</option>
-                                        <option value="absent">Absent</option>
-                                        <option value="half_day">Half Day</option>
-                                        <option value="leave">Leave</option>
+                                        <option value="present" {{ (!isset($emp->old_status) || (isset($emp->old_status) && $emp->old_status == 'present')) ? 'selected' : '' }}>Present</option>
+                                        <option value="absent" {{ (isset($emp->old_status) && $emp->old_status == 'absent') ? 'selected' : '' }}>Absent</option>
+                                        <option value="half_day" {{ (isset($emp->old_status) && $emp->old_status == 'half_day') ? 'selected' : '' }}>Half Day</option>
+                                        <option value="leave" {{ (isset($emp->old_status) && $emp->old_status == 'leave') ? 'selected' : '' }}>Leave</option>
+                                        <option value="late" {{ (isset($emp->old_status) && $emp->old_status == 'late') ? 'selected' : '' }}>Late</option>
                                     </select>
                                 </td>
                             </tr>
@@ -142,9 +135,12 @@
                 </div>
 
                 <div style="margin-top: 25px; text-align: right;">
+                    @if(isset($is_edit))
+                        <a href="{{ route('payroll.attendance.add') }}" class="btn btn-light" style="padding: 12px 20px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px; text-decoration: none; color: #333;">Cancel</a>
+                    @endif
                     <button type="submit" 
                             style="padding: 12px 40px; background: #3858f9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">
-                        SAVE ATTENDANCE
+                        {{ isset($is_edit) ? 'UPDATE ATTENDANCE' : 'SAVE ATTENDANCE' }}
                     </button>
                 </div>
             @endif
@@ -204,4 +200,3 @@
     }
 </script>
 @endsection
-

@@ -589,6 +589,22 @@ public function import(Request $request)
         }
     }
 
+    public function edit($id){
+        $attendance = Attendance::with('employee')->findOrFail($id);
+        // Employee object mein purani attendance daal dete hain taaki blade page par array loop chal sake
+        $employee = $attendance->employee;
+        $employee->old_check_in = $attendance->check_in ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') : null;
+        $employee->old_check_out = $attendance->check_out ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') : null;
+        $employee->old_status = $attendance->status;
+        $employee->old_duration = $attendance->total_hours ? intval($attendance->total_hours) . 'h ' . round(($attendance->total_hours - intval($attendance->total_hours)) * 60) . 'm' : '--';
+
+        return view('payroll.add-attendance', [
+            'employees' => [$employee], // Array mein sirf ek employee jayega
+            'edit_date' => \Carbon\Carbon::parse($attendance->attendance_date)->format('Y-m-d'),
+            'is_edit' => true // Is flag se hum page ko batayenge ki ye edit mode hai
+        ]);
+    }
+
     public function destroy($id)
     {
         try {

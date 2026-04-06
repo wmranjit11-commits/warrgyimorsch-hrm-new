@@ -231,9 +231,12 @@
                         <td class="text-center">
                             <span class="status-badge ${getStatusBadge(item.status)}">${item.status}</span>
                         </td>
-                        <td class="pe-4 text-center">
+                        <td class="pe-4 text-center d-flex">
                             <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
                                 <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm text-danger shadow-none" onclick="editSingleAttendance(${item.id}, '${lastDate}')">
+                                <i class="feather-edit"></i>
                             </button>
                         </td>
                     </tr>
@@ -287,6 +290,10 @@
                 if(data.success) openAttendanceDetails(date);
             });
         }
+    }
+
+    function editSingleAttendance(id) {
+        window.location.href = `/payroll/attendance/${id}/edit`;
     }
 
     function exportAttendance() {

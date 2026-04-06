@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payroll/attendance', [PayrollController::class, 'attendance'])->name('payroll.attendance');
     Route::get('/payroll/attendance/get', [PayrollController::class, 'getAttendance'])->name('payroll.attendance.get');
     Route::get('/payroll/attendance/add', [PayrollController::class, 'addAttendance'])->name('payroll.attendance.add');
+    Route::get('/payroll/attendance/{id}/edit', [PayrollController::class, 'edit'])->name('payroll.attendance.edit');
     Route::post('/payroll/attendance', [PayrollController::class, 'storeAttendance'])->name('payroll.attendance.store');
     Route::get('/payroll/attendance/export', [PayrollController::class, 'exportAttendance'])->name('payroll.attendance.export');
     Route::post('payroll/attendance/import', [PayrollController::class, 'import'])->name('payroll.attendance.import');
