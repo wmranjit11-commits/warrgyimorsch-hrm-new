@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\LeaveApplication;
+use App\Models\Attendance;
+use App\Exports\LeaveApplicationsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -45,12 +48,12 @@ class LeaveApplicationController extends Controller
             'reason' => 'required',
         ]);
 
-        $data = $request->only(['employee_id', 'leave_type', 'leave_category', 'start_date', 'end_date', 'reason', 'message', 'total_days', 'start_time']);
+        $data = $request->only(['employee_id', 'leave_type', 'leave_category', 'start_date', 'end_date', 'reason', 'message', 'total_days', 'start_time', 'end_time']);
         $data['status'] = 'pending';
 
-        if ($request->leave_category === 'gatepass') {
+        if (str_contains(strtolower($request->leave_category), 'gatepass')) {
             $data['end_date'] = $request->start_date;
-            $data['total_days'] = 0; // Or 0.125 or whatever, user said 1 hour count
+            $data['total_days'] = 0;
             if ($request->filled('start_time')) {
                 $startTime = Carbon::createFromFormat('H:i', $request->start_time);
                 $data['end_time'] = $startTime->copy()->addHour()->format('H:i');
@@ -82,37 +85,9 @@ class LeaveApplicationController extends Controller
         }
 
         $leaves = $query->orderBy('created_at', 'desc')->get();
+        $filename = "leave_applications_" . date('Y-m-d_H-i-s') . ".xlsx";
 
-        $filename = "leave_applications_" . date('Y-m-d_H-i-s') . ".csv";
-        $headers = [
-            "Content-Type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-        ];
-
-        $callback = function() use ($leaves) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Sr.No.', 'Employee Name', 'Status', 'Leave Type', 'Category', 'Start Date', 'End Date', 'Start Time', 'End Time', 'Total Days', 'Reason', 'Message']);
-
-            foreach ($leaves as $key => $leave) {
-                fputcsv($file, [
-                    $key + 1,
-                    $leave->employee->name,
-                    ucfirst($leave->status),
-                    $leave->leave_type,
-                    strtoupper($leave->leave_category),
-                    $leave->start_date->format('d-m-Y'),
-                    $leave->end_date ? $leave->end_date->format('d-m-Y') : '-',
-                    $leave->start_time ? Carbon::parse($leave->start_time)->format('h:i A') : '-',
-                    $leave->end_time ? Carbon::parse($leave->end_time)->format('h:i A') : '-',
-                    $leave->total_days,
-                    $leave->reason,
-                    $leave->message,
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new LeaveApplicationsExport($leaves), $filename);
     }
 
     public function updateAction(Request $request)
@@ -123,6 +98,46 @@ class LeaveApplicationController extends Controller
         ]);
 
         $leave = LeaveApplication::findOrFail($request->leave_id);
+        $oldStatus = $leave->status;
+        $newStatus = $request->status;
+
+        if ($newStatus === 'approved' && $oldStatus !== 'approved') {
+            $startDate = Carbon::parse($leave->start_date);
+            $endDate = $leave->end_date ? Carbon::parse($leave->end_date) : $startDate->copy();
+
+            if ($startDate->equalTo($endDate)) {
+                $endDate->addDay();
+            }
+
+            for ($date = $startDate->copy(); $date->lt($endDate); $date->addDay()) {
+                Attendance::updateOrCreate(
+                    [
+                        'employee_id' => $leave->employee_id,
+                        'attendance_date' => $date->format('Y-m-d')
+                    ],
+                    [
+                        'status' => str_contains(strtolower($leave->leave_category), 'half') ? 'half_day' : 'leave',
+                        'total_hours' => str_contains(strtolower($leave->leave_category), 'half') ? 4 : 0,
+                        'check_in' => null,
+                        'check_out' => null
+                    ]
+                );
+            }
+        } elseif ($oldStatus === 'approved' && $newStatus !== 'approved') {
+            $startDate = Carbon::parse($leave->start_date);
+            $endDate = $leave->end_date ? Carbon::parse($leave->end_date) : $startDate->copy();
+
+            if ($startDate->equalTo($endDate)) {
+                $endDate->addDay();
+            }
+
+            Attendance::where('employee_id', $leave->employee_id)
+                ->where('attendance_date', '>=', $startDate->format('Y-m-d'))
+                ->where('attendance_date', '<', $endDate->format('Y-m-d'))
+                ->whereIn('status', ['leave', 'half_day'])
+                ->delete();
+        }
+
         $leave->update(['status' => $request->status]);
 
         return response()->json(['success' => true, 'message' => 'Status updated successfully']);

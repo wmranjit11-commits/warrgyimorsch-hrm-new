@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Exports\EmployeesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -112,6 +114,34 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Get employee attendance for modal tab
+     */
+    public function getAttendance(Request $request, $id)
+    {
+        $employee = Employee::findOrFail($id);
+        
+        $query = \App\Models\Attendance::where('employee_id', $id);
+        
+        if ($request->filled('month')) {
+            // month is in YYYY-MM format
+            $parts = explode('-', $request->month);
+            $year = $parts[0];
+            $month = $parts[1];
+            
+            $query->whereYear('attendance_date', $year)
+                  ->whereMonth('attendance_date', $month);
+        } else {
+            // Default to current month if no filter
+            $query->whereYear('attendance_date', date('Y'))
+                  ->whereMonth('attendance_date', date('m'));
+        }
+            
+        $attendance = $query->orderBy('attendance_date', 'desc')->get();
+            
+        return response()->json($attendance);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)
@@ -179,7 +209,20 @@ class EmployeeController extends Controller
 
         // Handle photo upload
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('employees', 'public');
+            // Validate the photo if it's present
+            $request->validate([
+                'photo' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('employees', $filename, 'public');
+            
+            // Clean up old photo if needed
+            if ($employee->photo && \Storage::disk('public')->exists($employee->photo)) {
+                \Storage::disk('public')->delete($employee->photo);
+            }
+            
             $employee->update(['photo' => $path]);
         }
 
@@ -197,5 +240,12 @@ class EmployeeController extends Controller
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee deleted successfully! ✓');
+    }
+
+    public function export()
+    {
+        $employees = Employee::orderBy('name', 'asc')->get();
+        $filename = "employees_" . date('Y-m-d_H-i-s') . ".xlsx";
+        return Excel::download(new EmployeesExport($employees), $filename);
     }
 }

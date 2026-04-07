@@ -39,49 +39,55 @@
         <!-- Filters Section -->
         <div class="px-4 mb-4">
             <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
-                <form action="{{ route('leave.history') }}" method="GET" class="row g-3">
+                <form action="{{ route('leave.history') }}" method="GET" class="row g-3 align-items-end">
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Search By Category</label>
+                            style="letter-spacing: 0.5px;">Search Employee</label>
+                        <input type="text" name="search" class="form-control border-0 bg-light fw-bold"
+                            placeholder="Employee Name..." value="{{ request('search') }}"
+                            style="border-radius: 8px; height: 44px; padding-left: 15px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase"
+                            style="letter-spacing: 0.5px;">Category</label>
                         <select name="category" class="form-select border-0 bg-light"
-                            style="border-radius: 10px; height: 45px;">
-                            <option value="">Select Category</option>
-                            <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Leave</option>
-                            <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Leave</option>
-                            <option value="gatepass" {{ request('category') == 'gatepass' ? 'selected' : '' }}>Gatepass Leave
-                            </option>
+                            style="border-radius: 8px; height: 44px;">
+                            <option value="">All Categories</option>
+                            <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Day</option>
+                            <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Day</option>
+                            <option value="gatepass" {{ request('category') == 'gatepass' ? 'selected' : '' }}>Gatepass</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Search By Status</label>
+                            style="letter-spacing: 0.5px;">Status</label>
                         <select name="status" class="form-select border-0 bg-light"
-                            style="border-radius: 10px; height: 45px;">
-                            <option value="">Select Status</option>
+                            style="border-radius: 8px; height: 44px;">
+                            <option value="">All Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>On Hold</option>
                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1.5" style="flex: 1;">
                         <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">From Date</label>
-                        <input type="date" name="from_date" class="form-control border-0 bg-light"
-                            value="{{ request('from_date') }}" style="border-radius: 10px; height: 45px;">
+                            style="letter-spacing: 0.5px;">From</label>
+                        <input type="date" name="from_date" class="form-control border-0 bg-light px-2"
+                            value="{{ request('from_date') }}" style="border-radius: 8px; height: 44px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1.5" style="flex: 1;">
                         <label class="form-label small fw-bold text-muted text-uppercase"
-                            style="letter-spacing: 0.5px;">Upto Date</label>
-                        <input type="date" name="to_date" class="form-control border-0 bg-light"
-                            value="{{ request('to_date') }}" style="border-radius: 10px; height: 45px;">
+                            style="letter-spacing: 0.5px;">Upto</label>
+                        <input type="date" name="to_date" class="form-control border-0 bg-light px-2"
+                            value="{{ request('to_date') }}" style="border-radius: 8px; height: 44px;">
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary fw-bold flex-grow-1"
-                            style="border-radius: 10px; height: 45px; background: #3858f9; border: none;">Search</button>
+                            style="border-radius: 8px; height: 44px; background: #3858f9; border: none;">SEARCH</button>
                         <a href="{{ route('leave.history') }}"
                             class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
-                            style="border-radius: 10px; height: 45px; width: 100px;">Reset</a>
+                            style="border-radius: 8px; height: 44px; width: 80px; font-size: 13px;">RESET</a>
                     </div>
                 </form>
             </div>
@@ -131,12 +137,24 @@
                                         </td>
                                         <td><span class="fw-semibold text-dark">{{ $leave->leave_type }}</span></td>
                                         <td>
-                                            <span class="badge bg-light text-dark fw-bold border"
-                                                style="font-size: 10px;">{{ strtoupper($leave->leave_category) }}</span>
+                                            @php
+                                                $catRaw = strtolower(trim($leave->leave_category));
+                                                if (str_contains($catRaw, 'half')) {
+                                                    $catDisplay = 'HALF DAY';
+                                                    if (str_contains($catRaw, 'first')) $catDisplay .= ' (FIRST HALF)';
+                                                    else if (str_contains($catRaw, 'second')) $catDisplay .= ' (SECOND HALF)';
+                                                } elseif ($catRaw === 'full' || $catRaw === 'full day') {
+                                                    $catDisplay = 'FULL DAY';
+                                                } else {
+                                                    $catDisplay = strtoupper($catRaw);
+                                                }
+                                            @endphp
+                                            <span class="badge bg-soft-primary text-primary px-3 rounded-pill fw-bold"
+                                                style="font-size: 11px;">{{ $catDisplay }}</span>
                                         </td>
                                         <td class="small text-muted">
                                             <div class="fw-bold text-dark">{{ $leave->start_date->format('d-M-Y') }}</div>
-                                            @if($leave->leave_category === 'gatepass' && $leave->start_time)
+                                            @if(str_contains(strtolower($leave->leave_category), 'gatepass') && $leave->start_time)
                                                 <span class="badge bg-soft-info text-info p-1 px-2 mt-1" style="font-size: 9px;">
                                                     <i data-feather="clock" style="width: 10px; height: 10px;"></i>
                                                     {{ Carbon\Carbon::parse($leave->start_time)->format('h:i A') }} -
@@ -197,7 +215,7 @@
                         <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
                                 class="text-danger">*</span></label>
                         <select name="employee_id" class="form-select border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" required>
+                            style="height: 48px; border-radius: 10px;" required>
                             <option value="">Select Employee</option>
                             @foreach($employees as $emp)
                                 <option value="{{ $emp->id }}">{{ $emp->name }}</option>
@@ -207,36 +225,46 @@
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label>
                         <input type="text" class="form-control border-0 bg-light shadow-sm" value="{{ date('d-m-Y') }}"
-                            style="height: 50px; border-radius: 10px;" readonly>
+                            style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
-                        <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 50px;">
+                        <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
                             <div class="form-check d-flex align-items-center mb-0 ps-4">
-                                <input class="form-check-input" type="radio" name="leave_category" value="full" id="catFull"
+                                <input class="form-check-input" type="radio" name="leave_category" value="Full Day" id="catFull"
                                     checked onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catFull">Full</label>
+                                <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
-                                <input class="form-check-input" type="radio" name="leave_category" value="half" id="catHalf"
+                                <input class="form-check-input" type="radio" name="leave_category" value="Half Day" id="catHalf"
                                     onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catHalf">Half</label>
+                                <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
-                                <input class="form-check-input" type="radio" name="leave_category" value="gatepass"
+                                <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
                                     id="catGate" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catGate">Gatepass</label>
                             </div>
                         </div>
                     </div>
 
+                    <div class="col-md-6" id="halfDayOptionWrapper" style="display: none;">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Which Half? <span
+                                class="text-danger">*</span></label>
+                        <select name="half_day_type" class="form-select border-0 bg-white shadow-sm"
+                            style="height: 48px; border-radius: 10px;">
+                            <option value="First Half">First Half</option>
+                            <option value="Second Half">Second Half</option>
+                        </select>
+                    </div>
+
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Type <span
                                 class="text-danger">*</span></label>
                         <select name="leave_type" id="leaveType" class="form-select border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" required>
+                            style="height: 48px; border-radius: 10px;" required>
                             <option value="">Select Type...</option>
                             <option value="Paid Leave">Paid Leave</option>
                             <option value="Sick Leave">Sick Leave</option>
@@ -248,35 +276,41 @@
                         <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
                                 class="text-danger">*</span></label>
                         <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" required onchange="calculateDays()"
+                            style="height: 48px; border-radius: 10px;" required onchange="calculateDays()"
                             min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-4" id="endDateWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
                         <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
+                            style="height: 48px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-4" id="startTimeWrapper" style="display: none;">
                         <label class="form-label small fw-bold text-muted text-uppercase">Start Time <span
                                 class="text-danger">*</span></label>
                         <input type="time" name="start_time" id="startTime" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 50px; border-radius: 10px;" onchange="calculateDays()">
+                            style="height: 48px; border-radius: 10px;" onchange="calculateDays()">
+                    </div>
+
+                    <div class="col-md-4" id="endTimeWrapper" style="display: none;">
+                        <label class="form-label small fw-bold text-muted text-uppercase">End Time (Auto)</label>
+                        <input type="time" name="end_time" id="endTime" class="form-control border-0 bg-light shadow-sm text-muted fw-bold"
+                            style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted text-uppercase">Total Days/Duration</label>
                         <input type="text" name="total_days" id="totalDays"
                             class="form-control border-0 bg-light shadow-sm fw-bold text-primary" value="1"
-                            style="height: 50px; border-radius: 10px;" readonly>
+                            style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label small fw-bold text-muted text-uppercase">Reason <span
                                 class="text-danger">*</span></label>
                         <input type="text" name="reason" class="form-control border-0 bg-white shadow-sm"
-                            placeholder="Enter short reason" style="height: 50px; border-radius: 10px;" required>
+                            placeholder="Enter short reason" style="height: 48px; border-radius: 10px;" required>
                     </div>
 
                     <div class="col-12">
@@ -287,7 +321,7 @@
 
                     <div class="col-12 mt-4">
                         <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm"
-                            style="height: 55px; border-radius: 12px; background: #16a34a; border: none;">Apply Now</button>
+                            style="height: 50px; border-radius: 12px; background: #16a34a; border: none;">Apply Now</button>
                     </div>
                 </div>
             </form>
@@ -377,8 +411,12 @@
                             <div class="bg-white p-3 rounded-4 shadow-sm border h-100">
                                 <label class="small fw-bold text-muted text-uppercase d-block mb-1">Leave Info</label>
                                 <div class="fw-bold text-dark" id="viewLeaveType">-</div>
-                                <span id="viewCategoryBadge"
-                                    class="badge bg-soft-primary text-primary border border-primary border-opacity-10 mt-1">CAT</span>
+                                <div class="hstack gap-2 mt-1">
+                                    <span id="viewCategoryBadge"
+                                        class="badge bg-soft-primary text-primary border border-primary border-opacity-10">CAT</span>
+                                    <span id="viewStatusBadge"
+                                        class="badge rounded-pill fw-bold text-uppercase" style="font-size: 10px;">STATUS</span>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -458,14 +496,26 @@
             const category = document.querySelector('input[name="leave_category"]:checked').value;
             const endDateWrapper = document.getElementById('endDateWrapper');
             const startTimeWrapper = document.getElementById('startTimeWrapper');
+            const endTimeWrapper = document.getElementById('endTimeWrapper');
+            const halfDayOptionWrapper = document.getElementById('halfDayOptionWrapper');
             const leaveType = document.getElementById('leaveType');
 
-            if (category === 'gatepass') {
+            halfDayOptionWrapper.style.display = 'none';
+            endTimeWrapper.style.display = 'none';
+
+            if (category === 'Gatepass') {
                 endDateWrapper.style.display = 'none';
                 startTimeWrapper.style.display = 'block';
+                endTimeWrapper.style.display = 'block';
                 leaveType.value = 'Gatepass Leave';
                 document.getElementById('endDate').required = false;
                 document.getElementById('startTime').required = true;
+            } else if (category === 'Half Day') {
+                endDateWrapper.style.display = 'none';
+                startTimeWrapper.style.display = 'none';
+                halfDayOptionWrapper.style.display = 'block';
+                document.getElementById('endDate').required = false;
+                document.getElementById('startTime').required = false;
             } else {
                 endDateWrapper.style.display = 'block';
                 startTimeWrapper.style.display = 'none';
@@ -481,7 +531,15 @@
             const end = document.getElementById('endDate').value;
             const totalDaysInput = document.getElementById('totalDays');
 
-            if (category === 'gatepass') {
+            if (category === 'Gatepass') {
+                const startTimeInput = document.getElementById('startTime');
+                const endTimeInput = document.getElementById('endTime');
+                if (startTimeInput.value) {
+                    const [hours, minutes] = startTimeInput.value.split(':');
+                    let dateObj = new Date();
+                    dateObj.setHours(parseInt(hours) + 1, parseInt(minutes));
+                    endTimeInput.value = dateObj.toTimeString().substring(0, 5);
+                }
                 totalDaysInput.value = '1 Hour (Gatepass)';
                 return;
             }
@@ -492,13 +550,21 @@
                 const diffTime = eDate - sDate;
                 let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                if (category === 'half') {
+                // Same day logic or 8th-to-9th logic: both counts as 1 day 
+                // because end date is exclusive (return date).
+                if (diffDays === 0) {
+                    diffDays = 1;
+                }
+
+                if (category === 'Half Day') {
                     diffDays = 0.5;
                 }
 
-                totalDaysInput.value = diffDays < 0 ? 0 : (diffDays === 0 && category === 'full' ? 0 : diffDays) + (category === 'full' ? ' Days' : ' Days');
+                totalDaysInput.value = diffDays < 0 ? 0 : diffDays + ' Days';
+            } else if (start) {
+                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : '1 Days';
             } else {
-                totalDaysInput.value = category === 'half' ? '0.5 Days' : '0 Days';
+                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : '0 Days';
             }
         }
 
@@ -511,6 +577,10 @@
             // Clean total_days - extract numeric value only
             let totalDaysRaw = data['total_days'] || '0';
             data['total_days'] = parseFloat(totalDaysRaw.replace(/[^0-9.]/g, '')) || 0;
+
+            if (data['leave_category'] === 'Half Day' && data['half_day_type']) {
+                data['leave_category'] = `Half Day (${data['half_day_type']})`;
+            }
 
             fetch('{{ route("leave.apply") }}', {
                 method: 'POST',
@@ -566,15 +636,71 @@
                     document.getElementById('viewEmployeeName').textContent = data.employee.name;
                     document.getElementById('viewAvatarLetter').textContent = data.employee.name.charAt(0);
                     document.getElementById('viewLeaveType').textContent = data.leave_type;
-                    document.getElementById('viewCategoryBadge').textContent = data.leave_category.toUpperCase();
+                    
+                    let catDisp = data.leave_category.toUpperCase();
+                    if (catDisp.includes('HALF')) {
+                        catDisp = catDisp.replace('HALF', 'HALF DAY').replace('HALF DAY DAY', 'HALF DAY');
+                    } else if (catDisp === 'FULL' || catDisp.trim() === 'FULL') {
+                        catDisp = 'FULL DAY';
+                    }
+                    document.getElementById('viewCategoryBadge').textContent = catDisp;
+                    
+                    const statusBadge = document.getElementById('viewStatusBadge');
+                    const status = data.status.toLowerCase();
+                    statusBadge.textContent = status.toUpperCase();
+                    
+                    // Reset classes
+                    statusBadge.className = 'badge rounded-pill fw-bold text-uppercase';
+                    const statusClass = {
+                        'pending': 'bg-soft-dark text-dark',
+                        'approved': 'bg-soft-primary text-primary',
+                        'on_hold': 'bg-soft-warning text-warning',
+                        'rejected': 'bg-soft-danger text-danger'
+                    }[status] || 'bg-light';
+                    statusBadge.classList.add(...statusClass.split(' '));
 
-                    document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                    document.getElementById('viewStartTimeText').textContent = data.start_time ? data.start_time.substring(0, 5) : 'N/A';
+                    const cat = data.leave_category.toLowerCase();
+                    const isGatepass = cat.includes('gatepass');
+                    const isHalfDay = cat.includes('half');
 
-                    document.getElementById('viewEndDateText').textContent = data.end_date ? new Date(data.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-                    document.getElementById('viewEndTimeText').textContent = data.end_time ? data.end_time.substring(0, 5) : 'N/A';
+                    // Duration & Days
+                    if (isGatepass) {
+                        document.getElementById('viewTotalDays').textContent = '1 Hour (Gatepass Slot)';
+                    } else if (isHalfDay) {
+                        document.getElementById('viewTotalDays').textContent = '0.5 Days (Half Day)';
+                    } else {
+                        document.getElementById('viewTotalDays').textContent = `${data.total_days} Total Days`;
+                    }
 
-                    document.getElementById('viewTotalDays').textContent = data.leave_category === 'gatepass' ? '1 Hour (Gatepass Slot)' : `${data.total_days} Total Days`;
+                    // Timeframe section
+                    if (isGatepass) {
+                        // Gatepass: Show date + time slot
+                        document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        document.getElementById('viewStartTimeText').textContent = data.start_time ? data.start_time.substring(0, 5) : 'N/A';
+                        document.getElementById('viewEndDateText').textContent = 'Same Day';
+                        document.getElementById('viewEndTimeText').textContent = data.end_time ? data.end_time.substring(0, 5) : 'N/A';
+                    } else if (isHalfDay) {
+                        // Half Day: Show date + which half
+                        document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        
+                        // Extract "First Half" or "Second Half" more robustly
+                        let whichHalf = 'Half Day';
+                        if (cat.includes('first')) whichHalf = 'First Half';
+                        else if (cat.includes('second')) whichHalf = 'Second Half';
+                        
+                        document.getElementById('viewStartTimeText').textContent = whichHalf;
+                        
+                        // End part for Half Day
+                        document.getElementById('viewEndDateText').textContent = 'Same Day';
+                        document.getElementById('viewEndTimeText').textContent = '0.5 Day';
+                    } else {
+                        // Full Day: Show date range
+                        document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        document.getElementById('viewStartTimeText').textContent = 'Full Day';
+                        document.getElementById('viewEndDateText').textContent = data.end_date ? new Date(data.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                        document.getElementById('viewEndTimeText').textContent = 'Return Date';
+                    }
+
                     document.getElementById('viewReason').textContent = data.reason;
                     document.getElementById('viewMessage').textContent = data.message || 'No extra message.';
 
@@ -614,22 +740,29 @@
                             'rejected': 'bg-soft-danger text-danger'
                         }[item.status] || 'bg-light';
 
+                        let catDisp = item.leave_category.toUpperCase();
+                        if (catDisp.includes('HALF')) {
+                            catDisp = catDisp.replace('HALF', 'HALF DAY').replace('HALF DAY DAY', 'HALF DAY');
+                        } else if (catDisp === 'FULL' || catDisp.trim() === 'FULL') {
+                            catDisp = 'FULL DAY';
+                        }
+
                         tbody.innerHTML += `
-                                        <tr class="${isFuture ? 'bg-soft-primary bg-opacity-10' : ''}">
-                                            <td class="ps-3 py-3">
-                                                <div class="fw-bold text-dark small">${dateFormatted}</div>
-                                                ${isFuture ? '<div class="text-primary fw-bold" style="font-size: 8px;">UPCOMING</div>' : ''}
-                                            </td>
-                                            <td>
-                                                <div class="fw-semibold text-dark small">${item.leave_type}</div>
-                                                <div class="text-muted" style="font-size: 9px;">${item.leave_category.toUpperCase()}</div>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge ${statusClass} px-2 rounded-pill fw-bold" style="font-size: 10px;">${item.status.toUpperCase()}</span>
-                                            </td>
-                                            <td class="pe-3 text-end fw-bold text-primary small">${item.leave_category === 'gatepass' ? '1 Hr' : item.total_days}</td>
-                                        </tr>
-                                    `;
+                                            <tr class="${isFuture ? 'bg-soft-primary bg-opacity-10' : ''}">
+                                                <td class="ps-3 py-3">
+                                                    <div class="fw-bold text-dark small">${dateFormatted}</div>
+                                                    ${isFuture ? '<div class="text-primary fw-bold" style="font-size: 8px;">UPCOMING</div>' : ''}
+                                                </td>
+                                                <td>
+                                                    <div class="fw-semibold text-dark small">${item.leave_type}</div>
+                                                    <div class="text-muted" style="font-size: 9px;">${catDisp}</div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge ${statusClass} px-2 rounded-pill fw-bold" style="font-size: 10px;">${item.status.toUpperCase()}</span>
+                                                </td>
+                                                <td class="pe-3 text-end fw-bold text-primary small">${item.leave_category.toLowerCase().includes('gatepass') ? '1 Hr' : item.total_days}</td>
+                                            </tr>
+                                        `;
                     });
                 });
         }

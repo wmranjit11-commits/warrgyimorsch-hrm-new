@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\LeaveAllotment;
 use App\Models\Attendance;
+use App\Exports\LeaveBalancesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -19,7 +21,7 @@ class LeaveController extends Controller
     {
         $selectedMonth = $request->get('month', Carbon::now()->format('m'));
         $year = Carbon::now()->format('Y');
-        
+
         $month = $selectedMonth;
 
         $employees = Employee::orderBy('name', 'asc')->get();
@@ -79,6 +81,13 @@ class LeaveController extends Controller
         return response()->json($balances);
     }
 
+    public function exportBalances()
+    {
+        $balances = $this->calculateBalances();
+        $filename = "leave_balances_" . date('Y-m-d_H-i-s') . ".xlsx";
+        return Excel::download(new LeaveBalancesExport($balances), $filename);
+    }
+
     private function calculateBalances()
     {
         $employees = Employee::all();
@@ -86,18 +95,39 @@ class LeaveController extends Controller
 
         foreach ($employees as $employee) {
             $totalAllotted = LeaveAllotment::where('employee_id', $employee->id)->sum('leave_count');
-            
-            $fullDays = Attendance::where('employee_id', $employee->id)
-                ->where('status', 'leave')
-                ->count();
-            
-            $halfDays = Attendance::where('employee_id', $employee->id)
-                ->where('status', 'half_day')
-                ->count();
-                
-            $totalTaken = $fullDays + ($halfDays * 0.5);
 
-            $balances[] = (object)[
+            // Count ONLY from approved leave applications (NOT from Attendance table)
+            $approvedLeaves = \App\Models\LeaveApplication::where('employee_id', $employee->id)
+                ->where('status', 'approved')
+                ->get();
+
+            $totalTaken = 0;
+            foreach ($approvedLeaves as $leave) {
+                $cat = strtolower($leave->leave_category);
+
+                // Gatepass does NOT count in balance
+                if (str_contains($cat, 'gatepass')) {
+                    continue;
+                }
+
+                // Half Day = 0.5
+                if (str_contains($cat, 'half')) {
+                    $totalTaken += 0.5;
+                    continue;
+                }
+
+                // Full Day - calculate number of days (end date exclusive)
+                $startDate = Carbon::parse($leave->start_date);
+                $endDate = $leave->end_date ? Carbon::parse($leave->end_date) : $startDate->copy();
+
+                if ($startDate->equalTo($endDate)) {
+                    $totalTaken += 1;
+                } else {
+                    $totalTaken += $startDate->diffInDays($endDate);
+                }
+            }
+
+            $balances[] = (object) [
                 'id' => $employee->id,
                 'name' => $employee->name,
                 'total_allotted' => $totalAllotted,
@@ -108,3 +138,4 @@ class LeaveController extends Controller
         return $balances;
     }
 }
+
