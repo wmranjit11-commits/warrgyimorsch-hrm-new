@@ -21,36 +21,35 @@ class PayrollController extends Controller
     public function attendance(Request $request)
     {
         $query = Attendance::query();
-        $hasFilter = false;
 
         // Filter by Date Range
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
-            $hasFilter = true;
         }
 
         // Filter by Employee
         if ($request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
-            $hasFilter = true;
         }
 
-        if (!$hasFilter) {
-            // Default to current month if no filter is provided
+        // Default filter (current month)
+        if (!$request->filled('start_date') && !$request->filled('end_date') && !$request->filled('employee_id')) {
             $query->whereYear('attendance_date', now()->year)
                 ->whereMonth('attendance_date', now()->month);
         }
 
-        // Group by Date with Aggregate Counts
-        $attendance = $query->selectRaw('attendance_date, 
-                count(case when status = "present" then 1 end) as present_count,
-                count(case when status = "half_day" then 1 end) as half_day_count,
-                count(case when status in ("absent", "leave") then 1 end) as leave_count,
-                count(case when total_hours > 9 then 1 end) as overtime_count')
+        // Aggregation
+        $attendance = $query->selectRaw("
+                attendance_date,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
+                SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_day_count,
+                SUM(CASE WHEN status IN ('absent','leave') THEN 1 ELSE 0 END) as leave_count,
+                SUM(CASE WHEN total_hours >= 9 THEN 1 ELSE 0 END) as overtime_count
+            ")
             ->groupBy('attendance_date')
             ->orderBy('attendance_date', 'desc')
             ->paginate(15);
-
+            // echo "<pre>";print_r($attendance->toArray());exit;
         return view('payroll.attendance', compact('attendance'));
     }
 
@@ -110,26 +109,37 @@ class PayrollController extends Controller
      */
     public function storeAttendance(Request $request)
     {
+        // dd($request->all());
         try {
             if (!$request->attendance_date) {
                 throw new \Exception('Attendance date is required.');
             }
 
             foreach ($request->employees as $employeeData) {
-                if ($employeeData['employee_id']) {
-                    $status = $employeeData['status'] ?? 'present';
-
                     $checkIn = !empty($employeeData['check_in']) ? $employeeData['check_in'] : null;
                     $checkOut = !empty($employeeData['check_out']) ? $employeeData['check_out'] : null;
 
-                    $totalHours = 0;
+                    if ($checkIn || $checkOut) {
+                    $status = $employeeData['status'] ?? 'present';
+
+
+                  $totalHours = 0;
+
                     if ($checkIn && $checkOut) {
                         try {
                             $in = Carbon::createFromFormat('H:i', $checkIn);
                             $out = Carbon::createFromFormat('H:i', $checkOut);
-                            if ($out->greaterThan($in)) {
-                                $totalHours = $out->diffInMinutes($in) / 60;
+
+                            // 🔥 Get difference (can be negative)
+                            $diffMinutes = $in->diffInMinutes($out, false);
+
+                            // ✅ Handle night shift (e.g. 10 PM → 6 AM)
+                            if ($diffMinutes < 0) {
+                                $diffMinutes += 24 * 60;
                             }
+
+                           $totalHours = round($diffMinutes / 60, 2);
+
                         } catch (\Exception $e) {
                             $totalHours = 0;
                         }
@@ -175,116 +185,120 @@ class PayrollController extends Controller
     /**
      * Calculate and display payroll
      */
-    public function calculatePayroll(Request $request)
+   public function calculatePayroll(Request $request)
     {
         try {
-            $month = $request->month; // Format: YYYY-MM
+            $month = $request->month; // YYYY-MM
             $employeeId = $request->employee_id;
 
-            // Get employee
             $employee = Employee::findOrFail($employeeId);
 
-            // Check if payroll already exists for this month (Used for warning or updating)
-            $existingPayroll = Payroll::where('employee_id', $employeeId)
-                ->where('month', $month)
-                ->first();
+            // 📅 Month Setup
+            $date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $year = $date->year;
+            $monthNum = $date->month;
+            $totalDays = $date->daysInMonth;
 
-            // Robust Date Parsing (Fixes Feb 28/31 bug)
-            $selectedDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $year = $selectedDate->format('Y');
-            $monthNum = $selectedDate->format('m');
-            $totalDays = $selectedDate->daysInMonth;
-
-            // Get attendance records for this month
-            $attendanceRecords = Attendance::where('employee_id', $employeeId)
+            // 📊 Get Attendance
+            $records = Attendance::where('employee_id', $employeeId)
                 ->whereYear('attendance_date', $year)
                 ->whereMonth('attendance_date', $monthNum)
                 ->get();
 
-            if ($attendanceRecords->count() == 0) {
-                // No attendance records, default to full salary
-                $payableDays = $totalDays;
-            } else {
-                // Precise Hours-Based Calculation (Requested by User)
-                // If a user works 4 hours, it counts as 0.5 days (4/8)
-                // If a user works 8 hours, it counts as 1.0 days (8/8)
-                $totalHoursWorked = 0;
-                $daysPresent = 0;
+            // ✅ STEP 1: Total Working Hours
+            $totalHours = 0;
 
-                foreach ($attendanceRecords as $record) {
-                    // Include 'leave' in payable days (Paid Leave policy)
-                    // If you want Unpaid Leave, remove 'leave' from this array
-                    if (in_array($record->status, ['present', 'half_day', 'late', 'leave'])) {
-                        // Ensure it doesn't exceed 8 hours for base pay calculation (cap at full day pay)
-                        $hours = ($record->status === 'half_day') ? 4 : 8; // Default full day for late/leave
-                        if ($record->status === 'present' || $record->status === 'late') {
-                            $hours = min(8, $record->total_hours ?: 8);
-                        }
-                        $totalHoursWorked += $hours;
-                    }
+            foreach ($records as $r) {
+                if ($r->status == 'absent') continue;
+
+                // Paid Leave = full day (8 hrs)
+                if ($r->status == 'leave') {
+                    $totalHours += 8;
+                } else {
+                    $totalHours += $r->total_hours ?? 0;
                 }
-
-                $payableDays = $totalHoursWorked / 8;
-                if ($payableDays < 0)
-                    $payableDays = 0;
             }
 
-            // Convert Annual CTC to Monthly Base (Requested by User: "sal ki mili hogi na bro")
-            $monthlyBasic = $employee->basic_salary / 12;
-            $monthlyHRA = $employee->hra / 12;
-            $monthlyConveyance = $employee->conveyance_allowance / 12;
-            $monthlyMedical = $employee->medical_allowance / 12;
-            $monthlyOther = $employee->other_allowance / 12;
+            // Convert to days
+            $payableDays = round($totalHours / 8, 2);
+            $payableDays = min($payableDays, $totalDays); // safety
 
-            $fullMonthGross = $monthlyBasic + $monthlyHRA + $monthlyConveyance + $monthlyMedical + $monthlyOther;
-
-            // Pro-rate every individual component for absolute transparency
-            $pBasic = ($monthlyBasic / $totalDays) * $payableDays;
-            $pHRA = ($monthlyHRA / $totalDays) * $payableDays;
-            $pConveyance = ($monthlyConveyance / $totalDays) * $payableDays;
-            $pMedical = ($monthlyMedical / $totalDays) * $payableDays;
-            $pOtherAllowance = ($monthlyOther / $totalDays) * $payableDays;
-
-            $grossSalary = $pBasic + $pHRA + $pConveyance + $pMedical + $pOtherAllowance;
-            $salaryLoss = $fullMonthGross - $grossSalary;
             $unpaidDays = $totalDays - $payableDays;
 
-            // Pro-rate Deductions
-            $pPF = $employee->pf ? ($pBasic * 0.12) : 0;
-            $pESI = $employee->esi ? ($pBasic * 0.0175) : 0;
-            $pOtherDeduction = 0;
+            // 💰 STEP 2: Monthly Salary (Annual → Monthly)
+            $monthlySalary = (
+                ($employee->basic_salary ?? 0) +
+                ($employee->hra ?? 0) +
+                ($employee->conveyance_allowance ?? 0) +
+                ($employee->medical_allowance ?? 0) +
+                ($employee->other_allowance ?? 0)
+            ) / 12;
 
-            $totalDeductions = $pPF + $pESI + $pOtherDeduction;
-            $netSalary = $grossSalary - $totalDeductions;
+            // Per day salary
+            $perDaySalary = $monthlySalary / $totalDays;
 
+            // Gross Salary
+            $grossSalary = $perDaySalary * $payableDays;
+
+            // 📉 STEP 3: Deductions
+            $pf = 0;
+            $esi = 0;
+
+            // PF (12% of basic portion only)
+            if ($employee->pf) {
+                $basicMonthly = ($employee->basic_salary ?? 0) / 12;
+                $pf = ($basicMonthly / $totalDays * $payableDays) * 0.12;
+            }
+
+            // ESI (only if salary <= 21000)
+            if ($employee->esi && $grossSalary <= 21000) {
+                $esi = $grossSalary * 0.0075;
+            }
+
+            $totalDeductions = $pf + $esi;
+
+            // 💵 STEP 4: Net Salary
+            $netSalary = max(0, $grossSalary - $totalDeductions);
+
+            // 📉 Salary Loss
+            $fullMonthSalary = $monthlySalary;
+            $salaryLoss = $fullMonthSalary - $grossSalary;
+
+            // 📦 Final Data
             $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $month,
-                'payable_days' => round($payableDays, 1),
-                'unpaid_days' => round($unpaidDays, 1),
+                'payable_days' => $payableDays,
+                'unpaid_days' => round($unpaidDays, 2),
                 'salary_loss' => round($salaryLoss, 2),
-                'basic_salary' => round($pBasic, 2),
-                'hra' => round($pHRA, 2),
-                'conveyance_allowance' => round($pConveyance, 2),
-                'medical_allowance' => round($pMedical, 2),
-                'other_allowance' => round($pOtherAllowance, 2),
+
+                'basic_salary' => round(($employee->basic_salary / 12 / $totalDays) * $payableDays, 2),
+                'hra' => round(($employee->hra / 12 / $totalDays) * $payableDays, 2),
+                'conveyance_allowance' => round(($employee->conveyance_allowance / 12 / $totalDays) * $payableDays, 2),
+                'medical_allowance' => round(($employee->medical_allowance / 12 / $totalDays) * $payableDays, 2),
+                'other_allowance' => round(($employee->other_allowance / 12 / $totalDays) * $payableDays, 2),
+
                 'gross_salary' => round($grossSalary, 2),
+
+                'pf_deduction' => round($pf, 2),
+                'esi_deduction' => round($esi, 2),
+                'other_deduction' => 0,
                 'deductions' => round($totalDeductions, 2),
-                'pf_deduction' => round($pPF, 2),
-                'esi_deduction' => round($pESI, 2),
-                'other_deduction' => round($pOtherDeduction, 2),
+
                 'net_salary' => round($netSalary, 2),
+
                 'status' => 'pending',
             ];
 
             return response()->json([
                 'success' => true,
-                'payroll' => $payrollData,
+                'payroll' => $payrollData
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
+                'message' => $e->getMessage()
             ]);
         }
     }

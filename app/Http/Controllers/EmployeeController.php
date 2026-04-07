@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
 
 class EmployeeController extends Controller
 {
@@ -53,9 +55,9 @@ class EmployeeController extends Controller
                 'date_of_joining' => $request->date_of_joining,
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender ?? 'male',
-                'employee_type' => $request->employee_type,
-                'username' => $request->username,
-                'password' => $request->password,
+                'employee_code' => $request->employee_code,
+                // 'username' => $request->username,
+                'password' =>  Hash::make($request->password),
                 'aadhaar_number' => $request->aadhaar_number,
                 'pan_number' => $request->pan_number,
                 'address' => $request->address,
@@ -145,8 +147,8 @@ class EmployeeController extends Controller
             'date_of_joining' => $request->date_of_joining,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender ?? 'male',
-            'employee_type' => $request->employee_type,
-            'username' => $request->username,
+            'employee_code' => $request->employee_code,
+            // 'username' => $request->username,
             'aadhaar_number' => $request->aadhaar_number,
             'pan_number' => $request->pan_number,
             'address' => $request->address,
@@ -172,7 +174,7 @@ class EmployeeController extends Controller
 
         // Only update password if provided
         if ($request->filled('password')) {
-            $updateData['password'] = $request->password;
+            $updateData['password'] = Hash::make($request->password);
         }
 
         $employee->update($updateData);

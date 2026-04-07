@@ -98,16 +98,16 @@
                                 </td>
                                 <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
                                     <div style="margin-bottom: 8px;">
-                                        <input type="time" name="employees[{{ $index }}][check_out]" 
-                                               id="check_out_{{ $index }}"
-                                               value="{{ $emp->old_check_out ?? '' }}"
-                                               {{ isset($emp->old_check_in) ? '' : 'disabled' }}
-                                               onchange="calculateDuration({{ $index }})"
-                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: {{ isset($emp->old_check_in) ? 'white' : '#f5f5f5' }};">
+                                       <input type="time" name="employees[{{ $index }}][check_out]" 
+                                            id="check_out_{{ $index }}"
+                                            value="{{ $emp->old_check_out ?? '' }}"
+                                            {{ !empty($emp->old_check_in) ? '' : 'disabled' }}
+                                            onchange="calculateDuration({{ $index }})"
+                                            style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: {{ !empty($emp->old_check_in) ? 'white' : '#f5f5f5' }};">
                                     </div>
                                     <label style="font-size: 12px; cursor: pointer;">
                                         <input type="checkbox" id="toggle_out_{{ $index }}" 
-                                               {{ isset($emp->old_check_in) ? '' : 'disabled' }}
+                                             {{ !empty($emp->old_check_in) ? '' : 'disabled' }}
                                                onchange="setNowTime('check_out_{{ $index }}', {{ $index }})">
                                         <span>Set Now</span>
                                     </label>
@@ -134,21 +134,31 @@
                     </table>
                 </div>
 
-                <div style="margin-top: 25px; text-align: right;">
-                    @if(isset($is_edit))
-                        <a href="{{ route('payroll.attendance.add') }}" class="btn btn-light" style="padding: 12px 20px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px; text-decoration: none; color: #333;">Cancel</a>
-                    @endif
-                    <button type="submit" 
-                            style="padding: 12px 40px; background: #3858f9; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">
-                        {{ isset($is_edit) ? 'UPDATE ATTENDANCE' : 'SAVE ATTENDANCE' }}
-                    </button>
-                </div>
+             <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                @if(isset($is_edit))
+                    <a href="{{ route('payroll.attendance.add') }}" 
+                    class="btn btn-outline-secondary w-100 w-sm-auto">
+                        Cancel
+                    </a>
+                @endif
+
+                <button type="submit" 
+                        class="btn btn-primary fw-bold w-100 w-sm-auto px-4">
+                    {{ isset($is_edit) ? 'UPDATE ATTENDANCE' : 'SAVE ATTENDANCE' }}
+                </button>
+
+            </div>
             @endif
         </form>
     </div>
 </div>
 
 <script>
+    window.onload = function () {
+    document.querySelectorAll('[id^="check_in_"]').forEach((el, index) => {
+        calculateDuration(index);
+    });
+};
     function setNowTime(fieldId, index) {
         const field = document.getElementById(fieldId);
         const now = new Date();
@@ -168,29 +178,44 @@
         calculateDuration(index);
     }
 
-    function calculateDuration(index) {
+   function calculateDuration(index) {
         const checkInField = document.getElementById('check_in_' + index);
         const checkOutField = document.getElementById('check_out_' + index);
+        const toggleOut = document.getElementById('toggle_out_' + index);
         const durationDisplay = document.getElementById('duration_' + index);
-        
+
         const checkIn = checkInField.value;
         const checkOut = checkOutField.value;
-        
+
+        // ✅ ENABLE / DISABLE CHECK-OUT BASED ON CHECK-IN
+        if (checkIn) {
+            checkOutField.disabled = false;
+            toggleOut.disabled = false;
+            checkOutField.style.background = 'white';
+        } else {
+            checkOutField.disabled = true;
+            toggleOut.disabled = true;
+            checkOutField.style.background = '#f5f5f5';
+            checkOutField.value = ''; // reset checkout
+        }
+
+        // ✅ DURATION CALCULATION
         if (checkIn && checkOut) {
             const [inHours, inMinutes] = checkIn.split(':').map(Number);
             const [outHours, outMinutes] = checkOut.split(':').map(Number);
-            
+
             let inTotal = inHours * 60 + inMinutes;
             let outTotal = outHours * 60 + outMinutes;
-            
+
+            // Handle night shift (cross midnight)
             if (outTotal < inTotal) {
                 outTotal += 24 * 60;
             }
-            
+
             const diffMinutes = outTotal - inTotal;
             const hours = Math.floor(diffMinutes / 60);
             const minutes = diffMinutes % 60;
-            
+
             durationDisplay.textContent = hours + 'h ' + minutes + 'm';
             durationDisplay.style.color = '#3858f9';
         } else {

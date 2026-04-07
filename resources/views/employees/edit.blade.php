@@ -124,6 +124,13 @@
                     <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                         <div class="row g-3">
                             <div class="col-md-4">
+                            <label class="fw-bold">Employee Code</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <input type="text" name="employee_code" class="form-control" placeholder="Enter employee code" value="{{ old('name', $employee->employee_code) }}">
+                            </div>
+                        </div>
+                            <div class="col-md-4">
                                 <label class="fw-bold">Name <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
@@ -139,17 +146,7 @@
                                         value="{{ old('email', $employee->email) }}">
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="fw-bold">Employee Type</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                    <select name="employee_type" class="form-control">
-                                        <option value="">Select</option>
-                                        <option value="permanent" {{ old('employee_type', $employee->employee_type) == 'permanent' ? 'selected' : '' }}>Employee</option>
-                                        <option value="contract" {{ old('employee_type', $employee->employee_type) == 'contract' ? 'selected' : '' }}>Worker</option>
-                                    </select>
-                                </div>
-                            </div>
+                           
                             <div class="col-md-4">
                                 <label class="fw-bold">Role</label>
                                 <div class="input-group mb-3">
@@ -199,29 +196,56 @@
                                 <label class="fw-bold">Designation <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-users"></i></span>
-                                    <select name="designation" class="form-control" required>
+                                  <select name="designation" class="form-control" required>
                                         <option value="">Select designation...</option>
-                                        <option value="plant head" {{ old('designation', $employee->designation) == 'plant head' ? 'selected' : '' }}>Plant Head / Production Manager</option>
-                                        <option value="production supervisor" {{ old('designation', $employee->designation) == 'production supervisor' ? 'selected' : '' }}>
-                                            Factory/Production Supervisor</option>
-                                        <option value="machine operator" {{ old('designation', $employee->designation) == 'machine operator' ? 'selected' : '' }}>Machine
-                                            Operator</option>
-                                        <option value="polisher" {{ old('designation', $employee->designation) == 'polisher' ? 'selected' : '' }}>Polisher</option>
-                                        <option value="maintenance engineer" {{ old('designation', $employee->designation) == 'maintenance engineer' ? 'selected' : '' }}>Maintenance
-                                            Technician/Engineer</option>
-                                        <option value="qc engineer" {{ old('designation', $employee->designation) == 'qc engineer' ? 'selected' : '' }}>Quality Control (QC) Technician/Engineer</option>
-                                        <option value="production worker" {{ old('designation', $employee->designation) == 'production worker' ? 'selected' : '' }}>Production
-                                            Worker / Helper</option>
-                                        <option value="finishing engineer" {{ old('designation', $employee->designation) == 'finishing engineer' ? 'selected' : '' }}>Finishing
-                                            Engineer</option>
-                                        <option value="bdm" {{ old('designation', $employee->designation) == 'bdm' ? 'selected' : '' }}>Business Development Manager (BDM) / Executive</option>
-                                        <option value="sales manager" {{ old('designation', $employee->designation) == 'sales manager' ? 'selected' : '' }}>Sales Manager / Sales Representative
-                                            (Domestic/International)</option>
-                                        <option value="logistics executive" {{ old('designation', $employee->designation) == 'logistics executive' ? 'selected' : '' }}>Logistics
-                                            Executive / Telecaller Executive / Purchase Executive</option>
-                                        <option value="hr manager" {{ old('designation', $employee->designation) == 'hr manager' ? 'selected' : '' }}>Human Resources (HR) Manager / Executive</option>
+
+                                        <!-- Management -->
+                                        <option value="Chief Executive Officer (CEO)" {{ old('designation', $employee->designation) == 'Chief Executive Officer (CEO)' ? 'selected' : '' }}>Chief Executive Officer (CEO)</option>
+                                        <option value="Chief Finance Officer (CFO)" {{ old('designation', $employee->designation) == 'Chief Finance Officer (CFO)' ? 'selected' : '' }}>Chief Finance Officer (CFO)</option>
+                                        <option value="Chief Technology Officer (CTO)" {{ old('designation', $employee->designation) == 'Chief Technology Officer (CTO)' ? 'selected' : '' }}>Chief Technology Officer (CTO)</option>
+                                        <option value="Project Manager" {{ old('designation', $employee->designation) == 'Project Manager' ? 'selected' : '' }}>Project Manager</option>
+                                        <option value="Team Lead / Tech Lead" {{ old('designation', $employee->designation) == 'Team Lead / Tech Lead' ? 'selected' : '' }}>Team Lead / Tech Lead</option>
+
+                                        <!-- Development -->
+                                        <option value="Software Engineer / Developer" {{ old('designation', $employee->designation) == 'Software Engineer / Developer' ? 'selected' : '' }}>Software Engineer / Developer</option>
+                                        <option value="Frontend Developer (React / Next.js)" {{ old('designation', $employee->designation) == 'Frontend Developer (React / Next.js)' ? 'selected' : '' }}>Frontend Developer (React / Next.js)</option>
+                                        <option value="Backend Developer (Laravel / Node.js)" {{ old('designation', $employee->designation) == 'Backend Developer (Laravel / Node.js)' ? 'selected' : '' }}>Backend Developer (Laravel / Node.js)</option>
+                                        <option value="Full Stack Developer" {{ old('designation', $employee->designation) == 'Full Stack Developer' ? 'selected' : '' }}>Full Stack Developer</option>
+                                        <option value="Mobile App Developer (Flutter / Android / iOS)" {{ old('designation', $employee->designation) == 'Mobile App Developer (Flutter / Android / iOS)' ? 'selected' : '' }}>Mobile App Developer (Flutter / Android / iOS)</option>
+                                        <option value="Web Developer Intern" {{ old('designation', $employee->designation) == 'Web Developer Intern' ? 'selected' : '' }}>Web Developer Intern</option>
+
+                                        <!-- Specialized -->
+                                        <option value="DevOps Engineer" {{ old('designation', $employee->designation) == 'DevOps Engineer' ? 'selected' : '' }}>DevOps Engineer</option>
+                                        <option value="Cloud Engineer (AWS / Azure / GCP)" {{ old('designation', $employee->designation) == 'Cloud Engineer (AWS / Azure / GCP)' ? 'selected' : '' }}>Cloud Engineer (AWS / Azure / GCP)</option>
+                                        <option value="Data Science Engineer" {{ old('designation', $employee->designation) == 'Data Science Engineer' ? 'selected' : '' }}>Data Science Engineer</option>
+                                        <option value="AI / Machine Learning Engineer" {{ old('designation', $employee->designation) == 'AI / Machine Learning Engineer' ? 'selected' : '' }}>AI / Machine Learning Engineer</option>
+
+                                        <!-- Testing -->
+                                        <option value="QA Engineer / Tester" {{ old('designation', $employee->designation) == 'QA Engineer / Tester' ? 'selected' : '' }}>QA Engineer / Tester</option>
+                                        <option value="Automation Test Engineer" {{ old('designation', $employee->designation) == 'Automation Test Engineer' ? 'selected' : '' }}>Automation Test Engineer</option>
+
+                                        <!-- Design -->
+                                        <option value="UI/UX Designer" {{ old('designation', $employee->designation) == 'UI/UX Designer' ? 'selected' : '' }}>UI/UX Designer</option>
+                                        <option value="Graphic Designer" {{ old('designation', $employee->designation) == 'Graphic Designer' ? 'selected' : '' }}>Graphic Designer</option>
+                                        <option value="Social Media Executive" {{ old('designation', $employee->designation) == 'Social Media Executive' ? 'selected' : '' }}>Social Media Executive</option>
+
+                                        <!-- Support -->
+                                        <option value="System Administrator" {{ old('designation', $employee->designation) == 'System Administrator' ? 'selected' : '' }}>System Administrator</option>
+                                        <option value="IT Support Engineer" {{ old('designation', $employee->designation) == 'IT Support Engineer' ? 'selected' : '' }}>IT Support Engineer</option>
+
+                                        <!-- Business -->
+                                        <option value="Business Development Manager (BDM)" {{ old('designation', $employee->designation) == 'Business Development Manager (BDM)' ? 'selected' : '' }}>Business Development Manager (BDM)</option>
+                                        <option value="Sales Executive" {{ old('designation', $employee->designation) == 'Sales Executive' ? 'selected' : '' }}>Sales Executive</option>
+                                        <option value="Digital Marketing Executive" {{ old('designation', $employee->designation) == 'Digital Marketing Executive' ? 'selected' : '' }}>Digital Marketing Executive</option>
+                                        <option value="SEO Executive" {{ old('designation', $employee->designation) == 'SEO Executive' ? 'selected' : '' }}>SEO Executive</option>
+                                        <option value="SEO Intern" {{ old('designation', $employee->designation) == 'SEO Intern' ? 'selected' : '' }}>SEO Intern</option>
+
+                                        <!-- HR -->
+                                        <option value="HR Manager" {{ old('designation', $employee->designation) == 'HR Manager' ? 'selected' : '' }}>HR Manager</option>
+                                        <option value="HR Executive" {{ old('designation', $employee->designation) == 'HR Executive' ? 'selected' : '' }}>HR Executive</option>
+                                        <option value="HR Intern" {{ old('designation', $employee->designation) == 'HR Intern' ? 'selected' : '' }}>HR Intern</option>
                                     </select>
-                                </div>
+                                                                    </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="fw-bold">Date of Joining</label>
@@ -308,8 +332,7 @@
                                 <label class="fw-bold">Leave</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                    <input type="number" name="leave" class="form-control"
-                                        value="{{ old('leave', $employee->leave) }}">
+                                    <input type="text" name="leave" class="form-control" value="{{ old('leave', $employee->leave) }}" placeholder="Enter Leave Allotment">
                                 </div>
                             </div>
 

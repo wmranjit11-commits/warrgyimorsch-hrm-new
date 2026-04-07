@@ -153,6 +153,7 @@
                         <th class="py-3 small fw-bold text-muted text-uppercase">EMPLOYEE NAME</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">CHECK IN</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">CHECK OUT</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">Working Hrs</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">STATUS</th>
                         <th class="pe-4 py-3 small fw-bold text-muted text-uppercase text-center">ACTION</th>
                     </tr>
@@ -228,6 +229,7 @@
                         <td class="fw-bold text-dark">${item.employee.name}</td>
                         <td class="text-center">${item.check_in ? formatTime(item.check_in) : '--'}</td>
                         <td class="text-center">${item.check_out ? formatTime(item.check_out) : '--'}</td>
+                       <td class="text-center">${formatHours(item.total_hours)}</td>
                         <td class="text-center">
                             <span class="status-badge ${getStatusBadge(item.status)}">${item.status}</span>
                         </td>
@@ -252,6 +254,22 @@
             document.getElementById('statusIndicator').innerText = 'Showing All Records';
         }
     }
+
+    function formatHours(decimalHours) {
+        if (!decimalHours) return '--';
+
+        let hours = Math.floor(decimalHours);
+        let minutes = Math.round((decimalHours - hours) * 60);
+
+        // handle edge case (60 minutes)
+        if (minutes === 60) {
+            hours += 1;
+            minutes = 0;
+        }
+
+        return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+    }
+
 
     function formatTime(time) {
         if(!time) return '--';

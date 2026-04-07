@@ -194,93 +194,123 @@
     <script>
         let currentPayrollData = null;
 
-        function calculatePayroll() {
-            const month = document.getElementById('monthSelect').value;
-            const employeeId = document.getElementById('employeeSelect').value;
+       function calculatePayroll() {
+        const month = document.getElementById('monthSelect').value;
+        const employeeId = document.getElementById('employeeSelect').value;
 
-            if (!month || !employeeId) {
-                alert('Please select both month and employee');
-                return;
+        if (!month || !employeeId) {
+            alert('Please select both month and employee');
+            return;
+        }
+
+        const noCalc = document.getElementById('noCalculation');
+        noCalc.innerHTML = `
+            <div class="py-5 text-center">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-3 fw-bold text-primary">Calculating...</p>
+            </div>
+        `;
+
+        fetch('{{ route("payroll.calculate") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ month, employee_id: employeeId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                currentPayrollData = data.payroll;
+                displayPayrollData(data.payroll);
+
+                noCalc.style.display = 'none';
+                document.getElementById('calculationResult').style.display = 'block';
+            } else {
+                throw new Error(data.message || 'Something went wrong');
             }
+        })
+        .catch(err => {
+            noCalc.innerHTML = `
+                <div class="py-5 text-center text-danger">
+                    <i class="bi bi-exclamation-circle fs-1"></i>
+                    <p class="mt-3 fw-bold">${err.message}</p>
+                </div>
+            `;
+        });
+    }
 
-            const noCalc = document.getElementById('noCalculation');
-            noCalc.innerHTML = '<div class="py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 fw-bold text-primary">Calculating...</p></div>';
+    function displayPayrollData(p) {
 
-            fetch('{{ route("payroll.calculate") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ month, employee_id: employeeId })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        currentPayrollData = data.payroll;
-                        displayPayrollData(data.payroll);
-                        noCalc.style.display = 'none';
-                        document.getElementById('calculationResult').style.display = 'block';
-                    } else {
-                        alert(data.message || 'Error occurred');
-                        noCalc.innerHTML = '<div class="py-5"><i class="bi bi-exclamation-circle text-danger fs-1"></i><p class="mt-3 fw-bold text-danger">' + (data.message) + '</p></div>';
-                    }
-                });
-        }
+        // Format Month (2026-04 → Apr 2026)
+        const formattedMonth = new Date(p.month + '-01').toLocaleString('en-IN', {
+            month: 'short',
+            year: 'numeric'
+        });
 
-        function displayPayrollData(p) {
-            document.getElementById('resultMonth').textContent = p.month;
-            document.getElementById('resultPayableDays').textContent = p.payable_days;
-            document.getElementById('tableBasicSalary').textContent = '₹ ' + f(p.basic_salary);
-            document.getElementById('tableHRA').textContent = '₹ ' + f(p.hra);
-            document.getElementById('tableConveyance').textContent = '₹ ' + f(p.conveyance_allowance);
-            document.getElementById('tableMedical').textContent = '₹ ' + f(p.medical_allowance);
-            document.getElementById('tableGrossSalary').textContent = '₹ ' + f(p.gross_salary);
-            document.getElementById('tablePFDeduction').textContent = '₹ ' + f(p.pf_deduction);
-            document.getElementById('tableESIDeduction').textContent = '₹ ' + f(p.esi_deduction);
-            document.getElementById('tableOtherDeduction').textContent = '₹ 0.00';
-            document.getElementById('tableTotalDeductions').textContent = '₹ ' + f(p.deductions);
-            document.getElementById('tableNetSalary').textContent = '₹ ' + f(p.net_salary);
+        document.getElementById('resultMonth').textContent = formattedMonth;
+        document.getElementById('resultPayableDays').textContent = p.payable_days;
 
-            // Loss Breakdown
-            document.getElementById('resultUnpaidDays').textContent = p.unpaid_days;
-            document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
-        }
+        document.getElementById('tableBasicSalary').textContent = '₹ ' + f(p.basic_salary);
+        document.getElementById('tableHRA').textContent = '₹ ' + f(p.hra);
+        document.getElementById('tableConveyance').textContent = '₹ ' + f(p.conveyance_allowance);
+        document.getElementById('tableMedical').textContent = '₹ ' + f(p.medical_allowance);
+        document.getElementById('tableGrossSalary').textContent = '₹ ' + f(p.gross_salary);
 
-        function savePayroll() {
-            if (!currentPayrollData) return;
-            fetch('{{ route("payroll.store") }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify(currentPayrollData)
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        // Instead of redirect, show download option
-                        const btn = document.getElementById('downloadAfterSave');
-                        btn.classList.remove('d-none');
-                        
-                        // Change submit button to Done
-                        const submitBtn = event.target.closest('button');
-                        submitBtn.innerHTML = '<i class="bi bi-check-all me-2"></i> SAVED SUCCESSFULLY';
-                        submitBtn.className = "btn btn-success py-3 fw-bold shadow-sm w-100";
-                        submitBtn.disabled = true;
+        document.getElementById('tablePFDeduction').textContent = '₹ ' + f(p.pf_deduction);
+        document.getElementById('tableESIDeduction').textContent = '₹ ' + f(p.esi_deduction);
+        document.getElementById('tableOtherDeduction').textContent = '₹ ' + f(p.other_deduction || 0);
+        document.getElementById('tableTotalDeductions').textContent = '₹ ' + f(p.deductions);
 
-                        // Set global payroll ID for downloading
-                        window.lastSavedPayrollId = data.payroll_id; // need controller to return this
-                    } else {
-                        alert(data.message);
-                    }
-                });
-        }
+        document.getElementById('tableNetSalary').textContent = '₹ ' + f(p.net_salary);
+
+        document.getElementById('resultUnpaidDays').textContent = p.unpaid_days;
+        document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
+    }
+
+       function savePayroll(btn) {
+        if (!currentPayrollData) return;
+
+        fetch('{{ route("payroll.store") }}', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+            },
+            body: JSON.stringify(currentPayrollData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                document.getElementById('downloadAfterSave').classList.remove('d-none');
+
+                // Update button safely
+                btn.innerHTML = '<i class="bi bi-check-all me-2"></i> SAVED SUCCESSFULLY';
+                btn.className = "btn btn-success py-3 fw-bold shadow-sm w-100";
+                btn.disabled = true;
+
+                window.lastSavedPayrollId = data.payroll_id;
+
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(() => alert('Something went wrong'));
+    }
 
         function downloadCurrentPdf() {
             if(!window.lastSavedPayrollId) return;
             window.location.href = `{{ route('payroll.export') }}?id=${window.lastSavedPayrollId}&format=pdf`;
         }
 
-        function f(n) { return parseFloat(n).toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
+        function f(n) {
+            return parseFloat(n || 0).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
     </script>
 
     <style>

@@ -115,6 +115,13 @@
                 <!-- Personal Details Tab -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                     <div class="row g-3">
+                           <div class="col-md-4">
+                            <label class="fw-bold">Employee Code</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                <input type="text" name="employee_code" class="form-control" placeholder="Enter employee code">
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Name <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
@@ -130,17 +137,7 @@
                                 <input type="email" name="email" class="form-control" placeholder="Enter email">
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="fw-bold">Employee Type</label>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                <select name="employee_type" class="form-control">
-                                    <option value="">Select</option>
-                                    <option value="permanent">Employee</option>
-                                    <option value="contract">Worker</option>
-                                </select>
-                            </div>
-                        </div>
+                     
                         <div class="col-md-4">
                             <label class="fw-bold">Role</label>
                             <div class="input-group mb-3">
@@ -148,12 +145,11 @@
                                 <select name="role" class="form-control" required>
                                     <option value="">Select Role</option>
                                     <option value="super_admin">Super Admin</option>
-                                    <option value="business_operation_head">Business Operation Head</option>
+                                    <option value="manager">Manager</option>
                                     <option value="hr_executive">HR Executive</option>
+                                    <option value="hr_intern">HR Intern</option>
                                     <option value="team_leader">Team Leader</option>
                                     <option value="employee">Employee</option>
-                                    <option value="hr_marketing">HR Marketing</option>
-                                    <!-- aur add kare option yahan -->
                                 </select>
                             </div>
                         </div>
@@ -187,21 +183,52 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="designation" class="form-control" required>
                                     <option value="">Select designation...</option>
-                                    <option value="plant head">Plant Head / Production Manager</option>
-                                    <option value="production supervisor">Factory/Production Supervisor</option>
-                                    <option value="machine operator">Machine Operator</option>
-                                    <option value="polisher">Polisher</option>
-                                    <option value="maintenance engineer">Maintenance Technician/Engineer</option>
-                                    <option value="qc engineer">Quality Control (QC) Technician/Engineer</option>
-                                    <option value="production worker">Production Worker / Helper</option>
-                                    <option value="finishing engineer">Finishing Engineer</option>
-                                    <option value="bdm">Business Development Manager (BDM) / Executive</option>
-                                    <option value="sales manager">Sales Manager / Sales Representative
-                                        (Domestic/International)</option>
-                                    <option value="logistics executive">Logistics Executive / Telecaller Executive /
-                                        Purchase Executive</option>
-                                    <option value="hr manager">Human Resources (HR) Manager / Executive</option>
-                                    <!-- add aur options yahan -->
+
+                                    <!-- Management -->
+                                    <option value="Chief Executive Officer (CEO)">Chief Executive Officer (CEO)</option>
+                                    <option value="Chief Finance Officer (CFO)">Chief Finance Officer (CFO)</option>
+                                    <option value="Chief Technology Officer (CTO)">Chief Technology Officer (CTO)</option>
+                                    <option value="Project Manager">Project Manager</option>
+                                    <option value="Team Lead / Tech Lead">Team Lead / Tech Lead</option>
+
+                                    <!-- Development -->
+                                    <option value="Software Engineer / Developer">Software Engineer / Developer</option>
+                                    <option value="Frontend Developer (React / Next.js)">Frontend Developer (React / Next.js)</option>
+                                    <option value="Backend Developer (Laravel / Node.js)">Backend Developer (Laravel / Node.js)</option>
+                                    <option value="Full Stack Developer">Full Stack Developer</option>
+                                    <option value="Mobile App Developer (Flutter / Android / iOS)">Mobile App Developer (Flutter / Android / iOS)</option>
+                                    <option value="Web Developer Intern">Web Developer Intern</option>
+
+                                    <!-- Specialized -->
+                                    <option value="DevOps Engineer">DevOps Engineer</option>
+                                    <option value="Cloud Engineer (AWS / Azure / GCP)">Cloud Engineer (AWS / Azure / GCP)</option>
+                                    <option value="Data Science Engineer">Data Science Engineer</option>
+                                    <option value="AI / Machine Learning Engineer">AI / Machine Learning Engineer</option>
+
+                                    <!-- Testing -->
+                                    <option value="QA Engineer / Tester">QA Engineer / Tester</option>
+                                    <option value="Automation Test Engineer">Automation Test Engineer</option>
+
+                                    <!-- Design -->
+                                    <option value="UI/UX Designer">UI/UX Designer</option>
+                                    <option value="Graphic Designer">Graphic Designer</option>
+                                    <option value="Social Media Executive">Social Media Executive</option>
+
+                                    <!-- Support -->
+                                    <option value="System Administrator">System Administrator</option>
+                                    <option value="IT Support Engineer">IT Support Engineer</option>
+
+                                    <!-- Business -->
+                                    <option value="Business Development Manager (BDM)">Business Development Manager (BDM)</option>
+                                    <option value="Sales Executive">Sales Executive</option>
+                                    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
+                                    <option value="SEO Executive">SEO Executive</option>
+                                    <option value="SEO Intern">SEO Intern</option>
+
+                                    <!-- HR -->
+                                    <option value="HR Manager">HR Manager</option>
+                                    <option value="HR Executive">HR Executive</option>
+                                    <option value="HR Intern">HR Intern</option>
                                 </select>
                             </div>
                         </div>
@@ -228,13 +255,7 @@
                                 <span class="me-2 text-danger"><i class=""></i></span>Female
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="fw-bold">Username</label>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="feather-key"></i></span>
-                                <input type="text" name="username" class="form-control" placeholder="Username">
-                            </div>
-                        </div>
+                      
                         <div class="col-md-4">
                             <label class="fw-bold">Password</label>
                             <div class="input-group mb-3">
@@ -282,7 +303,7 @@
                             <label class="fw-bold">Leave</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="number" name="leave" class="form-control" value="0">
+                                <input type="text" name="leave" class="form-control" value="" placeholder="Enter Leave Allotment">
                             </div>
                         </div>
                         <!-- <div class="row align-items-center"> -->
