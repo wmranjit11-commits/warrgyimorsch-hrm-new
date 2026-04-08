@@ -294,34 +294,41 @@
     </div>
 
     <!-- ATTENDANCE HISTORY MODAL (SEPARATE) -->
-    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="attendanceHistoryModal"
-        aria-labelledby="attendanceHistoryLabel" style="width: 450px !important;">
-        <div class="offcanvas-header p-4"
-            style="background: #3858f9; display: flex; justify-content: space-between; align-items: center;">
-            <div class="d-flex align-items-center gap-3">
-                <div style="background: rgba(255,255,255,0.2); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-calendar-check text-white fs-4"></i>
+    <div class="modal fade" id="attendanceHistoryModal" tabindex="-1" aria-labelledby="attendanceHistoryLabel" aria-hidden="true" style="z-index: 9999 !important;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header p-4"
+                    style="background: linear-gradient(135deg, #3858f9 0%, #2563eb 100%); display: flex; justify-content: space-between; align-items: center; border: none;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="background: rgba(255,255,255,0.2); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-calendar-check text-white fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0" id="attendanceHistoryLabel">Attendance Portal</h5>
+                            <div id="attendanceEmpName" style="font-size: 11px; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">-</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(255,255,255,0.1); border-radius: 50%; padding: 10px;"></button>
                 </div>
-                <div>
-                    <h5 class="offcanvas-title text-white fw-bold mb-0" id="attendanceHistoryLabel">Attendance Portal</h5>
-                    <div id="attendanceEmpName" style="font-size: 11px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">-</div>
-                </div>
-            </div>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body p-4">
-            <!-- MONTH FILTER -->
-            <div class="mb-4">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-2">Select Month</label>
-                <div class="input-group" style="height: 48px;">
-                    <span class="input-group-text bg-light border-0"><i class="bi bi-filter text-primary"></i></span>
-                    <input type="month" id="attendanceMonthFilter" class="form-control border-0 bg-light fw-bold" 
-                           value="{{ date('Y-m') }}" onchange="refreshAttendancePortal()">
-                </div>
-            </div>
+                <div class="modal-body p-4 bg-white">
+                    <!-- MONTH FILTER -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Select Month</label>
+                        <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1.5px solid #e2e8f0;">
+                            <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-filter text-primary"></i></span>
+                            <input type="month" id="attendanceMonthFilter" class="form-control border-0 bg-white fw-bold px-2" 
+                                   value="{{ date('Y-m') }}" onchange="refreshAttendancePortal()" style="height: 50px;">
+                        </div>
+                    </div>
 
-            <div id="attendancePortalContent" class="attendance-history-list">
-                <!-- DATA POPULATED VIA JS -->
+                    <div id="attendancePortalContent" style="max-height: 500px; overflow-y: auto;">
+                        <!-- TABLE DATA POPULATED VIA JS -->
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light p-3">
+                    <button type="button" class="btn btn-dark fw-bold px-4 py-2 rounded-pill shadow-sm w-100" 
+                            data-bs-dismiss="modal" style="background: #0f172a; border: none; height: 46px;">DISMISS PORTAL</button>
+                </div>
             </div>
         </div>
     </div>
@@ -726,47 +733,61 @@
             background: #f8fafc;
         }
 
-        .att-date-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 8px;
-            border-radius: 12px;
-            min-width: 60px;
-            text-align: center;
+        /* Attendance Sheet (Table) Styles */
+        .att-sheet-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
         }
-
-        .att-day {
-            font-size: 10px;
-            font-weight: 800;
-            color: #64748b;
+        .att-sheet-table th {
             text-transform: uppercase;
-        }
-
-        .att-date {
-            font-size: 16px;
-            font-weight: 800;
-            color: #1e293b;
-        }
-
-        .att-info {
-            flex: 1;
-            margin-left: 15px;
-        }
-
-        .att-time {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .att-hours {
             font-size: 11px;
+            font-weight: 800;
             color: #64748b;
+            letter-spacing: 1px;
+            padding: 12px 15px;
+            background: #f8fafc;
+        }
+        .att-sheet-table td {
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .att-sheet-table tr td:first-child { border-left: 1px solid #f1f5f9; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        .att-sheet-table tr td:last-child { border-right: 1px solid #f1f5f9; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+        
+        .att-sheet-table tr:hover td {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        /* FORCE CLEAR EVERYTHING (NO THEME BLUR) */
+        body.modal-open .nxl-container, 
+        body.modal-open .nxl-header, 
+        body.modal-open .nxl-navigation, 
+        body.modal-open .page-header {
+            filter: none !important;
+            transition: none !important;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.3 !important; /* Extremely light so you can see behind clearly */
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        
+        .modal-content {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        .att-sheet-table td {
+            color: #0f172a !important; /* Deepest black-slate for max clarity */
             font-weight: 500;
         }
     </style>
@@ -1138,14 +1159,57 @@
             if (targetPane) targetPane.classList.add('active');
             if (targetButton) targetButton.classList.add('active');
         }
+        
+        // Helper to format 24h to 12h (AM/PM)
+        function formatTime12h(timeStr) {
+            if (!timeStr || timeStr === '--:--' || timeStr === '00:00') return '--:--';
+            try {
+                // Handle HH:mm or HH:mm:ss
+                let [hours, minutes] = timeStr.split(':');
+                hours = parseInt(hours);
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+            } catch (e) {
+                return timeStr;
+            }
+        }
+        
+        // Helper to calculate hours between two 12h time strings
+        function calculateAttendanceHours(checkIn, checkOut) {
+            if (!checkIn || !checkOut || checkIn === '--:--' || checkOut === '--:--') return 0;
+            
+            try {
+                function parseTime(t) {
+                    let [time, ampm] = t.split(' ');
+                    let [hrs, mins] = time.split(':');
+                    hrs = parseInt(hrs);
+                    mins = parseInt(mins);
+                    if (ampm === 'PM' && hrs < 12) hrs += 12;
+                    if (ampm === 'AM' && hrs === 12) hrs = 0;
+                    return hrs + (mins / 60);
+                }
+                
+                const inHrs = parseTime(checkIn);
+                const outHrs = parseTime(checkOut);
+                
+                if (outHrs > inHrs) {
+                    return outHrs - inHrs;
+                }
+                return 0;
+            } catch (e) {
+                return 0;
+            }
+        }
 
         // Open Attendance Portal
         function openAttendanceModal(empId, empName) {
             window.currentAttendanceEmpId = empId;
             document.getElementById('attendanceEmpName').textContent = empName;
             
-            // Trigger offcanvas
-            const attModal = new bootstrap.Offcanvas(document.getElementById('attendanceHistoryModal'));
+            // Trigger modal
+            const attModal = new bootstrap.Modal(document.getElementById('attendanceHistoryModal'));
             attModal.show();
             
             // Load history
@@ -1157,64 +1221,86 @@
             const empId = window.currentAttendanceEmpId;
             const month = document.getElementById('attendanceMonthFilter').value;
             const container = document.getElementById('attendancePortalContent');
-            
-            container.innerHTML = `
-                <div class="text-center py-5 text-muted">
-                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                    <p class="small fw-bold">Loading Records...</p>
-                </div>
-            `;
-            
-            fetch(`/api/employees/${empId}/attendance?month=${month}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        container.innerHTML = '<div class="text-center py-5 text-muted small">No records found for this month.</div>';
-                        return;
-                    }
-
-                    let html = '';
-                    data.forEach(record => {
-                        const dateObj = new Date(record.attendance_date);
-                        const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                        const dateNum = dateObj.getDate();
-                        const monthStr = dateObj.toLocaleDateString('en-US', { month: 'short' });
                         
-                        const statusClass = {
-                            'present': 'bg-soft-success text-success',
-                            'absent': 'bg-soft-danger text-danger',
-                            'leave': 'bg-soft-info text-info',
-                            'half_day': 'bg-soft-warning text-warning',
-                            'late': 'bg-soft-warning text-warning'
-                        }[record.status] || 'bg-light';
-
-                        html += `
-                            <div class="attendance-record-card bounce-in">
-                                <div class="att-date-box">
-                                    <span class="att-day">${day}</span>
-                                    <span class="att-date">${dateNum}</span>
-                                    <span class="att-day">${monthStr}</span>
-                                </div>
-                                <div class="att-info">
-                                    <div class="att-time">
-                                        <i class="bi bi-clock small text-primary"></i>
-                                        ${record.check_in || '--:--'} - ${record.check_out || '--:--'}
-                                    </div>
-                                    <div class="att-hours">${record.total_hours || '0'} hrs worked</div>
-                                </div>
-                                <div class="att-status">
-                                    <span class="badge ${statusClass} rounded-pill px-3 fw-bold text-uppercase" style="font-size: 10px;">
-                                        ${record.status.replace('_', ' ')}
-                                    </span>
-                                </div>
+                        container.innerHTML = `
+                            <div class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                <p class="small fw-bold">Loading Records...</p>
                             </div>
                         `;
-                    });
-                    container.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error('Error fetching attendance:', err);
-                    container.innerHTML = '<div class="text-center py-5 text-danger small">Failed to load data.</div>';
+                        
+                        fetch(`/api/employees/${empId}/attendance?month=${month}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data || data.length === 0) {
+                                    container.innerHTML = '<div class="text-center py-5 text-muted small fw-bold">No attendance records found for this month.</div>';
+                                    return;
+                                }
+
+                                let html = `
+                                    <table class="att-sheet-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">Date</th>
+                                                <th>Check In</th>
+                                                <th>Check Out</th>
+                                                <th>Duration</th>
+                                                <th class="text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                `;
+
+                                data.forEach(record => {
+                                    const dateObj = new Date(record.attendance_date);
+                                    const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                                    const dateNum = dateObj.getDate();
+                                    const monthStr = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                                    const fullDate = `${dateNum} ${monthStr}`;
+                                    
+                                    const statusClass = {
+                                        'present': 'bg-soft-success text-success',
+                                        'absent': 'bg-soft-danger text-danger',
+                                        'leave': 'bg-soft-info text-info',
+                                        'half_day': 'bg-soft-warning text-warning',
+                                        'late': 'bg-soft-warning text-warning'
+                                    }[record.status] || 'bg-light';
+
+                                    html += `
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">${fullDate}</div>
+                                                <div class="small text-muted text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">${day}</div>
+                                            </td>
+                                            <td class="fw-bold text-dark">${formatTime12h(record.check_in)}</td>
+                                            <td class="fw-bold text-dark">${formatTime12h(record.check_out)}</td>
+                                            <td>
+                                                <span class="text-primary fw-bold" style="font-size: 12px;">
+                                                    <i class="bi bi-clock-history me-1"></i>
+                                                    ${(function() {
+                                                        let hrs = parseFloat(record.total_hours || 0);
+                                                        if (hrs <= 0) {
+                                                            const inStr = formatTime12h(record.check_in);
+                                                            const outStr = formatTime12h(record.check_out);
+                                                            hrs = calculateAttendanceHours(inStr, outStr);
+                                                        }
+                                                        return Math.max(0, hrs).toFixed(1);
+                                                    })()} hrs
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge ${statusClass} rounded-pill px-3 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">
+                                                    ${record.status ? record.status.replace(/_/g, ' ') : 'N/A'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
+                                html += '</tbody></table>';
+                                container.innerHTML = html;
+                            })
+                            .catch(err => {
+                                console.error('Error fetching attendance:', err);
                 });
         }
 
@@ -1253,8 +1339,15 @@
                 // Filtering conditions
                 const nameMatch = name.includes(employeeName);
                 const typeMatch = employeeType === '' || rowType.toLowerCase() === employeeType;
-                const departmentMatch = department === '' || rowDept.includes(department.replace(/_/g, ' '));
-                const roleMatch = role === '' || rowRole.includes(role);
+                
+                // Robust matching for department and role (handles underscores and spaces)
+                const normDepartment = department.replace(/_/g, ' ');
+                const normRowDept = rowDept.replace(/_/g, ' ');
+                const departmentMatch = department === '' || normRowDept.includes(normDepartment);
+
+                const normRole = role.replace(/_/g, ' ');
+                const normRowRole = rowRole.replace(/_/g, ' ');
+                const roleMatch = role === '' || normRowRole.includes(normRole);
 
                 if (nameMatch && typeMatch && departmentMatch && roleMatch) {
                     row.style.display = '';

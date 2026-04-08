@@ -8,9 +8,15 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithMapping, WithColumnWidths
+class EmployeesExport extends DefaultValueBinder implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithMapping, WithColumnWidths, WithColumnFormatting, WithCustomValueBinder
 {
     protected $employees;
 
@@ -28,7 +34,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, W
     {
         return [
             'SR. NO',
-            'EMPLOYEE CODE',
+            'EMPLOYEE ID',
             'NAME',
             'EMAIL',
             'MOBILE NUMBER',
@@ -42,7 +48,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'USERNAME',
             'AADHAAR NUMBER',
             'PAN NUMBER',
-            'ADDRESS',
+            'RESIDENTIAL ADDRESS',
             'TIME IN',
             'TIME OUT',
             'PF',
@@ -55,12 +61,12 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'BANK NAME',
             'ACCOUNT NUMBER',
             'IFSC CODE',
-            'BASIC SALARY',
-            'HRA',
+            'ANNUAL BASIC SALARY',
+            'HRA (ANNUAL)',
             'CONVEYANCE ALLOWANCE',
             'MEDICAL ALLOWANCE',
             'OTHER ALLOWANCE',
-            'TOTAL SALARY (CTC)',
+            'TOTAL ANNUAL CTC',
         ];
     }
 
@@ -98,7 +104,7 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $emp->insurance_provider ?? '-',
             $emp->insurance_policy_number ?? '-',
             $emp->bank_name ?? '-',
-            $emp->account_number ?? '-',
+            $emp->account_number ? (string) $emp->account_number : '-',
             $emp->ifsc_code ?? '-',
             $emp->basic_salary ?? 0,
             $emp->hra ?? 0,
@@ -109,50 +115,78 @@ class EmployeesExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         ];
     }
 
-    public function styles(Worksheet $sheet)
+    public function bindValue(Cell $cell, $value)
+    {
+        $column = $cell->getColumn();
+        
+        // Force strings for columns with long numbers to prevent scientific notation
+        if (in_array($column, ['E', 'N', 'AA'])) {
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        // Return default binding for other columns
+        return parent::bindValue($cell, $value);
+    }
+
+    public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true, 'size' => 11]],
+            1 => [
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '3858F9']
+                ]
+            ],
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'AA' => NumberFormat::FORMAT_TEXT, // Account Number as Text
+            'N' => NumberFormat::FORMAT_TEXT,  // Aadhaar as Text
         ];
     }
 
     public function columnWidths(): array
     {
         return [
-            'A' => 8,    // SR. NO
-            'B' => 15,   // EMPLOYEE CODE
-            'C' => 25,   // NAME
-            'D' => 28,   // EMAIL
-            'E' => 16,   // MOBILE
-            'F' => 10,   // GENDER
-            'G' => 14,   // DOB
-            'H' => 14,   // DOJ
-            'I' => 16,   // TYPE
-            'J' => 18,   // ROLE
-            'K' => 22,   // DEPARTMENT
-            'L' => 22,   // DESIGNATION
-            'M' => 16,   // USERNAME
-            'N' => 18,   // AADHAAR
-            'O' => 14,   // PAN
-            'P' => 35,   // ADDRESS
-            'Q' => 10,   // TIME IN
-            'R' => 10,   // TIME OUT
-            'S' => 6,    // PF
-            'T' => 16,   // PF NUMBER
-            'U' => 6,    // ESI
-            'V' => 16,   // ESI NUMBER
-            'W' => 10,   // INSURANCE
-            'X' => 22,   // INSURANCE PROVIDER
-            'Y' => 22,   // INSURANCE POLICY
-            'Z' => 22,   // BANK NAME
-            'AA' => 20,  // ACCOUNT NUMBER
-            'AB' => 14,  // IFSC
-            'AC' => 14,  // BASIC
-            'AD' => 10,  // HRA
-            'AE' => 22,  // CONVEYANCE
-            'AF' => 20,  // MEDICAL
-            'AG' => 18,  // OTHER
-            'AH' => 16,  // TOTAL
+            'A' => 10,   // SR. NO
+            'B' => 18,   // EMPLOYEE CODE
+            'C' => 30,   // NAME
+            'D' => 35,   // EMAIL
+            'E' => 18,   // MOBILE
+            'F' => 12,   // GENDER
+            'G' => 16,   // DOB
+            'H' => 16,   // DOJ
+            'I' => 18,   // TYPE
+            'J' => 20,   // ROLE
+            'K' => 25,   // DEPARTMENT
+            'L' => 25,   // DESIGNATION
+            'M' => 18,   // USERNAME
+            'N' => 22,   // AADHAAR
+            'O' => 18,   // PAN
+            'P' => 45,   // ADDRESS
+            'Q' => 12,   // TIME IN
+            'R' => 12,   // TIME OUT
+            'S' => 8,    // PF
+            'T' => 20,   // PF NUMBER
+            'U' => 8,    // ESI
+            'V' => 20,   // ESI NUMBER
+            'W' => 12,   // INSURANCE
+            'X' => 25,   // INSURANCE PROVIDER
+            'Y' => 25,   // INSURANCE POLICY
+            'Z' => 25,   // BANK NAME
+            'AA' => 25,  // ACCOUNT NUMBER (Increased)
+            'AB' => 18,  // IFSC
+            'AC' => 20,  // BASIC
+            'AD' => 20,  // HRA
+            'AE' => 25,  // CONVEYANCE
+            'AF' => 25,  // MEDICAL
+            'AG' => 22,  // OTHER
+            'AH' => 22,  // TOTAL
         ];
     }
 }
