@@ -17,8 +17,13 @@ class LeaveApplicationController extends Controller
         $query = LeaveApplication::with('employee');
 
         // Search Filters
+        if ($request->filled('search')) {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->search . '%');
+            });
+        }
         if ($request->filled('category')) {
-            $query->where('leave_category', $request->category);
+            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -71,8 +76,13 @@ class LeaveApplicationController extends Controller
     {
         $query = LeaveApplication::with('employee');
 
+        if ($request->filled('search')) {
+            $query->whereHas('employee', function($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->search . '%');
+            });
+        }
         if ($request->filled('category')) {
-            $query->where('leave_category', $request->category);
+            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);

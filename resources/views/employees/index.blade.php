@@ -84,6 +84,11 @@
                                 <option value="hr">HR Department</option>
                             </select>
                         </div>
+                        <div class="col-md-2" id="filterRoleWrapper" style="display: none;">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
+                            <input type="text" id="filterRole" class="form-control border-0 shadow-sm" onkeyup="applyFilters()"
+                                placeholder="Search..." style="border-radius: 8px; height: 44px;">
+                        </div>
                         <div class="col-md-3 d-flex gap-2 align-items-end">
                             <button class="btn btn-primary flex-grow-1 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="applyFilters()"
                                 style="background: #3858f9; border: none; height: 44px; border-radius: 8px;">
@@ -132,7 +137,10 @@
                         <tbody>
                             @forelse($employees as $key => $emp)
                                 <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
-                                    data-employee-id="{{ $emp->id }}">
+                                    data-employee-id="{{ $emp->id }}"
+                                    data-employee-type="{{ $emp->employee_type }}"
+                                    data-employee-dept="{{ strtolower($emp->department) }}"
+                                    data-employee-role="{{ strtolower($emp->role) }}">
 
                                     <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox"
                                             data-id="{{ $emp->id }}"></td>
@@ -1228,30 +1236,31 @@
         // Apply Filters
         function applyFilters() {
             const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
-            const employeeType = document.getElementById('filterEmployeeType').value;
-            const department = document.getElementById('filterDepartment').value;
-            const role = document.getElementById('filterRole').value;
+            const employeeType = document.getElementById('filterEmployeeType').value.toLowerCase();
+            const department = document.getElementById('filterDepartment').value.toLowerCase();
+            const roleEl = document.getElementById('filterRole');
+            const role = roleEl ? roleEl.value.toLowerCase() : '';
 
-            const rows = document.querySelectorAll("#employeeTable tbody tr");
+            const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
             let visibleCount = 0;
 
             rows.forEach(row => {
-                if (row.querySelector('td:nth-child(6)')) { // Skip empty rows
-                    const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-                    const rowRole = row.querySelector('td:nth-child(4)').innerText.toLowerCase();
-                    const rowDepartment = row.querySelector('td:nth-child(5)').innerText.toLowerCase();
+                const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
+                const rowType = row.getAttribute('data-employee-type') || '';
+                const rowDept = row.getAttribute('data-employee-dept') || '';
+                const rowRole = row.getAttribute('data-employee-role') || '';
 
-                    // Check if row matches all filters
-                    const nameMatch = name.includes(employeeName);
-                    const roleMatch = role === '' || rowRole.includes(role.replace(/_/g, ' '));
-                    const departmentMatch = department === '' || rowDepartment.includes(department.replace(/_/g, ' '));
+                // Filtering conditions
+                const nameMatch = name.includes(employeeName);
+                const typeMatch = employeeType === '' || rowType.toLowerCase() === employeeType;
+                const departmentMatch = department === '' || rowDept.includes(department.replace(/_/g, ' '));
+                const roleMatch = role === '' || rowRole.includes(role);
 
-                    if (nameMatch && roleMatch && departmentMatch) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
+                if (nameMatch && typeMatch && departmentMatch && roleMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
                 }
             });
 

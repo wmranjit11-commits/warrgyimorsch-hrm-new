@@ -53,9 +53,9 @@
                         <select name="category" class="form-select border-0 bg-light"
                             style="border-radius: 8px; height: 44px;">
                             <option value="">All Categories</option>
-                            <option value="full" {{ request('category') == 'full' ? 'selected' : '' }}>Full Day</option>
-                            <option value="half" {{ request('category') == 'half' ? 'selected' : '' }}>Half Day</option>
-                            <option value="gatepass" {{ request('category') == 'gatepass' ? 'selected' : '' }}>Gatepass</option>
+                            <option value="Full Day" {{ request('category') == 'Full Day' ? 'selected' : '' }}>Full Day</option>
+                            <option value="Half Day" {{ request('category') == 'Half Day' ? 'selected' : '' }}>Half Day</option>
+                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Gatepass</option>
                         </select>
                     </div>
                     <div class="col-md-2">
