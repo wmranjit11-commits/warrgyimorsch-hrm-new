@@ -2,309 +2,217 @@
 
 @section('content')
 
-    <div class="main-content">
-        <div class="container-fluid">
+<!-- [ page-header ] start -->
+<div class="page-header">
+    <div class="page-header-left d-flex align-items-center">
+        <div class="page-header-title">
+            <h5 class="m-b-10" style="color: #3858f9; font-weight: 700;">Holiday Management</h5>
+        </div>
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+            <li class="breadcrumb-item active">Holiday List</li>
+        </ul>
+    </div>
+</div>
+<!-- [ page-header ] end -->
 
-            <div class="card shadow-sm custom-card">
-                <div class="card-body">
-
-                    <div class="row g-4">
-
-                        <!-- LEFT FORM -->
-                        <div class="col-lg-4 col-md-5 form-section">
-
-                            <h6 class="fw-bold mb-4" style="color: #334155;"><i class="feather-calendar me-2"></i>New Holiday</h6>
-
-                            <form id="holidayForm">
-                                @csrf
-
-                                <div class="mb-3">
-                                    <input type="text" name="title" id="holidayTitle" class="form-control" placeholder="Enter Holiday Name"
-                                        required>
-                                </div>
-
-                                <div class="mb-3">
-                                    <input type="date" name="date" id="holidayDate" class="form-control" value="{{ date('Y-m-d') }}"
-                                        required>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary btn-sm">SAVE</button>
-                            </form>
-
+<!-- [ main-content ] start -->
+<div class="main-content pt-4" style="margin-bottom: 100px;">
+    <div class="row g-4">
+        <!-- HOLIDAY FORM (LEFT - 4 Cols) -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
+                <div class="card-header bg-white border-bottom py-3" style="border-radius: 12px 12px 0 0;">
+                    <h6 class="fw-bold mb-0 text-uppercase" style="color: #64748b; font-size: 11px; letter-spacing: 0.5px;">New Holiday</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form id="holidayForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Title</label>
+                            <input type="text" name="title" id="holidayTitle" class="form-control border-0 bg-light shadow-none" 
+                                placeholder="Enter holiday title" required style="border-radius: 10px; height: 48px; font-size: 14px;">
                         </div>
 
-                        <!-- RIGHT TABLE -->
-                        <div class="col-lg-8 col-md-7 table-section">
-
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h6 class="fw-bold mb-0" style="color: #334155;">Holiday List</h6>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="input-group d-none d-md-flex" style="width: 200px;">
-                                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted small"></i></span>
-                                        <input type="text" id="search" class="form-control bg-light border-0 shadow-none form-control-sm ps-0" placeholder="Search...">
-                                    </div>
-                                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="location.reload()" title="Refresh">
-                                        <i class="feather-refresh-cw"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered text-center align-middle mb-0" id="holidayTable">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>SR. NO.</th>
-                                            <th>TITLE</th>
-                                            <th>DATE</th>
-                                            <th>ACTION</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        @forelse($holidays as $key => $h)
-                                            <tr>
-                                                <td>{{ $holidays->firstItem() + $key }}</td>
-                                                <td>{{ strtoupper($h->title) }}</td>
-                                                <td>{{ $h->date }}</td>
-                                                <td class="d-flex justify-content-center gap-1">
-                                                    <a href="{{ route('holidays.edit', $h->id) }}"
-                                                        class="avatar-text avatar-md bg-soft-success text-success" title="Edit">
-                                                        <i class="feather-edit-3"></i>
-                                                    </a>
-
-                                                    <a href="javascript:void(0);" 
-                                                        onclick="deleteHoliday({{ $h->id }})"
-                                                        class="avatar-text avatar-md bg-soft-danger text-danger" title="Delete">
-                                                        <i class="feather-trash-2"></i>
-                                                    </a>
-                                                </td>
-                                                <style>
-                                                    .avatar-md {
-                                                        width: 32px !important;
-                                                        height: 32px !important;
-                                                        display: flex !important;
-                                                        align-items: center !important;
-                                                        justify-content: center !important;
-                                                        border-radius: 8px !important;
-                                                        font-size: 14px !important;
-                                                        text-decoration: none !important;
-                                                    }
-                                                </style>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4">No holidays found</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="d-flex justify-content-between mt-3">
-                                <div>
-                                    Showing {{ $holidays->firstItem() }} to {{ $holidays->lastItem() }}
-                                </div>
-
-                                <div>
-                                    {{ $holidays->links('pagination::bootstrap-5') }}
-                                </div>
-                            </div>
-
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Date</label>
+                            <input type="date" name="date" id="holidayDate" class="form-control border-0 bg-light shadow-none" 
+                                value="{{ date('Y-m-d') }}" onclick="this.showPicker()" required 
+                                style="border-radius: 10px; height: 48px; font-size: 14px;">
                         </div>
 
-                    </div>
-
+                        <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm" 
+                            style="background: #3858f9; border: none; height: 52px; border-radius: 10px; font-size: 14px; letter-spacing: 0.5px;">
+                            SAVE HOLIDAY
+                        </button>
+                    </form>
                 </div>
             </div>
+        </div>
 
+        <!-- HOLIDAY LIST (RIGHT - 8 Cols) -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 12px; background: white;">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+                    style="border-radius: 12px 12px 0 0;">
+                    
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold mb-0 me-3" style="color: #334155; font-size: 16px;">Holiday List</h5>
+                    </div>
+
+                    <div class="input-group" style="width: 250px;">
+                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
+                        <input type="text" id="holidaySearch" class="form-control bg-light border-0 shadow-none fw-bold"
+                            placeholder="Search..." onkeyup="filterHolidays()" style="height: 44px; font-size: 14px; border-radius: 0 10px 10px 0;">
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover mb-0" id="holidayTable">
+                            <thead style="background: #3858f9; color: white;">
+                                <tr style="height: 60px; vertical-align: middle;">
+                                    <th class="ps-4" style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Sr.No.</th>
+                                    <th style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Holiday Title</th>
+                                    <th style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Date</th>
+                                    <th class="pe-4 text-center" style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody style="border-top: 1px solid #f1f5f9;">
+                                @forelse($holidays as $index => $h)
+                                <tr class="holiday-row" style="height: 70px;">
+                                    <td class="ps-4 fw-bold" style="font-size: 14px;">{{ $index + 1 }}</td>
+                                    <td class="fw-bold" style="color: #3858f9; font-size: 14px;">{{ strtoupper($h->title) }}</td>
+                                    <td style="font-size: 14px;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="feather-calendar text-muted small"></i>
+                                            <span class="fw-bold">{{ \Carbon\Carbon::parse($h->date)->format('d M Y') }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4 text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ route('holidays.edit', $h->id) }}" class="avatar-text avatar-md bg-soft-info text-info rounded" title="Edit">
+                                                <i class="feather-edit-3"></i>
+                                            </a>
+                                            <button type="button" onclick="confirmDelete({{ $h->id }})" class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0" title="Delete">
+                                                <i class="feather-trash-2"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">No holidays recorded.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="px-4 py-4 border-top bg-white d-flex justify-content-center" style="border-radius: 0 0 12px 12px;">
+                        {{ $holidays->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- SEARCH -->
-    <script>
-        document.getElementById('search').addEventListener('keyup', function () {
-            let search = this.value;
+<style>
+    .bg-soft-info { background: rgba(13, 202, 240, 0.08) !important; color: #0dcaf0; }
+    .bg-soft-danger { background: rgba(239, 68, 68, 0.08) !important; color: #ef4444; }
+    .form-control:focus, .form-select:focus { 
+        border: 1.5px solid #3858f9 !important; 
+        box-shadow: 0 0 0 0.2rem rgba(56, 88, 249, 0.1) !important; 
+    }
+    .table thead th { border: none !important; }
+    .avatar-md { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+</style>
 
-            fetch(`{{ route('holidays.index') }}?search=` + search)
-                .then(res => res.text())
-                .then(data => {
-                    let parser = new DOMParser();
-                    let htmlDoc = parser.parseFromString(data, 'text/html');
+<script>
+    function filterHolidays() {
+        const input = document.getElementById('holidaySearch');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('.holiday-row');
 
-                    let newTable = htmlDoc.querySelector('#holidayTable tbody').innerHTML;
-                    document.querySelector('#holidayTable tbody').innerHTML = newTable;
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    }
+
+    // AJAX Add Holiday
+    document.getElementById('holidayForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const title = document.getElementById('holidayTitle').value;
+        const date = document.getElementById('holidayDate').value;
+
+        fetch('{{ route("holidays.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ title, date })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success || data.id) { // Accepting either success flag or created object
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Holiday added successfully!'
                 });
-        });
-    </script>
-
-    <script>
-        document.getElementById('show').addEventListener('change', function () {
-
-            let show = this.value;
-            let search = document.getElementById('search').value;
-
-            window.location.href = `{{ route('holidays.index') }}?show=${show}&search=${search}`;
-        });
-    </script>
-
-    <script>
-        document.querySelectorAll('.uppercase').forEach(input => {
-            input.addEventListener('input', function () {
-                this.value = this.value.toUpperCase();
-            });
-        });
-
-        // AJAX Add Holiday
-        document.getElementById('holidayForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const title = document.getElementById('holidayTitle').value;
-            const date = document.getElementById('holidayDate').value;
-
-            fetch('{{ route("holidays.store") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ title, date })
-            })
-            .then(res => {
-                if (res.ok || res.redirected) {
-                    showToast('Holiday added successfully!', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    showToast('Error adding holiday', 'error');
-                }
-            })
-            .catch(() => showToast('Something went wrong!', 'error'));
-        });
-
-        // AJAX Delete Holiday
-        function deleteHoliday(id) {
-            fetch('/holidays/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(res => {
-                if (res.ok || res.redirected) {
-                    showToast('Holiday deleted successfully!', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    showToast('Error deleting holiday', 'error');
-                }
-            })
-            .catch(() => showToast('Something went wrong!', 'error'));
-        }
-
-        // Toast function
-        function showToast(message, type) {
-            const toast = document.getElementById('customToast');
-            const toastMsg = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-            toastMsg.textContent = message;
-            toast.className = 'custom-toast';
-            if (type === 'success') {
-                toast.classList.add('toast-success');
-                toastIcon.innerHTML = '\u2713';
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                toast.classList.add('toast-error');
-                toastIcon.innerHTML = '\u2717';
+                Toast.fire({
+                    icon: 'error',
+                    title: data.message || 'Error adding holiday'
+                });
             }
-            toast.classList.add('toast-show');
-            setTimeout(() => { toast.classList.remove('toast-show'); }, 2000);
-        }
+        })
+        .catch(() => Toast.fire({ icon: 'error', title: 'Something went wrong!' }));
+    });
 
-        // Show session flash as toast
-        @if(session('success'))
-            document.addEventListener('DOMContentLoaded', function() {
-                showToast('{{ session("success") }}', 'success');
-            });
-        @endif
-    </script>
-
-    <!-- Toast Notification -->
-    <div id="customToast" class="custom-toast">
-        <span id="toastIcon" class="toast-icon"></span>
-        <span id="toastMessage"></span>
-    </div>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-    <style>
-        .main-content {
-            padding: 25px;
-        }
-
-        .custom-card {
-            border-radius: 12px;
-        }
-
-        .form-section {
-            border-right: 1px solid #eee;
-            padding-right: 20px;
-        }
-
-        .table-section {
-            padding-left: 20px;
-        }
-
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .uppercase {
-            text-transform: uppercase;
-        }
-
-        @media(max-width:768px) {
-            .form-section {
-                border-right: none;
-                border-bottom: 1px solid #eee;
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3858f9',
+            cancelButtonColor: '#ef4444',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteHoliday(id);
             }
+        });
+    }
 
-            .table-section {
-                padding-left: 0;
+    function deleteHoliday(id) {
+        fetch('/holidays/' + id, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
-        }
-
-        .custom-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 14px 24px;
-            border-radius: 12px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 14px;
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            transform: translateX(120%);
-            transition: transform 0.4s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        .custom-toast.toast-show { transform: translateX(0); }
-        .custom-toast.toast-success { background: linear-gradient(135deg, #16a34a, #22c55e); }
-        .custom-toast.toast-error { background: linear-gradient(135deg, #dc2626, #ef4444); }
-        .toast-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 800;
-        }
-    </style>
+        })
+        .then(res => {
+            if (res.ok || res.status === 200) {
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Holiday deleted successfully!'
+                });
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error deleting holiday'
+                });
+            }
+        })
+        .catch(() => Toast.fire({ icon: 'error', title: 'Something went wrong!' }));
+    }
+</script>
 
 @endsection

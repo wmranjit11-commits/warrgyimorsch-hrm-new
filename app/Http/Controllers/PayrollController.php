@@ -522,61 +522,17 @@ public function import(Request $request)
     }
 
     /**
-     * Export attendance records (CSV)
+     * Export attendance records (Professional Monthly Excel Grid)
      */
     public function exportAttendance(Request $request)
     {
-        $query = Attendance::with('employee');
+        $year = $request->year ?? now()->year;
+        $month = $request->month ?? now()->month;
+        
+        $monthName = Carbon::create($year, $month, 1)->format('F_Y');
+        $filename = 'attendance_sheet_' . $monthName . '.xlsx';
 
-        // Filter by Date Range (Start Date to End Date)
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
-        } elseif ($request->filled('year') && $request->filled('month')) {
-            $query->whereYear('attendance_date', $request->year)
-                ->whereMonth('attendance_date', $request->month);
-        }
-
-        if ($request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
-        }
-
-        $attendances = $query->orderBy('attendance_date', 'desc')->get();
-
-        if ($request->filled('employee_id') && $attendances->count() > 0) {
-            $empName = $attendances->first()->employee->name;
-            $filename = 'attendance_' . str_replace(' ', '_', $empName) . '_' . date('Y-m-d') . '.csv';
-        } else {
-            $filename = 'attendance_report_' . date('Y-m-d_His') . '.csv';
-        }
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function () use ($attendances) {
-            $file = fopen('php://output', 'w');
-            // Invoice-like header
-            fputcsv($file, ['Company Name', 'Payroll Attendance Report']);
-            fputcsv($file, ['Generated On', now()->format('Y-m-d H:i:s')]);
-            fputcsv($file, ['']);
-            fputcsv($file, ['Date', 'Employee Name', 'Designation', 'Check In', 'Check Out', 'Status', 'Hours']);
-
-            foreach ($attendances as $att) {
-                fputcsv($file, [
-                    $att->attendance_date->format('Y-m-d'),
-                    $att->employee->name,
-                    $att->employee->designation ?? 'N/A',
-                    $att->check_in,
-                    $att->check_out,
-                    $att->status,
-                    $att->total_hours,
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Excel::download(new \App\Exports\AttendanceExport($year, $month), $filename);
     }
 
     /**

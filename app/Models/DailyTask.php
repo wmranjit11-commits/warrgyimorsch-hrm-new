@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class DailyTask extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'project_id',
+        'task_title',
+        'start_date',
+        'end_date',
+        'priority',
+        'status',
+        'employee_id',
+        'assigned_by',
+        'description',
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+}
