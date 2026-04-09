@@ -47,7 +47,7 @@
                                     <label class="form-label small fw-bold text-muted mb-1 text-uppercase">Select Allotment
                                         Month</label>
                                     <select id="monthSelect" class="form-select border-0 bg-light fw-bold"
-                                        style="border-radius: 10px; height: 48px; border: 1.5px solid #f1f5f9; padding-left: 15px;"
+                                        style="border-radius: 10px; height: 44px; border: 1.5px solid #f1f5f9; padding-left: 15px;"
                                         onchange="updateView()">
                                         @foreach(range(1, 12) as $m)
                                             <option value="{{ sprintf('%02d', $m) }}" {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}>
@@ -85,7 +85,7 @@
                                                         class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
                                                         data-employee-id="{{ $emp->id }}"
                                                         value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
-                                                        style="border-radius: 8px; width: 80px; height: 38px;">
+                                                        style="border-radius: 8px; width: 80px; height: 40px;">
                                                 </div>
                                             </td>
                                             <td class="text-center">
@@ -243,7 +243,12 @@
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-top p-3">
+                    <div class="modal-footer bg-light border-top p-3 d-flex justify-content-between">
+                        <a href="{{ route('leave.balance.export') }}"
+                            class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
+                            style="background: #3858f9; border: none;">
+                            <i data-feather="download" style="width: 16px; height: 16px;"></i> EXPORT LIST
+                        </a>
                         <button type="button" class="btn btn-dark fw-bold px-5 py-2 rounded-pill shadow-sm"
                             data-bs-dismiss="modal" style="background: #0f172a; border: none;">DISMISS LIST</button>
                     </div>
@@ -256,22 +261,22 @@
         /* FORCE REMOVE ALL BLUR EFFECTS */
         const styleFix = document.createElement('style');
         styleFix.innerHTML = `
-                .modal-open .nxl-container, 
-                .modal-open .nxl-header, 
-                .modal-open .nxl-navigation {
-                    filter: none !important;
-                    -webkit-filter: none !important;
-                }
-                .modal-backdrop {
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                    background-color: rgba(0, 0, 0, 0.7) !important;
-                }
-                .modal-content {
-                    backdrop-filter: none !important;
-                    -webkit-backdrop-filter: none !important;
-                }
-            `;
+                    .modal-open .nxl-container, 
+                    .modal-open .nxl-header, 
+                    .modal-open .nxl-navigation {
+                        filter: none !important;
+                        -webkit-filter: none !important;
+                    }
+                    .modal-backdrop {
+                        backdrop-filter: none !important;
+                        -webkit-backdrop-filter: none !important;
+                        background-color: rgba(0, 0, 0, 0.7) !important;
+                    }
+                    .modal-content {
+                        backdrop-filter: none !important;
+                        -webkit-backdrop-filter: none !important;
+                    }
+                `;
         document.head.appendChild(styleFix);
 
         function fetchLeaveBalances() {
@@ -287,17 +292,17 @@
                         const row = document.createElement('tr');
                         row.className = 'balance-row';
                         row.innerHTML = `
-                                <td class="ps-3 py-3">
-                                    <div class="fw-bold text-dark small">${item.name}</div>
-                                </td>
-                                <td class="text-center small fw-bold">${item.total_allotted}</td>
-                                <td class="text-center small fw-bold text-muted">${item.total_taken}</td>
-                                <td class="text-center pe-3">
-                                    <span class="badge rounded-pill px-2 py-1 ${item.balance < 0 ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary'} fw-bold" style="font-size: 10px;">
-                                        ${item.balance}
-                                    </span>
-                                </td>
-                            `;
+                                    <td class="ps-3 py-3">
+                                        <div class="fw-bold text-dark small">${item.name}</div>
+                                    </td>
+                                    <td class="text-center small fw-bold">${item.total_allotted}</td>
+                                    <td class="text-center small fw-bold text-muted">${item.total_taken}</td>
+                                    <td class="text-center pe-3">
+                                        <span class="badge rounded-pill px-2 py-1 ${item.balance < 0 ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary'} fw-bold" style="font-size: 10px;">
+                                            ${item.balance}
+                                        </span>
+                                    </td>
+                                `;
                         tbody.appendChild(row);
                     });
                 });
@@ -443,8 +448,8 @@
 
             // Previous
             html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                    <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage - 1})" style="color: #64748b; background: ${currentPage === 1 ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&laquo;</a>
-                </li>`;
+                        <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage - 1})" style="color: #64748b; background: ${currentPage === 1 ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&laquo;</a>
+                    </li>`;
 
             // Page numbers (show max 5 pages with ellipsis)
             let pages = [];
@@ -466,16 +471,16 @@
                 } else {
                     const isActive = p === currentPage;
                     html += `<li class="page-item ${isActive ? 'active' : ''}">
-                            <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${p})" 
-                               style="min-width: 36px; text-align: center; ${isActive ? 'background: #3858f9; color: #fff; box-shadow: 0 2px 8px rgba(56,88,249,0.3);' : 'color: #475569; background: #f1f5f9;'}">${p}</a>
-                        </li>`;
+                                <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${p})" 
+                                   style="min-width: 36px; text-align: center; ${isActive ? 'background: #3858f9; color: #fff; box-shadow: 0 2px 8px rgba(56,88,249,0.3);' : 'color: #475569; background: #f1f5f9;'}">${p}</a>
+                            </li>`;
                 }
             });
 
             // Next
             html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                    <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage + 1})" style="color: #64748b; background: ${currentPage === totalPages ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&raquo;</a>
-                </li>`;
+                        <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage + 1})" style="color: #64748b; background: ${currentPage === totalPages ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&raquo;</a>
+                    </li>`;
 
             controls.innerHTML = html;
         }

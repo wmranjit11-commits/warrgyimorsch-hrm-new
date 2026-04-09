@@ -40,8 +40,12 @@ Route::middleware(['auth'])->group(function () {
     // DELETE EMPLOYEE
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
+    // EXPORT EMPLOYEES
+    Route::get('/employees-export', [EmployeeController::class, 'export'])->name('employees.export');
+
     // API - GET EMPLOYEE JSON
     Route::get('/api/employees/{id}', [EmployeeController::class, 'getJson']);
+    Route::get('/api/employees/{id}/attendance', [EmployeeController::class, 'getAttendance']);
 
 });
 
@@ -90,7 +94,8 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/leave/allotment', [LeaveController::class, 'allotment'])->name('leave.allotment');
     Route::post('/leave/allotment', [LeaveController::class, 'storeAllotment'])->name('leave.storeAllotment');
-    Route::get('/leave/balance', [LeaveController::class, 'balanceList'])->name('leave.balance');
+    Route::get('/leave/balance', [LeaveController::class, 'allotment'])->name('leave.balance');
+    Route::get('/leave/balance/export', [LeaveController::class, 'exportBalances'])->name('leave.balance.export');
     Route::get('/api/leave/balance', [LeaveController::class, 'apiBalanceList']);
 
     // LEAVE APPLICATIONS

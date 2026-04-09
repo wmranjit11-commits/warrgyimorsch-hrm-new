@@ -378,21 +378,20 @@
                                     <!-- Image Box -->
                                     <div onclick="document.getElementById('photoInput').click()"
                                         class="bg-light border d-flex align-items-center justify-content-center"
-                                        style="width:120px; height:120px; cursor:pointer; overflow:hidden;">
+                                        style="width:120px; height:120px; cursor:pointer; overflow:hidden; border-radius: 15px; border: 2px dashed #cbd5e1 !important;">
 
                                         <img id="previewImg" src=""
                                             style="width:100%; height:100%; object-fit:cover; display:none;">
 
-                                        <span id="placeholderText" style="color:#888;">200x200</span>
+                                        <span id="placeholderText" 
+                                            style="color:#64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">SELECT PHOTO</span>
                                     </div>
 
                                     <!-- TEXT SIDE -->
                                     <div class="ms-3">
                                         <label class="fw-bold d-block">Upload Photo</label>
-                                        <small class="text-muted d-block"># Upload your profile</small>
-                                        <small class="text-muted d-block"># Avatar size 150x150</small>
                                         <small class="text-muted d-block"># Max upload size 2mb</small>
-                                        <small class="text-muted d-block"># Allowed file types: png, jpg, jpeg</small>
+                                        <small class="text-muted d-block"># Allowed: png, jpg, jpeg, webp</small>
                                     </div>
 
                                 </div>

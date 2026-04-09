@@ -6,13 +6,16 @@
         <!-- HEADER -->
         <!-- Main Content Card -->
         <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
-            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center" style="border-radius: 12px 12px 0 0;">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+                style="border-radius: 12px 12px 0 0;">
                 <div>
                     <h5 class="fw-bold mb-0" style="color: #334155;">Employee Management</h5>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
-                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">List</li>
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">
+                                List</li>
                         </ol>
                     </nav>
                 </div>
@@ -20,25 +23,35 @@
                     <!-- Right Aligned Search & Actions -->
                     <div class="input-group d-none d-md-flex" style="width: 250px;">
                         <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control bg-light border-0 shadow-none" placeholder="Search..." onkeyup="applyFilters()">
+                        <input type="text" id="searchInput" class="form-control bg-light border-0 shadow-none"
+                            placeholder="Search..." onkeyup="applyFilters()">
                     </div>
-                    
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
+
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
+                        data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
                         <i class="feather-filter"></i>
                     </a>
 
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="location.reload()" title="Refresh">
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
+                        onclick="location.reload()" title="Refresh">
                         <i class="feather-refresh-cw"></i>
                     </a>
 
-                    <a href="{{ route('employees.create') }}" class="avatar-text avatar-md bg-primary text-white" title="Add Employee">
+                    <a href="{{ route('employees.export') }}" class="avatar-text avatar-md bg-soft-success text-success"
+                        title="Export All Employees">
+                        <i class="feather-download"></i>
+                    </a>
+
+                    <a href="{{ route('employees.create') }}" class="avatar-text avatar-md bg-primary text-white"
+                        title="Add Employee">
                         <i class="feather-plus"></i>
                     </a>
 
                     @if(isset($employees) && $employees->count() > 0)
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" id="deleteSelectedBtn" onclick="deleteSelectedEmployees()" title="Delete Selected">
-                        <i class="feather-trash-2"></i>
-                    </a>
+                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger"
+                            id="deleteSelectedBtn" onclick="deleteSelectedEmployees()" title="Delete Selected">
+                            <i class="feather-trash-2"></i>
+                        </a>
                     @endif
                 </div>
             </div>
@@ -49,11 +62,13 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
-                            <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm" placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px;">
+                            <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm"
+                                placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 44px;">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()"
+                                style="border-radius: 8px; height: 44px;">
                                 <option value="">All Types</option>
                                 <option value="permanent">Employee</option>
                                 <option value="contract">Worker</option>
@@ -61,17 +76,27 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
-                            <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()" style="border-radius: 8px;">
+                            <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()"
+                                style="border-radius: 8px; height: 44px;">
                                 <option value="">All Departments</option>
                                 <option value="administration">Administration</option>
                                 <option value="business_development">Business Development</option>
                                 <option value="hr">HR Department</option>
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary w-100 fw-bold shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 38px; border-radius: 8px;">
-                                <i class="feather-check-circle me-1"></i> APPLY FILTERS
+                        <div class="col-md-2" id="filterRoleWrapper" style="display: none;">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
+                            <input type="text" id="filterRole" class="form-control border-0 shadow-sm" onkeyup="applyFilters()"
+                                placeholder="Search..." style="border-radius: 8px; height: 44px;">
+                        </div>
+                        <div class="col-md-3 d-flex gap-2 align-items-end">
+                            <button class="btn btn-primary flex-grow-1 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="applyFilters()"
+                                style="background: #3858f9; border: none; height: 44px; border-radius: 8px;">
+                                <i class="feather-check-circle me-1"></i> APPLY
                             </button>
+                            <a href="{{ route('employees.index') }}"
+                                class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
+                                style="border-radius: 8px; height: 44px; width: 80px; font-size: 13px;">Reset</a>
                         </div>
                     </div>
                 </div>
@@ -81,7 +106,8 @@
                 <!-- SHOW ENTRIES -->
                 <div class="px-4 py-3 border-bottom d-flex align-items-center gap-2">
                     <span class="text-muted small fw-bold text-uppercase">Show</span>
-                    <select class="form-select d-inline-block py-1 px-2 border-0 bg-light" style="width: 80px; border-radius: 8px;">
+                    <select class="form-select d-inline-block border-0 bg-light fw-bold"
+                        style="width: 80px; border-radius: 10px; height: 44px; font-size: 14px; color: #1e293b;">
                         <option>10</option>
                         <option>25</option>
                         <option>50</option>
@@ -103,6 +129,7 @@
                                         class=" ms-1"></i></th>
                                 <th style="width:200px; padding: 15px; font-size: 14px; text-align: center;">DEPARTMENT <i
                                         class="ms-1"></i></th>
+                                <th style="width:140px; padding: 15px; font-size: 14px; text-align: center;">ATTENDANCE</th>
                                 <th style="width:140px; padding: 15px; font-size: 14px; text-align: center;">PHOTO</th>
                             </tr>
                         </thead>
@@ -110,13 +137,17 @@
                         <tbody>
                             @forelse($employees as $key => $emp)
                                 <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
-                                    data-employee-id="{{ $emp->id }}">
+                                    data-employee-id="{{ $emp->id }}"
+                                    data-employee-type="{{ $emp->employee_type }}"
+                                    data-employee-dept="{{ strtolower($emp->department) }}"
+                                    data-employee-role="{{ strtolower($emp->role) }}">
 
                                     <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox"
                                             data-id="{{ $emp->id }}"></td>
 
                                     <td class="fw-bold" style="padding: 12px; font-size: 15px; text-align: center;">
-                                        {{ $key + 1 }}</td>
+                                        {{ $key + 1 }}
+                                    </td>
 
                                     <td style="padding: 12px; text-align: center;" data-employee-id="{{ $emp->id }}">
                                         <div class="dropdown">
@@ -135,15 +166,15 @@
                                                         href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})"
                                                         style="color:#6366f1;font-weight:500;">
                                                         <i class="feather-eye" style="color:#6366f1;font-size:16px;"></i>
-                                                        View
+                                                        View Details
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <a class="dropdown-item d-flex align-items-center gap-2"
                                                         href="{{ route('employees.edit', $emp->id) }}"
                                                         style="color:#22c55e;font-weight:500;">
-                                                        <i class="feather-edit-3"
-                                                            style="color:#22c55e;font-size:16px;"></i> Edit
+                                                        <i class="feather-edit-3" style="color:#22c55e;font-size:16px;"></i>
+                                                        Edit Profile
                                                     </a>
                                                 </li>
                                                 <li>
@@ -159,19 +190,28 @@
                                     </td>
 
                                     <td style="padding: 12px; font-size: 15px; text-align: center;">
-                                        {{ ucfirst(str_replace('_', ' ', $emp->role)) }}</td>
+                                        {{ ucfirst(str_replace('_', ' ', $emp->role)) }}
+                                    </td>
 
                                     <td style="padding: 12px; font-size: 15px; text-align: center;">
-                                        {{ ucfirst(str_replace('_', ' ', $emp->department)) }}</td>
+                                        {{ ucfirst(str_replace('_', ' ', $emp->department)) }}
+                                    </td>
+
+                                    <td class="text-center" style="padding: 12px; text-align: center;">
+                                        <a href="javascript:void(0)" onclick="openAttendanceModal({{ $emp->id }}, '{{ $emp->name }}')"
+                                            style="color: #3858f9; font-size: 20px; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                            <i class="bi bi-calendar3-event"></i>
+                                        </a>
+                                    </td>
 
                                     <td class="text-center" style="padding: 12px; text-align: center;">
                                         @if($emp->photo)
-                                            <img src="/storage/{{ $emp->photo }}"
-                                                style="width:50px;height:50px;border-radius:6px;object-fit:cover;border:1px solid #e5e7eb;">
+                                            <img src="{{ asset('storage/' . $emp->photo) }}"
+                                                style="width:50px;height:50px;border-radius:12px;object-fit:cover;border:1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                                         @else
                                             <div
-                                                style="width:50px;height:50px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid #e5e7eb;font-size:10px;color:#9ca3af;">
-                                                N/A
+                                                style="width:50px;height:50px;background:rgba(99, 102, 241, 0.1);color:#6366f1;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(99, 102, 241, 0.2);font-size:18px;font-weight:800;">
+                                                {{ substr($emp->name, 0, 1) }}
                                             </div>
                                         @endif
                                     </td>
@@ -209,23 +249,28 @@
     <!-- ICONS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
+    </div>
+
     <!-- RIGHT SIDE MODAL FOR EMPLOYEE DETAILS -->
-    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="employeeModal" aria-labelledby="employeeModalLabel">
+    <div class="offcanvas offcanvas-end custom-side-modal" tabindex="-1" id="employeeModal"
+        aria-labelledby="employeeModalLabel">
         <div class="offcanvas-header p-3 p-md-4"
             style="background: #0f172a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <div class="d-flex align-items-center gap-3">
-                <div style="background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div
+                    style="background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <i class="bi bi-person-circle text-white fs-4"></i>
                 </div>
                 <div>
                     <h5 class="offcanvas-title text-white fw-bold mb-0" id="employeeModalLabel">Employee Profile</h5>
-                    <div style="font-size: 11px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
+                    <div
+                        style="font-size: 11px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
                         System ID: <span id="employeeCodeDisplay" style="color: #818cf8; font-weight: 800;">-</span>
                     </div>
                 </div>
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <button type="button" class="btn btn-sm" id="editEmployeeBtn" onclick="editEmployee()" 
+                <button type="button" class="btn btn-sm" id="editEmployeeBtn" onclick="editEmployee()"
                     style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); font-weight: 600; padding: 6px 15px; border-radius: 8px;">
                     <i class="bi bi-pencil-square me-1"></i> Edit
                 </button>
@@ -233,14 +278,56 @@
                     style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 600; padding: 6px 15px; border-radius: 8px;">
                     <i class="bi bi-trash me-1"></i> Delete
                 </button>
-                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="offcanvas" aria-label="Close" style="opacity: 0.8;"></button>
+                <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="offcanvas" aria-label="Close"
+                    style="opacity: 0.8;"></button>
             </div>
         </div>
         <div class="offcanvas-body p-0" id="employeeDetails" style="background: #ffffff;">
             <div class="d-flex align-items-center justify-content-center h-100" style="min-height: 400px;">
                 <div class="text-center">
                     <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
-                    <p class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Retrieving Records...</p>
+                    <p class="text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">Retrieving Records...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ATTENDANCE HISTORY MODAL (SEPARATE) -->
+    <div class="modal fade" id="attendanceHistoryModal" tabindex="-1" aria-labelledby="attendanceHistoryLabel" aria-hidden="true" style="z-index: 9999 !important;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header p-4"
+                    style="background: linear-gradient(135deg, #3858f9 0%, #2563eb 100%); display: flex; justify-content: space-between; align-items: center; border: none;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="background: rgba(255,255,255,0.2); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-calendar-check text-white fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0" id="attendanceHistoryLabel">Attendance Portal</h5>
+                            <div id="attendanceEmpName" style="font-size: 11px; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">-</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(255,255,255,0.1); border-radius: 50%; padding: 10px;"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <!-- MONTH FILTER -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 0.5px;">Select Month</label>
+                        <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1.5px solid #e2e8f0;">
+                            <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-filter text-primary"></i></span>
+                            <input type="month" id="attendanceMonthFilter" class="form-control border-0 bg-white fw-bold px-2" 
+                                   value="{{ date('Y-m') }}" onchange="refreshAttendancePortal()" style="height: 50px;">
+                        </div>
+                    </div>
+
+                    <div id="attendancePortalContent" style="max-height: 500px; overflow-y: auto;">
+                        <!-- TABLE DATA POPULATED VIA JS -->
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light p-3">
+                    <button type="button" class="btn btn-dark fw-bold px-4 py-2 rounded-pill shadow-sm w-100" 
+                            data-bs-dismiss="modal" style="background: #0f172a; border: none; height: 46px;">DISMISS PORTAL</button>
                 </div>
             </div>
         </div>
@@ -279,7 +366,7 @@
         .custom-side-modal {
             width: 600px !important;
             border-left: none;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -287,32 +374,39 @@
             .custom-side-modal {
                 width: 100% !important;
             }
+
             .page-header {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 15px;
             }
+
             .page-header-right {
                 width: 100%;
                 margin-left: 0 !important;
             }
+
             .page-header-right-items {
                 display: flex;
                 width: 100%;
                 gap: 10px;
             }
+
             .page-header-right-items .btn {
                 flex: 1;
                 font-size: 13px;
                 padding: 10px;
             }
+
             .details-grid {
                 grid-template-columns: 1fr !important;
             }
+
             .nav-tabs-custom {
                 margin: 0 10px 20px 10px !important;
                 flex-wrap: wrap;
             }
+
             .nav-tab {
                 flex: 1 1 30%;
                 font-size: 11px !important;
@@ -324,28 +418,35 @@
             .nav-tab {
                 flex: 1 1 45%;
             }
+
             .salary-total {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 5px;
             }
+
             .header-actions {
                 flex-direction: column;
                 width: 100%;
             }
         }
-            .table th, .table td {
-                font-size: 13px !important;
-                padding: 10px 8px !important;
-                white-space: nowrap;
-            }
-            .offcanvas-header {
-                padding: 15px !important;
-            }
-            #editEmployeeBtn, #deleteEmployeeBtn {
-                padding: 5px 12px !important;
-                font-size: 11px !important;
-            }
+
+        .table th,
+        .table td {
+            font-size: 13px !important;
+            padding: 10px 8px !important;
+            white-space: nowrap;
+        }
+
+        .offcanvas-header {
+            padding: 15px !important;
+        }
+
+        #editEmployeeBtn,
+        #deleteEmployeeBtn {
+            padding: 5px 12px !important;
+            font-size: 11px !important;
+        }
         }
 
         table thead th {
@@ -457,8 +558,15 @@
         }
 
         @keyframes paneSlideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .tab-pane.active {
@@ -480,7 +588,7 @@
             align-items: center;
             gap: 14px;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
         }
 
         .detail-card:hover {
@@ -518,8 +626,15 @@
             min-width: 0;
         }
 
-        .status-enrolled { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
-        .status-not-enrolled { background: rgba(241, 245, 249, 1); color: #475569; }
+        .status-enrolled {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .status-not-enrolled {
+            background: rgba(241, 245, 249, 1);
+            color: #475569;
+        }
 
         .detail-label {
             font-size: 10px;
@@ -546,7 +661,9 @@
             border-bottom: 1px dashed #e5e7eb;
         }
 
-        .salary-item:last-child { border-bottom: none; }
+        .salary-item:last-child {
+            border-bottom: none;
+        }
 
         .salary-label {
             display: flex;
@@ -572,7 +689,7 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid #e2e8f0;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         .salary-total .salary-label {
@@ -592,7 +709,87 @@
             visibility: visible !important;
         }
 
+        /* Attendance Tab Styles */
+        .attendance-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
 
+        .attendance-record-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 15px;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .attendance-record-card:hover {
+            border-color: #6366f1;
+            background: #f8fafc;
+        }
+
+        /* Attendance Sheet (Table) Styles */
+        .att-sheet-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        .att-sheet-table th {
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 800;
+            color: #64748b;
+            letter-spacing: 1px;
+            padding: 12px 15px;
+            background: #f8fafc;
+        }
+        .att-sheet-table td {
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+        .att-sheet-table tr td:first-child { border-left: 1px solid #f1f5f9; border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        .att-sheet-table tr td:last-child { border-right: 1px solid #f1f5f9; border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+        
+        .att-sheet-table tr:hover td {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        /* FORCE CLEAR EVERYTHING (NO THEME BLUR) */
+        body.modal-open .nxl-container, 
+        body.modal-open .nxl-header, 
+        body.modal-open .nxl-navigation, 
+        body.modal-open .page-header {
+            filter: none !important;
+            transition: none !important;
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.3 !important; /* Extremely light so you can see behind clearly */
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        
+        .modal-content {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3) !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        .att-sheet-table td {
+            color: #0f172a !important; /* Deepest black-slate for max clarity */
+            font-weight: 500;
+        }
     </style>
 
     <!-- SEARCH & VIEW MODAL -->
@@ -648,222 +845,232 @@
                     let photoHtml = emp.photo
                         ? `<img src="/storage/${emp.photo}" class="employee-photo-premium">`
                         : `<div class="employee-photo-premium bg-light d-flex align-items-center justify-content-center text-muted">
-                                    <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
-                                   </div>`;
+                                        <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
+                                       </div>`;
 
                     const html = `
-                                <div class="employee-details-container">
-                                    <div class="employee-premium-header">
-                                        <div class="d-flex align-items-center gap-4">
-                                            <div class="header-photo-wrapper">
-                                                ${emp.photo ? 
-                                                    `<img src="/storage/${emp.photo}" alt="${emp.name}">` : 
-                                                    `<div class="employee-photo-premium d-flex align-items-center justify-content-center bg-white-opacity" style="background: rgba(255,255,255,0.1); width:100px; height:100px; border-radius: 20px;">
-                                                        <i class="bi bi-person text-white fs-1"></i>
-                                                    </div>`
-                                                }
-                                            </div>
-                                            <div>
-                                                <h3 class="mb-1 fw-bold text-white">${emp.name}</h3>
-                                                <div class="d-flex align-items-center gap-2 opacity-75">
-                                                    <i class="bi bi-briefcase small"></i>
-                                                    <span class="small fw-bold text-uppercase" style="letter-spacing: 1px;">${emp.designation || 'EMPLOYEE'}</span>
+                                    <div class="employee-details-container">
+                                        <div class="employee-premium-header">
+                                            <div class="d-flex align-items-center gap-4">
+                                                <div class="header-photo-wrapper">
+                                                    ${emp.photo ?
+                            `<img src="{{ asset('storage') }}/${emp.photo}" alt="${emp.name}" style="width:100px; height:100px; border-radius: 20px; object-fit: cover; border: 3px solid rgba(255,255,255,0.2);">` :
+                            `<div class="employee-photo-premium d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.2); width:100px; height:100px; border-radius: 20px; border: 3px solid rgba(255,255,255,0.1); font-size: 42px; font-weight: 800; color: white;">
+                                                            ${emp.name.charAt(0)}
+                                                        </div>`
+                        }
                                                 </div>
-                                                <div class="d-flex align-items-center gap-2 mt-2">
-                                                    <span class="badge bg-primary px-3 rounded-pill" style="font-size: 10px;">${emp.department || 'N/A'}</span>
+                                                <div>
+                                                    <h3 class="mb-1 fw-bold text-white">${emp.name}</h3>
+                                                    <div class="d-flex align-items-center gap-2 opacity-75">
+                                                        <i class="bi bi-briefcase small"></i>
+                                                        <span class="small fw-bold text-uppercase" style="letter-spacing: 1px;">${emp.designation || 'EMPLOYEE'}</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                                        <span class="badge bg-primary px-3 rounded-pill" style="font-size: 10px;">${emp.department || 'N/A'}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="nav-tabs-custom">
-                                        <button class="nav-tab active" id="tabPersonal" onclick="showTab('personal')"><i class="bi bi-person"></i>PERSONAL</button>
-                                        <button class="nav-tab" id="tabBank" onclick="showTab('bank')"><i class="bi bi-bank"></i>BANK</button>
-                                        <button class="nav-tab" id="tabSalary" onclick="showTab('salary')"><i class="bi bi-cash-coin"></i>SALARY</button>
-                                    </div>
+                                        <div class="nav-tabs-custom">
+                                            <button class="nav-tab active" id="tabPersonal" onclick="showTab('personal')"><i class="bi bi-person"></i>PERSONAL</button>
+                                            <button class="nav-tab" id="tabBank" onclick="showTab('bank')"><i class="bi bi-bank"></i>BANK</button>
+                                            <button class="nav-tab" id="tabSalary" onclick="showTab('salary')"><i class="bi bi-cash-coin"></i>SALARY</button>
+                                        </div>
 
-                                    <div class="tab-content" id="modalTabContent">
-                                        <!-- PERSONAL TAB -->
-                                        <div id="employeeTabPersonal" class="tab-pane active">
-                                            <div class="details-grid">
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-person-fill"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Username</label>
-                                                        <p class="detail-value">${emp.username || 'N/A'}</p>
+                                        <div class="tab-content" id="modalTabContent">
+                                            <!-- PERSONAL TAB -->
+                                            <div id="employeeTabPersonal" class="tab-pane active">
+                                                <div class="details-grid">
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-person-fill"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Username</label>
+                                                            <p class="detail-value">${emp.username || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-phone"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Mobile</label>
-                                                        <p class="detail-value">${emp.mobile_number || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-phone"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Mobile</label>
+                                                            <p class="detail-value">${emp.mobile_number || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card full-width">
-                                                    <div class="detail-icon"><i class="bi bi-envelope"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Email Address</label>
-                                                        <p class="detail-value">${emp.email || 'N/A'}</p>
+                                                    <div class="detail-card full-width">
+                                                        <div class="detail-icon"><i class="bi bi-envelope"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Email Address</label>
+                                                            <p class="detail-value">${emp.email || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Date of Birth</label>
-                                                        <p class="detail-value">${emp.date_of_birth || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Date of Birth</label>
+                                                            <p class="detail-value">${emp.date_of_birth || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-gender-ambiguous"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Gender</label>
-                                                        <p class="detail-value">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1) : 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-gender-ambiguous"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Gender</label>
+                                                            <p class="detail-value">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1) : 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-card-heading"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Aadhaar Number</label>
-                                                        <p class="detail-value">${emp.aadhaar_number || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-card-heading"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Aadhaar Number</label>
+                                                            <p class="detail-value">${emp.aadhaar_number || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-credit-card-2-back"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">PAN Number</label>
-                                                        <p class="detail-value">${emp.pan_number || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-credit-card-2-back"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">PAN Number</label>
+                                                            <p class="detail-value">${emp.pan_number || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card full-width">
-                                                    <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Residential Address</label>
-                                                        <p class="detail-value">${emp.address || 'N/A'}</p>
+                                                    <div class="detail-card full-width">
+                                                        <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Residential Address</label>
+                                                            <p class="detail-value">${emp.address || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <!-- WORK & JOB DETAILS (Merged into Personal) -->
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-shield-lock"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">System Role</label>
-                                                        <p class="detail-value">${emp.role ? emp.role.replace(/_/g, ' ').toUpperCase() : 'N/A'}</p>
+                                                    <!-- WORK & JOB DETAILS (Merged into Personal) -->
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-shield-lock"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">System Role</label>
+                                                            <p class="detail-value">${emp.role ? emp.role.replace(/_/g, ' ').toUpperCase() : 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-calendar-check"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Joining Date</label>
-                                                        <p class="detail-value">${emp.date_of_joining || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-calendar-check"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Joining Date</label>
+                                                            <p class="detail-value">${emp.date_of_joining || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-clock"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Shift Hours</label>
-                                                        <p class="detail-value">${emp.time_in || 'N/A'} - ${emp.time_out || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-clock"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Shift Hours</label>
+                                                            <p class="detail-value">${emp.time_in || 'N/A'} - ${emp.time_out || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-calendar-x"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Leave Balance</label>
-                                                        <p class="detail-value text-primary">${emp.leave || '0'} Days</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-calendar-x"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Leave Balance</label>
+                                                            <p class="detail-value text-primary">${emp.leave || '0'} Days</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card full-width">
-                                                    <div class="detail-icon"><i class="bi bi-info-circle"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Employee Type</label>
-                                                        <p class="detail-value">${emp.employee_type ? emp.employee_type.toUpperCase() : 'N/A'}</p>
+                                                    <div class="detail-card full-width">
+                                                        <div class="detail-icon"><i class="bi bi-info-circle"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Employee Type</label>
+                                                            <p class="detail-value">${emp.employee_type ? emp.employee_type.toUpperCase() : 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <!-- STATUTORY DETAILS (Merged into Personal) -->
-                                                <div class="detail-card full-width" style="border-left: 4px solid #6366f1;">
-                                                    <div class="detail-content">
-                                                        <label class="detail-label text-primary">Statutory Enrollment</label>
-                                                        <div class="d-flex flex-column gap-3 mt-2">
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <span class="small fw-bold text-dark">PF Number</span>
-                                                                <span class="status-badge ${emp.pf ? 'status-enrolled' : 'status-not-enrolled'}">${emp.pf ? emp.pf_number : 'Not Enrolled'}</span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <span class="small fw-bold text-dark">ESI Number</span>
-                                                                <span class="status-badge ${emp.esi ? 'status-enrolled' : 'status-not-enrolled'}">${emp.esi ? emp.esi_number : 'Not Enrolled'}</span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <span class="small fw-bold text-dark">Insurance</span>
-                                                                <span class="status-badge ${emp.insurance ? 'status-enrolled' : 'status-not-enrolled'}">${emp.insurance ? emp.insurance_provider : 'Not Enrolled'}</span>
+                                                    <!-- STATUTORY DETAILS (Merged into Personal) -->
+                                                    <div class="detail-card full-width" style="border-left: 4px solid #6366f1;">
+                                                        <div class="detail-content">
+                                                            <label class="detail-label text-primary">Statutory Enrollment</label>
+                                                            <div class="d-flex flex-column gap-3 mt-2">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <span class="small fw-bold text-dark">PF Number</span>
+                                                                    <span class="status-badge ${emp.pf ? 'status-enrolled' : 'status-not-enrolled'}">${emp.pf ? emp.pf_number : 'Not Enrolled'}</span>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <span class="small fw-bold text-dark">ESI Number</span>
+                                                                    <span class="status-badge ${emp.esi ? 'status-enrolled' : 'status-not-enrolled'}">${emp.esi ? emp.esi_number : 'Not Enrolled'}</span>
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <span class="small fw-bold text-dark">Insurance</span>
+                                                                    <span class="status-badge ${emp.insurance ? 'status-enrolled' : 'status-not-enrolled'}">${emp.insurance ? emp.insurance_provider : 'Not Enrolled'}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- BANK TAB -->
-                                        <div id="employeeTabBank" class="tab-pane">
-                                            <div class="details-grid">
-                                                <div class="detail-card full-width">
-                                                    <div class="detail-icon"><i class="bi bi-bank"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Bank Name</label>
-                                                        <p class="detail-value">${emp.bank_name || 'N/A'}</p>
+                                            <!-- BANK TAB -->
+                                            <div id="employeeTabBank" class="tab-pane">
+                                                <div class="details-grid">
+                                                    <div class="detail-card full-width">
+                                                        <div class="detail-icon"><i class="bi bi-bank"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Bank Name</label>
+                                                            <p class="detail-value">${emp.bank_name || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-hash"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">Account Number</label>
-                                                        <p class="detail-value">${emp.account_number || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-hash"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">Account Number</label>
+                                                            <p class="detail-value">${emp.account_number || 'N/A'}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="detail-card">
-                                                    <div class="detail-icon"><i class="bi bi-upc-scan"></i></div>
-                                                    <div class="detail-content">
-                                                        <label class="detail-label">IFSC Code</label>
-                                                        <p class="detail-value text-primary">${emp.ifsc_code || 'N/A'}</p>
+                                                    <div class="detail-card">
+                                                        <div class="detail-icon"><i class="bi bi-upc-scan"></i></div>
+                                                        <div class="detail-content">
+                                                            <label class="detail-label">IFSC Code</label>
+                                                            <p class="detail-value text-primary">${emp.ifsc_code || 'N/A'}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- SALARY TAB -->
-                                        <div id="employeeTabSalary" class="tab-pane">
-                                            <div class="salary-container">
-                                                <div class="salary-breakdown full-width">
-                                                    <div class="salary-item">
-                                                        <div class="salary-label"><i class="bi bi-cash"></i>Basic Salary</div>
-                                                        <div class="salary-amount">₹ ${parseFloat(emp.basic_salary || 0).toLocaleString('en-IN')}</div>
-                                                    </div>
-                                                    <div class="salary-item">
-                                                        <div class="salary-label"><i class="bi bi-house"></i>HRA</div>
-                                                        <div class="salary-amount">₹ ${parseFloat(emp.hra || 0).toLocaleString('en-IN')}</div>
-                                                    </div>
-                                                    <div class="salary-item">
-                                                        <div class="salary-label"><i class="bi bi-truck"></i>Conveyance</div>
-                                                        <div class="salary-amount">₹ ${parseFloat(emp.conveyance_allowance || 0).toLocaleString('en-IN')}</div>
-                                                    </div>
-                                                    <div class="salary-item">
-                                                        <div class="salary-label"><i class="bi bi-activity"></i>Medical</div>
-                                                        <div class="salary-amount">₹ ${parseFloat(emp.medical_allowance || 0).toLocaleString('en-IN')}</div>
-                                                    </div>
-                                                    <div class="salary-item">
-                                                        <div class="salary-label"><i class="bi bi-gift"></i>Other Allowance</div>
-                                                        <div class="salary-amount">₹ ${parseFloat(emp.other_allowance || 0).toLocaleString('en-IN')}</div>
-                                                    </div>
-                                                    <div class="salary-total">
-                                                        <div class="salary-label"><strong>Total Salary</strong></div>
-                                                        <div class="salary-amount total">₹ ${(parseFloat(emp.basic_salary || 0) + parseFloat(emp.hra || 0) + parseFloat(emp.conveyance_allowance || 0) + parseFloat(emp.medical_allowance || 0) + parseFloat(emp.other_allowance || 0)).toLocaleString('en-IN')}</div>
+                                            <!-- SALARY TAB -->
+                                            <div id="employeeTabSalary" class="tab-pane">
+                                                <div class="salary-container">
+                                                    <div class="salary-breakdown full-width">
+                                                        <div class="salary-item">
+                                                            <div class="salary-label"><i class="bi bi-cash"></i>Basic Salary</div>
+                                                            <div class="salary-amount">₹ ${parseFloat(emp.basic_salary || 0).toLocaleString('en-IN')}</div>
+                                                        </div>
+                                                        <div class="salary-item">
+                                                            <div class="salary-label"><i class="bi bi-house"></i>HRA</div>
+                                                            <div class="salary-amount">₹ ${parseFloat(emp.hra || 0).toLocaleString('en-IN')}</div>
+                                                        </div>
+                                                        <div class="salary-item">
+                                                            <div class="salary-label"><i class="bi bi-truck"></i>Conveyance</div>
+                                                            <div class="salary-amount">₹ ${parseFloat(emp.conveyance_allowance || 0).toLocaleString('en-IN')}</div>
+                                                        </div>
+                                                        <div class="salary-item">
+                                                            <div class="salary-label"><i class="bi bi-activity"></i>Medical</div>
+                                                            <div class="salary-amount">₹ ${parseFloat(emp.medical_allowance || 0).toLocaleString('en-IN')}</div>
+                                                        </div>
+                                                        <div class="salary-item">
+                                                            <div class="salary-label"><i class="bi bi-gift"></i>Other Allowance</div>
+                                                            <div class="salary-amount">₹ ${parseFloat(emp.other_allowance || 0).toLocaleString('en-IN')}</div>
+                                                        </div>
+                                                        <div class="salary-total">
+                                                            <div class="salary-label"><strong>Total Salary</strong></div>
+                                                            <div class="salary-amount total">₹ ${(parseFloat(emp.basic_salary || 0) + parseFloat(emp.hra || 0) + parseFloat(emp.conveyance_allowance || 0) + parseFloat(emp.medical_allowance || 0) + parseFloat(emp.other_allowance || 0)).toLocaleString('en-IN')}</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+
+                                            <!-- ATTENDANCE TAB -->
+                                            <div id="employeeTabAttendance" class="tab-pane">
+                                                <div id="attendanceHistoryContent" class="attendance-history-list">
+                                                    <div class="text-center py-5 text-muted">
+                                                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                                        <p class="small fw-bold">Loading Attendance History...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>      </div>
                                     </div>
-                                </div>
-                            `;
+                                `;
 
                     document.getElementById('employeeDetails').innerHTML = html;
                     new bootstrap.Offcanvas(document.getElementById('employeeModal')).show();
@@ -909,7 +1116,7 @@
                             // Close modal if open
                             const modal = bootstrap.Offcanvas.getInstance(document.getElementById('employeeModal'));
                             if (modal) modal.hide();
-                            
+
                             // Remove row from table
                             const row = document.getElementById(`emp-row-${id}`);
                             if (row) {
@@ -948,9 +1155,153 @@
             // Show selected tab and add active class
             const targetPane = document.getElementById('employeeTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
             const targetButton = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
-            
+
             if (targetPane) targetPane.classList.add('active');
             if (targetButton) targetButton.classList.add('active');
+        }
+        
+        // Helper to format 24h to 12h (AM/PM)
+        function formatTime12h(timeStr) {
+            if (!timeStr || timeStr === '--:--' || timeStr === '00:00') return '--:--';
+            try {
+                // Handle HH:mm or HH:mm:ss
+                let [hours, minutes] = timeStr.split(':');
+                hours = parseInt(hours);
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+            } catch (e) {
+                return timeStr;
+            }
+        }
+        
+        // Helper to calculate hours between two 12h time strings
+        function calculateAttendanceHours(checkIn, checkOut) {
+            if (!checkIn || !checkOut || checkIn === '--:--' || checkOut === '--:--') return 0;
+            
+            try {
+                function parseTime(t) {
+                    let [time, ampm] = t.split(' ');
+                    let [hrs, mins] = time.split(':');
+                    hrs = parseInt(hrs);
+                    mins = parseInt(mins);
+                    if (ampm === 'PM' && hrs < 12) hrs += 12;
+                    if (ampm === 'AM' && hrs === 12) hrs = 0;
+                    return hrs + (mins / 60);
+                }
+                
+                const inHrs = parseTime(checkIn);
+                const outHrs = parseTime(checkOut);
+                
+                if (outHrs > inHrs) {
+                    return outHrs - inHrs;
+                }
+                return 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        // Open Attendance Portal
+        function openAttendanceModal(empId, empName) {
+            window.currentAttendanceEmpId = empId;
+            document.getElementById('attendanceEmpName').textContent = empName;
+            
+            // Trigger modal
+            const attModal = new bootstrap.Modal(document.getElementById('attendanceHistoryModal'));
+            attModal.show();
+            
+            // Load history
+            refreshAttendancePortal();
+        }
+
+        // Refresh Attendance Portal history
+        function refreshAttendancePortal() {
+            const empId = window.currentAttendanceEmpId;
+            const month = document.getElementById('attendanceMonthFilter').value;
+            const container = document.getElementById('attendancePortalContent');
+                        
+                        container.innerHTML = `
+                            <div class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                <p class="small fw-bold">Loading Records...</p>
+                            </div>
+                        `;
+                        
+                        fetch(`/api/employees/${empId}/attendance?month=${month}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data || data.length === 0) {
+                                    container.innerHTML = '<div class="text-center py-5 text-muted small fw-bold">No attendance records found for this month.</div>';
+                                    return;
+                                }
+
+                                let html = `
+                                    <table class="att-sheet-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">Date</th>
+                                                <th>Check In</th>
+                                                <th>Check Out</th>
+                                                <th>Duration</th>
+                                                <th class="text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                `;
+
+                                data.forEach(record => {
+                                    const dateObj = new Date(record.attendance_date);
+                                    const day = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                                    const dateNum = dateObj.getDate();
+                                    const monthStr = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                                    const fullDate = `${dateNum} ${monthStr}`;
+                                    
+                                    const statusClass = {
+                                        'present': 'bg-soft-success text-success',
+                                        'absent': 'bg-soft-danger text-danger',
+                                        'leave': 'bg-soft-info text-info',
+                                        'half_day': 'bg-soft-warning text-warning',
+                                        'late': 'bg-soft-warning text-warning'
+                                    }[record.status] || 'bg-light';
+
+                                    html += `
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">${fullDate}</div>
+                                                <div class="small text-muted text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">${day}</div>
+                                            </td>
+                                            <td class="fw-bold text-dark">${formatTime12h(record.check_in)}</td>
+                                            <td class="fw-bold text-dark">${formatTime12h(record.check_out)}</td>
+                                            <td>
+                                                <span class="text-primary fw-bold" style="font-size: 12px;">
+                                                    <i class="bi bi-clock-history me-1"></i>
+                                                    ${(function() {
+                                                        let hrs = parseFloat(record.total_hours || 0);
+                                                        if (hrs <= 0) {
+                                                            const inStr = formatTime12h(record.check_in);
+                                                            const outStr = formatTime12h(record.check_out);
+                                                            hrs = calculateAttendanceHours(inStr, outStr);
+                                                        }
+                                                        return Math.max(0, hrs).toFixed(1);
+                                                    })()} hrs
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge ${statusClass} rounded-pill px-3 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">
+                                                    ${record.status ? record.status.replace(/_/g, ' ') : 'N/A'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
+                                html += '</tbody></table>';
+                                container.innerHTML = html;
+                            })
+                            .catch(err => {
+                                console.error('Error fetching attendance:', err);
+                });
         }
 
         // Toggle Filter Section
@@ -971,30 +1322,38 @@
         // Apply Filters
         function applyFilters() {
             const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
-            const employeeType = document.getElementById('filterEmployeeType').value;
-            const department = document.getElementById('filterDepartment').value;
-            const role = document.getElementById('filterRole').value;
+            const employeeType = document.getElementById('filterEmployeeType').value.toLowerCase();
+            const department = document.getElementById('filterDepartment').value.toLowerCase();
+            const roleEl = document.getElementById('filterRole');
+            const role = roleEl ? roleEl.value.toLowerCase() : '';
 
-            const rows = document.querySelectorAll("#employeeTable tbody tr");
+            const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
             let visibleCount = 0;
 
             rows.forEach(row => {
-                if (row.querySelector('td:nth-child(6)')) { // Skip empty rows
-                    const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-                    const rowRole = row.querySelector('td:nth-child(4)').innerText.toLowerCase();
-                    const rowDepartment = row.querySelector('td:nth-child(5)').innerText.toLowerCase();
+                const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
+                const rowType = row.getAttribute('data-employee-type') || '';
+                const rowDept = row.getAttribute('data-employee-dept') || '';
+                const rowRole = row.getAttribute('data-employee-role') || '';
 
-                    // Check if row matches all filters
-                    const nameMatch = name.includes(employeeName);
-                    const roleMatch = role === '' || rowRole.includes(role.replace(/_/g, ' '));
-                    const departmentMatch = department === '' || rowDepartment.includes(department.replace(/_/g, ' '));
+                // Filtering conditions
+                const nameMatch = name.includes(employeeName);
+                const typeMatch = employeeType === '' || rowType.toLowerCase() === employeeType;
+                
+                // Robust matching for department and role (handles underscores and spaces)
+                const normDepartment = department.replace(/_/g, ' ');
+                const normRowDept = rowDept.replace(/_/g, ' ');
+                const departmentMatch = department === '' || normRowDept.includes(normDepartment);
 
-                    if (nameMatch && roleMatch && departmentMatch) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
+                const normRole = role.replace(/_/g, ' ');
+                const normRowRole = rowRole.replace(/_/g, ' ');
+                const roleMatch = role === '' || normRowRole.includes(normRole);
+
+                if (nameMatch && typeMatch && departmentMatch && roleMatch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
                 }
             });
 
@@ -1050,7 +1409,7 @@
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                 // Delete each employee
-                Promise.all(employeeIds.map(id => 
+                Promise.all(employeeIds.map(id =>
                     fetch(`/employees/${id}`, {
                         method: 'DELETE',
                         headers: {
@@ -1067,20 +1426,20 @@
                         return res;
                     })
                 ))
-                .then(() => {
-                    // Check if table is empty
-                    const visibleRows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)").length;
-                    if (visibleRows === 0) {
-                        const tbody = document.querySelector("#employeeTable tbody");
-                        const noResultsRow = document.createElement('tr');
-                        noResultsRow.id = 'noResultsRow';
-                        noResultsRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted">No employees found. <a href="{{ route('employees.create') }}">Add one</a></td>';
-                        tbody.appendChild(noResultsRow);
-                    }
-                    
-                    // Uncheck select all
-                    document.getElementById('selectAll').checked = false;
-                })
+                    .then(() => {
+                        // Check if table is empty
+                        const visibleRows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)").length;
+                        if (visibleRows === 0) {
+                            const tbody = document.querySelector("#employeeTable tbody");
+                            const noResultsRow = document.createElement('tr');
+                            noResultsRow.id = 'noResultsRow';
+                            noResultsRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted">No employees found. <a href="{{ route('employees.create') }}">Add one</a></td>';
+                            tbody.appendChild(noResultsRow);
+                        }
+
+                        // Uncheck select all
+                        document.getElementById('selectAll').checked = false;
+                    })
                     .catch(err => {
                         console.error('Delete Error:', err);
                         alert('Error deleting employees');
