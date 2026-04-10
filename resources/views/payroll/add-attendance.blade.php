@@ -13,7 +13,7 @@
     </div>
 
     @if(!isset($is_edit))
-    <div class="dropdown d-inline-block ms-auto float-end">
+    <!-- <div class="dropdown d-inline-block ms-auto float-end">
         <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance">
             <i class="fas fa-upload"></i>
         </a>
@@ -30,7 +30,7 @@
                 </button>
             </form>
         </div>
-    </div>
+    </div> -->
     @endif
 </div>
 

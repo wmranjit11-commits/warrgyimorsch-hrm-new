@@ -18,38 +18,27 @@ class PayrollController extends Controller
     /**
      * Display Attendance List
      */
-    public function attendance(Request $request)
+   public function attendance(Request $request)
     {
         $query = Attendance::query();
 
-        // Filter by Date Range
+         // ✅ Apply only if user selects filter
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('attendance_date', [$request->start_date, $request->end_date]);
+            $query->whereDate('attendance_date', '>=', $request->start_date)
+                ->whereDate('attendance_date', '<=', $request->end_date);
         }
-
-        // Filter by Employee
-        if ($request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
-        }
-
-        // Default filter (current month)
-        if (!$request->filled('start_date') && !$request->filled('end_date') && !$request->filled('employee_id')) {
-            $query->whereYear('attendance_date', now()->year)
-                ->whereMonth('attendance_date', now()->month);
-        }
-
-        // Aggregation
+        // ✅ GROUPING (required for your blade)
         $attendance = $query->selectRaw("
                 attendance_date,
-                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-                SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_day_count,
-                SUM(CASE WHEN status IN ('absent','leave') THEN 1 ELSE 0 END) as leave_count,
-                SUM(CASE WHEN total_hours >= 9 THEN 1 ELSE 0 END) as overtime_count
+                COUNT(CASE WHEN status = 'present' THEN 1 END) as present_count,
+                COUNT(CASE WHEN status = 'half_day' THEN 1 END) as half_day_count,
+                COUNT(CASE WHEN status IN ('absent','leave') THEN 1 END) as leave_count,
+                COUNT(CASE WHEN total_hours >= 9 THEN 1 END) as overtime_count
             ")
             ->groupBy('attendance_date')
             ->orderBy('attendance_date', 'desc')
-            ->paginate(15);
-            // echo "<pre>";print_r($attendance->toArray());exit;
+            ->paginate(31);
+
         return view('payroll.attendance', compact('attendance'));
     }
 
