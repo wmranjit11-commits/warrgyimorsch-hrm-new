@@ -174,19 +174,31 @@
                                                     class="form-check-input task-checkbox shadow-none" value="{{ $task->id }}">
                                             </td>
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
-                                                {{ $task->project ? $task->project->name : '-' }}</td>
+                                                {{ $task->project->name ?? ($task->project_id ? 'Proj ID: '.$task->project_id : '-') }}</td>
                                             <td style="font-size: 14px; color: #475569;">{{ $task->task_title }}</td>
                                             <td style="font-size: 14px; color: #475569;">
                                                 {{ $task->start_date->format('Y-m-d') }}</td>
                                             <td style="font-size: 14px; color: #475569;">{{ $task->end_date->format('Y-m-d') }}
                                             </td>
                                             <td>
-                                                <span class="text-capitalize"
-                                                    style="font-size: 14px; color: #475569;">{{ $task->priority }}</span>
+                                                @php
+                                                    $priorityClass = 'bg-soft-info text-info';
+                                                    if (strtolower($task->priority) == 'hard') $priorityClass = 'bg-soft-danger text-danger';
+                                                    elseif (strtolower($task->priority) == 'medium') $priorityClass = 'bg-soft-warning text-warning';
+                                                    elseif (strtolower($task->priority) == 'low') $priorityClass = 'bg-soft-success text-success';
+                                                @endphp
+                                                <span class="badge {{ $priorityClass }}"
+                                                    style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                                                    {{ $task->priority }}
+                                                </span>
                                             </td>
                                             <td>
-                                                <span
-                                                    class="badge {{ $task->status == 'Completed' ? 'bg-soft-success text-success' : 'bg-soft-primary text-primary' }}"
+                                                @php
+                                                    $taskStatusClass = 'bg-soft-primary text-primary';
+                                                    if ($task->status == 'Completed') $taskStatusClass = 'bg-soft-success text-success';
+                                                    elseif ($task->status == 'On Hold') $taskStatusClass = 'bg-soft-warning text-warning';
+                                                @endphp
+                                                <span class="badge {{ $taskStatusClass }}"
                                                     style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
                                                     {{ $task->status }}
                                                 </span>
@@ -197,6 +209,13 @@
                                                 {{ $task->creator ? $task->creator->name : '-' }}</td>
                                             <td class="pe-4 text-center">
                                                 <div class="d-flex justify-content-center gap-2">
+                                                    <a href="javascript:void(0);"
+                                                        class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
+                                                        title="View Description" onclick="showTaskDesc({{ $task->id }})">
+                                                        <i class="feather-file-text"></i>
+                                                    </a>
+                                                    <template id="task_desc_{{ $task->id }}">{!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}</template>
+                                                    
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-primary text-primary rounded"
                                                         title="Edit" onclick="editTask({{ json_encode($task) }})">
@@ -339,6 +358,10 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Task Description</label>
+                        <textarea name="description" id="taskDesc" class="form-control border-0 bg-light shadow-none fw-bold" rows="3" placeholder="Enter task description" style="border-radius: 10px; font-size: 14px;"></textarea>
+                    </div>
                 </div>
 
                 <div class="mt-5">
@@ -375,7 +398,7 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work
                                                 Description <span class="text-danger">*</span></label>
-                                            <textarea name="work_description"
+                                            <textarea name="work_description" id="workDesc"
                                                 class="form-control border-0 bg-light shadow-none fw-bold" rows="5"
                                                 placeholder="Write Your Reply" required
                                                 style="border-radius: 10px; font-size: 14px;"></textarea>
@@ -508,6 +531,10 @@
 @endsection
 
 @push('scripts')
+    <!-- Summernote CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
     <style>
         .bg-soft-primary {
             background: rgba(56, 88, 249, 0.08) !important;
@@ -524,9 +551,19 @@
             color: #0dcaf0;
         }
 
+        .bg-soft-warning {
+            background: rgba(245, 158, 11, 0.08) !important;
+            color: #f59e0b;
+        }
+
         .bg-soft-danger {
             background: rgba(239, 68, 68, 0.08) !important;
             color: #ef4444;
+        }
+
+        .bg-soft-secondary {
+            background: rgba(100, 116, 139, 0.08) !important;
+            color: #64748b;
         }
 
         .form-control:focus,
@@ -576,6 +613,18 @@
             border-color: #3858f9 !important;
             color: #3858f9;
         }
+
+        .custom-html-content ul { list-style-type: disc !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content ol { list-style-type: decimal !important; padding-left: 30px !important; margin-bottom: 1.1rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content li { display: list-item !important; margin-bottom: 0.6rem !important; list-style-type: inherit !important; }
+        .custom-html-content p { margin-bottom: 1rem !important; line-height: 1.6 !important; }
+        .custom-html-content { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; padding: 25px 30px 25px 40px !important; background: #fff !important; }
+        
+        /* Summernote point indentation fix */
+        .note-editable ul { list-style-type: disc !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable ol { list-style-type: decimal !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable li { display: list-item !important; list-style-type: inherit !important; }
+        .note-editable { min-height: 200px; padding: 25px !important; background: white !important; }
     </style>
 
     <script>
@@ -618,16 +667,82 @@
             document.getElementById('taskForm').reset();
             document.getElementById('taskOffcanvasLabel').innerText = 'Edit Task';
             document.getElementById('submitTaskBtn').innerText = 'UPDATE TASK';
-            document.getElementById('taskId').value = task.id;
-            document.getElementById('taskProjectId').value = task.project_id;
-            document.getElementById('taskTitle').value = task.task_title;
-            document.getElementById('taskStartDate').value = task.start_date.substring(0, 10);
-            document.getElementById('taskEndDate').value = task.end_date.substring(0, 10);
-            document.getElementById('taskPriority').value = task.priority;
-            document.getElementById('taskStatus').value = task.status;
-            document.getElementById('taskEmployeeId').value = task.employee_id;
-            document.getElementById('methodField').innerHTML = '@method("PUT")';
-            new bootstrap.Offcanvas(document.getElementById('taskOffcanvas')).show();
+            
+            // Set basic fields
+            document.getElementById('taskId').value = task.id || '';
+            document.getElementById('taskTitle').value = task.task_title || '';
+            document.getElementById('taskStartDate').value = task.start_date ? task.start_date.substring(0, 10) : '';
+            document.getElementById('taskEndDate').value = task.end_date ? task.end_date.substring(0, 10) : '';
+            document.getElementById('taskPriority').value = task.priority || '';
+            document.getElementById('taskStatus').value = task.status || 'In Process';
+            
+            // Set Select fields (Project & Employee)
+            const pId = task.project_id || '';
+            const eId = task.employee_id || '';
+            
+            // Try both native and jQuery to be absolutely sure
+            const projSelect = document.getElementById('taskProjectId');
+            if (projSelect) {
+                projSelect.value = pId;
+                if (projSelect.value !== pId.toString()) {
+                    // Fallback search if value doesn't match directly
+                    for(let i=0; i<projSelect.options.length; i++) {
+                        if(projSelect.options[i].value == pId) {
+                            projSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            const empSelect = document.getElementById('taskEmployeeId');
+            if (empSelect) {
+                empSelect.value = eId;
+            }
+
+            // Summernote description
+            try {
+                const desc = task.description || '';
+                if ($('#taskDesc').length && typeof $.fn.summernote === 'function') {
+                    $('#taskDesc').summernote('code', desc);
+                } else {
+                    document.getElementById('taskDesc').value = desc;
+                }
+            } catch (e) {
+                console.error('Summernote load error', e);
+                if(document.getElementById('taskDesc')) document.getElementById('taskDesc').value = task.description || '';
+            }
+
+            // Form action and method
+            document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
+            const formObj = document.getElementById('taskForm');
+            if(formObj) formObj.action = `/daily-tasks/${task.id}`;
+            
+            // Show Offcanvas
+            const offElement = document.getElementById('taskOffcanvas');
+            if(offElement) {
+                const bOff = bootstrap.Offcanvas.getInstance(offElement) || new bootstrap.Offcanvas(offElement);
+                bOff.show();
+            }
+        }
+
+        function resetTaskForm() {
+            document.getElementById('taskForm').reset();
+            document.getElementById('taskForm').action = `{{ route('daily-tasks.store') }}`;
+            document.getElementById('taskOffcanvasLabel').innerText = 'Create Task';
+            document.getElementById('submitTaskBtn').innerText = 'SUBMIT TASK';
+            document.getElementById('taskId').value = '';
+            document.getElementById('methodField').innerHTML = '';
+            
+            document.getElementById('taskForm').querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.getElementById('taskForm').querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            try {
+                if ($('#taskDesc').length && typeof $.fn.summernote === 'function') {
+                    $('#taskDesc').summernote('code', '');
+                } else {
+                    document.getElementById('taskDesc').value = '';
+                }
+            } catch (e) {}
         }
 
         function openFollowUpModal(taskId, taskTitle) {
@@ -661,16 +776,23 @@
                     timeDisplay = fu.time_taken + ' Hours';
                 }
 
+                let descBtn = `<a href="javascript:void(0);" onclick="showFollowUpDesc(${fu.id})" class="badge bg-soft-info text-info border-0" style="padding: 6px 12px; border-radius: 8px; text-decoration: none;">View</a>`;
+
                 body.innerHTML += `
                     <tr style="height: 56px; border-bottom: 1px solid #f1f5f9;">
                         <td class="ps-3 fw-bold" style="font-size: 13px;">${startIdx + index + 1}</td>
-                        <td style="font-size: 13px; color: #475569;">${fu.work_description}</td>
+                        <td style="font-size: 13px;">
+                            ${descBtn}
+                        </td>
                         <td style="font-size: 13px; color: #475569;">${fu.reference_name || '-'}</td>
                         <td style="font-size: 13px; color: #475569; font-weight: 700;">${timeDisplay}</td>
                         <td style="font-size: 13px;">
                             ${fu.photo ? `<a href="/storage/${fu.photo}" target="_blank"><img src="/storage/${fu.photo}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;"></a>` : '-'}
                         </td>
-                        <td style="font-size: 12px; white-space: nowrap;">${new Date(fu.created_at).toLocaleString()}</td>
+                        <td style="font-size: 12px; white-space: nowrap;">
+                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                            <div class="text-muted mt-1" style="font-size: 11px;">${new Date(fu.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
+                        </td>
                         <td class="pe-3 text-center"><a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-sm bg-soft-danger text-danger rounded"><i class="feather-trash-2"></i></a></td>
                     </tr>
                 `;
@@ -715,7 +837,9 @@
                 .then(res => res.json()).then(data => {
                     btn.innerText = origText; btn.disabled = false;
                     if (data.success) { 
-                        this.reset(); removePreview(); Toast.fire({ icon: 'success', title: data.success }); loadFollowUpHistory(document.getElementById('followUpTaskId').value); 
+                        this.reset(); 
+                        $('#workDesc').summernote('code', '');
+                        removePreview(); Toast.fire({ icon: 'success', title: data.success }); loadFollowUpHistory(document.getElementById('followUpTaskId').value); 
                     } else if (data.errors) {
                         for (const [key, value] of Object.entries(data.errors)) {
                             const input = this.querySelector(`[name="${key}"]`);
@@ -763,6 +887,49 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => { filterTasks(); });
+
+        function showTaskDesc(id) {
+            const html = document.getElementById('task_desc_' + id).innerHTML;
+            Swal.fire({
+                title: 'Task Description',
+                html: `<div class="custom-html-content" style="max-height: 60vh; overflow-y: auto; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">${html}</div>`,
+                showConfirmButton: true,
+                confirmButtonColor: '#3858f9'
+            });
+        }
+
+        function showFollowUpDesc(id) {
+            const fu = globalFollowUps.find(f => f.id === id);
+            if (fu) {
+                Swal.fire({
+                    title: 'Work Description',
+                    html: `<div class="custom-html-content" style="max-height: 400px; overflow-y: auto; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">${fu.work_description}</div>`,
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3858f9'
+                });
+            }
+        }
+
+        $(document).ready(function() {
+            $('#workDesc, #taskDesc').summernote({
+                placeholder: 'Enter Description...',
+                tabsize: 2,
+                height: 150,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                callbacks: {
+                    onChange: function(contents, $editable) {
+                        $(this).val(contents);
+                    }
+                }
+            });
+        });
 
         function deleteFollowUp(id) {
             Swal.fire({

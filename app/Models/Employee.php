@@ -48,8 +48,12 @@ class Employee extends Model
     {
         return $this->hasMany(LeaveAllotment::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(DailyTask::class);
     public function attendances()
     {
-        return $this->hasMany(Attendance::class, 'employee_id', 'employee_code');
+        return $this->hasMany(Attendance::class);
     }
 }

@@ -157,7 +157,7 @@
                                                 style="color:#3b82f6; font-size: 15px;">
                                                 <span style="font-size:15px;">{{ $emp->name }}</span>
                                                 <span class="ms-2 text-muted"
-                                                    style="font-size:12px; color:#3b82f6;">(EC{{ str_pad($emp->id, 4, '0', STR_PAD_LEFT) }})</span>
+                                                    style="font-size:12px; color:#3b82f6;">({{ $emp->employee_code }})</span>
                                             </a>
                                             <ul class="dropdown-menu shadow-sm border-0 p-2"
                                                 style="min-width:180px;left:0 !important;top:100% !important;max-height:none !important;overflow-y:visible !important;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:8px;">
@@ -207,10 +207,10 @@
                                     <td class="text-center" style="padding: 12px; text-align: center;">
                                         @if($emp->photo)
                                             <img src="{{ asset('storage/' . $emp->photo) }}"
-                                                style="width:50px;height:50px;border-radius:12px;object-fit:cover;border:1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                                                style="width:50px;height:50px;border-radius:12px;object-fit:cover;border:1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin: 0 auto;">
                                         @else
                                             <div
-                                                style="width:50px;height:50px;background:rgba(99, 102, 241, 0.1);color:#6366f1;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(99, 102, 241, 0.2);font-size:18px;font-weight:800;">
+                                                style="width:50px;height:50px;background:rgba(99, 102, 241, 0.1);color:#6366f1;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(99, 102, 241, 0.2);font-size:18px;font-weight:800; margin: 0 auto;">
                                                 {{ substr($emp->name, 0, 1) }}
                                             </div>
                                         @endif
