@@ -53,9 +53,12 @@
                         <select name="category" class="form-select border-0 bg-light"
                             style="border-radius: 8px; height: 44px;">
                             <option value="">All Categories</option>
-                            <option value="Full Day" {{ request('category') == 'Full Day' ? 'selected' : '' }}>Full Day</option>
-                            <option value="Half Day" {{ request('category') == 'Half Day' ? 'selected' : '' }}>Half Day</option>
-                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Gatepass</option>
+                            <option value="Full Day" {{ request('category') == 'Full Day' ? 'selected' : '' }}>Full Day
+                            </option>
+                            <option value="Half Day" {{ request('category') == 'Half Day' ? 'selected' : '' }}>Half Day
+                            </option>
+                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Gatepass
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -141,8 +144,10 @@
                                                 $catRaw = strtolower(trim($leave->leave_category));
                                                 if (str_contains($catRaw, 'half')) {
                                                     $catDisplay = 'HALF DAY';
-                                                    if (str_contains($catRaw, 'first')) $catDisplay .= ' (FIRST HALF)';
-                                                    else if (str_contains($catRaw, 'second')) $catDisplay .= ' (SECOND HALF)';
+                                                    if (str_contains($catRaw, 'first'))
+                                                        $catDisplay .= ' (FIRST HALF)';
+                                                    else if (str_contains($catRaw, 'second'))
+                                                        $catDisplay .= ' (SECOND HALF)';
                                                 } elseif ($catRaw === 'full' || $catRaw === 'full day') {
                                                     $catDisplay = 'FULL DAY';
                                                 } else {
@@ -233,13 +238,13 @@
                                 class="text-danger">*</span></label>
                         <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
                             <div class="form-check d-flex align-items-center mb-0 ps-4">
-                                <input class="form-check-input" type="radio" name="leave_category" value="Full Day" id="catFull"
-                                    checked onchange="toggleCategoryFields()">
+                                <input class="form-check-input" type="radio" name="leave_category" value="Full Day"
+                                    id="catFull" checked onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
-                                <input class="form-check-input" type="radio" name="leave_category" value="Half Day" id="catHalf"
-                                    onchange="toggleCategoryFields()">
+                                <input class="form-check-input" type="radio" name="leave_category" value="Half Day"
+                                    id="catHalf" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
@@ -295,7 +300,8 @@
 
                     <div class="col-md-4" id="endTimeWrapper" style="display: none;">
                         <label class="form-label small fw-bold text-muted text-uppercase">End Time (Auto)</label>
-                        <input type="time" name="end_time" id="endTime" class="form-control border-0 bg-light shadow-sm text-muted fw-bold"
+                        <input type="time" name="end_time" id="endTime"
+                            class="form-control border-0 bg-light shadow-sm text-muted fw-bold"
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
@@ -414,8 +420,8 @@
                                 <div class="hstack gap-2 mt-1">
                                     <span id="viewCategoryBadge"
                                         class="badge bg-soft-primary text-primary border border-primary border-opacity-10">CAT</span>
-                                    <span id="viewStatusBadge"
-                                        class="badge rounded-pill fw-bold text-uppercase" style="font-size: 10px;">STATUS</span>
+                                    <span id="viewStatusBadge" class="badge rounded-pill fw-bold text-uppercase"
+                                        style="font-size: 10px;">STATUS</span>
                                 </div>
                             </div>
                         </div>
@@ -636,7 +642,7 @@
                     document.getElementById('viewEmployeeName').textContent = data.employee.name;
                     document.getElementById('viewAvatarLetter').textContent = data.employee.name.charAt(0);
                     document.getElementById('viewLeaveType').textContent = data.leave_type;
-                    
+
                     let catDisp = data.leave_category.toUpperCase();
                     if (catDisp.includes('HALF')) {
                         catDisp = catDisp.replace('HALF', 'HALF DAY').replace('HALF DAY DAY', 'HALF DAY');
@@ -644,11 +650,11 @@
                         catDisp = 'FULL DAY';
                     }
                     document.getElementById('viewCategoryBadge').textContent = catDisp;
-                    
+
                     const statusBadge = document.getElementById('viewStatusBadge');
                     const status = data.status.toLowerCase();
                     statusBadge.textContent = status.toUpperCase();
-                    
+
                     // Reset classes
                     statusBadge.className = 'badge rounded-pill fw-bold text-uppercase';
                     const statusClass = {
@@ -682,14 +688,14 @@
                     } else if (isHalfDay) {
                         // Half Day: Show date + which half
                         document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-                        
+
                         // Extract "First Half" or "Second Half" more robustly
                         let whichHalf = 'Half Day';
                         if (cat.includes('first')) whichHalf = 'First Half';
                         else if (cat.includes('second')) whichHalf = 'Second Half';
-                        
+
                         document.getElementById('viewStartTimeText').textContent = whichHalf;
-                        
+
                         // End part for Half Day
                         document.getElementById('viewEndDateText').textContent = 'Same Day';
                         document.getElementById('viewEndTimeText').textContent = '0.5 Day';
@@ -748,21 +754,21 @@
                         }
 
                         tbody.innerHTML += `
-                                            <tr class="${isFuture ? 'bg-soft-primary bg-opacity-10' : ''}">
-                                                <td class="ps-3 py-3">
-                                                    <div class="fw-bold text-dark small">${dateFormatted}</div>
-                                                    ${isFuture ? '<div class="text-primary fw-bold" style="font-size: 8px;">UPCOMING</div>' : ''}
-                                                </td>
-                                                <td>
-                                                    <div class="fw-semibold text-dark small">${item.leave_type}</div>
-                                                    <div class="text-muted" style="font-size: 9px;">${catDisp}</div>
-                                                </td>
-                                                <td class="text-center">
-                                                    <span class="badge ${statusClass} px-2 rounded-pill fw-bold" style="font-size: 10px;">${item.status.toUpperCase()}</span>
-                                                </td>
-                                                <td class="pe-3 text-end fw-bold text-primary small">${item.leave_category.toLowerCase().includes('gatepass') ? '1 Hr' : item.total_days}</td>
-                                            </tr>
-                                        `;
+                                                    <tr class="${isFuture ? 'bg-soft-primary bg-opacity-10' : ''}">
+                                                        <td class="ps-3 py-3">
+                                                            <div class="fw-bold text-dark small">${dateFormatted}</div>
+                                                            ${isFuture ? '<div class="text-primary fw-bold" style="font-size: 8px;">UPCOMING</div>' : ''}
+                                                        </td>
+                                                        <td>
+                                                            <div class="fw-semibold text-dark small">${item.leave_type}</div>
+                                                            <div class="text-muted" style="font-size: 9px;">${catDisp}</div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge ${statusClass} px-2 rounded-pill fw-bold" style="font-size: 10px;">${item.status.toUpperCase()}</span>
+                                                        </td>
+                                                        <td class="pe-3 text-end fw-bold text-primary small">${item.leave_category.toLowerCase().includes('gatepass') ? '1 Hr' : item.total_days}</td>
+                                                    </tr>
+                                                `;
                     });
                 });
         }

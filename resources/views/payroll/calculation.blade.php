@@ -167,7 +167,7 @@
 
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-primary py-3 fw-bold shadow-sm"
-                                        style="background: #3858f9; border: none; border-radius: 12px;" onclick="savePayroll()">
+                                        style="background: #3858f9; border: none; border-radius: 12px;" onclick="savePayroll(this)">
                                         <i class="bi bi-check2-circle me-2 fs-5"></i> SUBMIT PAYROLL
                                     </button>
                                     <button class="btn btn-soft-danger py-2 fw-bold d-none" id="downloadAfterSave"
@@ -269,8 +269,12 @@
         document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
     }
 
-       function savePayroll(btn) {
+    function savePayroll(btn) {
         if (!currentPayrollData) return;
+
+        const originalBtnText = btn.innerHTML;
+        btn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i> SAVING...';
+        btn.disabled = true;
 
         fetch('{{ route("payroll.store") }}', {
             method: 'POST',
@@ -280,24 +284,43 @@
             },
             body: JSON.stringify(currentPayrollData)
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
         .then(data => {
             if (data.success) {
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Payroll saved successfully!'
+                });
 
-                document.getElementById('downloadAfterSave').classList.remove('d-none');
-
-                // Update button safely
                 btn.innerHTML = '<i class="bi bi-check-all me-2"></i> SAVED SUCCESSFULLY';
                 btn.className = "btn btn-success py-3 fw-bold shadow-sm w-100";
-                btn.disabled = true;
 
-                window.lastSavedPayrollId = data.payroll_id;
+                // Redirect to Payroll History (Admin View) after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = '{{ route("payroll.index") }}';
+                }, 1500);
 
             } else {
-                alert(data.message);
+                Toast.fire({
+                    icon: 'error',
+                    title: data.message || 'Failed to save payroll'
+                });
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
             }
         })
-        .catch(() => alert('Something went wrong'));
+        .catch(err => {
+            console.error('Error:', err);
+            Toast.fire({
+                icon: 'error',
+                title: 'Something went wrong. Please check console.'
+            });
+            btn.innerHTML = originalBtnText;
+            btn.disabled = false;
+        });
     }
 
         function downloadCurrentPdf() {

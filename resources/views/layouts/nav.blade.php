@@ -94,10 +94,11 @@
                             </ul>
                         </li>
 
+                        </li>
                     </ul>
                 </li>
 
-                <li class="nxl-item nxl-hasmenu">
+                <!-- <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-calendar"></i></span>
                         <span class="nxl-mtext">Holidays</span>
@@ -114,7 +115,7 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
 
                 <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
@@ -140,10 +141,37 @@
                                 <span class="nxl-mtext">Leave Applications</span>
                             </a>
                         </li>
+                        <li class="nxl-item">
+                            <a href="{{ route('holidays.index') }}" class="nxl-link">
+                                <span class="nxl-micon">
+                                    <i class="feather-list"></i>
+                                </span>
+                                <span class="nxl-mtext">Holiday List</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
-
-
+                <li class="nxl-item nxl-hasmenu">
+                    <a href="javascript:void(0);" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-briefcase"></i></span>
+                        <span class="nxl-mtext">Project Module</span>
+                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    </a>
+                    <ul class="nxl-submenu">
+                        <li class="nxl-item">
+                            <a href="{{ route('projects.index') }}" class="nxl-link">
+                                <span class="nxl-micon"><i class="feather-list"></i></span>
+                                <span class="nxl-mtext">Projects</span>
+                            </a>
+                        </li>
+                        <li class="nxl-item">
+                            <a href="{{ route('daily-tasks.index') }}" class="nxl-link">
+                                <span class="nxl-micon"><i class="feather-check-square"></i></span>
+                                <span class="nxl-mtext">Daily Tasks</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <!-- <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-cast"></i></span>
@@ -326,16 +354,16 @@
                     <h6 class="mt-4 text-dark fw-bolder">{{ auth()->user()->name}} </h6>
                     <p class="fs-11 my-3 text-dark"> {{auth()->user()->email}}</p>
                     <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                        @csrf
 
-                            <a href="{{ route('logout') }}" class="btn btn-primary w-100"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                <i class="feather-log-out"></i>
-                                <span>&nbsp;Logout</span>
-                            </a>
-                        </form>
+                        <a href="{{ route('logout') }}" class="btn btn-primary w-100"
+                            onclick="event.preventDefault(); this.closest('form').submit();">
+                            <i class="feather-log-out"></i>
+                            <span>&nbsp;Logout</span>
+                        </a>
+                    </form>
 
-                  
+
                 </div>
             </div>
         </div>
