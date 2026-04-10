@@ -80,7 +80,7 @@ class DashboardController extends Controller
             ->where('month', $selectedMonth)
             ->latest()
             ->paginate(10);
-
+        // dd($recentPayrolls);
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();
 
