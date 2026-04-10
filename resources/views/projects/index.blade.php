@@ -33,64 +33,70 @@
                             <div id="methodField"></div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Project Name</label>
-                                <input type="text" name="name" id="projectName"
-                                    class="form-control border-0 bg-light shadow-none" placeholder="Enter project Name"
-                                    required style="border-radius: 10px; height: 48px; font-size: 14px;">
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Project Name <span class="text-danger">*</span></label>
+                                @error('name')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <input type="text" name="name" id="projectName" value="{{ old('name') }}"
+                                    class="form-control border-0 bg-light shadow-none @error('name') is-invalid @enderror" placeholder="Enter project Name"
+                                    style="border-radius: 10px; height: 48px; font-size: 14px;">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase mb-2">Start Date <span
                                         class="text-danger">*</span></label>
-                                <input type="date" name="start_date" id="startDate"
-                                    class="form-control border-0 bg-light shadow-none" onclick="this.showPicker()"
+                                @error('start_date')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <input type="date" name="start_date" id="startDate" value="{{ old('start_date') }}"
+                                    class="form-control border-0 bg-light shadow-none @error('start_date') is-invalid @enderror" onclick="this.showPicker()"
                                     style="border-radius: 10px; height: 48px; font-size: 14px;">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase mb-2">End Date <span
                                         class="text-danger">*</span></label>
-                                <input type="date" name="end_date" id="endDate"
-                                    class="form-control border-0 bg-light shadow-none" onclick="this.showPicker()"
+                                @error('end_date')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <input type="date" name="end_date" id="endDate" value="{{ old('end_date') }}"
+                                    class="form-control border-0 bg-light shadow-none @error('end_date') is-invalid @enderror" onclick="this.showPicker()"
                                     style="border-radius: 10px; height: 48px; font-size: 14px;">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Status</label>
-                                <select name="status" id="projectStatus" class="form-select border-0 bg-light shadow-none"
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Status <span class="text-danger">*</span></label>
+                                @error('status')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <select name="status" id="projectStatus" class="form-select border-0 bg-light shadow-none @error('status') is-invalid @enderror"
                                     style="border-radius: 10px; height: 48px; font-size: 14px;">
-                                    <option value="In Process">In Process</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="On Hold">On Hold</option>
+                                    <option value="In Process" {{ old('status') == 'In Process' ? 'selected' : '' }}>In Process</option>
+                                    <option value="Completed" {{ old('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                    <option value="On Hold" {{ old('status') == 'On Hold' ? 'selected' : '' }}>On Hold</option>
                                 </select>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase mb-2">Department <span
                                         class="text-danger">*</span></label>
-                                <select name="department" id="projectDept" class="form-select border-0 bg-light shadow-none"
+                                @error('department')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <select name="department" id="projectDept" class="form-select border-0 bg-light shadow-none @error('department') is-invalid @enderror"
                                     style="border-radius: 10px; height: 48px; font-size: 14px;">
                                     <option value="">Select department...</option>
-                                    <option value="Web Development">Web Development</option>
-                                    <option value="Mobile Development">Mobile Development</option>
-                                    <option value="Design">Design</option>
-                                    <option value="Quality Assurance">Quality Assurance</option>
+                                    <option value="Web Development" {{ old('department') == 'Web Development' ? 'selected' : '' }}>Web Development</option>
+                                    <option value="Mobile Development" {{ old('department') == 'Mobile Development' ? 'selected' : '' }}>Mobile Development</option>
+                                    <option value="Design" {{ old('department') == 'Design' ? 'selected' : '' }}>Design</option>
+                                    <option value="Quality Assurance" {{ old('department') == 'Quality Assurance' ? 'selected' : '' }}>Quality Assurance</option>
                                 </select>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work Description
-                                    <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work Description</label>
+                                @error('description')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
                                 <textarea name="description" id="projectDesc"
-                                    class="form-control border-0 bg-light shadow-none" rows="3" placeholder="Enter Message"
-                                    style="border-radius: 10px; font-size: 14px;"></textarea>
+                                    class="form-control border-0 bg-light shadow-none @error('description') is-invalid @enderror" rows="3" placeholder="Enter Message"
+                                    style="border-radius: 10px; font-size: 14px;">{{ old('description') }}</textarea>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold small text-muted text-uppercase mb-2">Technology
-                                    Name</label>
-                                <input type="text" name="technology" id="projectTech" list="techList"
-                                    class="form-control border-0 bg-light shadow-none"
+                                    Name <span class="text-danger">*</span></label>
+                                @error('technology')<div class="text-danger small fw-bold mb-1">{{ $message }}</div>@enderror
+                                <input type="text" name="technology" id="projectTech" list="techList" value="{{ old('technology') }}"
+                                    class="form-control border-0 bg-light shadow-none @error('technology') is-invalid @enderror"
                                     placeholder="Enter or select technology"
                                     style="border-radius: 10px; height: 48px; font-size: 14px;">
                                 <datalist id="techList">
@@ -218,7 +224,7 @@
                                                         <i class="feather-edit-3"></i>
                                                     </a>
                                                     <form action="{{ route('projects.destroy', $project->id) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this project?')">
+                                                        class="delete-form d-inline" onsubmit="deleteRecord(event, this)">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
@@ -376,5 +382,25 @@
 
             paginateTable();
         }
+
+        function deleteRecord(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
     </script>
+    
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+        });
+    </script>
+    @endif
 @endsection

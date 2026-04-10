@@ -203,11 +203,11 @@
                                                         <i class="feather-edit-3"></i>
                                                     </a>
                                                     <form action="{{ route('daily-tasks.destroy', $task->id) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this task?')">
+                                                        class="delete-form d-inline" onsubmit="deleteRecord(event, this)">
                                                         @csrf @method('DELETE')
                                                         <button type="submit"
                                                             class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0"
-                                                            title="Delete">
+                                                            title="Delete Task">
                                                             <i class="feather-trash-2"></i>
                                                         </button>
                                                     </form>
@@ -671,7 +671,7 @@
                             ${fu.photo ? `<a href="/storage/${fu.photo}" target="_blank"><img src="/storage/${fu.photo}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;"></a>` : '-'}
                         </td>
                         <td style="font-size: 12px; white-space: nowrap;">${new Date(fu.created_at).toLocaleString()}</td>
-                        <td class="pe-3 text-center"><a href="javascript:void(0);" class="avatar-text avatar-sm bg-soft-danger text-danger rounded"><i class="feather-trash-2"></i></a></td>
+                        <td class="pe-3 text-center"><a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-sm bg-soft-danger text-danger rounded"><i class="feather-trash-2"></i></a></td>
                     </tr>
                 `;
             });
@@ -706,20 +706,101 @@
             const btn = document.getElementById('submitReplyBtn');
             const origText = btn.innerText;
             btn.innerText = 'SUBMITTING...'; btn.disabled = true;
-            fetch('{{ route("daily-tasks.follow-up.store") }}', { method: 'POST', body: new FormData(this), headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })
+
+            // Clear previous errors
+            this.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            this.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
+            fetch('{{ route("daily-tasks.follow-up.store") }}', { method: 'POST', body: new FormData(this), headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } })
                 .then(res => res.json()).then(data => {
                     btn.innerText = origText; btn.disabled = false;
-                    if (data.success) { this.reset(); removePreview(); Toast.fire({ icon: 'success', title: data.success }); loadFollowUpHistory(document.getElementById('followUpTaskId').value); }
+                    if (data.success) { 
+                        this.reset(); removePreview(); Toast.fire({ icon: 'success', title: data.success }); loadFollowUpHistory(document.getElementById('followUpTaskId').value); 
+                    } else if (data.errors) {
+                        for (const [key, value] of Object.entries(data.errors)) {
+                            const input = this.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                input.classList.add('is-invalid');
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'invalid-feedback d-block fw-bold small text-danger mb-1';
+                                errorDiv.innerText = value[0];
+                                input.parentNode.insertBefore(errorDiv, input);
+                            }
+                        }
+                    } else if (data.message) {
+                        Toast.fire({ icon: 'error', title: data.message });
+                    }
                 }).catch(err => { btn.innerText = origText; btn.disabled = false; Toast.fire({ icon: 'error', title: 'Upload failed. Max size 10MB.' }); });
         });
 
         document.getElementById('submitTaskBtn').addEventListener('click', function () {
             const form = document.getElementById('taskForm');
+            
+            // Clear previous errors
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
             const url = document.getElementById('methodField').innerHTML !== '' ? `/daily-tasks/${document.getElementById('taskId').value}` : '/daily-tasks';
             fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) })
-                .then(res => res.json()).then(result => { if (result.success) Toast.fire({ icon: 'success', title: result.success }).then(() => location.reload()); });
+                .then(res => res.json()).then(result => { 
+                    if (result.success) {
+                        Toast.fire({ icon: 'success', title: result.success }).then(() => location.reload()); 
+                    } else if (result.errors) {
+                        for (const [key, value] of Object.entries(result.errors)) {
+                            const input = form.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                input.classList.add('is-invalid');
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'invalid-feedback d-block fw-bold small text-danger mb-1';
+                                errorDiv.innerText = value[0];
+                                input.parentNode.insertBefore(errorDiv, input);
+                            }
+                        }
+                    } else if (result.message) {
+                        Toast.fire({ icon: 'error', title: result.message });
+                    }
+                });
         });
 
         document.addEventListener('DOMContentLoaded', () => { filterTasks(); });
+
+        function deleteFollowUp(id) {
+            Swal.fire({
+                title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/daily-tasks/follow-up/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                    }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                            Toast.fire({ icon: 'success', title: data.success });
+                            loadFollowUpHistory(document.getElementById('followUpTaskId').value);
+                        }
+                    });
+                }
+            });
+        }
+
+        function deleteRecord(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
     </script>
+
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+        });
+    </script>
+    @endif
 @endpush

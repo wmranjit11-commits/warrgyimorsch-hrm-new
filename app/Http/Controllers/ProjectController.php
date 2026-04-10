@@ -17,12 +17,12 @@ class ProjectController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'status' => 'nullable|string',
-            'department' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'status' => 'required|string',
+            'department' => 'required|string',
             'description' => 'nullable|string',
-            'technology' => 'nullable|string',
+            'technology' => 'required|string',
         ]);
 
         Project::create($validated);
@@ -36,12 +36,12 @@ class ProjectController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'status' => 'nullable|string',
-            'department' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'status' => 'required|string',
+            'department' => 'required|string',
             'description' => 'nullable|string',
-            'technology' => 'nullable|string',
+            'technology' => 'required|string',
         ]);
 
         $project->update($validated);

@@ -116,4 +116,14 @@ class DailyTaskController extends Controller
         $followUps = TaskFollowUp::where('daily_task_id', $taskId)->latest()->get();
         return response()->json($followUps);
     }
+
+    public function destroyFollowUp($id)
+    {
+        $followUp = TaskFollowUp::findOrFail($id);
+        if ($followUp->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($followUp->photo);
+        }
+        $followUp->delete();
+        return response()->json(['success' => 'Task history description deleted successfully!']);
+    }
 }
