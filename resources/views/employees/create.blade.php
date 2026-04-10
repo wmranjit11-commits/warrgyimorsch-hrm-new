@@ -31,27 +31,33 @@
                 border-radius: 0 !important;
                 border-bottom: 1px solid #eee !important;
             }
+
             .nav-tabs .nav-link.active {
                 background: #fff !important;
                 border-left: 4px solid #6366f1 !important;
             }
+
             .card.stretch {
                 border-radius: 0 !important;
                 margin: -15px !important;
             }
+
             .tab-content {
                 padding: 15px !important;
             }
+
             .page-header {
                 padding: 15px !important;
                 flex-direction: column !important;
                 align-items: flex-start !important;
             }
+
             .page-header-right {
                 margin-top: 10px !important;
                 margin-left: 0 !important;
                 width: 100% !important;
             }
+
             .btn-lg {
                 width: 100% !important;
                 margin-bottom: 10px !important;
@@ -92,20 +98,20 @@
             <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row" id="employeeTab" role="tablist"
                 style="background: #f8f9fa; border-radius: 10px 10px 0 0; border-bottom: 2px solid #dee2e6;">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold active w-100" id="personal-tab"
-                        data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
+                    <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
+                        data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-person-circle me-2"></i>Personal Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold w-100" id="bank-tab" type="button"
-                        data-bs-toggle="tab" data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
+                    <button class="nav-link fw-bold w-100" id="bank-tab" type="button" data-bs-toggle="tab"
+                        data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-bank2 me-2"></i>Bank Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold w-100" id="salary-tab"
-                        data-bs-toggle="tab" data-bs-target="#salary" type="button" role="tab" aria-controls="salary" aria-selected="false"
+                    <button class="nav-link fw-bold w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
+                        type="button" role="tab" aria-controls="salary" aria-selected="false"
                         style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
                         <i class="bi bi-cash-coin me-2"></i>Salary Details</button>
                 </li>
@@ -115,11 +121,12 @@
                 <!-- Personal Details Tab -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                     <div class="row g-3">
-                           <div class="col-md-4">
+                        <div class="col-md-4">
                             <label class="fw-bold">Employee Code</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                <input type="text" name="employee_code" class="form-control" placeholder="Enter employee code">
+                                <input type="text" name="employee_code" class="form-control"
+                                    placeholder="Enter employee code">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -137,7 +144,7 @@
                                 <input type="email" name="email" class="form-control" placeholder="Enter email">
                             </div>
                         </div>
-                     
+
                         <div class="col-md-4">
                             <label class="fw-bold">Role</label>
                             <div class="input-group mb-3">
@@ -193,15 +200,19 @@
 
                                     <!-- Development -->
                                     <option value="Software Engineer / Developer">Software Engineer / Developer</option>
-                                    <option value="Frontend Developer (React / Next.js)">Frontend Developer (React / Next.js)</option>
-                                    <option value="Backend Developer (Laravel / Node.js)">Backend Developer (Laravel / Node.js)</option>
+                                    <option value="Frontend Developer (React / Next.js)">Frontend Developer (React /
+                                        Next.js)</option>
+                                    <option value="Backend Developer (Laravel / Node.js)">Backend Developer (Laravel /
+                                        Node.js)</option>
                                     <option value="Full Stack Developer">Full Stack Developer</option>
-                                    <option value="Mobile App Developer (Flutter / Android / iOS)">Mobile App Developer (Flutter / Android / iOS)</option>
+                                    <option value="Mobile App Developer (Flutter / Android / iOS)">Mobile App Developer
+                                        (Flutter / Android / iOS)</option>
                                     <option value="Web Developer Intern">Web Developer Intern</option>
 
                                     <!-- Specialized -->
                                     <option value="DevOps Engineer">DevOps Engineer</option>
-                                    <option value="Cloud Engineer (AWS / Azure / GCP)">Cloud Engineer (AWS / Azure / GCP)</option>
+                                    <option value="Cloud Engineer (AWS / Azure / GCP)">Cloud Engineer (AWS / Azure / GCP)
+                                    </option>
                                     <option value="Data Science Engineer">Data Science Engineer</option>
                                     <option value="AI / Machine Learning Engineer">AI / Machine Learning Engineer</option>
 
@@ -219,7 +230,8 @@
                                     <option value="IT Support Engineer">IT Support Engineer</option>
 
                                     <!-- Business -->
-                                    <option value="Business Development Manager (BDM)">Business Development Manager (BDM)</option>
+                                    <option value="Business Development Manager (BDM)">Business Development Manager (BDM)
+                                    </option>
                                     <option value="Sales Executive">Sales Executive</option>
                                     <option value="Digital Marketing Executive">Digital Marketing Executive</option>
                                     <option value="SEO Executive">SEO Executive</option>
@@ -255,7 +267,7 @@
                                 <span class="me-2 text-danger"><i class=""></i></span>Female
                             </div>
                         </div>
-                      
+
                         <div class="col-md-4">
                             <label class="fw-bold">Password</label>
                             <div class="input-group mb-3">
@@ -289,21 +301,22 @@
                             <label class="fw-bold">Time In</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_in" class="form-control" value="09:00">
+                                <input type="time" name="time_in" class="form-control" value="09:30">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time Out</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_out" class="form-control" value="19:00">
+                                <input type="time" name="time_out" class="form-control" value="18:00">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Leave</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="text" name="leave" class="form-control" value="" placeholder="Enter Leave Allotment">
+                                <input type="text" name="leave" class="form-control" value=""
+                                    placeholder="Enter Leave Allotment">
                             </div>
                         </div>
                         <!-- <div class="row align-items-center"> -->
@@ -383,8 +396,9 @@
                                         <img id="previewImg" src=""
                                             style="width:100%; height:100%; object-fit:cover; display:none;">
 
-                                        <span id="placeholderText" 
-                                            style="color:#64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">SELECT PHOTO</span>
+                                        <span id="placeholderText"
+                                            style="color:#64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">SELECT
+                                            PHOTO</span>
                                     </div>
 
                                     <!-- TEXT SIDE -->
@@ -473,39 +487,40 @@
                             <label class="fw-bold">Basic Salary <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input" placeholder="Basic Salary"
-                                    required>
+                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input"
+                                    placeholder="Basic Salary" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">HRA</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="number" name="hra" id="hra" class="form-control salary-input" placeholder="HRA">
+                                <input type="number" name="hra" id="hra" class="form-control salary-input"
+                                    placeholder="HRA">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Conveyance Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-truck"></i></span>
-                                <input type="number" name="conveyance_allowance" id="conveyance_allowance" class="form-control salary-input"
-                                    placeholder="Conveyance Allowance">
+                                <input type="number" name="conveyance_allowance" id="conveyance_allowance"
+                                    class="form-control salary-input" placeholder="Conveyance Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Medical Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-activity"></i></span>
-                                <input type="number" name="medical_allowance" id="medical_allowance" class="form-control salary-input"
-                                    placeholder="Medical Allowance">
+                                <input type="number" name="medical_allowance" id="medical_allowance"
+                                    class="form-control salary-input" placeholder="Medical Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Other Allowance</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-gift"></i></span>
-                                <input type="number" name="other_allowance" id="other_allowance" class="form-control salary-input"
-                                    placeholder="Other Allowance">
+                                <input type="number" name="other_allowance" id="other_allowance"
+                                    class="form-control salary-input" placeholder="Other Allowance">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -577,7 +592,7 @@
         }
 
         // Form Submit Validation
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', function (e) {
             const requiredFields = this.querySelectorAll('[required]');
             let missingFields = [];
 
@@ -595,7 +610,7 @@
                 e.preventDefault();
                 const message = "Cannot submit. Please fill these required fields:\n- " + missingFields.join("\n- ");
                 alert(message);
-                
+
                 // Switch to the first tab with an error
                 const firstInvalid = this.querySelector('.is-invalid');
                 if (firstInvalid) {
@@ -618,7 +633,7 @@
             const conveyance = parseFloat(document.getElementById('conveyance_allowance').value) || 0;
             const medical = parseFloat(document.getElementById('medical_allowance').value) || 0;
             const other = parseFloat(document.getElementById('other_allowance').value) || 0;
-            
+
             const total = basic + hra + conveyance + medical + other;
             document.getElementById('total_salary').value = total.toFixed(2);
         }

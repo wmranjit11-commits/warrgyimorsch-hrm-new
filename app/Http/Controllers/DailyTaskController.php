@@ -49,6 +49,7 @@ class DailyTaskController extends Controller
             'priority' => 'required|string',
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
+            'description' => 'nullable|string',
         ]);
 
         $validated['assigned_by'] = Auth::id();
@@ -68,6 +69,7 @@ class DailyTaskController extends Controller
             'priority' => 'required|string',
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
+            'description' => 'nullable|string',
         ]);
 
         $dailyTask->update($validated);

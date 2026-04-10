@@ -186,9 +186,6 @@
                                             Department</th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">
-                                            Description</th>
-                                        <th
-                                            style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">
                                             Technology</th>
                                         <th class="pe-4 text-center"
                                             style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">
@@ -206,18 +203,27 @@
                                             <td style="font-size: 14px; white-space: nowrap;">
                                                 {{ $project->end_date ? $project->end_date->format('d M Y') : '-' }}</td>
                                             <td>
-                                                <span
-                                                    class="badge {{ $project->status == 'Completed' ? 'bg-soft-success text-success' : 'bg-soft-primary text-primary' }}"
+                                                @php
+                                                    $projStatusClass = 'bg-soft-primary text-primary';
+                                                    if ($project->status == 'Completed') $projStatusClass = 'bg-soft-success text-success';
+                                                    elseif ($project->status == 'On Hold') $projStatusClass = 'bg-soft-warning text-warning';
+                                                @endphp
+                                                <span class="badge {{ $projStatusClass }}"
                                                     style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
                                                     {{ $project->status }}
                                                 </span>
                                             </td>
                                             <td style="font-size: 14px;">{{ $project->department }}</td>
-                                            <td style="font-size: 14px;" title="{{ $project->description }}">
-                                                {{ \Illuminate\Support\Str::limit($project->description, 20) }}</td>
                                             <td style="font-size: 14px;">{{ $project->technology }}</td>
                                             <td class="pe-4 text-center">
                                                 <div class="d-flex justify-content-center gap-2">
+                                                    <a href="javascript:void(0);"
+                                                        class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
+                                                        title="View Description" onclick="showProjectDesc({{ $project->id }})">
+                                                        <i class="feather-file-text"></i>
+                                                    </a>
+                                                    <template id="proj_desc_{{ $project->id }}">{!! $project->description ?? '<span class="text-muted">No description provided.</span>' !!}</template>
+                                                    
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-info text-info rounded"
                                                         onclick="editProject({{ json_encode($project) }})" title="Edit Project">
@@ -297,6 +303,16 @@
             color: #ef4444;
         }
 
+        .bg-soft-warning {
+            background: rgba(245, 158, 11, 0.08) !important;
+            color: #f59e0b;
+        }
+
+        .bg-soft-secondary {
+            background: rgba(100, 116, 139, 0.08) !important;
+            color: #64748b;
+        }
+
         .form-control:focus,
         .form-select:focus {
             border: 1.5px solid #3858f9 !important;
@@ -320,7 +336,24 @@
             border-color: #3858f9 !important;
             color: #ffffff !important;
         }
+
+        .custom-html-content ul { list-style-type: disc !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content ol { list-style-type: decimal !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content li { display: list-item !important; margin-bottom: 0.6rem !important; list-style-type: inherit !important; }
+        .custom-html-content p { margin-bottom: 1rem !important; line-height: 1.6 !important; }
+        .custom-html-content { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; padding: 25px 30px 25px 40px !important; background: #f8fafc !important; border-radius: 12px; }
+        
+        /* Summernote point indentation fix */
+        .note-editable ul { list-style-type: disc !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable ol { list-style-type: decimal !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable li { display: list-item !important; list-style-type: inherit !important; }
+        .note-editable { min-height: 200px; padding: 20px !important; background: white !important; }
     </style>
+
+@push('scripts')
+    <!-- Summernote CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
     <script>
         function paginateTable() {
@@ -349,12 +382,18 @@
             document.getElementById('endDate').value = project.end_date ? project.end_date.substring(0, 10) : '';
             document.getElementById('projectStatus').value = project.status;
             document.getElementById('projectDept').value = project.department;
-            document.getElementById('projectDesc').value = project.description;
+            try {
+                if ($('#projectDesc').length && typeof $.fn.summernote === 'function') {
+                    $('#projectDesc').summernote('code', project.description || '');
+                } else {
+                    document.getElementById('projectDesc').value = project.description || '';
+                }
+            } catch (e) { console.error('Summernote load error', e); }
             document.getElementById('projectTech').value = project.technology;
 
             const form = document.getElementById('projectForm');
             form.action = `/projects/${project.id}`;
-            document.getElementById('methodField').innerHTML = '@method("PUT")';
+            document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
 
             document.getElementById('submitBtn').innerText = 'UPDATE PROJECT';
             document.getElementById('cancelBtn').classList.remove('d-none');
@@ -363,6 +402,13 @@
 
         function resetForm() {
             document.getElementById('projectForm').reset();
+            try {
+                if ($('#projectDesc').length && typeof $.fn.summernote === 'function') {
+                    $('#projectDesc').summernote('code', '');
+                } else {
+                    document.getElementById('projectDesc').value = '';
+                }
+            } catch (e) {}
             document.getElementById('projectForm').action = "{{ route('projects.store') }}";
             document.getElementById('methodField').innerHTML = '';
             document.getElementById('submitBtn').innerText = 'SAVE PROJECT';
@@ -382,6 +428,46 @@
 
             paginateTable();
         }
+
+        function showProjectDesc(id) {
+            const html = document.getElementById('proj_desc_' + id).innerHTML;
+            Swal.fire({
+                title: 'Project Description',
+                html: `<div class="custom-html-content" style="max-height: 60vh; overflow-y: auto; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">${html}</div>`,
+                showConfirmButton: true,
+                confirmButtonColor: '#3858f9'
+            });
+        }
+
+        $(document).ready(function() {
+            $('#projectDesc').summernote({
+                placeholder: 'Enter Project Description',
+                tabsize: 2,
+                height: 150,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                callbacks: {
+                    onChange: function(contents, $editable) {
+                        $('#projectDesc').val(contents);
+                    }
+                }
+            });
+
+            // CRITICAL: Sync Summernote before form submission
+            $('#projectForm').on('submit', function() {
+                if ($('#projectDesc').summernote('isEmpty')) {
+                    $('#projectDesc').val('');
+                } else {
+                    $('#projectDesc').val($('#projectDesc').summernote('code'));
+                }
+            });
+        });
 
         function deleteRecord(e, form) {
             e.preventDefault();
@@ -403,4 +489,5 @@
         });
     </script>
     @endif
+@endpush
 @endsection

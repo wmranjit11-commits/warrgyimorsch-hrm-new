@@ -35,6 +35,7 @@ class EmployeeController extends Controller
     {
         try {
             $validated = $request->validate([
+                'employee_code' => 'required|string|max:50|unique:employees,employee_code',
                 'name' => 'required|string|max:255',
                 'mobile_number' => 'required|string|max:20',
                 'department' => 'required|string',
@@ -46,48 +47,31 @@ class EmployeeController extends Controller
                 'basic_salary' => 'required|numeric|min:0',
             ]);
 
-            // Create employee with all fields
-            $employee = Employee::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'role' => $request->role,
-                'department' => $request->department,
-                'designation' => $request->designation,
-                'date_of_joining' => $request->date_of_joining,
-                'date_of_birth' => $request->date_of_birth,
-                'gender' => $request->gender ?? 'male',
-                'employee_code' => $request->employee_code,
-                // 'username' => $request->username,
-                'password' =>  Hash::make($request->password),
-                'aadhaar_number' => $request->aadhaar_number,
-                'pan_number' => $request->pan_number,
-                'address' => $request->address,
-                'time_in' => $request->time_in ?? '09:00',
-                'time_out' => $request->time_out ?? '19:00',
-                'leave' => $request->leave ?? 0,
-                'pf' => $request->has('pf'),
-                'pf_number' => $request->pf_number,
-                'esi' => $request->has('esi'),
-                'esi_number' => $request->esi_number,
-                'insurance' => $request->has('insurance'),
-                'insurance_provider' => $request->insurance_provider,
-                'insurance_policy_number' => $request->insurance_policy_number,
-                'bank_name' => $request->bank_name,
-                'account_number' => $request->account_number,
-                'ifsc_code' => $request->ifsc_code,
-                'basic_salary' => $request->basic_salary ?? 0,
-                'hra' => $request->hra ?? 0,
-                'conveyance_allowance' => $request->conveyance_allowance ?? 0,
-                'medical_allowance' => $request->medical_allowance ?? 0,
-                'other_allowance' => $request->other_allowance ?? 0,
-            ]);
-
-            // Handle photo upload
-            if ($request->hasFile('photo')) {
-                $path = $request->file('photo')->store('employees', 'public');
-                $employee->update(['photo' => $path]);
+            $data = $request->all();
+            
+            // Password hashing
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
             }
+            
+            // Defaults
+            $data['gender'] = $request->gender ?? 'male';
+            $data['time_in'] = $request->time_in ?? '09:00';
+            $data['time_out'] = $request->time_out ?? '19:00';
+            $data['leave'] = $request->leave ?? 0;
+            
+            // Toggles
+            $data['pf'] = $request->has('pf');
+            $data['esi'] = $request->has('esi');
+            $data['insurance'] = $request->has('insurance');
+
+            // Handle Photo upload
+            if ($request->hasFile('photo')) {
+                $data['photo'] = $request->file('photo')->store('employees', 'public');
+            }
+
+            // Create employee
+            $employee = Employee::create($data);
 
             return redirect()->route('employees.index')
                 ->with('success', 'Employee added successfully! ✓');
@@ -121,25 +105,25 @@ class EmployeeController extends Controller
     public function getAttendance(Request $request, $id)
     {
         $employee = Employee::findOrFail($id);
-        
+
         $query = \App\Models\Attendance::where('employee_id', $id);
-        
+
         if ($request->filled('month')) {
             // month is in YYYY-MM format
             $parts = explode('-', $request->month);
             $year = $parts[0];
             $month = $parts[1];
-            
+
             $query->whereYear('attendance_date', $year)
-                  ->whereMonth('attendance_date', $month);
+                ->whereMonth('attendance_date', $month);
         } else {
             // Default to current month if no filter
             $query->whereYear('attendance_date', date('Y'))
-                  ->whereMonth('attendance_date', date('m'));
+                ->whereMonth('attendance_date', date('m'));
         }
-            
+
         $attendance = $query->orderBy('attendance_date', 'desc')->get();
-            
+
         return response()->json($attendance);
     }
 
@@ -219,12 +203,12 @@ class EmployeeController extends Controller
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('employees', $filename, 'public');
-            
+
             // Clean up old photo if needed
             if ($employee->photo && \Storage::disk('public')->exists($employee->photo)) {
                 \Storage::disk('public')->delete($employee->photo);
             }
-            
+
             $employee->update(['photo' => $path]);
         }
 

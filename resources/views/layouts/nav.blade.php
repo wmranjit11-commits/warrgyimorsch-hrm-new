@@ -94,11 +94,11 @@
                             </ul>
                         </li>
 
-                        </li>
-                    </ul>
                 </li>
+            </ul>
+            </li>
 
-                <!-- <li class="nxl-item nxl-hasmenu">
+            <!-- <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-calendar"></i></span>
                         <span class="nxl-mtext">Holidays</span>
@@ -117,62 +117,62 @@
                     </ul>
                 </li> -->
 
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-calendar"></i></span>
-                        <span class="nxl-mtext">Leave Module</span>
-                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                    </a>
+            <li class="nxl-item nxl-hasmenu">
+                <a href="javascript:void(0);" class="nxl-link">
+                    <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                    <span class="nxl-mtext">Leave Module</span>
+                    <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                </a>
 
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item">
-                            <a href="{{ route('leave.allotment') }}" class="nxl-link">
-                                <span class="nxl-micon">
-                                    <i class="feather-plus-circle"></i>
-                                </span>
-                                <span class="nxl-mtext">Leave Allotment</span>
-                            </a>
-                        </li>
-                        <li class="nxl-item">
-                            <a href="{{ route('leave.history') }}" class="nxl-link">
-                                <span class="nxl-micon">
-                                    <i class="feather-file-text"></i>
-                                </span>
-                                <span class="nxl-mtext">Leave Applications</span>
-                            </a>
-                        </li>
-                        <li class="nxl-item">
-                            <a href="{{ route('holidays.index') }}" class="nxl-link">
-                                <span class="nxl-micon">
-                                    <i class="feather-list"></i>
-                                </span>
-                                <span class="nxl-mtext">Holiday List</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nxl-item nxl-hasmenu">
-                    <a href="javascript:void(0);" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-briefcase"></i></span>
-                        <span class="nxl-mtext">Project Module</span>
-                        <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                    </a>
-                    <ul class="nxl-submenu">
-                        <li class="nxl-item">
-                            <a href="{{ route('projects.index') }}" class="nxl-link">
-                                <span class="nxl-micon"><i class="feather-list"></i></span>
-                                <span class="nxl-mtext">Projects</span>
-                            </a>
-                        </li>
-                        <li class="nxl-item">
-                            <a href="{{ route('daily-tasks.index') }}" class="nxl-link">
-                                <span class="nxl-micon"><i class="feather-check-square"></i></span>
-                                <span class="nxl-mtext">Daily Tasks</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <!-- <li class="nxl-item nxl-hasmenu">
+                <ul class="nxl-submenu">
+                    <li class="nxl-item">
+                        <a href="{{ route('holidays.index') }}" class="nxl-link">
+                            <span class="nxl-micon">
+                                <i class="feather-list"></i>
+                            </span>
+                            <span class="nxl-mtext">Holiday List</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="{{ route('leave.allotment') }}" class="nxl-link">
+                            <span class="nxl-micon">
+                                <i class="feather-plus-circle"></i>
+                            </span>
+                            <span class="nxl-mtext">Leave Allotment</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="{{ route('leave.history') }}" class="nxl-link">
+                            <span class="nxl-micon">
+                                <i class="feather-file-text"></i>
+                            </span>
+                            <span class="nxl-mtext">Leave Applications</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nxl-item nxl-hasmenu">
+                <a href="javascript:void(0);" class="nxl-link">
+                    <span class="nxl-micon"><i class="feather-briefcase"></i></span>
+                    <span class="nxl-mtext">Project Module</span>
+                    <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                </a>
+                <ul class="nxl-submenu">
+                    <li class="nxl-item">
+                        <a href="{{ route('projects.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-list"></i></span>
+                            <span class="nxl-mtext">Projects</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="{{ route('daily-tasks.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-check-square"></i></span>
+                            <span class="nxl-mtext">Daily Tasks</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!-- <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-cast"></i></span>
                             <span class="nxl-mtext">Reports</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
