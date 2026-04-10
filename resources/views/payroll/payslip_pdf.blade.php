@@ -205,11 +205,10 @@
                 <td style="width: 60%;">
                     <div class="company-address-box">
                         <div class="company-name-header">Warrgyizmorsch Pvt. Ltd.</div>
-                        NH 8, Industries Area, near Skoda Showroom, next to<br>
-                        Meridian Marble and Decorative Stones Pvt. Ltd,<br>
-                        Amberi, Sukher, Rajasthan 313001<br>
-                        info@warrgyizmorsch.com | www.warrgyizmorsch.com<br>
-                        +91 76655 04555
+                        410, 4th floor, Ashoka palace, <br>
+                        Shobhagpura, Udaipur, Rajasthan<br>
+                        info@&#8203;warrgyizmorsch.com | https:/&#8203;/warrgyizmorsch.com/<br>
+                        +91 9257874994
                     </div>
                 </td>
             </tr>
@@ -251,7 +250,8 @@
                 <td class="label">PAN No:</td>
                 <td class="value">{{ $payroll->employee->pan_number ?? 'ABCDE1234F' }}</td>
                 <td class="label">Leaves:</td>
-                <td class="value">{{ \Carbon\Carbon::parse($payroll->month)->daysInMonth - $payroll->payable_days }}</td>
+                <td class="value">{{ \Carbon\Carbon::parse($payroll->month)->daysInMonth - $payroll->payable_days }}
+                </td>
             </tr>
             <tr>
                 <td class="label">Month:</td>
@@ -278,39 +278,41 @@
                                 <td class="text-right">&#8377;{{ number_format($payroll->basic_salary, 2) }}</td>
                             </tr>
                             @if($payroll->hra > 0)
-                            <tr>
-                                <td>HRA</td>
-                                <td class="text-right">&#8377;{{ number_format($payroll->hra, 2) }}</td>
-                            </tr>
+                                <tr>
+                                    <td>HRA</td>
+                                    <td class="text-right">&#8377;{{ number_format($payroll->hra, 2) }}</td>
+                                </tr>
                             @endif
                             @if($payroll->medical_allowance > 0)
-                            <tr>
-                                <td>Medical Allowance</td>
-                                <td class="text-right">&#8377;{{ number_format($payroll->medical_allowance, 2) }}</td>
-                            </tr>
+                                <tr>
+                                    <td>Medical Allowance</td>
+                                    <td class="text-right">&#8377;{{ number_format($payroll->medical_allowance, 2) }}</td>
+                                </tr>
                             @endif
                             @if($payroll->other_allowance > 0)
-                            <tr>
-                                <td>Other Allowances</td>
-                                <td class="text-right">&#8377;{{ number_format($payroll->other_allowance, 2) }}</td>
-                            </tr>
+                                <tr>
+                                    <td>Other Allowances</td>
+                                    <td class="text-right">&#8377;{{ number_format($payroll->other_allowance, 2) }}</td>
+                                </tr>
                             @endif
                             @if($payroll->conveyance_allowance > 0)
-                            <tr>
-                                <td>Conveyance</td>
-                                <td class="text-right">&#8377;{{ number_format($payroll->conveyance_allowance, 2) }}</td>
-                            </tr>
+                                <tr>
+                                    <td>Conveyance</td>
+                                    <td class="text-right">&#8377;{{ number_format($payroll->conveyance_allowance, 2) }}
+                                    </td>
+                                </tr>
                             @endif
                             <tr class="bold">
                                 <td style="border-top: 1px solid #e2e8f0;">Total Earnings</td>
-                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">&#8377;{{ number_format($payroll->gross_salary, 2) }}</td>
+                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">
+                                    &#8377;{{ number_format($payroll->gross_salary, 2) }}</td>
                             </tr>
                         </table>
                     </td>
                     <td class="col-50">
                         <table class="inner-table">
                             @php $hasDeductions = false; @endphp
-                            
+
                             @if($payroll->pf_deduction > 0)
                                 @php $hasDeductions = true; @endphp
                                 <tr>
@@ -318,7 +320,7 @@
                                     <td class="text-right">&#8377;{{ number_format($payroll->pf_deduction, 2) }}</td>
                                 </tr>
                             @endif
-                            
+
                             @if($payroll->esi_deduction > 0)
                                 @php $hasDeductions = true; @endphp
                                 <tr>
@@ -326,7 +328,7 @@
                                     <td class="text-right">&#8377;{{ number_format($payroll->esi_deduction, 2) }}</td>
                                 </tr>
                             @endif
-                            
+
                             @if($payroll->other_deduction > 0)
                                 @php $hasDeductions = true; @endphp
                                 <tr>
@@ -337,13 +339,15 @@
 
                             @if(!$hasDeductions)
                                 <tr>
-                                    <td colspan="2" class="text-center py-4 text-muted" style="font-size: 9px; opacity: 0.5;">No deductions applicable</td>
+                                    <td colspan="2" class="text-center py-4 text-muted"
+                                        style="font-size: 9px; opacity: 0.5;">No deductions applicable</td>
                                 </tr>
                             @endif
 
                             <tr class="bold">
                                 <td style="border-top: 1px solid #e2e8f0;">Total Deduction</td>
-                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">&#8377;{{ number_format($payroll->deductions, 2) }}</td>
+                                <td class="text-right" style="border-top: 1px solid #e2e8f0;">
+                                    &#8377;{{ number_format($payroll->deductions, 2) }}</td>
                             </tr>
                         </table>
                     </td>
@@ -353,11 +357,13 @@
 
         <!-- High-contrast Net Pay Callout -->
         <div class="net-payment-bar">
-            <span class="net-payment-text">Net Payable Amount: &#8377;{{ number_format($payroll->net_salary, 2) }}</span>
+            <span class="net-payment-text">Net Payable Amount:
+                &#8377;{{ number_format($payroll->net_salary, 2) }}</span>
         </div>
 
         <div style="margin-top: 30px; font-size: 8px; color: #94a3b8; font-style: italic;">
-            * This is a computer-generated document and does not require a physical seal. Net salary payable is subject to applicable deductions.
+            * This is a computer-generated document and does not require a physical seal. Net salary payable is subject
+            to applicable deductions.
         </div>
 
         <!-- Authorized Signature Section -->
@@ -374,4 +380,5 @@
         </table>
     </div>
 </body>
+
 </html>

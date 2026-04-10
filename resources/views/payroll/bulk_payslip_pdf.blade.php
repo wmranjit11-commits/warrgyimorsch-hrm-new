@@ -212,11 +212,10 @@
                     <td style="width: 60%;">
                         <div class="company-address-box">
                             <div class="company-name-header">Warrgyizmorsch Pvt. Ltd.</div>
-                            NH 8, Industries Area, near Skoda Showroom, next to<br>
-                            Meridian Marble and Decorative Stones Pvt. Ltd,<br>
-                            Amberi, Sukher, Rajasthan 313001<br>
-                            info@warrgyizmorsch.com | www.warrgyizmorsch.com<br>
-                            +91 76655 04555
+                            410, 4th floor, Ashoka palace, <br>
+                            Shobhagpura, Udaipur, Rajasthan<br>
+                            info@&#8203;warrgyizmorsch.com | https:/&#8203;/warrgyizmorsch.com/<br>
+                            +91 9257874994
                         </div>
                     </td>
                 </tr>
