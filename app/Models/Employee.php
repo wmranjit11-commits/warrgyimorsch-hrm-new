@@ -52,5 +52,8 @@ class Employee extends Model
     public function tasks()
     {
         return $this->hasMany(DailyTask::class);
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

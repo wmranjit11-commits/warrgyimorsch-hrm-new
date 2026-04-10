@@ -16,6 +16,24 @@
                     </nav>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                     <div class="dropdown d-inline-block ms-auto float-end">
+                        <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Import Attendance &nbsp; </label>
+                            <i class="fas fa-upload"></i>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-end p-4 shadow-sm border-0" style="width: 320px;">
+                            <form action="{{ route('payroll.attendance.import') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark mb-2">Import Attendance (Excel)</label>
+                                    <input type="file" class="form-control" name="import_file" accept=".xlsx, .xls, .csv" required>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 fw-bold">
+                                    <i class="fas fa-file-import me-2"></i> UPLOAD & CALCULATE
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                     <!-- Right Aligned Search & Actions -->
                     <div class="input-group d-none d-md-flex" style="width: 250px;">
                         <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
@@ -83,27 +101,28 @@
                                     {{ \Carbon\Carbon::parse($att->attendance_date)->format('d-m-Y') }}
                                 </td>
                                 <td>
+                                    @php $date = \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d'); @endphp
                                     <div class="d-flex flex-wrap gap-2">
-                                        <div class="ref-badge badge-green clickable" title="View Present" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'present')">
+                                        <div class="ref-badge badge-green clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'present')">
                                             Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-blue clickable" title="View Overtime" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'overtime')">
+                                        <div class="ref-badge badge-blue clickable" title="View Overtime" onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
                                             Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-yellow clickable" title="View Half Day" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'half_day')">
+                                        <div class="ref-badge badge-yellow clickable" title="View Half Day" onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
                                             Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $att->attendance_date }}', 'leave')">
+                                        <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $date }}', 'leave')">
                                             Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $att->attendance_date }}')" title="View">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $date }}')" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
-                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deleteAttendanceByDate('{{ $att->attendance_date }}')" title="Delete">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deleteAttendanceByDate('{{ $date }}')" title="Delete">
                                             <i class="feather-trash-2"></i>
                                         </a>
                                     </div>
