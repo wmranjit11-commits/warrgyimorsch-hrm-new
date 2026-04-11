@@ -337,17 +337,17 @@
             color: #ffffff !important;
         }
 
-        .custom-html-content ul { list-style-type: disc !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content ol { list-style-type: decimal !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content li { display: list-item !important; margin-bottom: 0.6rem !important; list-style-type: inherit !important; }
+        .custom-html-content ul { list-style-type: disc !important; padding-left: 35px !important; margin-bottom: 1.2rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content ol { list-style-type: decimal !important; padding-left: 35px !important; margin-bottom: 1.2rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content li { display: list-item !important; margin-bottom: 0.8rem !important; list-style-type: inherit !important; line-height: 1.6 !important; }
         .custom-html-content p { margin-bottom: 1rem !important; line-height: 1.6 !important; }
-        .custom-html-content { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; padding: 25px 30px 25px 40px !important; background: #f8fafc !important; border-radius: 12px; }
+        .custom-html-content { text-align: left !important; font-size: 15px; line-height: 1.6; color: #1e293b; padding: 30px 30px 30px 45px !important; background: #ffffff !important; border-radius: 12px; }
         
         /* Summernote point indentation fix */
-        .note-editable ul { list-style-type: disc !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable ol { list-style-type: decimal !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable li { display: list-item !important; list-style-type: inherit !important; }
-        .note-editable { min-height: 200px; padding: 20px !important; background: white !important; }
+        .note-editable ul { list-style-type: disc !important; padding-left: 35px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable ol { list-style-type: decimal !important; padding-left: 35px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable li { display: list-item !important; margin-bottom: 0.5rem !important; list-style-type: inherit !important; }
+        .note-editable { min-height: 200px; padding: 25px !important; background: white !important; }
     </style>
 
 @push('scripts')

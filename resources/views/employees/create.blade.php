@@ -125,23 +125,32 @@
                             <label class="fw-bold">Employee Code</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                <input type="text" name="employee_code" class="form-control"
+                                <input type="text" name="employee_code" class="form-control @error('employee_code') is-invalid @enderror" value="{{ old('employee_code') }}"
                                     placeholder="Enter employee code">
+                                @error('employee_code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Name <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" name="name" class="form-control" placeholder="Enter employee name"
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Enter employee name"
                                     required>
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Email</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-mail"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="Enter email">
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="Enter email">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
@@ -149,121 +158,105 @@
                             <label class="fw-bold">Role</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                <select name="role" class="form-control" required>
+                                <select name="role" class="form-control @error('role') is-invalid @enderror" required>
                                     <option value="">Select Role</option>
-                                    <option value="super_admin">Super Admin</option>
-                                    <option value="manager">Manager</option>
-                                    <option value="hr_executive">HR Executive</option>
-                                    <option value="hr_intern">HR Intern</option>
-                                    <option value="team_leader">Team Leader</option>
-                                    <option value="employee">Employee</option>
+                                    <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                                    <option value="hr_executive" {{ old('role') == 'hr_executive' ? 'selected' : '' }}>HR Executive</option>
+                                    <option value="hr_intern" {{ old('role') == 'hr_intern' ? 'selected' : '' }}>HR Intern</option>
+                                    <option value="team_leader" {{ old('role') == 'team_leader' ? 'selected' : '' }}>Team Leader</option>
+                                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
                                 </select>
+                                @error('role')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Mobile Number <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-phone"></i></span>
-                                <input type="text" name="mobile_number" class="form-control"
+                                <input type="text" name="mobile_number" class="form-control @error('mobile_number') is-invalid @enderror" value="{{ old('mobile_number') }}"
                                     placeholder="Enter mobile number" required>
+                                @error('mobile_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Department</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-users"></i></span>
-                                <select name="department" class="form-control" required>
+                                <select name="department" class="form-control @error('department') is-invalid @enderror" required>
                                     <option value="">Select department...</option>
-                                    <option value="administration">Administration (Admin)</option>
-                                    <option value="business_development">Business Development (BD)</option>
-                                    <option value="hr">HR Department (HR)</option>
-                                    <option value="web_development">Web Development (WD)</option>
-                                    <option value="digital_marketing">Digital Marketing (DM)</option>
-                                    <option value="web_graphics">Web & Graphics Design (WGD)</option>
+                                    <option value="administration" {{ old('department') == 'administration' ? 'selected' : '' }}>Administration (Admin)</option>
+                                    <option value="business_development" {{ old('department') == 'business_development' ? 'selected' : '' }}>Business Development (BD)</option>
+                                    <option value="hr" {{ old('department') == 'hr' ? 'selected' : '' }}>HR Department (HR)</option>
+                                    <option value="web_development" {{ old('department') == 'web_development' ? 'selected' : '' }}>Web Development (WD)</option>
+                                    <option value="digital_marketing" {{ old('department') == 'digital_marketing' ? 'selected' : '' }}>Digital Marketing (DM)</option>
+                                    <option value="web_graphics" {{ old('department') == 'web_graphics' ? 'selected' : '' }}>Web & Graphics Design (WGD)</option>
                                     <!-- aur add karo jo chahiye -->
                                 </select>
+                                @error('department')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Designation <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-users"></i></span>
-                                <select name="designation" class="form-control" required>
+                                <select name="designation" class="form-control @error('designation') is-invalid @enderror" required>
                                     <option value="">Select designation...</option>
-
-                                    <!-- Management -->
-                                    <option value="Chief Executive Officer (CEO)">Chief Executive Officer (CEO)</option>
-                                    <option value="Chief Finance Officer (CFO)">Chief Finance Officer (CFO)</option>
-                                    <option value="Chief Technology Officer (CTO)">Chief Technology Officer (CTO)</option>
-                                    <option value="Project Manager">Project Manager</option>
-                                    <option value="Team Lead / Tech Lead">Team Lead / Tech Lead</option>
-
-                                    <!-- Development -->
-                                    <option value="Software Engineer / Developer">Software Engineer / Developer</option>
-                                    <option value="Frontend Developer (React / Next.js)">Frontend Developer (React /
-                                        Next.js)</option>
-                                    <option value="Backend Developer (Laravel / Node.js)">Backend Developer (Laravel /
-                                        Node.js)</option>
-                                    <option value="Full Stack Developer">Full Stack Developer</option>
-                                    <option value="Mobile App Developer (Flutter / Android / iOS)">Mobile App Developer
-                                        (Flutter / Android / iOS)</option>
-                                    <option value="Web Developer Intern">Web Developer Intern</option>
-
-                                    <!-- Specialized -->
-                                    <option value="DevOps Engineer">DevOps Engineer</option>
-                                    <option value="Cloud Engineer (AWS / Azure / GCP)">Cloud Engineer (AWS / Azure / GCP)
-                                    </option>
-                                    <option value="Data Science Engineer">Data Science Engineer</option>
-                                    <option value="AI / Machine Learning Engineer">AI / Machine Learning Engineer</option>
-
-                                    <!-- Testing -->
-                                    <option value="QA Engineer / Tester">QA Engineer / Tester</option>
-                                    <option value="Automation Test Engineer">Automation Test Engineer</option>
-
-                                    <!-- Design -->
-                                    <option value="UI/UX Designer">UI/UX Designer</option>
-                                    <option value="Graphic Designer">Graphic Designer</option>
-                                    <option value="Social Media Executive">Social Media Executive</option>
-
-                                    <!-- Support -->
-                                    <option value="System Administrator">System Administrator</option>
-                                    <option value="IT Support Engineer">IT Support Engineer</option>
-
-                                    <!-- Business -->
-                                    <option value="Business Development Manager (BDM)">Business Development Manager (BDM)
-                                    </option>
-                                    <option value="Sales Executive">Sales Executive</option>
-                                    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                                    <option value="SEO Executive">SEO Executive</option>
-                                    <option value="SEO Intern">SEO Intern</option>
-
-                                    <!-- HR -->
-                                    <option value="HR Manager">HR Manager</option>
-                                    <option value="HR Executive">HR Executive</option>
-                                    <option value="HR Intern">HR Intern</option>
+                                    @php
+                                        $designations = [
+                                            'Chief Executive Officer (CEO)', 'Chief Finance Officer (CFO)', 'Chief Technology Officer (CTO)',
+                                            'Project Manager', 'Team Lead / Tech Lead', 'Software Engineer / Developer',
+                                            'Frontend Developer (React / Next.js)', 'Backend Developer (Laravel / Node.js)',
+                                            'Full Stack Developer', 'Mobile App Developer (Flutter / Android / iOS)',
+                                            'Web Developer Intern', 'DevOps Engineer', 'Cloud Engineer (AWS / Azure / GCP)',
+                                            'Data Science Engineer', 'AI / Machine Learning Engineer', 'QA Engineer / Tester',
+                                            'Automation Test Engineer', 'UI/UX Designer', 'Graphic Designer',
+                                            'Social Media Executive', 'System Administrator', 'IT Support Engineer',
+                                            'Business Development Manager (BDM)', 'Sales Executive', 'Digital Marketing Executive',
+                                            'SEO Executive', 'SEO Intern', 'HR Manager', 'HR Executive', 'HR Intern'
+                                        ];
+                                    @endphp
+                                    @foreach($designations as $dsg)
+                                        <option value="{{ $dsg }}" {{ old('designation') == $dsg ? 'selected' : '' }}>{{ $dsg }}</option>
+                                    @endforeach
                                 </select>
+                                @error('designation')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Date of Joining</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_joining" class="form-control">
+                                <input type="date" name="date_of_joining" class="form-control @error('date_of_joining') is-invalid @enderror" value="{{ old('date_of_joining', \Carbon\Carbon::today()->toDateString()) }}">
+                                @error('date_of_joining')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Date of Birth</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_birth" class="form-control">
+                                <input type="date" name="date_of_birth" class="form-control @error('date_of_birth') is-invalid @enderror" value="{{ old('date_of_birth') }}">
+                                @error('date_of_birth')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Gender</label><br>
                             <div class="d-flex align-items-center mb-3">
-                                <input class="form-check-input me-2" type="radio" name="gender" value="male" checked>
+                                <input class="form-check-input me-2" type="radio" name="gender" value="male" {{ old('gender', 'male') == 'male' ? 'checked' : '' }}>
                                 <span class="me-2 text-success"><i class=""></i></span>Male
-                                <input class="form-check-input ms-4 me-2" type="radio" name="gender" value="female">
+                                <input class="form-check-input ms-4 me-2" type="radio" name="gender" value="female" {{ old('gender') == 'female' ? 'checked' : '' }}>
                                 <span class="me-2 text-danger"><i class=""></i></span>Female
                             </div>
                         </div>
@@ -272,51 +265,72 @@
                             <label class="fw-bold">Password</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-lock"></i></span>
-                                <input type="password" name="password" class="form-control" placeholder="Password">
+                                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password">
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Aadhaar Number</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
-                                <input type="text" name="aadhaar_number" class="form-control"
+                                <input type="text" name="aadhaar_number" class="form-control @error('aadhaar_number') is-invalid @enderror" value="{{ old('aadhaar_number') }}"
                                     placeholder="Enter Aadhaar Number">
+                                @error('aadhaar_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">PAN Number</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
-                                <input type="text" name="pan_number" class="form-control" placeholder="E.G. ABCDE2548K">
+                                <input type="text" name="pan_number" class="form-control @error('pan_number') is-invalid @enderror" value="{{ old('pan_number') }}" placeholder="E.G. ABCDE2548K">
+                                @error('pan_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Address</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-map-pin"></i></span>
-                                <textarea name="address" class="form-control" placeholder="Enter Address"></textarea>
+                                <textarea name="address" class="form-control @error('address') is-invalid @enderror" placeholder="Enter Address">{{ old('address') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time In</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_in" class="form-control" value="09:30">
+                                <input type="time" name="time_in" class="form-control @error('time_in') is-invalid @enderror" value="{{ old('time_in', '09:30') }}">
+                                @error('time_in')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time Out</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_out" class="form-control" value="18:00">
+                                <input type="time" name="time_out" class="form-control @error('time_out') is-invalid @enderror" value="{{ old('time_out', '18:00') }}">
+                                @error('time_out')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Leave</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="text" name="leave" class="form-control" value=""
+                                <input type="text" name="leave" class="form-control @error('leave') is-invalid @enderror" value="{{ old('leave') }}"
                                     placeholder="Enter Leave Allotment">
+                                @error('leave')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <!-- <div class="row align-items-center"> -->
@@ -328,14 +342,17 @@
                                 <!-- PF Section -->
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="pf" id="pfToggle">
+                                        <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ old('pf') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
                                     </div>
                                     <div id="pfField" style="display: none;">
                                         <label class="fw-bold small">PF No.</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                            <input type="text" name="pf_number" class="form-control" placeholder="PF No.">
+                                            <input type="text" name="pf_number" class="form-control @error('pf_number') is-invalid @enderror" value="{{ old('pf_number') }}" placeholder="PF No.">
+                                            @error('pf_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -343,14 +360,17 @@
                                 <!-- ESI Section -->
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="esi" id="esiToggle">
+                                        <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ old('esi') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
                                     </div>
                                     <div id="esiField" style="display: none;">
                                         <label class="fw-bold small">ESI No.</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                            <input type="text" name="esi_number" class="form-control" placeholder="ESI No.">
+                                            <input type="text" name="esi_number" class="form-control @error('esi_number') is-invalid @enderror" value="{{ old('esi_number') }}" placeholder="ESI No.">
+                                            @error('esi_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +379,7 @@
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
                                         <input class="form-check-input" type="checkbox" name="insurance"
-                                            id="insuranceToggle">
+                                            id="insuranceToggle" {{ old('insurance') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
                                     </div>
                                     <div id="insuranceFields" style="display: none;">
@@ -367,16 +387,22 @@
                                             <label class="fw-bold small">Provider</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                                <input type="text" name="insurance_provider" class="form-control"
-                                                    placeholder="Insurance Company">
+                                                <input type="text" name="insurance_provider" class="form-control @error('insurance_provider') is-invalid @enderror"
+                                                    value="{{ old('insurance_provider') }}" placeholder="Insurance Company">
+                                                @error('insurance_provider')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div>
                                             <label class="fw-bold small">Policy Number</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                                                <input type="text" name="insurance_policy_number" class="form-control"
-                                                    placeholder="Policy Number">
+                                                <input type="text" name="insurance_policy_number" class="form-control @error('insurance_policy_number') is-invalid @enderror"
+                                                    value="{{ old('insurance_policy_number') }}" placeholder="Policy Number">
+                                                @error('insurance_policy_number')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
@@ -452,22 +478,31 @@
                             <label class="fw-bold">Bank Name <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="text" name="bank_name" class="form-control" placeholder="Bank Name" required>
+                                <input type="text" name="bank_name" class="form-control @error('bank_name') is-invalid @enderror" value="{{ old('bank_name') }}" placeholder="Bank Name" required>
+                                @error('bank_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Account Number <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-hash"></i></span>
-                                <input type="text" name="account_number" class="form-control" placeholder="Account Number"
+                                <input type="text" name="account_number" class="form-control @error('account_number') is-invalid @enderror" value="{{ old('account_number') }}" placeholder="Account Number"
                                     required>
+                                @error('account_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">IFSC Code <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-key"></i></span>
-                                <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code" required>
+                                <input type="text" name="ifsc_code" class="form-control @error('ifsc_code') is-invalid @enderror" value="{{ old('ifsc_code') }}" placeholder="IFSC Code" required>
+                                @error('ifsc_code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -487,16 +522,22 @@
                             <label class="fw-bold">Basic Salary <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input"
-                                    placeholder="Basic Salary" required>
+                                <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input @error('basic_salary') is-invalid @enderror"
+                                    value="{{ old('basic_salary') }}" placeholder="Basic Salary" required>
+                                @error('basic_salary')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">HRA</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="number" name="hra" id="hra" class="form-control salary-input"
-                                    placeholder="HRA">
+                                <input type="number" name="hra" id="hra" class="form-control salary-input @error('hra') is-invalid @enderror"
+                                    value="{{ old('hra') }}" placeholder="HRA">
+                                @error('hra')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -504,7 +545,11 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-truck"></i></span>
                                 <input type="number" name="conveyance_allowance" id="conveyance_allowance"
-                                    class="form-control salary-input" placeholder="Conveyance Allowance">
+                                    class="form-control salary-input @error('conveyance_allowance') is-invalid @enderror" 
+                                    value="{{ old('conveyance_allowance') }}" placeholder="Conveyance Allowance">
+                                @error('conveyance_allowance')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -512,7 +557,11 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-activity"></i></span>
                                 <input type="number" name="medical_allowance" id="medical_allowance"
-                                    class="form-control salary-input" placeholder="Medical Allowance">
+                                    class="form-control salary-input @error('medical_allowance') is-invalid @enderror" 
+                                    value="{{ old('medical_allowance') }}" placeholder="Medical Allowance">
+                                @error('medical_allowance')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -520,7 +569,11 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-gift"></i></span>
                                 <input type="number" name="other_allowance" id="other_allowance"
-                                    class="form-control salary-input" placeholder="Other Allowance">
+                                    class="form-control salary-input @error('other_allowance') is-invalid @enderror" 
+                                    value="{{ old('other_allowance') }}" placeholder="Other Allowance">
+                                @error('other_allowance')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -638,8 +691,33 @@
             document.getElementById('total_salary').value = total.toFixed(2);
         }
 
-        // Initialize total on load if values exist
-        window.addEventListener('load', calculateTotalSalary);
+        // Initialize total on load if values exist and switch to error tab
+        window.addEventListener('load', function() {
+            calculateTotalSalary();
+            
+            // Auto-switch to tab with validation errors
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                const tabPane = firstError.closest('.tab-pane');
+                if (tabPane) {
+                    const tabId = tabPane.id;
+                    const tabTrigger = document.querySelector('#' + tabId + '-tab');
+                    if (tabTrigger) {
+                        bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+                    }
+                }
+            }
+
+            // Set initial visibility for toggles based on old values
+            const pfToggle = document.getElementById('pfToggle');
+            if (pfToggle) document.getElementById('pfField').style.display = pfToggle.checked ? 'block' : 'none';
+            
+            const esiToggle = document.getElementById('esiToggle');
+            if (esiToggle) document.getElementById('esiField').style.display = esiToggle.checked ? 'block' : 'none';
+            
+            const insuranceToggle = document.getElementById('insuranceToggle');
+            if (insuranceToggle) document.getElementById('insuranceFields').style.display = insuranceToggle.checked ? 'block' : 'none';
+        });
     </script>
 
 @endsection

@@ -136,8 +136,8 @@
                             <table class="table table-hover align-middle mb-0" id="tasksTable">
                                 <thead style="background: #3858f9; color: white;">
                                     <tr style="height: 60px; vertical-align: middle;">
-                                        <th class="ps-4" style="width: 60px;"><input type="checkbox" id="selectAllTasks"
-                                                class="form-check-input shadow-none"></th>
+                                        <th class="ps-4" style="width: 80px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
+                                            Sr. No.</th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Project.</th>
@@ -170,8 +170,8 @@
                                 <tbody style="border-top: 1px solid #f1f5f9;">
                                     @forelse($tasks as $index => $task)
                                         <tr class="task-row" style="height: 70px; border-bottom: 1px solid #f1f5f9;">
-                                            <td class="ps-4"><input type="checkbox"
-                                                    class="form-check-input task-checkbox shadow-none" value="{{ $task->id }}">
+                                            <td class="ps-4 fw-bold" style="font-size: 14px; color: #1e293b;">
+                                                {{ $index + 1 }}
                                             </td>
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
                                                 {{ $task->project->name ?? ($task->project_id ? 'Proj ID: '.$task->project_id : '-') }}</td>
@@ -614,16 +614,16 @@
             color: #3858f9;
         }
 
-        .custom-html-content ul { list-style-type: disc !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content ol { list-style-type: decimal !important; padding-left: 30px !important; margin-bottom: 1.1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content li { display: list-item !important; margin-bottom: 0.6rem !important; list-style-type: inherit !important; }
+        .custom-html-content ul { list-style-type: disc !important; padding-left: 35px !important; margin-bottom: 1.2rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content ol { list-style-type: decimal !important; padding-left: 35px !important; margin-bottom: 1.2rem !important; list-style-position: outside !important; display: block !important; }
+        .custom-html-content li { display: list-item !important; margin-bottom: 0.8rem !important; list-style-type: inherit !important; line-height: 1.6 !important; }
         .custom-html-content p { margin-bottom: 1rem !important; line-height: 1.6 !important; }
-        .custom-html-content { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; padding: 25px 30px 25px 40px !important; background: #fff !important; }
+        .custom-html-content { text-align: left !important; font-size: 15px; line-height: 1.6; color: #1e293b; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; padding: 30px 30px 30px 45px !important; background: #ffffff !important; border-radius: 12px; }
         
         /* Summernote point indentation fix */
-        .note-editable ul { list-style-type: disc !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable ol { list-style-type: decimal !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable li { display: list-item !important; list-style-type: inherit !important; }
+        .note-editable ul { list-style-type: disc !important; padding-left: 35px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable ol { list-style-type: decimal !important; padding-left: 35px !important; list-style-position: outside !important; display: block !important; }
+        .note-editable li { display: list-item !important; margin-bottom: 0.5rem !important; list-style-type: inherit !important; }
         .note-editable { min-height: 200px; padding: 25px !important; background: white !important; }
     </style>
 

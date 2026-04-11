@@ -24,7 +24,8 @@
                     <div class="input-group d-none d-md-flex" style="width: 250px;">
                         <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
                         <input type="text" id="searchInput" class="form-control bg-light border-0 shadow-none"
-                            placeholder="Search..." onkeyup="applyFilters()">
+                            placeholder="Search name/ID..." value="{{ request('name') }}" 
+                            onkeypress="if(event.key === 'Enter') applyFilters()">
                     </div>
 
                     <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
@@ -63,15 +64,19 @@
                         <div class="col-md-3">
                             <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
                             <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm"
-                                placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 44px;">
+                                placeholder="Search..." value="{{ request('name') }}" 
+                                onkeypress="if(event.key === 'Enter') applyFilters()" style="border-radius: 8px; height: 44px;">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                            <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()"
+                            <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
+                            <select id="filterRole" class="form-select border-0 shadow-sm" onchange="applyFilters()"
                                 style="border-radius: 8px; height: 44px;">
-                                <option value="">All Types</option>
-                                <option value="permanent">Employee</option>
-                                <option value="contract">Worker</option>
+                                <option value="">All Roles</option>
+                                @foreach($all_roles as $value => $label)
+                                    <option value="{{ $value }}" {{ request('role') == $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -79,15 +84,12 @@
                             <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()"
                                 style="border-radius: 8px; height: 44px;">
                                 <option value="">All Departments</option>
-                                <option value="administration">Administration</option>
-                                <option value="business_development">Business Development</option>
-                                <option value="hr">HR Department</option>
+                                @foreach($all_departments as $value => $label)
+                                    <option value="{{ $value }}" {{ request('department') == $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
                             </select>
-                        </div>
-                        <div class="col-md-2" id="filterRoleWrapper" style="display: none;">
-                            <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
-                            <input type="text" id="filterRole" class="form-control border-0 shadow-sm" onkeyup="applyFilters()"
-                                placeholder="Search..." style="border-radius: 8px; height: 44px;">
                         </div>
                         <div class="col-md-3 d-flex gap-2 align-items-end">
                             <button class="btn btn-primary flex-grow-1 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="applyFilters()"
@@ -103,7 +105,6 @@
             </div>
 
             <div class="card-body p-0">
-                <!-- SHOW ENTRIES -->
                 <div class="px-4 py-3 border-bottom d-flex align-items-center gap-2">
                     <span class="text-muted small fw-bold text-uppercase">Show</span>
                     <select class="form-select d-inline-block border-0 bg-light fw-bold"
@@ -136,7 +137,7 @@
 
                         <tbody>
                             @forelse($employees as $key => $emp)
-                                <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
+                                <tr id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
                                     data-employee-id="{{ $emp->id }}"
                                     data-employee-type="{{ $emp->employee_type }}"
                                     data-employee-dept="{{ strtolower($emp->department) }}"
@@ -335,31 +336,9 @@
 
     <!-- ANIMATION -->
     <style>
-        .fade-row {
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-out {
-            opacity: 0 !important;
-            transform: translateX(20px);
-            transition: all 0.4s ease-out;
-        }
-
-        .is-invalid {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.1) !important;
+        .card.stretch {
+            border-radius: 0 !important;
+            margin: -15px !important;
         }
 
         /* RESPONSIVE STYLES */
@@ -1319,81 +1298,38 @@
             document.getElementById('filterSection').style.display = 'none';
         }
 
-        // Apply Filters
+        // Apply Filters (Reload page with query parameters)
         function applyFilters() {
-            const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
-            const employeeType = document.getElementById('filterEmployeeType').value.toLowerCase();
-            const department = document.getElementById('filterDepartment').value.toLowerCase();
-            const roleEl = document.getElementById('filterRole');
-            const role = roleEl ? roleEl.value.toLowerCase() : '';
+            const name = document.getElementById('filterEmployeeName').value;
+            const role = document.getElementById('filterRole').value;
+            const department = document.getElementById('filterDepartment').value;
+            const topSearch = document.getElementById('searchInput').value;
+            
+            // Use the most recent search value
+            const searchVal = name || topSearch;
 
-            const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-                const rowType = row.getAttribute('data-employee-type') || '';
-                const rowDept = row.getAttribute('data-employee-dept') || '';
-                const rowRole = row.getAttribute('data-employee-role') || '';
-
-                // Filtering conditions
-                const nameMatch = name.includes(employeeName);
-                const typeMatch = employeeType === '' || rowType.toLowerCase() === employeeType;
-                
-                // Robust matching for department and role (handles underscores and spaces)
-                const normDepartment = department.replace(/_/g, ' ');
-                const normRowDept = rowDept.replace(/_/g, ' ');
-                const departmentMatch = department === '' || normRowDept.includes(normDepartment);
-
-                const normRole = role.replace(/_/g, ' ');
-                const normRowRole = rowRole.replace(/_/g, ' ');
-                const roleMatch = role === '' || normRowRole.includes(normRole);
-
-                if (nameMatch && typeMatch && departmentMatch && roleMatch) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Show "no results" message if no rows match
-            if (visibleCount === 0) {
-                const tbody = document.querySelector("#employeeTable tbody");
-                if (!document.getElementById('noResultsRow')) {
-                    const noResultsRow = document.createElement('tr');
-                    noResultsRow.id = 'noResultsRow';
-                    noResultsRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted">No employees match the filters</td>';
-                    tbody.appendChild(noResultsRow);
-                }
-            } else {
-                const noResultsRow = document.getElementById('noResultsRow');
-                if (noResultsRow) {
-                    noResultsRow.remove();
-                }
-            }
+            let params = new URLSearchParams();
+            if (searchVal) params.set('name', searchVal);
+            if (role) params.set('role', role);
+            if (department) params.set('department', department);
+            
+            window.location.href = window.location.pathname + '?' + params.toString();
         }
 
         // Clear Filters
         function clearFilters() {
-            document.getElementById('filterEmployeeName').value = '';
-            document.getElementById('filterEmployeeType').value = '';
-            document.getElementById('filterDepartment').value = '';
-            document.getElementById('filterRole').value = '';
-
-            // Show all rows
-            document.querySelectorAll("#employeeTable tbody tr").forEach(row => {
-                row.style.display = '';
-            });
-
-            // Remove no results message
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) {
-                noResultsRow.remove();
-            }
-
-            document.getElementById('filterSection').style.display = 'none';
+            window.location.href = "{{ route('employees.index') }}";
         }
+
+        // Keep filter section open if any filter is active
+        @if(request('name') || request('role') || request('department'))
+            document.addEventListener('DOMContentLoaded', function() {
+                const filterSection = document.getElementById('filterSection');
+                if (filterSection) {
+                    new bootstrap.Collapse(filterSection, { show: true });
+                }
+            });
+        @endif
 
         // Delete Selected Employees (Bulk Delete)
         function deleteSelectedEmployees() {

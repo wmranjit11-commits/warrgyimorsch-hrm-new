@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Exports\EmployeesExport;
+use App\Models\User;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 
 class EmployeeController extends Controller
@@ -14,10 +16,52 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::paginate(10);
-        return view('employees.index', compact('employees'));
+        $query = Employee::query();
+
+        // Search by Name or ID
+        if ($request->filled('name')) {
+            $search = $request->name;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('employee_code', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by Role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter by Department
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        $employees = $query->paginate(10)->appends($request->all());
+
+        // Comprehensive list of roles as defined in create view
+        $all_roles = [
+            'super_admin' => 'Super Admin',
+            'manager' => 'Manager',
+            'hr_executive' => 'HR Executive',
+            'hr_intern' => 'HR Intern',
+            'team_leader' => 'Team Leader',
+            'employee' => 'Employee',
+        ];
+
+        // Comprehensive list of departments as defined in create view
+        $all_departments = [
+            'administration' => 'Administration (Admin)',
+            'business_development' => 'Business Development (BD)',
+            'hr' => 'HR Department (HR)',
+            'web_development' => 'Web Development (WD)',
+            'digital_marketing' => 'Digital Marketing (DM)',
+            'web_graphics' => 'Web & Graphics Design (WGD)',
+        ];
+
+        return view('employees.index', compact('employees', 'all_roles', 'all_departments'));
     }
 
     /**
@@ -45,21 +89,28 @@ class EmployeeController extends Controller
                 'account_number' => 'required|string|max:50',
                 'ifsc_code' => 'required|string|max:20',
                 'basic_salary' => 'required|numeric|min:0',
+                'email' => 'required|email|unique:users,email',
             ]);
-
+            DB::beginTransaction();
             $data = $request->all();
-            
+
             // Password hashing
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
             }
-            
+
             // Defaults
             $data['gender'] = $request->gender ?? 'male';
             $data['time_in'] = $request->time_in ?? '09:00';
             $data['time_out'] = $request->time_out ?? '19:00';
             $data['leave'] = $request->leave ?? 0;
             
+            // Salary Defaults to 0 if empty
+            $data['hra'] = $request->hra ?? 0;
+            $data['conveyance_allowance'] = $request->conveyance_allowance ?? 0;
+            $data['medical_allowance'] = $request->medical_allowance ?? 0;
+            $data['other_allowance'] = $request->other_allowance ?? 0;
+
             // Toggles
             $data['pf'] = $request->has('pf');
             $data['esi'] = $request->has('esi');
@@ -73,9 +124,19 @@ class EmployeeController extends Controller
             // Create employee
             $employee = Employee::create($data);
 
+            $user = User::create([
+                "name" => $request->name,
+                "email" => $request->email,
+                "password" => $request->password,
+                "employee_id" => $employee->id,
+                "role" => $request->role,
+            ]);
+            DB::commit();
+
             return redirect()->route('employees.index')
                 ->with('success', 'Employee added successfully! ✓');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'Error: ' . $e->getMessage())
                 ->withInput();
         }

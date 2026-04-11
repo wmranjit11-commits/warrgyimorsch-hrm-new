@@ -27,6 +27,24 @@
             color: #fff;
             border-color: #ef4444;
         }
+
+        /* Hide scrollbar for the navigation sidebar */
+        .nxl-navigation .navbar-content {
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important;  /* IE and Edge */
+        }
+        
+        .nxl-navigation .navbar-content::-webkit-scrollbar {
+            display: none !important; /* Chrome, Safari and Opera */
+        }
+
+        /* Force hide Perfect Scrollbar rails in the sidebar */
+        .nxl-navigation .ps__rail-y,
+        .nxl-navigation .ps__rail-x {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
     </style>
 </head>
 
@@ -55,7 +73,9 @@
     <script src="{{ asset('assets/vendors/js/circle-progress.min.js') }}"></script>
 
     <script src="{{ asset('assets/js/common-init.min.js') }}"></script>
-    <script src="{{ asset('assets/js/dashboard-init.min.js') }}"></script>
+    @if(Route::currentRouteName() != 'dashboard')
+        <script src="{{ asset('assets/js/dashboard-init.min.js') }}"></script>
+    @endif
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
 
     <script>
