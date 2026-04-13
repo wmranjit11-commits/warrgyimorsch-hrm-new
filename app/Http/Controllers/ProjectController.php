@@ -49,6 +49,18 @@ class ProjectController extends Controller
         return redirect()->back()->with('success', 'Project updated successfully.');
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $project = Project::findOrFail($id);
+        $validated = $request->validate([
+            'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework',
+        ]);
+
+        $project->update(['status' => $validated['status']]);
+
+        return response()->json(['success' => 'Project status updated successfully.']);
+    }
+
     public function destroy($id)
     {
         $project = Project::findOrFail($id);

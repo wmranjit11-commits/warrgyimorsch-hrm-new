@@ -59,6 +59,7 @@ class EmployeeController extends Controller
             $data['time_in'] = $request->time_in ?? '09:00';
             $data['time_out'] = $request->time_out ?? '19:00';
             $data['leave'] = $request->leave ?? 0;
+            $data['username'] = $request->name;
             
             // Toggles
             $data['pf'] = $request->has('pf');
@@ -162,7 +163,7 @@ class EmployeeController extends Controller
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender ?? 'male',
             'employee_code' => $request->employee_code,
-            // 'username' => $request->username,
+            'username' => $request->name,
             'aadhaar_number' => $request->aadhaar_number,
             'pan_number' => $request->pan_number,
             'address' => $request->address,

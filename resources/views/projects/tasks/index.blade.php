@@ -15,19 +15,27 @@
         <div class="page-header-right ms-auto">
             <div class="page-header-right-items">
                 <div class="d-flex align-items-center gap-2">
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
-                        onclick="location.reload()" title="Refresh">
-                        <i class="feather-refresh-cw"></i>
-                    </a>
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger"
-                        onclick="bulkDelete()" title="Delete Bulk">
-                        <i class="feather-trash-2"></i>
-                    </a>
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-primary text-white"
-                        data-bs-toggle="offcanvas" data-bs-target="#taskOffcanvas" onclick="resetTaskForm()"
-                        title="Create Task">
-                        <i class="feather-plus"></i>
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-primary text-white shadow-sm"
+                            style="border-radius: 10px;" data-bs-toggle="offcanvas" data-bs-target="#taskOffcanvas"
+                            onclick="resetTaskForm()" title="Create Task">
+                            <i class="feather-plus"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary shadow-sm"
+                            style="border-radius: 10px;" data-bs-toggle="collapse" data-bs-target="#taskFilterSection"
+                            title="Filter Tasks">
+                            <i class="feather-filter"></i>
+                        </a>
+                        <a href="javascript:void(0);"
+                            class="avatar-text avatar-md bg-soft-secondary text-secondary shadow-sm"
+                            style="border-radius: 10px;" onclick="location.reload()" title="Refresh">
+                            <i class="feather-refresh-cw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger shadow-sm"
+                            style="border-radius: 10px;" onclick="bulkDelete()" title="Delete Bulk">
+                            <i class="feather-trash-2"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,73 +46,81 @@
     <div class="main-content pt-4">
         <div class="row">
             <div class="col-12">
-                <!-- FILTER CARD -->
-                <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white;">
-                    <div class="card-body p-4">
-                        <form action="{{ route('daily-tasks.index') }}" method="GET">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
-                                        Project</label>
-                                    <select name="project_id" class="form-select border-0 bg-light shadow-none fw-bold"
-                                        style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                        <option value="">Select Project...</option>
-                                        @foreach($projects as $project)
-                                            <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
-                                        @endforeach
-                                    </select>
+                <!-- FILTER CARD (Collapsible) -->
+                <div id="taskFilterSection" class="collapse">
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: white;">
+                        <div class="card-body p-4">
+                            <form action="{{ route('daily-tasks.index') }}" method="GET">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
+                                            Project</label>
+                                        <select name="project_id" class="form-select border-0 bg-light shadow-none fw-bold"
+                                            style="height: 48px; border-radius: 10px; font-size: 14px;">
+                                            <option value="">Select Project...</option>
+                                            @foreach($projects as $project)
+                                                <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>{{ $project->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
+                                            Employee Name</label>
+                                        <select name="employee_id" class="form-select border-0 bg-light shadow-none fw-bold"
+                                            style="height: 48px; border-radius: 10px; font-size: 14px;">
+                                            <option value="">Select Employee Name</option>
+                                            @foreach($employees as $employee)
+                                                <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
+                                            Status</label>
+                                        <select name="status" class="form-select border-0 bg-light shadow-none fw-bold"
+                                            style="height: 48px; border-radius: 10px; font-size: 14px;">
+                                            <option value="">Select Status</option>
+                                            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>
+                                                Pending</option>
+                                            <option value="In Process" {{ request('status') == 'In Process' ? 'selected' : '' }}>In Process</option>
+                                            <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On
+                                                Hold</option>
+                                            <option value="Review" {{ request('status') == 'Review' ? 'selected' : '' }}>
+                                                Review</option>
+                                            <option value="Rework" {{ request('status') == 'Rework' ? 'selected' : '' }}>
+                                                Rework</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">From
+                                            Date</label>
+                                        <input type="date" name="from_date"
+                                            class="form-control border-0 bg-light shadow-none fw-bold"
+                                            value="{{ request('from_date') }}" onclick="this.showPicker()"
+                                            style="height: 48px; border-radius: 10px; font-size: 14px;">
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upto
+                                            Date</label>
+                                        <input type="date" name="upto_date"
+                                            class="form-control border-0 bg-light shadow-none fw-bold"
+                                            value="{{ request('upto_date') }}" onclick="this.showPicker()"
+                                            style="height: 48px; border-radius: 10px; font-size: 14px;">
+                                    </div>
+                                    <div class="col-md-4 mt-3 d-flex align-items-end gap-2">
+                                        <button type="submit"
+                                            class="btn btn-primary fw-bold shadow-sm d-flex align-items-center justify-content-center flex-grow-1"
+                                            style="background: #3858f9; border: none; height: 48px; border-radius: 10px;">
+                                            <i class="feather-search me-1"></i> SEARCH
+                                        </button>
+                                        <a href="{{ route('daily-tasks.index') }}"
+                                            class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
+                                            style="border-radius: 10px; height: 48px; width: 100px; font-size: 14px;">Reset</a>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
-                                        Employee Name</label>
-                                    <select name="employee_id" class="form-select border-0 bg-light shadow-none fw-bold"
-                                        style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                        <option value="">Select Employee Name</option>
-                                        @foreach($employees as $employee)
-                                            <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">Search By
-                                        Status</label>
-                                    <select name="status" class="form-select border-0 bg-light shadow-none fw-bold"
-                                        style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                        <option value="">Select Status</option>
-                                        <option value="In Process" {{ request('status') == 'In Process' ? 'selected' : '' }}>
-                                            In Process</option>
-                                        <option value="Completed" {{ request('status') == 'Completed' ? 'selected' : '' }}>
-                                            Completed</option>
-                                        <option value="On Hold" {{ request('status') == 'On Hold' ? 'selected' : '' }}>On Hold
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">From Date</label>
-                                    <input type="date" name="from_date"
-                                        class="form-control border-0 bg-light shadow-none fw-bold"
-                                        value="{{ request('from_date') }}" onclick="this.showPicker()"
-                                        style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                </div>
-                                <div class="col-md-4 mt-3">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upto Date</label>
-                                    <input type="date" name="upto_date"
-                                        class="form-control border-0 bg-light shadow-none fw-bold"
-                                        value="{{ request('upto_date') }}" onclick="this.showPicker()"
-                                        style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                </div>
-                                <div class="col-md-4 mt-3 d-flex align-items-end gap-2">
-                                    <button type="submit"
-                                        class="btn btn-primary fw-bold shadow-sm d-flex align-items-center justify-content-center flex-grow-1"
-                                        style="background: #3858f9; border: none; height: 48px; border-radius: 10px;">
-                                        <i class="feather-search me-1"></i> SEARCH
-                                    </button>
-                                    <a href="{{ route('daily-tasks.index') }}"
-                                        class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
-                                        style="border-radius: 10px; height: 48px; width: 100px; font-size: 14px;">Reset</a>
-                                </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -149,7 +165,7 @@
                                             Start Date</th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            End Date</th>
+                                            Time Tracking</th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Priority</th>
@@ -174,18 +190,41 @@
                                                     class="form-check-input task-checkbox shadow-none" value="{{ $task->id }}">
                                             </td>
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
-                                                {{ $task->project->name ?? ($task->project_id ? 'Proj ID: '.$task->project_id : '-') }}</td>
+                                                {{ $task->project->name ?? ($task->project_id ? 'Proj ID: ' . $task->project_id : '-') }}
+                                            </td>
                                             <td style="font-size: 14px; color: #475569;">{{ $task->task_title }}</td>
                                             <td style="font-size: 14px; color: #475569;">
-                                                {{ $task->start_date->format('Y-m-d') }}</td>
-                                            <td style="font-size: 14px; color: #475569;">{{ $task->end_date->format('Y-m-d') }}
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="feather-calendar text-primary" style="font-size: 12px;"></i>
+                                                    <span class="fw-bold">{{ $task->start_date->format('d M Y') }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    @if($task->status != 'Completed' && $task->end_date)
+                                                        <div class="task-timer fw-bold text-primary mb-1" style="font-size: 13px;"
+                                                            data-end="{{ $task->end_date->toIso8601String() }}">
+                                                            Calculating...
+                                                        </div>
+                                                    @else
+                                                        <div class="fw-bold text-success mb-1" style="font-size: 13px;">
+                                                            <i class="feather-check-circle me-1"></i> Completed
+                                                        </div>
+                                                    @endif
+                                                    <span class="text-muted" style="font-size: 11px; font-weight: 600;">
+                                                        Deadline: {{ $task->end_date->format('d M Y') }}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td>
                                                 @php
                                                     $priorityClass = 'bg-soft-info text-info';
-                                                    if (strtolower($task->priority) == 'hard') $priorityClass = 'bg-soft-danger text-danger';
-                                                    elseif (strtolower($task->priority) == 'medium') $priorityClass = 'bg-soft-warning text-warning';
-                                                    elseif (strtolower($task->priority) == 'low') $priorityClass = 'bg-soft-success text-success';
+                                                    if (strtolower($task->priority) == 'hard')
+                                                        $priorityClass = 'bg-soft-danger text-danger';
+                                                    elseif (strtolower($task->priority) == 'medium')
+                                                        $priorityClass = 'bg-soft-warning text-warning';
+                                                    elseif (strtolower($task->priority) == 'low')
+                                                        $priorityClass = 'bg-soft-success text-success';
                                                 @endphp
                                                 <span class="badge {{ $priorityClass }}"
                                                     style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
@@ -195,18 +234,58 @@
                                             <td>
                                                 @php
                                                     $taskStatusClass = 'bg-soft-primary text-primary';
-                                                    if ($task->status == 'Completed') $taskStatusClass = 'bg-soft-success text-success';
-                                                    elseif ($task->status == 'On Hold') $taskStatusClass = 'bg-soft-warning text-warning';
+                                                    if ($task->status == 'Completed')
+                                                        $taskStatusClass = 'bg-soft-success text-success';
+                                                    elseif ($task->status == 'On Hold')
+                                                        $taskStatusClass = 'bg-soft-warning text-warning';
+                                                    elseif ($task->status == 'Review')
+                                                        $taskStatusClass = 'bg-soft-info text-info';
+                                                    elseif ($task->status == 'Pending')
+                                                        $taskStatusClass = 'bg-soft-secondary text-secondary';
+                                                    elseif ($task->status == 'Rework')
+                                                        $taskStatusClass = 'bg-soft-danger text-danger';
                                                 @endphp
-                                                <span class="badge {{ $taskStatusClass }}"
-                                                    style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-                                                    {{ $task->status }}
-                                                </span>
+                                                <div class="dropdown">
+                                                    <span class="badge {{ $taskStatusClass }} dropdown-toggle cursor-pointer"
+                                                        data-bs-toggle="dropdown" data-bs-boundary="viewport"
+                                                        aria-expanded="false"
+                                                        style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; min-width: 90px; display: inline-block; text-align: center;">
+                                                        {{ $task->status }}
+                                                    </span>
+                                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm"
+                                                        style="border-radius: 12px; font-size: 12px; z-index: 999 !important;">
+                                                        <li><a class="dropdown-item fw-bold" href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'Pending')">Pending</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold text-primary"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'In Process')">In
+                                                                Process</a></li>
+                                                        <li><a class="dropdown-item fw-bold text-success"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'Completed')">Completed</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold text-warning"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'On Hold')">On
+                                                                Hold</a></li>
+                                                        <li><a class="dropdown-item fw-bold text-info"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'Review')">Review</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold text-danger"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateTaskStatus({{ $task->id }}, 'Rework')">Rework</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td style="font-size: 14px; color: #475569;">
-                                                {{ $task->employee ? $task->employee->name : '-' }}</td>
+                                                {{ $task->employee ? $task->employee->name : '-' }}
+                                            </td>
                                             <td style="font-size: 14px; color: #475569;">
-                                                {{ $task->creator ? $task->creator->name : '-' }}</td>
+                                                {{ $task->creator ? $task->creator->name : '-' }}
+                                            </td>
                                             <td class="pe-4 text-center">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
@@ -214,8 +293,9 @@
                                                         title="View Description" onclick="showTaskDesc({{ $task->id }})">
                                                         <i class="feather-file-text"></i>
                                                     </a>
-                                                    <template id="task_desc_{{ $task->id }}">{!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}</template>
-                                                    
+                                                    <template
+                                                        id="task_desc_{{ $task->id }}">{!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}</template>
+
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-primary text-primary rounded"
                                                         title="Edit" onclick="editTask({{ json_encode($task) }})">
@@ -232,9 +312,18 @@
                                                     </form>
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-info text-info rounded"
-                                                        title="Task History"
-                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ $task->task_title }}')">
-                                                        <i class="feather-mail"></i>
+                                                        title="Add Work Progress" data-bs-toggle="modal"
+                                                        data-bs-target="#followUpModal"
+                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add')">
+                                                        <i class="feather-plus-circle"></i>
+                                                    </a>
+
+                                                    <a href="javascript:void(0);"
+                                                        class="avatar-text avatar-md bg-soft-dark text-dark rounded"
+                                                        title="View Work History" data-bs-toggle="modal"
+                                                        data-bs-target="#followUpModal"
+                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'history')">
+                                                        <i class="feather-clock"></i>
                                                     </a>
                                                 </div>
                                             </td>
@@ -251,7 +340,8 @@
                         <div class="px-4 py-4 border-top d-flex justify-content-between align-items-center bg-white"
                             style="border-radius: 0 0 12px 12px;">
                             <div class="small text-muted fw-bold" id="entriesInfo" style="font-size: 14px;">Showing 1 to
-                                {{ $tasks->count() }} of {{ $tasks->count() }} entries</div>
+                                {{ $tasks->count() }} of {{ $tasks->count() }} entries
+                            </div>
                             <nav>
                                 <ul class="pagination pagination-md mb-0 gap-1" id="paginationList">
                                     <li class="page-item disabled mx-1"><a
@@ -340,10 +430,12 @@
                         <label class="form-label fw-bold small text-muted text-uppercase mb-2">Status</label>
                         <select name="status" id="taskStatus" class="form-select border-0 bg-light shadow-none fw-bold"
                             style="height: 48px; border-radius: 10px; font-size: 14px;" required>
-                            <option value="In Process">Status</option>
+                            <option value="Pending">Pending</option>
                             <option value="In Process">In Process</option>
                             <option value="Completed">Completed</option>
                             <option value="On Hold">On Hold</option>
+                            <option value="Review">Review</option>
+                            <option value="Rework">Rework</option>
                         </select>
                     </div>
                     <div class="col-md-12">
@@ -360,7 +452,9 @@
                     </div>
                     <div class="col-md-12">
                         <label class="form-label fw-bold small text-muted text-uppercase mb-2">Task Description</label>
-                        <textarea name="description" id="taskDesc" class="form-control border-0 bg-light shadow-none fw-bold" rows="3" placeholder="Enter task description" style="border-radius: 10px; font-size: 14px;"></textarea>
+                        <textarea name="description" id="taskDesc"
+                            class="form-control border-0 bg-light shadow-none fw-bold" rows="3"
+                            placeholder="Enter task description" style="border-radius: 10px; font-size: 14px;"></textarea>
                     </div>
                 </div>
 
@@ -376,49 +470,67 @@
     <!-- TASK FOLLOW-UP MODAL (HISTORY DESCRIPTION) -->
     <div class="modal border-0" id="followUpModal" tabindex="-1" aria-hidden="true"
         style="backdrop-filter: none !important;">
-        <div class="modal-dialog modal-xl modal-dialog-centered"
-            style="transform: none !important; transition: none !important;">
+        <div class="modal-dialog modal-dialog-centered"
+            style="max-width: 55%; min-width: 800px; transform: none !important; transition: none !important;">
             <div class="modal-content border-0 shadow-lg"
                 style="border-radius: 16px; overflow: hidden; filter: none !important; -webkit-filter: none !important; transform: none !important;">
-                <div class="modal-header text-white p-4" style="background: #3858f9; border: none !important;">
-                    <h5 class="modal-title fw-bold" style="color: #ffffff !important;">Task History Description: <span
-                            id="followUpTaskTitle" style="color: #ffffff !important; opacity: 0.9;"></span></h5>
+                <div class="modal-header text-white p-3" style="background: #3858f9; border: none !important;">
+                    <h5 class="modal-title fw-bold" id="followUpModalLabel" style="color: #ffffff !important;">Work History
+                    </h5>
+                    <span id="followUpTaskTitle" class="badge bg-white text-primary ms-2 fw-bold"
+                        style="font-size: 11px; padding: 5px 10px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase;"></span>
                     <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4" style="background-color: #f8fafc !important; transform: none !important;">
+                <div class="modal-body p-3" style="background-color: #f8fafc !important; transform: none !important;">
                     <div class="row g-4">
                         <!-- ADD FOLLOW UP FORM (LEFT) -->
-                        <div class="col-lg-5">
+                        <div class="col-lg-5 d-none" id="followUpFormColumn">
                             <div class="card border-0 shadow-sm" style="border-radius: 12px; background: #ffffff;">
                                 <div class="card-body p-4">
                                     <form id="followUpForm" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="daily_task_id" id="followUpTaskId">
+                                        <input type="hidden" name="time_taken" id="totalFollowUpHours" value="0">
+                                        
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work
-                                                Description <span class="text-danger">*</span></label>
+                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Performed
+                                                By <span class="text-danger">*</span></label>
+                                            <select name="reference_name" id="followUpEmployee"
+                                                class="form-select border-0 bg-light shadow-none fw-bold"
+                                                style="height: 40px; border-radius: 10px; font-size: 13px;" required>
+                                                <option value="">Select Employee...</option>
+                                                @foreach($employees as $employee)
+                                                    <option value="{{ $employee->name }}" {{ Auth::user()->name == $employee->name ? 'selected' : '' }}>{{ $employee->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- QUICK TASK ADDER -->
+                                        <div class="row g-2 mb-3 p-2 rounded" style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1" style="font-size: 10px;">Sub-Task</label>
+                                                <input type="text" id="quickTaskTitle" class="form-control border-0 shadow-none fw-bold" placeholder="Title" style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                            </div>
+                                            <div class="col-3">
+                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1" style="font-size: 10px;">Hrs</label>
+                                                <input type="text" id="quickTaskHours" class="form-control border-0 shadow-none fw-bold" placeholder="2.5" style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                            </div>
+                                            <div class="col-3 d-flex align-items-end">
+                                                <button type="button" class="btn btn-primary w-100 p-0 fw-bold" onclick="addQuickTaskToDesc()" style="height: 35px; border-radius: 8px; font-size: 10px; background: #3858f9;">
+                                                    ADD
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work Description <span class="text-danger">*</span></label>
                                             <textarea name="work_description" id="workDesc"
-                                                class="form-control border-0 bg-light shadow-none fw-bold" rows="5"
-                                                placeholder="Write Your Reply" required
-                                                style="border-radius: 10px; font-size: 14px;"></textarea>
+                                                class="form-control border-0 bg-light shadow-none fw-bold" rows="3"
+                                                placeholder="Details..." required
+                                                style="border-radius: 10px; font-size: 13px;"></textarea>
                                         </div>
-                                        <div class="mb-3">
-                                            <label
-                                                class="form-label fw-bold small text-muted text-uppercase mb-2">Reference</label>
-                                            <input type="text" name="reference_name"
-                                                class="form-control border-0 bg-light shadow-none fw-bold"
-                                                placeholder="Reference Name"
-                                                style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Time
-                                                Taken (e.g. 5 Hours or 2 Days)</label>
-                                            <input type="text" name="time_taken"
-                                                class="form-control border-0 bg-light shadow-none fw-bold"
-                                                placeholder="Enter timeframe"
-                                                style="height: 48px; border-radius: 10px; font-size: 14px;">
-                                        </div>
+                                        
                                         <div class="mb-4">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upload
                                                 Photo</label>
@@ -448,32 +560,32 @@
                         </div>
 
                         <!-- FOLLOW UP HISTORY TABLE (RIGHT) -->
-                        <div class="col-lg-7">
+                        <div class="col-lg-7" id="followUpHistoryColumn">
                             <div class="card border-0 shadow-sm overflow-hidden"
-                                style="border-radius: 12px; background: #ffffff;">
-                                <div
-                                    class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="text-muted small fw-bold text-uppercase"
-                                            style="font-size: 11px;">Show</span>
-                                        <select id="modalEntriesLimit"
-                                            class="form-select border-0 bg-light shadow-none fw-bold"
-                                            onchange="changeModalEntries()"
-                                            style="width: 90px; height: 44px; font-size: 14px; border-radius: 10px; padding: 0 12px; line-height: 44px;">
-                                            <option value="5">5</option>
-                                            <option value="10">10</option>
-                                            <option value="25">25</option>
-                                        </select>
-                                        <span class="text-muted small fw-bold text-uppercase"
-                                            style="font-size: 11px;">entries</span>
-                                    </div>
-                                    <div class="input-group" style="width: 200px;">
-                                        <span class="input-group-text bg-light border-0"><i
-                                                class="feather-search text-muted"></i></span>
-                                        <input type="text" id="modalSearch"
-                                            class="form-control border-0 bg-light shadow-none fw-bold"
-                                            placeholder="Search..." onkeyup="filterModalHistory()"
-                                            style="height: 44px; font-size: 14px; border-radius: 0 10px 10px 0;">
+                                style="border-radius: 12px; background: #ffffff; min-height: 500px;">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted small fw-bold text-uppercase"
+                                                style="font-size: 11px;">Show</span>
+                                            <select id="modalEntriesLimit"
+                                                class="form-select border-0 bg-light shadow-none fw-bold"
+                                                onchange="changeModalEntries()"
+                                                style="width: 80px; height: 38px; font-size: 13px; border-radius: 8px;">
+                                                <option value="5">5</option>
+                                                <option value="10">10</option>
+                                            </select>
+                                            <span class="text-muted small fw-bold text-uppercase"
+                                                style="font-size: 11px;">entries</span>
+                                        </div>
+                                        <div class="input-group" style="width: 180px;">
+                                            <span class="input-group-text bg-light border-0 py-0"><i
+                                                    class="feather-search text-muted"></i></span>
+                                            <input type="text" id="modalSearch"
+                                                class="form-control border-0 bg-light shadow-none fw-bold"
+                                                placeholder="Search..." onkeyup="filterModalHistory()"
+                                                style="height: 38px; font-size: 13px; border-radius: 0 8px 8px 0;">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
@@ -483,27 +595,21 @@
                                             <thead
                                                 style="background: #3858f9; color: white; position: sticky; top: 0; z-index: 1;">
                                                 <tr style="height: 52px; vertical-align: middle;">
-                                                    <th class="ps-3"
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Sr.No.</th>
+                                                    <th class="ps-4"
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 65px;">
+                                                        #</th>
                                                     <th
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Follow Up</th>
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important;">
+                                                        Employee Name</th>
                                                     <th
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Reference</th>
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 120px;">
+                                                        Time Spent</th>
                                                     <th
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Time Taken</th>
-                                                    <th
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Document</th>
-                                                    <th
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Followup_time</th>
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 110px;">
+                                                        Date</th>
                                                     <th class="pe-3 text-center"
-                                                        style="font-size: 12px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Action</th>
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 50px;">
+                                                        Del</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="followUpHistoryBody">
@@ -603,6 +709,28 @@
             border-radius: 8px !important;
         }
 
+        /* Prevent shaking/shifting */
+        .timer-display,
+        .task-timer {
+            font-variant-numeric: tabular-nums;
+            min-width: 140px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .task-row {
+            transition: background-color 0.2s ease;
+        }
+
+        .task-row:hover {
+            background-color: #f8fafc !important;
+        }
+
+        .table> :not(caption)>*>* {
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
         .active>.page-link {
             background-color: #3858f9 !important;
             border-color: #3858f9 !important;
@@ -614,23 +742,135 @@
             color: #3858f9;
         }
 
-        .custom-html-content ul { list-style-type: disc !important; padding-left: 30px !important; margin-bottom: 1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content ol { list-style-type: decimal !important; padding-left: 30px !important; margin-bottom: 1.1rem !important; list-style-position: outside !important; display: block !important; }
-        .custom-html-content li { display: list-item !important; margin-bottom: 0.6rem !important; list-style-type: inherit !important; }
-        .custom-html-content p { margin-bottom: 1rem !important; line-height: 1.6 !important; }
-        .custom-html-content { text-align: left; font-size: 15px; line-height: 1.6; color: #1e293b; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; padding: 25px 30px 25px 40px !important; background: #fff !important; }
-        
+        .custom-html-content ul {
+            list-style-type: disc !important;
+            padding-left: 30px !important;
+            margin-bottom: 1rem !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
+
+        .custom-html-content ol {
+            list-style-type: decimal !important;
+            padding-left: 30px !important;
+            margin-bottom: 1.1rem !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
+
+        .custom-html-content li {
+            display: list-item !important;
+            margin-bottom: 0.6rem !important;
+            list-style-type: inherit !important;
+        }
+
+        .custom-html-content p {
+            margin-bottom: 1rem !important;
+            line-height: 1.6 !important;
+        }
+
+        .custom-html-content img {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: block;
+        }
+
+        .custom-html-content ol {
+            padding-left: 25px !important;
+            list-style-type: decimal !important;
+            margin-bottom: 15px;
+        }
+        .custom-html-content ul {
+            padding-left: 25px !important;
+            list-style-type: disc !important;
+            margin-bottom: 15px;
+        }
+        .custom-html-content p {
+            margin-bottom: 10px;
+        }
+
+        .custom-html-content {
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1e293b;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            padding: 25px 30px 25px 40px !important;
+            background: #fff !important;
+        }
+
         /* Summernote point indentation fix */
-        .note-editable ul { list-style-type: disc !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable ol { list-style-type: decimal !important; padding-left: 30px !important; list-style-position: outside !important; display: block !important; }
-        .note-editable li { display: list-item !important; list-style-type: inherit !important; }
-        .note-editable { min-height: 200px; padding: 25px !important; background: white !important; }
+        .note-editable ul {
+            list-style-type: disc !important;
+            padding-left: 30px !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
+
+        .note-editable ol {
+            list-style-type: decimal !important;
+            padding-left: 30px !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
+
+        .note-editable li {
+            display: list-item !important;
+            list-style-type: inherit !important;
+        }
+
+        .note-editable {
+            min-height: 200px;
+            padding: 25px !important;
+            background: white !important;
+        }
+
+        /* Smooth Collapse Animation for Filter */
+        .collapse {
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .collapsing {
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            height: 0;
+            overflow: hidden;
+        }
     </style>
 
     <script>
         let globalFollowUps = [];
         let modalCurrentPage = 1;
         let modalPageSize = 5;
+        let myFollowUpModal = null;
+        let currentModalEmployeeFilter = 'All';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            myFollowUpModal = new bootstrap.Modal(document.getElementById('followUpModal'));
+
+            // Robust Backdrop Cleanup
+            document.getElementById('followUpModal').addEventListener('hidden.bs.modal', function () {
+                const backdrops = document.getElementsByClassName('modal-backdrop');
+                while (backdrops.length > 0) {
+                    backdrops[0].parentNode.removeChild(backdrops[0]);
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            });
+
+            // Fix dropdown clipping globally for this page
+            var dropdownEls = document.querySelectorAll('.dropdown-toggle');
+            dropdownEls.forEach(function (el) {
+                new bootstrap.Dropdown(el, {
+                    boundary: 'viewport',
+                    popperConfig: { strategy: 'fixed' }
+                });
+            });
+        });
 
         function previewImage(input) {
             const preview = document.getElementById('photoPreview');
@@ -667,7 +907,7 @@
             document.getElementById('taskForm').reset();
             document.getElementById('taskOffcanvasLabel').innerText = 'Edit Task';
             document.getElementById('submitTaskBtn').innerText = 'UPDATE TASK';
-            
+
             // Set basic fields
             document.getElementById('taskId').value = task.id || '';
             document.getElementById('taskTitle').value = task.task_title || '';
@@ -675,26 +915,26 @@
             document.getElementById('taskEndDate').value = task.end_date ? task.end_date.substring(0, 10) : '';
             document.getElementById('taskPriority').value = task.priority || '';
             document.getElementById('taskStatus').value = task.status || 'In Process';
-            
+
             // Set Select fields (Project & Employee)
             const pId = task.project_id || '';
             const eId = task.employee_id || '';
-            
+
             // Try both native and jQuery to be absolutely sure
             const projSelect = document.getElementById('taskProjectId');
             if (projSelect) {
                 projSelect.value = pId;
                 if (projSelect.value !== pId.toString()) {
                     // Fallback search if value doesn't match directly
-                    for(let i=0; i<projSelect.options.length; i++) {
-                        if(projSelect.options[i].value == pId) {
+                    for (let i = 0; i < projSelect.options.length; i++) {
+                        if (projSelect.options[i].value == pId) {
                             projSelect.selectedIndex = i;
                             break;
                         }
                     }
                 }
             }
-            
+
             const empSelect = document.getElementById('taskEmployeeId');
             if (empSelect) {
                 empSelect.value = eId;
@@ -710,17 +950,17 @@
                 }
             } catch (e) {
                 console.error('Summernote load error', e);
-                if(document.getElementById('taskDesc')) document.getElementById('taskDesc').value = task.description || '';
+                if (document.getElementById('taskDesc')) document.getElementById('taskDesc').value = task.description || '';
             }
 
             // Form action and method
             document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
             const formObj = document.getElementById('taskForm');
-            if(formObj) formObj.action = `/daily-tasks/${task.id}`;
-            
+            if (formObj) formObj.action = `/daily-tasks/${task.id}`;
+
             // Show Offcanvas
             const offElement = document.getElementById('taskOffcanvas');
-            if(offElement) {
+            if (offElement) {
                 const bOff = bootstrap.Offcanvas.getInstance(offElement) || new bootstrap.Offcanvas(offElement);
                 bOff.show();
             }
@@ -733,7 +973,7 @@
             document.getElementById('submitTaskBtn').innerText = 'SUBMIT TASK';
             document.getElementById('taskId').value = '';
             document.getElementById('methodField').innerHTML = '';
-            
+
             document.getElementById('taskForm').querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
             document.getElementById('taskForm').querySelectorAll('.invalid-feedback').forEach(el => el.remove());
             try {
@@ -742,26 +982,96 @@
                 } else {
                     document.getElementById('taskDesc').value = '';
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
 
-        function openFollowUpModal(taskId, taskTitle) {
+        function openFollowUpModal(taskId, taskProjectName, mode = 'history') {
             document.getElementById('followUpTaskId').value = taskId;
-            document.getElementById('followUpTaskTitle').innerText = taskTitle;
+            document.getElementById('followUpTaskTitle').innerText = taskProjectName;
+            document.getElementById('followUpForm').reset();
+            document.getElementById('totalFollowUpHours').value = 0;
+            try { $('#workDesc').summernote('code', ''); } catch (e) { }
             removePreview();
             modalCurrentPage = 1;
             loadFollowUpHistory(taskId);
-            new bootstrap.Modal(document.getElementById('followUpModal')).show();
+
+            const formCol = document.getElementById('followUpFormColumn');
+            const historyCol = document.getElementById('followUpHistoryColumn');
+            const modalDialog = document.querySelector('#followUpModal .modal-dialog');
+
+            if (mode === 'add') {
+                formCol.classList.remove('d-none');
+                historyCol.classList.remove('col-lg-12');
+                historyCol.classList.add('col-lg-7');
+                modalDialog.classList.add('modal-xl');
+                document.getElementById('followUpModalLabel').innerText = 'Add Work Progress';
+            } else {
+                formCol.classList.add('d-none');
+                historyCol.classList.remove('col-lg-7');
+                historyCol.classList.add('col-lg-12');
+                modalDialog.classList.remove('modal-xl');
+                document.getElementById('followUpModalLabel').innerText = 'Work History';
+            }
         }
 
         function loadFollowUpHistory(taskId) {
-            fetch(`/daily-tasks/${taskId}/follow-ups`).then(res => res.json()).then(data => { globalFollowUps = data; renderModalTable(); });
+            fetch(`/daily-tasks/${taskId}/follow-ups`)
+                .then(res => res.json())
+                .then(data => {
+                    globalFollowUps = data;
+                    renderModalTable();
+                });
+        }
+
+        function addQuickTaskToDesc() {
+            const titleInput = document.getElementById('quickTaskTitle');
+            const hoursInput = document.getElementById('quickTaskHours');
+            const title = titleInput.value;
+            const hours = hoursInput.value;
+
+            if (!title) { Toast.fire({ icon: 'warning', title: 'Enter sub-task name' }); return; }
+
+            // 1. Calculate and Update Hidden Total Hours field
+            const hiddenHoursField = document.getElementById('totalFollowUpHours');
+            let currentTotal = parseFloat(hiddenHoursField.value) || 0;
+            let addedHours = parseFloat(hours) || 0;
+            hiddenHoursField.value = currentTotal + addedHours;
+
+            // 2. Format HTML - Prepend to the TOP using Real Bullets and Numbered List for details
+            const timeStr = hours ? ` — <b style="color: #3858f9;">${hours} ${isNaN(hours) ? '' : 'Hours'}</b>` : '';
+            const html = `<div class="mb-4" style="border-left: 4px solid #3858f9; padding-left: 20px;">
+                            <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
+                            <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
+                                <li><em>First point about this task...</em></li>
+                                <li><em>Second point about this task...</em></li>
+                            </ol>
+                          </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
+
+            if ($('#workDesc').length && typeof $.fn.summernote === 'function') {
+                const currentContent = $('#workDesc').summernote('code');
+                // Prepend new task to the TOP
+                $('#workDesc').summernote('code', html + currentContent);
+            } else {
+                const el = document.getElementById('workDesc');
+                el.value = html + el.value;
+            }
+
+            // Clear inputs
+            titleInput.value = '';
+            hoursInput.value = '';
+            
+            Toast.fire({ icon: 'success', title: `Task added. Total: ${hiddenHoursField.value} hrs` });
         }
 
         function renderModalTable() {
             const body = document.getElementById('followUpHistoryBody');
             const searchTerm = document.getElementById('modalSearch').value.toLowerCase();
-            let filtered = globalFollowUps.filter(fu => fu.work_description.toLowerCase().includes(searchTerm) || (fu.reference_name && fu.reference_name.toLowerCase().includes(searchTerm)));
+
+            let filtered = globalFollowUps.filter(fu => {
+                const matchesSearch = fu.work_description.toLowerCase().includes(searchTerm) || (fu.reference_name && fu.reference_name.toLowerCase().includes(searchTerm));
+                return matchesSearch;
+            });
+
             const totalItems = filtered.length;
             const totalPages = Math.ceil(totalItems / modalPageSize) || 1;
             if (modalCurrentPage > totalPages) modalCurrentPage = totalPages;
@@ -770,41 +1080,37 @@
 
             body.innerHTML = '';
             paginated.forEach((fu, index) => {
-                // TIME TAKEN UNIT LOGIC
                 let timeDisplay = fu.time_taken || '-';
                 if (fu.time_taken && !isNaN(fu.time_taken)) {
                     timeDisplay = fu.time_taken + ' Hours';
                 }
 
-                let descBtn = `<a href="javascript:void(0);" onclick="showFollowUpDesc(${fu.id})" class="badge bg-soft-info text-info border-0" style="padding: 6px 12px; border-radius: 8px; text-decoration: none;">View</a>`;
+                let nameBtn = `<a href="javascript:void(0);" onclick="showFollowUpDesc(${fu.id})" class="text-primary fw-bold" style="text-decoration: none; font-size: 14px;"><i class="feather-user me-1"></i>${fu.reference_name || 'Anonymous'}</a>`;
 
                 body.innerHTML += `
-                    <tr style="height: 56px; border-bottom: 1px solid #f1f5f9;">
-                        <td class="ps-3 fw-bold" style="font-size: 13px;">${startIdx + index + 1}</td>
-                        <td style="font-size: 13px;">
-                            ${descBtn}
-                        </td>
-                        <td style="font-size: 13px; color: #475569;">${fu.reference_name || '-'}</td>
-                        <td style="font-size: 13px; color: #475569; font-weight: 700;">${timeDisplay}</td>
-                        <td style="font-size: 13px;">
-                            ${fu.photo ? `<a href="/storage/${fu.photo}" target="_blank"><img src="/storage/${fu.photo}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;"></a>` : '-'}
-                        </td>
-                        <td style="font-size: 12px; white-space: nowrap;">
-                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                            <div class="text-muted mt-1" style="font-size: 11px;">${new Date(fu.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
-                        </td>
-                        <td class="pe-3 text-center"><a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-sm bg-soft-danger text-danger rounded"><i class="feather-trash-2"></i></a></td>
-                    </tr>
-                `;
+                                    <tr style="height: 65px; border-bottom: 1px solid #f1f5f9; background: white;">
+                                        <td class="ps-4 fw-bold text-dark" style="font-size: 13px;">${startIdx + index + 1}</td>
+                                        <td style="font-size: 13px;">
+                                            ${nameBtn}
+                                        </td>
+                                        <td style="font-size: 13px; font-weight: 700; color: #475569;">
+                                            ${timeDisplay}
+                                        </td>
+                                        <td style="font-size: 12px; white-space: nowrap;">
+                                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                                        </td>
+                                        <td class="pe-3 text-center"><a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="text-danger shadow-none"><i class="feather-trash-2"></i></a></td>
+                                    </tr>
+                                `;
             });
-            if (totalItems === 0) body.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
+            if (totalItems === 0) body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
 
             document.getElementById('modalEntriesInfo').innerText = `Showing ${totalItems === 0 ? 0 : startIdx + 1} to ${Math.min(startIdx + modalPageSize, totalItems)} of ${totalItems} entries`;
 
             const pgnBtn = document.getElementById('modalPaginationButtons');
-            let pgnHtml = `<a class="page-link ${modalCurrentPage === 1 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage - 1})"><i class="feather-chevron-left"></i></a>`;
-            for (let i = 1; i <= totalPages; i++) { pgnHtml += `<li class="page-item ${i === modalCurrentPage ? 'active' : ''}"><a class="page-link" onclick="changeModalPage(${i})">${i}</a></li>`; }
-            pgnHtml += `<a class="page-link ${modalCurrentPage === totalPages || totalItems === 0 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage + 1})"><i class="feather-chevron-right"></i></a>`;
+            let pgnHtml = `<a class="page-link cursor-pointer ${modalCurrentPage === 1 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage - 1})"><i class="feather-chevron-left"></i></a>`;
+            for (let i = 1; i <= totalPages; i++) { pgnHtml += `<li class="page-item ${i === modalCurrentPage ? 'active' : ''}"><a class="page-link cursor-pointer" onclick="changeModalPage(${i})">${i}</a></li>`; }
+            pgnHtml += `<a class="page-link cursor-pointer ${modalCurrentPage === totalPages || totalItems === 0 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage + 1})"><i class="feather-chevron-right"></i></a>`;
             pgnBtn.innerHTML = pgnHtml;
         }
 
@@ -836,10 +1142,12 @@
             fetch('{{ route("daily-tasks.follow-up.store") }}', { method: 'POST', body: new FormData(this), headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } })
                 .then(res => res.json()).then(data => {
                     btn.innerText = origText; btn.disabled = false;
-                    if (data.success) { 
-                        this.reset(); 
+                    if (data.success) {
+                        this.reset();
                         $('#workDesc').summernote('code', '');
-                        removePreview(); Toast.fire({ icon: 'success', title: data.success }); loadFollowUpHistory(document.getElementById('followUpTaskId').value); 
+                        removePreview();
+                        Toast.fire({ icon: 'success', title: data.success });
+                        if (myFollowUpModal) myFollowUpModal.hide();
                     } else if (data.errors) {
                         for (const [key, value] of Object.entries(data.errors)) {
                             const input = this.querySelector(`[name="${key}"]`);
@@ -859,16 +1167,16 @@
 
         document.getElementById('submitTaskBtn').addEventListener('click', function () {
             const form = document.getElementById('taskForm');
-            
+
             // Clear previous errors
             form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
             form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 
             const url = document.getElementById('methodField').innerHTML !== '' ? `/daily-tasks/${document.getElementById('taskId').value}` : '/daily-tasks';
             fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) })
-                .then(res => res.json()).then(result => { 
+                .then(res => res.json()).then(result => {
                     if (result.success) {
-                        Toast.fire({ icon: 'success', title: result.success }).then(() => location.reload()); 
+                        Toast.fire({ icon: 'success', title: result.success }).then(() => location.reload());
                     } else if (result.errors) {
                         for (const [key, value] of Object.entries(result.errors)) {
                             const input = form.querySelector(`[name="${key}"]`);
@@ -886,7 +1194,55 @@
                 });
         });
 
-        document.addEventListener('DOMContentLoaded', () => { filterTasks(); });
+        // Task Timer Logic
+        function updateTaskTimers() {
+            const now = new Date();
+            const timers = document.querySelectorAll('.task-timer');
+
+            timers.forEach(timer => {
+                const end = new Date(timer.getAttribute('data-end'));
+
+                if (now < end) {
+                    let diff = end - now;
+
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    diff -= days * (1000 * 60 * 60 * 24);
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    diff -= hours * (1000 * 60 * 60);
+                    const mins = Math.floor(diff / (1000 * 60));
+                    diff -= mins * (1000 * 60);
+                    const secs = Math.floor(diff / 1000);
+
+                    timer.innerHTML = `
+                                            <span class="text-primary">${days}d</span> 
+                                            <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
+                                            <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
+                                        `;
+                } else {
+                    let diff = now - end;
+
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    diff -= days * (1000 * 60 * 60 * 24);
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    diff -= hours * (1000 * 60 * 60);
+                    const mins = Math.floor(diff / (1000 * 60));
+                    diff -= mins * (1000 * 60);
+                    const secs = Math.floor(diff / 1000);
+
+                    timer.innerHTML = `
+                                            <span class="text-danger">${days}d</span> 
+                                            <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
+                                            <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
+                                        `;
+                }
+            });
+        }
+
+        setInterval(updateTaskTimers, 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            filterTasks();
+            updateTaskTimers();
+        });
 
         function showTaskDesc(id) {
             const html = document.getElementById('task_desc_' + id).innerHTML;
@@ -910,21 +1266,44 @@
             }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#workDesc, #taskDesc').summernote({
                 placeholder: 'Enter Description...',
                 tabsize: 2,
-                height: 150,
+                height: 100,
+                maximumImageFileSize: 1024 * 1024 * 5, // 5MB limit
                 toolbar: [
                     ['style', ['style']],
                     ['font', ['bold', 'underline', 'clear']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
                     ['view', ['fullscreen', 'codeview', 'help']]
                 ],
                 callbacks: {
-                    onChange: function(contents, $editable) {
+                    onImageUpload: function(files) {
+                        for (let i = 0; i < files.length; i++) {
+                            if (files[i].size > 1024 * 1024 * 5) {
+                                Toast.fire({ icon: 'error', title: 'Image too large (Max 5MB)' });
+                                continue;
+                            }
+                            // Summernote handles base64 by default if we don't handle it here, 
+                            // but we can manually invoke it to be safe
+                            let reader = new FileReader();
+                            reader.onload = (e) => {
+                                $(this).summernote('insertImage', e.target.result);
+                            };
+                            reader.readAsDataURL(files[i]);
+                        }
+                    },
+                    onPaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('text/html');
+                        if (bufferText) {
+                            // Optionally clean up pasted HTML
+                        }
+                    },
+                    onChange: function (contents, $editable) {
                         $(this).val(contents);
                     }
                 }
@@ -961,13 +1340,33 @@
                 }
             });
         }
+
+        function updateTaskStatus(id, status) {
+            fetch(`/daily-tasks/${id}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ status: status })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+                    } else {
+                        Toast.fire({ icon: 'error', title: 'Update failed' });
+                    }
+                });
+        }
     </script>
 
     @if(session('success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
-        });
-    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+            });
+        </script>
     @endif
 @endpush
