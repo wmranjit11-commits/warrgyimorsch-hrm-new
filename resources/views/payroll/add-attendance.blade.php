@@ -42,9 +42,12 @@
     </div>
 
     <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <form action="{{ route('payroll.attendance.store') }}" method="POST">
+        <form action="{{ isset($is_edit) ? route('payroll.attendance.updateByDate', $edit_date) : route('payroll.attendance.store') }}" method="POST">
             @csrf
             
+            @if(isset($is_edit))
+                @method('PUT')
+            @endif
             <div style="margin-bottom: 25px;">
                 <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
                 <input type="date" name="attendance_date" 
@@ -84,11 +87,11 @@
                                 </td>
                                 <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
                                     <div style="margin-bottom: 8px;">
-                                        <input type="time" name="employees[{{ $index }}][check_in]" 
-                                               id="check_in_{{ $index }}"
-                                               value="{{ $emp->old_check_in ?? '' }}"
-                                               onchange="calculateDuration({{ $index }})"
-                                               style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center;">
+                                        <input type="time"
+                                        id="check_in_{{ $index }}"
+                                        name="employees[{{ $index }}][check_in]"
+                                        value="{{ $emp->old_check_in ?? '' }}"
+                                        onchange="calculateDuration({{ $index }})">
                                     </div>
                                     <label style="font-size: 12px; cursor: pointer;">
                                         <input type="checkbox" id="toggle_in_{{ $index }}" 
@@ -98,16 +101,14 @@
                                 </td>
                                 <td style="padding: 15px; border-right: 1px solid #ddd; text-align: center;">
                                     <div style="margin-bottom: 8px;">
-                                       <input type="time" name="employees[{{ $index }}][check_out]" 
-                                            id="check_out_{{ $index }}"
-                                            value="{{ $emp->old_check_out ?? '' }}"
-                                            {{ !empty($emp->old_check_in) ? '' : 'disabled' }}
-                                            onchange="calculateDuration({{ $index }})"
-                                            style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; text-align: center; background: {{ !empty($emp->old_check_in) ? 'white' : '#f5f5f5' }};">
+                                       <input type="time"
+                                       id="check_out_{{ $index }}"
+                                        name="employees[{{ $index }}][check_out]"
+                                        value="{{ $emp->old_check_out ?? '' }}"
+                                        onchange="calculateDuration({{ $index }})">
                                     </div>
                                     <label style="font-size: 12px; cursor: pointer;">
                                         <input type="checkbox" id="toggle_out_{{ $index }}" 
-                                             {{ !empty($emp->old_check_in) ? '' : 'disabled' }}
                                                onchange="setNowTime('check_out_{{ $index }}', {{ $index }})">
                                         <span>Set Now</span>
                                     </label>
@@ -124,6 +125,7 @@
                                         <option value="present" {{ (!isset($emp->old_status) || (isset($emp->old_status) && $emp->old_status == 'present')) ? 'selected' : '' }}>Present</option>
                                         <option value="absent" {{ (isset($emp->old_status) && $emp->old_status == 'absent') ? 'selected' : '' }}>Absent</option>
                                         <option value="half_day" {{ (isset($emp->old_status) && $emp->old_status == 'half_day') ? 'selected' : '' }}>Half Day</option>
+                                        <option value="wfh" {{ (isset($emp->old_status) && $emp->old_status == 'wfh') ? 'selected' : '' }}>WFH</option>
                                         <option value="leave" {{ (isset($emp->old_status) && $emp->old_status == 'leave') ? 'selected' : '' }}>Leave</option>
                                         <option value="late" {{ (isset($emp->old_status) && $emp->old_status == 'late') ? 'selected' : '' }}>Late</option>
                                     </select>
@@ -158,7 +160,7 @@
     document.querySelectorAll('[id^="check_in_"]').forEach((el, index) => {
         calculateDuration(index);
     });
-};
+    };
     function setNowTime(fieldId, index) {
         const field = document.getElementById(fieldId);
         const now = new Date();
@@ -188,16 +190,16 @@
         const checkOut = checkOutField.value;
 
         // ✅ ENABLE / DISABLE CHECK-OUT BASED ON CHECK-IN
-        if (checkIn) {
-            checkOutField.disabled = false;
-            toggleOut.disabled = false;
-            checkOutField.style.background = 'white';
-        } else {
-            checkOutField.disabled = true;
-            toggleOut.disabled = true;
-            checkOutField.style.background = '#f5f5f5';
-            checkOutField.value = ''; // reset checkout
-        }
+        // if (checkIn) {
+        //     checkOutField.disabled = false;
+        //     toggleOut.disabled = false;
+        //     checkOutField.style.background = 'white';
+        // } else {
+        //     checkOutField.disabled = true;
+        //     toggleOut.disabled = true;
+        //     checkOutField.style.background = '#f5f5f5';
+        //     checkOutField.value = ''; // reset checkout
+        // }
 
         // ✅ DURATION CALCULATION
         if (checkIn && checkOut) {

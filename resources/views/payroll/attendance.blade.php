@@ -115,10 +115,19 @@
                                         <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $date }}', 'leave')">
                                             Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
+                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
+                                            WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
+                                        </div>
+                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
+                                            Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
+                                        <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} " class="avatar-text avatar-md bg-soft-primary text-primary">
+                                           <i class="feather-edit"></i>
+                                        </a>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $date }}')" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
@@ -239,6 +248,17 @@
             if (filterStatus === 'leave' && (item.status === 'leave' || item.status === 'absent')) match = true;
             if (filterStatus === 'late' && item.status === 'late') match = true;
             if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
+            if (filterStatus === 'wfh' && item.status === 'wfh') match = true;
+            if (filterStatus === 'early_out' && item.check_out && item.employee?.time_out) {
+                const shiftEnd = new Date(`1970-01-01T${item.employee.time_out}`);
+                shiftEnd.setMinutes(shiftEnd.getMinutes() - 30);
+
+                const checkOut = new Date(`1970-01-01T${item.check_out}`);
+
+                if (checkOut <= shiftEnd) {
+                    match = true;
+                }
+            }
 
             if (match) {
                 count++;
@@ -394,6 +414,12 @@
         background: #f1f5f9 !important;
         color: #3858f9;
         border: 0 !important;
+    }
+
+    .badge-purple {
+        background: #f3e8ff;
+        color: #7c3aed;
+        border: 1px solid #ddd6fe;
     }
 </style>
 @endpush
