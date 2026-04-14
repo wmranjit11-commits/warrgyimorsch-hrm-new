@@ -192,9 +192,7 @@
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
                                                 {{ $task->project->name ?? ($task->project_id ? 'Proj ID: ' . $task->project_id : '-') }}
                                             </td>
-                                            <td
-                                                style="font-size: 14px; color: #475569; white-space: normal; word-wrap: break-word; min-width: 200px; line-height: 1.4;">
-                                                {{ $task->task_title }}</td>
+                                            <td style="font-size: 14px; color: #475569;">{{ $task->task_title }}</td>
                                             <td style="font-size: 14px; color: #475569;">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="feather-calendar text-primary" style="font-size: 12px;"></i>
@@ -494,7 +492,7 @@
                                         @csrf
                                         <input type="hidden" name="daily_task_id" id="followUpTaskId">
                                         <input type="hidden" name="time_taken" id="totalFollowUpHours" value="0">
-
+                                        
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Performed
                                                 By <span class="text-danger">*</span></label>
@@ -509,40 +507,30 @@
                                         </div>
 
                                         <!-- QUICK TASK ADDER -->
-                                        <div class="row g-2 mb-3 p-2 rounded"
-                                            style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
+                                        <div class="row g-2 mb-3 p-2 rounded" style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
                                             <div class="col-6">
-                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1"
-                                                    style="font-size: 10px;">Sub-Task</label>
-                                                <input type="text" id="quickTaskTitle"
-                                                    class="form-control border-0 shadow-none fw-bold" placeholder="Title"
-                                                    style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1" style="font-size: 10px;">Sub-Task</label>
+                                                <input type="text" id="quickTaskTitle" class="form-control border-0 shadow-none fw-bold" placeholder="Title" style="height: 35px; border-radius: 8px; font-size: 12px;">
                                             </div>
                                             <div class="col-3">
-                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1"
-                                                    style="font-size: 10px;">Hrs</label>
-                                                <input type="text" id="quickTaskHours"
-                                                    class="form-control border-0 shadow-none fw-bold" placeholder="2.5"
-                                                    style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1" style="font-size: 10px;">Hrs</label>
+                                                <input type="text" id="quickTaskHours" class="form-control border-0 shadow-none fw-bold" placeholder="2.5" style="height: 35px; border-radius: 8px; font-size: 12px;">
                                             </div>
                                             <div class="col-3 d-flex align-items-end">
-                                                <button type="button" class="btn btn-primary w-100 p-0 fw-bold"
-                                                    onclick="addQuickTaskToDesc()"
-                                                    style="height: 35px; border-radius: 8px; font-size: 10px; background: #3858f9;">
+                                                <button type="button" class="btn btn-primary w-100 p-0 fw-bold" onclick="addQuickTaskToDesc()" style="height: 35px; border-radius: 8px; font-size: 10px; background: #3858f9;">
                                                     ADD
                                                 </button>
                                             </div>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work
-                                                Description <span class="text-danger">*</span></label>
+                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work Description <span class="text-danger">*</span></label>
                                             <textarea name="work_description" id="workDesc"
                                                 class="form-control border-0 bg-light shadow-none fw-bold" rows="3"
                                                 placeholder="Details..." required
                                                 style="border-radius: 10px; font-size: 13px;"></textarea>
                                         </div>
-
+                                        
                                         <div class="mb-4">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upload
                                                 Photo</label>
@@ -604,8 +592,7 @@
                                 <div class="card-body p-0">
                                     <div id="modalTableContainer"
                                         style="max-height: 450px; overflow-y: auto; overflow-x: hidden; width: 100%;">
-                                        <table class="table table-hover align-middle mb-0"
-                                            style="width: 100%; table-layout: fixed;">
+                                        <table class="table table-hover align-middle mb-0" style="width: 100%; table-layout: fixed;">
                                             <thead
                                                 style="background: #3858f9; color: white; position: sticky; top: 0; z-index: 1;">
                                                 <tr style="height: 52px; vertical-align: middle;">
@@ -756,11 +743,26 @@
             color: #3858f9;
         }
 
+        .custom-html-content ul {
+            list-style-type: disc !important;
+            padding-left: 30px !important;
+            margin-bottom: 1rem !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
+
+        .custom-html-content ol {
+            list-style-type: decimal !important;
+            padding-left: 30px !important;
+            margin-bottom: 1.1rem !important;
+            list-style-position: outside !important;
+            display: block !important;
+        }
 
         .custom-html-content li {
-            display: block !important;
+            display: list-item !important;
             margin-bottom: 0.6rem !important;
-            list-style-type: none !important;
+            list-style-type: inherit !important;
         }
 
         .custom-html-content p {
@@ -776,18 +778,16 @@
             display: block;
         }
 
-        .custom-html-content ul {
-            padding-left: 0 !important;
-            list-style-type: none !important;
-            margin-bottom: 15px;
-        }
-
         .custom-html-content ol {
-            padding-left: 0 !important;
-            list-style-type: none !important;
+            padding-left: 25px !important;
+            list-style-type: decimal !important;
             margin-bottom: 15px;
         }
-
+        .custom-html-content ul {
+            padding-left: 25px !important;
+            list-style-type: disc !important;
+            margin-bottom: 15px;
+        }
         .custom-html-content p {
             margin-bottom: 10px;
         }
@@ -1043,12 +1043,12 @@
             // 2. Format HTML - Prepend to the TOP using Real Bullets and Numbered List for details
             const timeStr = hours ? ` — <b style="color: #3858f9;">${hours} ${isNaN(hours) ? '' : 'Hours'}</b>` : '';
             const html = `<div class="mb-4" style="border-left: 4px solid #3858f9; padding-left: 20px;">
-                                <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
-                                <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
-                                    <li><em>First point about this task...</em></li>
-                                    <li><em>Second point about this task...</em></li>
-                                </ol>
-                              </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
+                            <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
+                            <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
+                                <li><em>First point about this task...</em></li>
+                                <li><em>Second point about this task...</em></li>
+                            </ol>
+                          </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
 
             if ($('#workDesc').length && typeof $.fn.summernote === 'function') {
                 const currentContent = $('#workDesc').summernote('code');
@@ -1062,7 +1062,7 @@
             // Clear inputs
             titleInput.value = '';
             hoursInput.value = '';
-
+            
             Toast.fire({ icon: 'success', title: `Task added. Total: ${hiddenHoursField.value} hrs` });
         }
 
@@ -1093,36 +1093,36 @@
                 let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                 body.innerHTML += `
-                                        <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
-                                            <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
-                                            <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                ${nameHtml}
-                                            </td>
-                                            <td style="font-size: 14px; font-weight: 700; color: #475569; white-space: normal; word-wrap: break-word;">
-                                                ${timeDisplay}
-                                            </td>
-                                            <td style="font-size: 13px; white-space: nowrap;">
-                                                <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                                            </td>
-                                            <td class="pe-3 text-center">
-                                                <div class="d-flex align-items-center justify-content-center">
-                                                    ${viewBtn}
-                                                    ${delBtn}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
-                                            <td colspan="5" class="p-0">
-                                                <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                                    <div style="padding: 20px 25px;">
-                                                        <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
-                                                            ${fu.work_description}
-                                                        </div>
+                                    <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
+                                        <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
+                                        <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            ${nameHtml}
+                                        </td>
+                                        <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            ${timeDisplay}
+                                        </td>
+                                        <td style="font-size: 13px; white-space: nowrap;">
+                                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                                        </td>
+                                        <td class="pe-3 text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                ${viewBtn}
+                                                ${delBtn}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
+                                        <td colspan="5" class="p-0">
+                                            <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                                <div style="padding: 20px 25px;">
+                                                    <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
+                                                        ${fu.work_description}
                                                     </div>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    `;
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
             });
             if (totalItems === 0) body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
 
@@ -1235,10 +1235,10 @@
                     const secs = Math.floor(diff / 1000);
 
                     timer.innerHTML = `
-                                                <span class="text-primary">${days}d</span> 
-                                                <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
-                                                <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
-                                            `;
+                                            <span class="text-primary">${days}d</span> 
+                                            <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
+                                            <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
+                                        `;
                 } else {
                     let diff = now - end;
 
@@ -1251,10 +1251,10 @@
                     const secs = Math.floor(diff / 1000);
 
                     timer.innerHTML = `
-                                                <span class="text-danger">${days}d</span> 
-                                                <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
-                                                <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
-                                            `;
+                                            <span class="text-danger">${days}d</span> 
+                                            <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
+                                            <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
+                                        `;
                 }
             });
         }
@@ -1290,7 +1290,7 @@
                 btn.classList.add('bg-info', 'text-white');
             } else {
                 // Hide Smoothly
-                $(content).slideUp(350, "swing", function () {
+                $(content).slideUp(350, "swing", function() {
                     row.classList.add('d-none');
                 });
                 icon.classList.remove('feather-eye-off');
@@ -1316,27 +1316,19 @@
                     ['view', ['fullscreen', 'codeview', 'help']]
                 ],
                 callbacks: {
-                    onImageUpload: function (files) {
+                    onImageUpload: function(files) {
                         for (let i = 0; i < files.length; i++) {
                             if (files[i].size > 1024 * 1024 * 5) {
                                 Toast.fire({ icon: 'error', title: 'Image too large (Max 5MB)' });
                                 continue;
                             }
-                            let formData = new FormData();
-                            formData.append('image', files[i]);
-                            fetch('{{ route("editor.upload-image") }}', {
-                                method: 'POST',
-                                body: formData,
-                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                            })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.url) {
-                                        $(this).summernote('insertImage', data.url);
-                                    } else {
-                                        Toast.fire({ icon: 'error', title: 'Upload failed' });
-                                    }
-                                }).catch(err => Toast.fire({ icon: 'error', title: 'Error uploading image' }));
+                            // Summernote handles base64 by default if we don't handle it here, 
+                            // but we can manually invoke it to be safe
+                            let reader = new FileReader();
+                            reader.onload = (e) => {
+                                $(this).summernote('insertImage', e.target.result);
+                            };
+                            reader.readAsDataURL(files[i]);
                         }
                     },
                     onPaste: function (e) {

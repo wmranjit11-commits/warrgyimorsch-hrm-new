@@ -83,15 +83,13 @@ class EmployeeController extends Controller
 
                 // Create User for login if email is present
                 if ($request->filled('email')) {
-                    User::updateOrCreate(
-                        ['email' => $employee->email],
-                        [
-                            'name' => $employee->name,
-                            'password' => Hash::make($rawPassword),
-                            'role' => $employee->role,
-                            'employee_id' => $employee->id,
-                        ]
-                    );
+                    User::create([
+                        'name' => $employee->name,
+                        'email' => $employee->email,
+                        'password' => Hash::make($rawPassword),
+                        'role' => $employee->role,
+                        'employee_id' => $employee->id,
+                    ]);
                 }
 
                 return redirect()->route('employees.index')
@@ -243,12 +241,7 @@ class EmployeeController extends Controller
 
                 // Sync with User table
                 if ($request->filled('email')) {
-                    // Find user by employee_id FIRST, then by old email if needed
-                    $user = User::where('employee_id', $employee->id)->first();
-                    
-                    if (!$user) {
-                        $user = User::where('email', $employee->email)->first();
-                    }
+                    $user = User::where('employee_id', $employee->id)->orWhere('email', $employee->email)->first();
 
                     $userData = [
                         'name' => $employee->name,
@@ -264,8 +257,7 @@ class EmployeeController extends Controller
                     if ($user) {
                         $user->update($userData);
                     } else {
-                        // Create ONLY if no user exists for this employee/email
-                        User::create($userData + ['password' => Hash::make($request->password ?? $request->mobile_number ?? '12345678')]);
+                        User::create($userData + ['password' => Hash::make($request->password ?? '12345678')]);
                     }
                 }
 

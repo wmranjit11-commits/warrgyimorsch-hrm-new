@@ -264,66 +264,6 @@
                                             <td class="pe-4 text-center">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
-                                                        class="avatar-text avatar-md bg-soft-primary text-primary rounded"
-                                                        title="View Team" onclick="showProjectTeam({{ $project->id }})">
-                                                        <i class="feather-users"></i>
-                                                    </a>
-                                                    <template id="proj_team_{{ $project->id }}">
-                                                        <div class="table-responsive">
-                                                            <table class="table table-borderless align-middle mb-0">
-                                                                <thead style="background: #f8fafc; border-bottom: 2px solid #f1f5f9;">
-                                                                    <tr>
-                                                                        <th class="ps-3 py-3" style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">EMPLOYEE</th>
-                                                                        <th class="py-3 text-center" style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; width: 120px;">STATUS</th>
-                                                                        <th class="py-3" style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">ASSIGNED TASK</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @forelse($project->tasks->sortByDesc('id') as $task)
-                                                                        @php
-                                                                            $employee = $task->employee;
-                                                                            $taskStatusClass = 'bg-soft-primary text-primary';
-                                                                            if ($task->status == 'Completed') $taskStatusClass = 'bg-soft-success text-success';
-                                                                            elseif ($task->status == 'Pending') $taskStatusClass = 'bg-soft-secondary text-secondary';
-                                                                            elseif ($task->status == 'On Hold') $taskStatusClass = 'bg-soft-warning text-warning';
-                                                                        @endphp
-                                                                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                                            <td class="ps-3 py-3" style="width: 200px;">
-                                                                                <div class="d-flex align-items-center gap-2">
-                                                                                    <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle fw-bold" style="width: 32px; height: 32px; font-size: 12px;">
-                                                                                        {{ strtoupper(substr($employee->name ?? '?', 0, 1)) }}
-                                                                                    </div>
-                                                                                    <div class="d-flex flex-column">
-                                                                                        <span class="fw-bold text-dark" style="font-size: 13px;">{{ $employee->name ?? 'Unknown' }}</span>
-                                                                                        <span class="text-muted" style="font-size: 10px;">{{ $employee->designation ?? 'Member' }}</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                            <td class="py-3 text-center">
-                                                                                <span class="badge {{ $taskStatusClass }}" 
-                                                                                    style="padding: 6px 10px; border-radius: 8px; font-size: 9px; font-weight: 800; text-transform: uppercase; min-width: 90px;">
-                                                                                    {{ $task->status }}
-                                                                                </span>
-                                                                            </td>
-                                                                            <td class="py-3">
-                                                                                <span class="fw-bold text-muted" style="font-size: 13px; line-height: 1.4; display: block; word-break: break-word;">
-                                                                                    {{ $task->task_title }}
-                                                                                </span>
-                                                                            </td>
-                                                                        </tr>
-                                                                    @empty
-                                                                        <tr>
-                                                                            <td colspan="3" class="text-center py-5">
-                                                                                <div class="text-muted fw-bold" style="font-size: 14px;">No tasks assigned yet.</div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforelse
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </template>
-
-                                                    <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
                                                         title="View Description" onclick="showProjectDesc({{ $project->id }})">
                                                         <i class="feather-file-text"></i>
@@ -758,10 +698,10 @@
                         const secs = Math.floor(diff / 1000);
 
                         timer.innerHTML = `
-                                                                            <span class="text-primary">${days}d</span> 
-                                                                            <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
-                                                                            <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
-                                                                        `;
+                                                                <span class="text-primary">${days}d</span> 
+                                                                <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
+                                                                <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
+                                                            `;
                     } else {
                         timer.innerHTML = `<span class="text-danger fw-bold"><i class="feather-alert-circle me-1"></i> DEADLINE PASSED</span>`;
                     }
@@ -781,18 +721,6 @@
                 });
             }
 
-            function showProjectTeam(id) {
-                const html = document.getElementById('proj_team_' + id).innerHTML;
-                Swal.fire({
-                    title: '<span style="color: #3858f9; font-weight: 700;">Project Team & Tasks</span>',
-                    html: `<div class="mt-3" style="text-align: left;">${html}</div>`,
-                    width: '700px',
-                    showConfirmButton: true,
-                    confirmButtonText: 'CLOSE',
-                    confirmButtonColor: '#3858f9'
-                });
-            }
-
             $(document).ready(function () {
                 $('#projectDesc').summernote({
                     placeholder: 'Enter Project Description',
@@ -808,7 +736,7 @@
                         ['view', ['fullscreen', 'codeview', 'help']]
                     ],
                     callbacks: {
-                        onImageUpload: function (files) {
+                        onImageUpload: function(files) {
                             for (let i = 0; i < files.length; i++) {
                                 if (files[i].size > 1024 * 1024 * 5) { // 5MB limit
                                     Toast.fire({ icon: 'error', title: 'Image too large (Max 5MB)' });

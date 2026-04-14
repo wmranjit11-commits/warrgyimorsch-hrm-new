@@ -64,7 +64,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/daily-tasks/follow-up', [\App\Http\Controllers\DailyTaskController::class, 'storeFollowUp'])->name('daily-tasks.follow-up.store');
     Route::delete('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'destroyFollowUp'])->name('daily-tasks.follow-up.destroy');
     Route::get('/daily-tasks/{taskId}/follow-ups', [\App\Http\Controllers\DailyTaskController::class, 'getFollowUps']);
-    Route::post('/editor/upload-image', [\App\Http\Controllers\DailyTaskController::class, 'uploadImage'])->name('editor.upload-image');
 
     // STATIC PAGES
     Route::get('/help', function () {
