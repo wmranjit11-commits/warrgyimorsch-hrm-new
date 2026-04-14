@@ -13,7 +13,7 @@ class DailyTaskController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DailyTask::with(['project', 'employee', 'creator']);
+        $query = DailyTask::with(['project', 'employee', 'creator', 'followUps']);
 
         // Filtering
         if ($request->project_id) {
@@ -127,5 +127,15 @@ class DailyTaskController extends Controller
         }
         $followUp->delete();
         return response()->json(['success' => 'Task history description deleted successfully!']);
+    }
+    public function updateStatus(Request $request, DailyTask $dailyTask)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework',
+        ]);
+
+        $dailyTask->update(['status' => $validated['status']]);
+
+        return response()->json(['success' => 'Task status updated successfully!']);
     }
 }

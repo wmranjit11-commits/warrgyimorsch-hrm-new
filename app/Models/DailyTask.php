@@ -40,4 +40,20 @@ class DailyTask extends Model
     {
         return $this->belongsTo(User::class, 'assigned_by');
     }
+
+    public function followUps()
+    {
+        return $this->hasMany(TaskFollowUp::class, 'daily_task_id');
+    }
+
+    public function getTotalTimeAttribute()
+    {
+        return $this->followUps->reduce(function ($total, $fu) {
+            // Extract numeric part from strings like "5 hours", "2.5 days" etc.
+            if (preg_match('/[+-]?([0-9]*[.])?[0-9]+/', $fu->time_taken, $matches)) {
+                return $total + (float)$matches[0];
+            }
+            return $total;
+        }, 0);
+    }
 }

@@ -51,17 +51,30 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
     Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
     Route::put('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
+    Route::patch('/projects/{id}/status', [\App\Http\Controllers\ProjectController::class, 'updateStatus'])->name('projects.update-status');
     Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
 
     // DAILY TASKS
     Route::get('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'index'])->name('daily-tasks.index');
     Route::post('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'store'])->name('daily-tasks.store');
     Route::put('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'update'])->name('daily-tasks.update');
+    Route::patch('/daily-tasks/{dailyTask}/status', [\App\Http\Controllers\DailyTaskController::class, 'updateStatus'])->name('daily-tasks.update-status');
     Route::delete('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'destroy'])->name('daily-tasks.destroy');
     Route::post('/daily-tasks/bulk-delete', [\App\Http\Controllers\DailyTaskController::class, 'bulkDestroy'])->name('daily-tasks.bulk-delete');
     Route::post('/daily-tasks/follow-up', [\App\Http\Controllers\DailyTaskController::class, 'storeFollowUp'])->name('daily-tasks.follow-up.store');
     Route::delete('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'destroyFollowUp'])->name('daily-tasks.follow-up.destroy');
     Route::get('/daily-tasks/{taskId}/follow-ups', [\App\Http\Controllers\DailyTaskController::class, 'getFollowUps']);
+
+    // STATIC PAGES
+    Route::get('/help', function () {
+        return view('pages.help');
+    })->name('help');
+    Route::get('/terms', function () {
+        return view('pages.terms');
+    })->name('terms');
+    Route::get('/privacy', function () {
+        return view('pages.privacy');
+    })->name('privacy');
 
 });
 
