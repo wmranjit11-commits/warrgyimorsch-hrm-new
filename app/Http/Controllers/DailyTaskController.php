@@ -138,4 +138,15 @@ class DailyTaskController extends Controller
 
         return response()->json(['success' => 'Task status updated successfully!']);
     }
+
+    public function uploadImage(Request $request)
+    {
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('editor_images', $filename, 'public');
+            return response()->json(['url' => asset('storage/' . $path)]);
+        }
+        return response()->json(['error' => 'No image uploaded'], 400);
+    }
 }
