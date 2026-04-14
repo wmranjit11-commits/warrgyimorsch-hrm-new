@@ -66,34 +66,59 @@
                                     <div class="col-md-6">
                                         <h6 class="small fw-bold text-primary text-uppercase mb-3"
                                             style="letter-spacing: 0.5px;">Earnings</h6>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-borderless align-middle mb-0">
-                                                <tbody class="text-dark fw-bold">
-                                                    <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">Basic Salary</td>
-                                                        <td class="text-end py-2" id="tableBasicSalary">₹ 0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">HRA</td>
-                                                        <td class="text-end py-2" id="tableHRA">₹ 0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">Conveyance</td>
-                                                        <td class="text-end py-2" id="tableConveyance">₹ 0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">Medical</td>
-                                                        <td class="text-end py-2" id="tableMedical">₹ 0.00</td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td class="ps-0 py-3">Gross Salary</td>
-                                                        <td class="text-end py-3 text-dark fs-5" id="tableGrossSalary">₹
-                                                            0.00</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-borderless align-middle mb-0">
+                                                    <tbody class="text-dark fw-bold">
+                                                        <!-- <select id="calcType" class="form-control mb-2">
+                                                            <option value="per_day">Per Day</option>
+                                                            <option value="monthly">Monthly</option>
+                                                            <option value="hourly">Hourly</option>
+                                                        </select> -->
+
+                                                           <tr>
+                                                                <td class="ps-0 py-2 text-muted fw-normal">Payable Days</td>
+                                                                <td><input type="number" step="0.01" id="inputPayableDays" class="form-control">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="ps-0 py-2 text-muted fw-normal">Basic Salary</td>
+                                                            <td><input type="number" id="inputBasic" class="form-control"></td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td class="ps-0 py-2 text-muted fw-normal">HRA</td>
+                                                            <td><input type="number" id="inputHRA" class="form-control"></td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td class="ps-0 py-2 text-muted fw-normal">Conveyance</td>
+                                                            <td><input type="number" id="inputConveyance" class="form-control"></td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td class="ps-0 py-2 text-muted fw-normal">Medical</td>
+                                                            <td><input type="number" id="inputMedical" class="form-control"></td>
+                                                        </tr>
+
+                                                     
+
+                                                        <tr>
+                                                            <td class="ps-0 py-2 text-muted fw-normal">Override Salary</td>
+                                                            <td>
+                                                                <input type="checkbox" id="overrideCheck"> Enable
+                                                                <input type="number" id="overrideAmount" class="form-control mt-1" disabled>
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr class="border-top">
+                                                            <td class="ps-0 py-3">Gross Salary</td>
+                                                            <td class="text-end py-3 fs-5" id="tableGrossSalary">₹ 0.00</td>
+                                                        </tr>
+                                                        
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                    </div>
                                     <div class="col-md-6">
                                         <h6 class="small fw-bold text-danger text-uppercase mb-3"
                                             style="letter-spacing: 0.5px;">Deductions</h6>
@@ -101,17 +126,23 @@
                                             <table class="table table-sm table-borderless align-middle mb-0">
                                                 <tbody class="text-dark fw-bold">
                                                     <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">PF (12%)</td>
-                                                        <td class="text-end py-2" id="tablePFDeduction">₹ 0.00</td>
+                                                        <td>PF</td>
+                                                        <td><input type="number" id="inputPF" class="form-control"></td>
                                                     </tr>
+
                                                     <tr>
-                                                        <td class="ps-0 py-2 text-muted fw-normal">ESI (1.75%)</td>
-                                                        <td class="text-end py-2" id="tableESIDeduction">₹ 0.00</td>
+                                                        <td>ESI</td>
+                                                        <td><input type="number" id="inputESI" class="form-control"></td>
                                                     </tr>
+
                                                     <tr>
+                                                        <td>Other</td>
+                                                        <td><input type="number" id="inputOther" class="form-control"></td>
+                                                    </tr>
+                                                    <!-- <tr>
                                                         <td class="ps-0 py-2 text-muted fw-normal">Other</td>
                                                         <td class="text-end py-2" id="tableOtherDeduction">₹ 0.00</td>
-                                                    </tr>
+                                                    </tr> -->
                                                     <tr class="border-top">
                                                         <td class="ps-0 py-3 text-danger">Total Deductions</td>
                                                         <td class="text-end py-3 text-danger fs-5"
@@ -156,7 +187,7 @@
                                             <div class="fw-bold fs-6" id="resultMonth">--</div>
                                         </div>
                                     </div>
-                                    <div class="col-12 mt-2">
+                                    <div class="col-8 mt-2">
                                         <div class="p-3 bg-soft-danger rounded-3 border border-danger border-opacity-10">
                                             <div class="text-danger small fw-bold text-uppercase mb-1"
                                                 style="font-size: 10px;">Total Salary Cut</div>
@@ -191,10 +222,97 @@
         </div>
     </div>
 
-    <script>
-        let currentPayrollData = null;
+<script>
+    let isManualDays = false;
+    let currentPayrollData = null;
+    document.addEventListener('input', recalculate);
+    // document.getElementById('calcType').addEventListener('change', recalculate);
 
-       function calculatePayroll() {
+    document.getElementById('inputPayableDays').addEventListener('input', function () {
+        isManualDays = true;
+    });
+
+    document.getElementById('overrideCheck').addEventListener('change', function () {
+        document.getElementById('overrideAmount').disabled = !this.checked;
+    });
+
+   function recalculate() {
+
+    let basic = parseFloat(document.getElementById('inputBasic').value) || 0;
+    let hra = parseFloat(document.getElementById('inputHRA').value) || 0;
+    let conv = parseFloat(document.getElementById('inputConveyance').value) || 0;
+    let med = parseFloat(document.getElementById('inputMedical').value) || 0;
+
+    let payableDays = parseFloat(document.getElementById('inputPayableDays').value) || 0;
+    let totalDays = 30;
+
+    payableDays = Math.min(payableDays, totalDays); // ✅ safety
+
+    // let calcType = document.getElementById('calcType').value;
+
+    let gross = 0;
+
+    let fullSalary = basic + hra + conv + med;
+
+    // ✅ PER DAY VALUES
+    let perDayBasic = basic / totalDays;
+    let perDayHRA = hra / totalDays;
+    let perDayConv = conv / totalDays;
+    let perDayMed = med / totalDays;
+
+    gross = (fullSalary / totalDays) * payableDays; 
+
+    // if (calcType === 'monthly') {
+    //     gross = (fullSalary / totalDays) * payableDays; 
+    // } 
+    // else if (calcType === 'per_day') {
+    //     gross = (perDayBasic * payableDays) +
+    //             (perDayHRA * payableDays) +
+    //             (perDayConv * payableDays) +
+    //             (perDayMed * payableDays);
+    // } 
+    // else if (calcType === 'hourly') {
+    //     let totalHours = payableDays * 8;
+    //     let perHour = fullSalary / (totalDays * 8);
+    //     gross = perHour * totalHours;
+    // }
+
+    // ✅ Override
+    if (document.getElementById('overrideCheck').checked) {
+        let override = parseFloat(document.getElementById('overrideAmount').value);
+        if (!isNaN(override) && override > 0) {
+            gross = override;
+        }
+    }
+
+    // ✅ UI Update
+    document.getElementById('tableGrossSalary').innerText = '₹ ' + gross.toFixed(2);
+
+    let pf = parseFloat(document.getElementById('inputPF').value) || 0;
+    let esi = parseFloat(document.getElementById('inputESI').value) || 0;
+    let other = parseFloat(document.getElementById('inputOther').value) || 0;
+
+    let totalDeduction = pf + esi + other;
+    let net = gross - totalDeduction;
+
+    document.getElementById('tableTotalDeductions').innerText = '₹ ' + totalDeduction.toFixed(2);
+    document.getElementById('tableNetSalary').innerText = '₹ ' + net.toFixed(2);
+
+    // ✅ RIGHT PANEL SYNC
+    document.getElementById('resultPayableDays').innerText = payableDays;
+
+    let unpaidDays = totalDays - payableDays;
+    document.getElementById('resultUnpaidDays').innerText = unpaidDays.toFixed(2);
+
+    let salaryLoss = fullSalary - gross;
+    document.getElementById('resultSalaryLoss').innerText = '₹ ' + salaryLoss.toFixed(2);
+}
+
+    // =========================
+    // CALCULATE API
+    // =========================
+    function calculatePayroll() {
+        isManualDays = false;
         const month = document.getElementById('monthSelect').value;
         const employeeId = document.getElementById('employeeSelect').value;
 
@@ -241,39 +359,55 @@
         });
     }
 
+    // =========================
+    // DISPLAY DATA
+    // =========================
     function displayPayrollData(p) {
 
-        // Format Month (2026-04 → Apr 2026)
         const formattedMonth = new Date(p.month + '-01').toLocaleString('en-IN', {
             month: 'short',
             year: 'numeric'
         });
 
         document.getElementById('resultMonth').textContent = formattedMonth;
-        document.getElementById('resultPayableDays').textContent = p.payable_days;
 
-        document.getElementById('tableBasicSalary').textContent = '₹ ' + f(p.basic_salary);
-        document.getElementById('tableHRA').textContent = '₹ ' + f(p.hra);
-        document.getElementById('tableConveyance').textContent = '₹ ' + f(p.conveyance_allowance);
-        document.getElementById('tableMedical').textContent = '₹ ' + f(p.medical_allowance);
-        document.getElementById('tableGrossSalary').textContent = '₹ ' + f(p.gross_salary);
+        // ✅ Only set if NOT manually edited
+        if (!isManualDays) {
+            document.getElementById('inputPayableDays').value = p.payable_days;
+        }
 
-        document.getElementById('tablePFDeduction').textContent = '₹ ' + f(p.pf_deduction);
-        document.getElementById('tableESIDeduction').textContent = '₹ ' + f(p.esi_deduction);
-        document.getElementById('tableOtherDeduction').textContent = '₹ ' + f(p.other_deduction || 0);
-        document.getElementById('tableTotalDeductions').textContent = '₹ ' + f(p.deductions);
-
-        document.getElementById('tableNetSalary').textContent = '₹ ' + f(p.net_salary);
-
+        // ALWAYS show backend initially
+       if (!isManualDays) {
+            document.getElementById('resultPayableDays').textContent = p.payable_days;
+        }
         document.getElementById('resultUnpaidDays').textContent = p.unpaid_days;
-        document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
-    }
 
+        document.getElementById('resultSalaryLoss').textContent = '₹ ' + f(p.salary_loss);
+
+        document.getElementById('inputBasic').value = p.basic_salary;
+        document.getElementById('inputHRA').value = p.hra;
+        document.getElementById('inputConveyance').value = p.conveyance_allowance;
+        document.getElementById('inputMedical').value = p.medical_allowance;
+
+        document.getElementById('inputPF').value = p.pf_deduction;
+        document.getElementById('inputESI').value = p.esi_deduction;
+        document.getElementById('inputOther').value = p.other_deduction || 0;
+
+       
+
+        recalculate();
+    }
+           
+
+    // =========================
+    // SAVE PAYROLL
+    // =========================
     function savePayroll(btn) {
+
         if (!currentPayrollData) return;
 
         const originalBtnText = btn.innerHTML;
-        btn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i> SAVING...';
+        btn.innerHTML = 'Saving...';
         btn.disabled = true;
 
         fetch('{{ route("payroll.store") }}', {
@@ -282,59 +416,49 @@
                 'Content-Type': 'application/json', 
                 'X-CSRF-TOKEN': '{{ csrf_token() }}' 
             },
-            body: JSON.stringify(currentPayrollData)
+            body: JSON.stringify({
+                ...currentPayrollData,
+
+                basic_salary: document.getElementById('inputBasic').value,
+                hra: document.getElementById('inputHRA').value,
+                conveyance_allowance: document.getElementById('inputConveyance').value,
+                medical_allowance: document.getElementById('inputMedical').value,
+
+                payable_days: document.getElementById('inputPayableDays').value,
+
+                pf_deduction: document.getElementById('inputPF').value,
+                esi_deduction: document.getElementById('inputESI').value,
+                other_deduction: document.getElementById('inputOther').value,
+
+                net_salary: document.getElementById('tableNetSalary').innerText.replace(/[₹,]/g,''),
+                gross_salary: document.getElementById('tableGrossSalary').innerText.replace(/[₹,]/g,'')
+            })
         })
-        .then(res => {
-            if (!res.ok) throw new Error('Network response was not ok');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
             if (data.success) {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Payroll saved successfully!'
-                });
-
-                btn.innerHTML = '<i class="bi bi-check-all me-2"></i> SAVED SUCCESSFULLY';
-                btn.className = "btn btn-success py-3 fw-bold shadow-sm w-100";
-
-                // Redirect to Payroll History (Admin View) after 1.5 seconds
-                setTimeout(() => {
-                    window.location.href = '{{ route("payroll.index") }}';
-                }, 1500);
-
+                alert('Payroll saved successfully!');
+                window.location.href = '{{ route("payroll.index") }}';
             } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: data.message || 'Failed to save payroll'
-                });
+                alert(data.message || 'Error saving payroll');
                 btn.innerHTML = originalBtnText;
                 btn.disabled = false;
             }
         })
-        .catch(err => {
-            console.error('Error:', err);
-            Toast.fire({
-                icon: 'error',
-                title: 'Something went wrong. Please check console.'
-            });
+        .catch(() => {
+            alert('Something went wrong');
             btn.innerHTML = originalBtnText;
             btn.disabled = false;
         });
     }
 
-        function downloadCurrentPdf() {
-            if(!window.lastSavedPayrollId) return;
-            window.location.href = `{{ route('payroll.export') }}?id=${window.lastSavedPayrollId}&format=pdf`;
-        }
-
-        function f(n) {
-            return parseFloat(n || 0).toLocaleString('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-    </script>
+    function f(n) {
+        return parseFloat(n || 0).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+</script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');

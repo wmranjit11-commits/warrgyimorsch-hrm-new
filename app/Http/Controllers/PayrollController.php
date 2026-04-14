@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payroll;
 use App\Models\Attendance;
+use App\Models\LeaveApplication;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -187,31 +188,71 @@ class PayrollController extends Controller
             $year = $date->year;
             $monthNum = $date->month;
             $totalDays = $date->daysInMonth;
-
+            // echo $totalDays;exit;
             // 📊 Get Attendance
             $records = Attendance::where('employee_id', $employeeId)
                 ->whereYear('attendance_date', $year)
                 ->whereMonth('attendance_date', $monthNum)
                 ->get();
 
-            // ✅ STEP 1: Total Working Hours
-            $totalHours = 0;
+            $leaves = LeaveApplication::where('employee_id', $employeeId)
+                ->where('status', 'approved')
+                ->where(function ($q) use ($year, $monthNum) {
+                    $q->whereMonth('start_date', $monthNum)
+                    ->orWhereMonth('end_date', $monthNum);
+                })
+                ->get();
+
+                $leaveDays = 0;
+                foreach ($leaves as $leave) {
+
+                    // If already stored → best case
+                    if (!empty($leave->total_days)) {
+                        $leaveDays += $leave->total_days;
+                    } else {
+
+                        // fallback (date diff)
+                        $days = $leave->start_date->diffInDays($leave->end_date) + 1;
+                        $leaveDays += $days;
+                    }
+                }
+
+           $attendanceDays = 0;
 
             foreach ($records as $r) {
-                if ($r->status == 'absent') continue;
 
-                // Paid Leave = full day (8 hrs)
-                if ($r->status == 'leave') {
-                    $totalHours += 8;
-                } else {
-                    $totalHours += $r->total_hours ?? 0;
+                switch ($r->status) {
+
+                    case 'present':
+                    case 'work_from_home':
+                    case 'late':
+                        $attendanceDays += 1;
+                        break;
+
+                    case 'half_day':
+                        $attendanceDays += 0.5;
+                        break;
+
+                    case 'absent':
+                    default:
+                        break;
                 }
             }
 
-            // Convert to days
-            $payableDays = round($totalHours / 8, 2);
-            $payableDays = min($payableDays, $totalDays); // safety
+            // Leaves
+            $leaveDays = 0;
 
+            foreach ($leaves as $leave) {
+                $leaveDays += $leave->total_days ?? 
+                    ($leave->start_date->diffInDays($leave->end_date) + 1);
+            }
+
+            // Final
+            $payableDays = min($attendanceDays + $leaveDays, $totalDays);
+
+            // Safety
+            $payableDays = min($payableDays, $totalDays);
+            $overrideSalary = $request->override_salary ?? null;
             $unpaidDays = $totalDays - $payableDays;
 
             // 💰 STEP 2: Monthly Salary (Annual → Monthly)
@@ -221,7 +262,7 @@ class PayrollController extends Controller
                 ($employee->conveyance_allowance ?? 0) +
                 ($employee->medical_allowance ?? 0) +
                 ($employee->other_allowance ?? 0)
-            ) / 12;
+            );
 
             // Per day salary
             $perDaySalary = $monthlySalary / $totalDays;
@@ -229,22 +270,33 @@ class PayrollController extends Controller
             // Gross Salary
             $grossSalary = $perDaySalary * $payableDays;
 
+            // Override (HR control)
+            if ($overrideSalary) {
+                $grossSalary = $overrideSalary;
+            }
+
             // 📉 STEP 3: Deductions
             $pf = 0;
             $esi = 0;
 
-            // PF (12% of basic portion only)
-            if ($employee->pf) {
-                $basicMonthly = ($employee->basic_salary ?? 0) / 12;
-                $pf = ($basicMonthly / $totalDays * $payableDays) * 0.12;
-            }
+            $pf = $request->pf ?? $pf;
+            $esi = $request->esi ?? $esi;
+            $otherDeduction = $request->other_deduction ?? 0;
 
-            // ESI (only if salary <= 21000)
-            if ($employee->esi && $grossSalary <= 21000) {
-                $esi = $grossSalary * 0.0075;
-            }
+            $totalDeductions = $pf + $esi + $otherDeduction;
 
-            $totalDeductions = $pf + $esi;
+            // // PF (12% of basic portion only)
+            // if ($employee->pf) {
+            //     $basicMonthly = ($employee->basic_salary ?? 0) / 12;
+            //     $pf = ($basicMonthly / $totalDays * $payableDays) * 0.12;
+            // }
+
+            // // ESI (only if salary <= 21000)
+            // if ($employee->esi && $grossSalary <= 21000) {
+            //     $esi = $grossSalary * 0.0075;
+            // }
+
+            // $totalDeductions = $pf + $esi;
 
             // 💵 STEP 4: Net Salary
             $netSalary = max(0, $grossSalary - $totalDeductions);
@@ -254,30 +306,42 @@ class PayrollController extends Controller
             $salaryLoss = $fullMonthSalary - $grossSalary;
 
             // 📦 Final Data
-            $payrollData = [
+           $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $month,
+
+                // Attendance
                 'payable_days' => $payableDays,
                 'unpaid_days' => round($unpaidDays, 2),
-                'salary_loss' => round($salaryLoss, 2),
 
-                'basic_salary' => round(($employee->basic_salary / 12 / $totalDays) * $payableDays, 2),
-                'hra' => round(($employee->hra / 12 / $totalDays) * $payableDays, 2),
-                'conveyance_allowance' => round(($employee->conveyance_allowance / 12 / $totalDays) * $payableDays, 2),
-                'medical_allowance' => round(($employee->medical_allowance / 12 / $totalDays) * $payableDays, 2),
-                'other_allowance' => round(($employee->other_allowance / 12 / $totalDays) * $payableDays, 2),
+                //  ORIGINAL MONTHLY SALARY (IMPORTANT)
+                'basic_salary' => $employee->basic_salary,
+                'hra' => $employee->hra,
+                'conveyance_allowance' => $employee->conveyance_allowance,
+                'medical_allowance' => $employee->medical_allowance,
+                'other_allowance' => $employee->other_allowance,
 
+                //  CALCULATED (for reference only)
+                'calculated_basic' => round(($employee->basic_salary / $totalDays) * $payableDays, 2),
+                'calculated_hra' => round(($employee->hra / $totalDays) * $payableDays, 2),
+
+                // Gross
                 'gross_salary' => round($grossSalary, 2),
 
+                // Deductions
                 'pf_deduction' => round($pf, 2),
                 'esi_deduction' => round($esi, 2),
-                'other_deduction' => 0,
+                'other_deduction' => $otherDeduction,
                 'deductions' => round($totalDeductions, 2),
 
+                // Final
+                'salary_loss' => round($salaryLoss, 2),
                 'net_salary' => round($netSalary, 2),
 
                 'status' => 'pending',
             ];
+
+            // dd($payrollData);
 
             return response()->json([
                 'success' => true,
