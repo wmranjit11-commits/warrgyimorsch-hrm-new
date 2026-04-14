@@ -8,11 +8,11 @@ use App\Models\LeaveApplication;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Imports\AttendanceImport;
+// use App\Imports\AttendanceImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
+// use Barryvdh\DomPDF\Facade\Pdf;
+// use Illuminate\Support\Facades\Log;
 
 class PayrollController extends Controller
 {
@@ -23,6 +23,8 @@ class PayrollController extends Controller
     {
         $query = Attendance::query();
 
+        $query->join('employees', 'attendances.employee_id', '=', 'employees.id');
+
          // ✅ Apply only if user selects filter
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereDate('attendance_date', '>=', $request->start_date)
@@ -30,14 +32,21 @@ class PayrollController extends Controller
         }
         // ✅ GROUPING (required for your blade)
         $attendance = $query->selectRaw("
-                attendance_date,
-                COUNT(CASE WHEN status = 'present' THEN 1 END) as present_count,
-                COUNT(CASE WHEN status = 'half_day' THEN 1 END) as half_day_count,
-                COUNT(CASE WHEN status IN ('absent','leave') THEN 1 END) as leave_count,
-                COUNT(CASE WHEN total_hours >= 9 THEN 1 END) as overtime_count
+                attendances.attendance_date,
+                COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
+                COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
+                COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
+                COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count,
+                COUNT(CASE WHEN attendances.total_hours >= 9 THEN 1 END) as overtime_count,
+                SUM(CASE 
+                    WHEN TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
+                    AND attendances.check_out IS NOT NULL
+                    THEN 1
+                    ELSE 0
+                END) as early_count
             ")
-            ->groupBy('attendance_date')
-            ->orderBy('attendance_date', 'desc')
+            ->groupBy('attendances.attendance_date')
+            ->orderBy('attendances.attendance_date', 'desc')
             ->paginate(31);
 
         return view('payroll.attendance', compact('attendance'));
@@ -97,71 +106,121 @@ class PayrollController extends Controller
     /**
      * Store Attendance
      */
+    // public function storeAttendance(Request $request)
+    // {
+    //     // dd($request->all());
+    //     try {
+    //         if (!$request->attendance_date) {
+    //             throw new \Exception('Attendance date is required.');
+    //         }
+
+    //         foreach ($request->employees as $employeeData) {
+    //                 $checkIn = !empty($employeeData['check_in']) ? $employeeData['check_in'] : null;
+    //                 $checkOut = !empty($employeeData['check_out']) ? $employeeData['check_out'] : null;
+
+    //                 if ($checkIn || $checkOut) {
+    //                 $status = $employeeData['status'] ?? 'present';
+
+
+    //               $totalHours = 0;
+
+    //                 if ($checkIn && $checkOut) {
+    //                     try {
+    //                         $in = Carbon::createFromFormat('H:i', $checkIn);
+    //                         $out = Carbon::createFromFormat('H:i', $checkOut);
+
+    //                         // 🔥 Get difference (can be negative)
+    //                         $diffMinutes = $in->diffInMinutes($out, false);
+
+    //                         // ✅ Handle night shift (e.g. 10 PM → 6 AM)
+    //                         if ($diffMinutes < 0) {
+    //                             $diffMinutes += 24 * 60;
+    //                         }
+
+    //                        $totalHours = round($diffMinutes / 60, 2);
+
+    //                     } catch (\Exception $e) {
+    //                         $totalHours = 0;
+    //                     }
+    //                 }
+
+    //                 // Auto-Leave Logic: If no check-in, set status to 'leave'
+    //                 if (empty($checkIn)) {
+    //                     $status = 'leave';
+    //                     $checkOut = null; // Ensure no check-out if no check-in
+    //                 }
+
+    //                 Attendance::updateOrCreate(
+    //                     [
+    //                         'employee_id' => $employeeData['employee_id'],
+    //                         'attendance_date' => $request->attendance_date
+    //                     ],
+    //                     [
+    //                         'check_in' => $checkIn,
+    //                         'check_out' => $checkOut,
+    //                         'status' => $status,
+    //                         'total_hours' => round($totalHours, 2),
+    //                     ]
+    //                 );
+    //             }
+    //         }
+
+    //         return redirect()->route('payroll.attendance', ['start_date' => $request->attendance_date, 'end_date' => $request->attendance_date])
+    //             ->with('success', 'Attendance records have been updated successfully! ✓');
+    //     } catch (\Exception $e) {
+    //         return back()->with('error', 'Error: ' . $e->getMessage())
+    //             ->withInput();
+    //     }
+    // }
+
     public function storeAttendance(Request $request)
     {
-        // dd($request->all());
-        try {
-            if (!$request->attendance_date) {
-                throw new \Exception('Attendance date is required.');
+        foreach ($request->employees as $emp) {
+
+            // skip if everything empty and absent
+            if (
+                empty($emp['check_in']) &&
+                empty($emp['check_out']) &&
+                ($emp['status'] ?? 'present') == 'present'
+            ) {
+                continue;
             }
 
-            foreach ($request->employees as $employeeData) {
-                    $checkIn = !empty($employeeData['check_in']) ? $employeeData['check_in'] : null;
-                    $checkOut = !empty($employeeData['check_out']) ? $employeeData['check_out'] : null;
+            $checkIn = !empty($emp['check_in']) ? $emp['check_in'] : null;
+            $checkOut = !empty($emp['check_out']) ? $emp['check_out'] : null;
 
-                    if ($checkIn || $checkOut) {
-                    $status = $employeeData['status'] ?? 'present';
+            $totalHours = 0;
 
+            if ($checkIn && $checkOut) {
+                try {
+                    $in = \Carbon\Carbon::createFromFormat('H:i', $checkIn);
+                    $out = \Carbon\Carbon::createFromFormat('H:i', $checkOut);
 
-                  $totalHours = 0;
+                    $diffMinutes = $in->diffInMinutes($out, false);
 
-                    if ($checkIn && $checkOut) {
-                        try {
-                            $in = Carbon::createFromFormat('H:i', $checkIn);
-                            $out = Carbon::createFromFormat('H:i', $checkOut);
-
-                            // 🔥 Get difference (can be negative)
-                            $diffMinutes = $in->diffInMinutes($out, false);
-
-                            // ✅ Handle night shift (e.g. 10 PM → 6 AM)
-                            if ($diffMinutes < 0) {
-                                $diffMinutes += 24 * 60;
-                            }
-
-                           $totalHours = round($diffMinutes / 60, 2);
-
-                        } catch (\Exception $e) {
-                            $totalHours = 0;
-                        }
+                    // night shift
+                    if ($diffMinutes < 0) {
+                        $diffMinutes += 24 * 60;
                     }
 
-                    // Auto-Leave Logic: If no check-in, set status to 'leave'
-                    if (empty($checkIn)) {
-                        $status = 'leave';
-                        $checkOut = null; // Ensure no check-out if no check-in
-                    }
+                    $totalHours = round($diffMinutes / 60, 2);
 
-                    Attendance::updateOrCreate(
-                        [
-                            'employee_id' => $employeeData['employee_id'],
-                            'attendance_date' => $request->attendance_date
-                        ],
-                        [
-                            'check_in' => $checkIn,
-                            'check_out' => $checkOut,
-                            'status' => $status,
-                            'total_hours' => round($totalHours, 2),
-                        ]
-                    );
+                } catch (\Exception $e) {
+                    $totalHours = 0;
                 }
             }
 
-            return redirect()->route('payroll.attendance', ['start_date' => $request->attendance_date, 'end_date' => $request->attendance_date])
-                ->with('success', 'Attendance records have been updated successfully! ✓');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error: ' . $e->getMessage())
-                ->withInput();
+            Attendance::create([
+                'employee_id' => $emp['employee_id'],
+                'attendance_date' => $request->attendance_date,
+                'check_in' => !empty($emp['check_in']) ? $emp['check_in'] : null,
+                'check_out' => !empty($emp['check_out']) ? $emp['check_out'] : null,
+                'total_hours' => $totalHours,
+                'status' => $emp['status'] ?? 'present',
+            ]);
         }
+
+        return redirect()->route('payroll.attendance')->with('success', 'Attendance saved successfully');
     }
 
     /**
@@ -626,6 +685,135 @@ public function import(Request $request)
             'edit_date' => \Carbon\Carbon::parse($attendance->attendance_date)->format('Y-m-d'),
             'is_edit' => true // Is flag se hum page ko batayenge ki ye edit mode hai
         ]);
+    }
+
+    public function editByDate($attendance_date)
+    {
+        $attendances = Attendance::with('employee')
+            ->whereDate('attendance_date', $attendance_date)
+            ->get();
+
+        if ($attendances->isEmpty()) {
+            return redirect()->back()->with('error', 'No attendance records found for this date.');
+        }
+
+        $employees = $attendances->map(function ($attendance) {
+            $employee = $attendance->employee;
+
+            $employee->old_check_in = $attendance->check_in 
+                ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') 
+                : '';
+
+            $employee->old_check_out = $attendance->check_out 
+                ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') 
+                : '';
+
+            $employee->old_status = $attendance->status;
+
+            // edit flags
+            $employee->can_edit_check_in = empty($attendance->check_in);
+            $employee->can_edit_check_out = empty($attendance->check_out);
+
+            // absent if both empty
+            $employee->is_absent = empty($attendance->check_in) && empty($attendance->check_out);
+
+            // duration
+            if ($attendance->check_in && $attendance->check_out) {
+                $in = strtotime($attendance->check_in);
+                $out = strtotime($attendance->check_out);
+
+                if ($out < $in) {
+                    $out += 86400;
+                }
+
+                $diff = $out - $in;
+                $hours = floor($diff / 3600);
+                $minutes = floor(($diff % 3600) / 60);
+
+                $employee->old_duration = $hours . 'h ' . $minutes . 'm';
+            } else {
+                $employee->old_duration = '--';
+            }
+
+            return $employee;
+        });
+
+        return view('payroll.add-attendance', [
+            'employees' => $employees,
+            'edit_date' => $attendance_date,
+            'is_edit' => true
+        ]);
+    }
+
+    // public function updateByDate(Request $request, $attendance_date)
+    // {
+    //     foreach ($request->employees as $emp) {
+
+    //         $attendance = Attendance::whereDate('attendance_date', $attendance_date)
+    //             ->where('employee_id', $emp['employee_id'])
+    //             ->first();
+
+    //         if (!$attendance) {
+    //             continue;
+    //         }
+
+    //         // update values directly
+    //         $attendance->check_in = $emp['check_in'];
+    //         $attendance->check_out = $emp['check_out'];
+    //         $attendance->status = $emp['status'];
+
+    //         $attendance->save();
+    //     }
+
+    //     return redirect()->back()->with('success', 'Attendance updated successfully');
+    // }
+    public function updateByDate(Request $request, $attendance_date)
+    {
+        foreach ($request->employees as $emp) {
+
+            $attendance = Attendance::whereDate('attendance_date', $attendance_date)
+                ->where('employee_id', $emp['employee_id'])
+                ->first();
+
+            if (!$attendance) {
+                continue;
+            }
+
+            $checkIn = !empty($emp['check_in']) ? $emp['check_in'] : null;
+            $checkOut = !empty($emp['check_out']) ? $emp['check_out'] : null;
+
+            $totalHours = 0;
+
+            // calculate total hours if both times exist
+            if ($checkIn && $checkOut) {
+                try {
+                    $in = \Carbon\Carbon::createFromFormat('H:i', $checkIn);
+                    $out = \Carbon\Carbon::createFromFormat('H:i', $checkOut);
+
+                    $diffMinutes = $in->diffInMinutes($out, false);
+
+                    // handle night shift
+                    if ($diffMinutes < 0) {
+                        $diffMinutes += 24 * 60;
+                    }
+
+                    $totalHours = round($diffMinutes / 60, 2);
+
+                } catch (\Exception $e) {
+                    $totalHours = 0;
+                }
+            }
+
+            $attendance->check_in = $checkIn;
+            $attendance->check_out = $checkOut;
+            $attendance->status = $emp['status'];
+            $attendance->total_hours = $totalHours;
+
+            $attendance->save();
+        }
+
+        return redirect()->route('payroll.attendance')
+            ->with('success', 'Attendance updated successfully');
     }
 
     public function destroy($id)
