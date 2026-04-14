@@ -507,8 +507,19 @@
             line-height: 1.6;
             color: #1e293b;
             padding: 25px 30px 25px 40px !important;
-            background: #f8fafc !important;
+            background: #fff !important;
             border-radius: 12px;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .custom-html-content img {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: block;
         }
 
         /* Summernote point indentation fix */
@@ -721,9 +732,23 @@
                         ['color', ['color']],
                         ['para', ['ul', 'ol', 'paragraph']],
                         ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
                         ['view', ['fullscreen', 'codeview', 'help']]
                     ],
                     callbacks: {
+                        onImageUpload: function(files) {
+                            for (let i = 0; i < files.length; i++) {
+                                if (files[i].size > 1024 * 1024 * 5) { // 5MB limit
+                                    Toast.fire({ icon: 'error', title: 'Image too large (Max 5MB)' });
+                                    continue;
+                                }
+                                let reader = new FileReader();
+                                reader.onload = (e) => {
+                                    $(this).summernote('insertImage', e.target.result);
+                                };
+                                reader.readAsDataURL(files[i]);
+                            }
+                        },
                         onChange: function (contents, $editable) {
                             $('#projectDesc').val(contents);
                         }

@@ -95,28 +95,45 @@
                 @csrf
                 @method('PUT')
                 <!-- Tab Navigation with custom style -->
-                <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row" id="employeeTab" role="tablist"
-                    style="background: #f8f9fa; border-radius: 10px 10px 0 0; border-bottom: 2px solid #dee2e6;">
+                <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row custom-tabs" id="employeeTab" role="tablist"
+                    style="background: #f1f5f9; border-radius: 12px 12px 0 0; padding: 5px 5px 0 5px; border-bottom: none;">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
                             data-bs-target="#personal" type="button" role="tab" aria-controls="personal"
                             aria-selected="true"
-                            style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                            style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                             <i class="bi bi-person-circle me-2"></i>Personal Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold w-100" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank"
                             type="button" role="tab" aria-controls="bank" aria-selected="false"
-                            style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                            style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                             <i class="bi bi-bank2 me-2"></i>Bank Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
                             type="button" role="tab" aria-controls="salary" aria-selected="false"
-                            style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                            style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                             <i class="bi bi-cash-coin me-2"></i>Salary Details</button>
                     </li>
                 </ul>
+
+                <style>
+                    .custom-tabs .nav-link {
+                        color: #64748b;
+                        background: transparent !important;
+                        position: relative;
+                    }
+                    .custom-tabs .nav-link.active {
+                        color: #4f46e5 !important;
+                        background: #fff !important;
+                        box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+                    }
+                    .custom-tabs .nav-link:not(.active):hover {
+                        background: rgba(255,255,255,0.5) !important;
+                        color: #334155;
+                    }
+                </style>
                 <div class="tab-content p-4" id="employeeTabContent"
                     style="background: #fff; border-radius: 0 0 10px 10px; border: 1px solid #e3e6ef; border-top: none;">
 
@@ -129,7 +146,7 @@
                                     <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
                                     <input type="text" name="employee_code" class="form-control"
                                         placeholder="Enter employee code"
-                                        value="{{ old('name', $employee->employee_code) }}">
+                                        value="{{ old('employee_code', $employee->employee_code) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -293,14 +310,7 @@
                                     <span class="me-2 text-danger"><i class=""></i></span>Female
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="fw-bold">Username</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-key"></i></span>
-                                    <input type="text" name="username" class="form-control" placeholder="Username"
-                                        value="{{ old('username', $employee->username) }}">
-                                </div>
-                            </div>
+
                             <div class="col-md-4">
                                 <label class="fw-bold">Password (Leave blank to keep current)</label>
                                 <div class="input-group mb-3">
@@ -364,10 +374,11 @@
                                     <!-- PF Section -->
                                     <div class="col-md-4">
                                         <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ $employee->pf ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ old('pf', $employee->pf) ? 'checked' : '' }}>
                                             <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
                                         </div>
-                                        <div id="pfField" style="display: {{ $employee->pf ? 'block' : 'none' }};">
+                                        <div id="pfField"
+                                            style="display: {{ old('pf', $employee->pf) ? 'block' : 'none' }};">
                                             <label class="fw-bold small">PF No.</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
@@ -381,10 +392,11 @@
                                     <!-- ESI Section -->
                                     <div class="col-md-4">
                                         <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ $employee->esi ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ old('esi', $employee->esi) ? 'checked' : '' }}>
                                             <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
                                         </div>
-                                        <div id="esiField" style="display: {{ $employee->esi ? 'block' : 'none' }};">
+                                        <div id="esiField"
+                                            style="display: {{ old('esi', $employee->esi) ? 'block' : 'none' }};">
                                             <label class="fw-bold small">ESI No.</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-shield"></i></span>
@@ -399,11 +411,11 @@
                                     <div class="col-md-4">
                                         <div class="form-check form-switch mb-2">
                                             <input class="form-check-input" type="checkbox" name="insurance"
-                                                id="insuranceToggle" {{ $employee->insurance ? 'checked' : '' }}>
+                                                id="insuranceToggle" {{ old('insurance', $employee->insurance) ? 'checked' : '' }}>
                                             <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
                                         </div>
                                         <div id="insuranceFields"
-                                            style="display: {{ $employee->insurance ? 'block' : 'none' }};">
+                                            style="display: {{ old('insurance', $employee->insurance) ? 'block' : 'none' }};">
                                             <div class="mb-2">
                                                 <label class="fw-bold small">Provider</label>
                                                 <div class="input-group">

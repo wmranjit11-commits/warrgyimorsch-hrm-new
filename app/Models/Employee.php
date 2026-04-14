@@ -18,7 +18,6 @@ class Employee extends Model
         'date_of_birth',
         'gender',
         'employee_type',
-        'username',
         'password',
         'aadhaar_number',
         'pan_number',
@@ -56,5 +55,9 @@ class Employee extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
+    }
+    public function user()
+    {
+        return $this->hasOne(User::class, 'employee_id');
     }
 }

@@ -95,27 +95,44 @@
         <form method="POST" action="{{ route('employees.store') }}" enctype="multipart/form-data">
             @csrf
             <!-- Tab Navigation with custom style -->
-            <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row" id="employeeTab" role="tablist"
-                style="background: #f8f9fa; border-radius: 10px 10px 0 0; border-bottom: 2px solid #dee2e6;">
+            <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row custom-tabs" id="employeeTab" role="tablist"
+                style="background: #f1f5f9; border-radius: 12px 12px 0 0; padding: 5px 5px 0 5px; border-bottom: none;">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
                         data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
-                        style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                        style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                         <i class="bi bi-person-circle me-2"></i>Personal Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold w-100" id="bank-tab" type="button" data-bs-toggle="tab"
                         data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
-                        style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                        style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                         <i class="bi bi-bank2 me-2"></i>Bank Details</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
                         type="button" role="tab" aria-controls="salary" aria-selected="false"
-                        style="font-size: 16px; padding: 15px 0; border: none; background: #f8f9fa; border-radius: 10px 10px 0 0;">
+                        style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                         <i class="bi bi-cash-coin me-2"></i>Salary Details</button>
                 </li>
             </ul>
+
+            <style>
+                .custom-tabs .nav-link {
+                    color: #64748b;
+                    background: transparent !important;
+                    position: relative;
+                }
+                .custom-tabs .nav-link.active {
+                    color: #4f46e5 !important;
+                    background: #fff !important;
+                    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+                }
+                .custom-tabs .nav-link:not(.active):hover {
+                    background: rgba(255,255,255,0.5) !important;
+                    color: #334155;
+                }
+            </style>
             <div class="tab-content p-4" id="employeeTabContent"
                 style="background: #fff; border-radius: 0 0 10px 10px; border: 1px solid #e3e6ef; border-top: none;">
                 <!-- Personal Details Tab -->
@@ -126,7 +143,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
                                 <input type="text" name="employee_code" class="form-control"
-                                    placeholder="Enter employee code">
+                                    placeholder="Enter employee code" value="{{ old('employee_code') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -134,14 +151,14 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input type="text" name="name" class="form-control" placeholder="Enter employee name"
-                                    required>
+                                    value="{{ old('name') }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Email</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-mail"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="Enter email">
+                                <input type="email" name="email" class="form-control" placeholder="Enter email" value="{{ old('email') }}">
                             </div>
                         </div>
 
@@ -151,12 +168,12 @@
                                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                 <select name="role" class="form-control" required>
                                     <option value="">Select Role</option>
-                                    <option value="super_admin">Super Admin</option>
-                                    <option value="manager">Manager</option>
-                                    <option value="hr_executive">HR Executive</option>
-                                    <option value="hr_intern">HR Intern</option>
-                                    <option value="team_leader">Team Leader</option>
-                                    <option value="employee">Employee</option>
+                                    <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                                    <option value="hr_executive" {{ old('role') == 'hr_executive' ? 'selected' : '' }}>HR Executive</option>
+                                    <option value="hr_intern" {{ old('role') == 'hr_intern' ? 'selected' : '' }}>HR Intern</option>
+                                    <option value="team_leader" {{ old('role') == 'team_leader' ? 'selected' : '' }}>Team Leader</option>
+                                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
                                 </select>
                             </div>
                         </div>
@@ -165,7 +182,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-phone"></i></span>
                                 <input type="text" name="mobile_number" class="form-control"
-                                    placeholder="Enter mobile number" required>
+                                    placeholder="Enter mobile number" value="{{ old('mobile_number') }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -174,12 +191,12 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="department" class="form-control" required>
                                     <option value="">Select department...</option>
-                                    <option value="administration">Administration (Admin)</option>
-                                    <option value="business_development">Business Development (BD)</option>
-                                    <option value="hr">HR Department (HR)</option>
-                                    <option value="web_development">Web Development (WD)</option>
-                                    <option value="digital_marketing">Digital Marketing (DM)</option>
-                                    <option value="web_graphics">Web & Graphics Design (WGD)</option>
+                                    <option value="administration" {{ old('department') == 'administration' ? 'selected' : '' }}>Administration (Admin)</option>
+                                    <option value="business_development" {{ old('department') == 'business_development' ? 'selected' : '' }}>Business Development (BD)</option>
+                                    <option value="hr" {{ old('department') == 'hr' ? 'selected' : '' }}>HR Department (HR)</option>
+                                    <option value="web_development" {{ old('department') == 'web_development' ? 'selected' : '' }}>Web Development (WD)</option>
+                                    <option value="digital_marketing" {{ old('department') == 'digital_marketing' ? 'selected' : '' }}>Digital Marketing (DM)</option>
+                                    <option value="web_graphics" {{ old('department') == 'web_graphics' ? 'selected' : '' }}>Web & Graphics Design (WGD)</option>
                                     <!-- aur add karo jo chahiye -->
                                 </select>
                             </div>
@@ -248,22 +265,22 @@
                             <label class="fw-bold">Date of Joining</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_joining" class="form-control">
+                                <input type="date" name="date_of_joining" class="form-control" value="{{ old('date_of_joining') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Date of Birth</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="date" name="date_of_birth" class="form-control">
+                                <input type="date" name="date_of_birth" class="form-control" value="{{ old('date_of_birth') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Gender</label><br>
                             <div class="d-flex align-items-center mb-3">
-                                <input class="form-check-input me-2" type="radio" name="gender" value="male" checked>
+                                <input class="form-check-input me-2" type="radio" name="gender" value="male" {{ old('gender', 'male') == 'male' ? 'checked' : '' }}>
                                 <span class="me-2 text-success"><i class=""></i></span>Male
-                                <input class="form-check-input ms-4 me-2" type="radio" name="gender" value="female">
+                                <input class="form-check-input ms-4 me-2" type="radio" name="gender" value="female" {{ old('gender') == 'female' ? 'checked' : '' }}>
                                 <span class="me-2 text-danger"><i class=""></i></span>Female
                             </div>
                         </div>
@@ -280,42 +297,42 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
                                 <input type="text" name="aadhaar_number" class="form-control"
-                                    placeholder="Enter Aadhaar Number">
+                                    placeholder="Enter Aadhaar Number" value="{{ old('aadhaar_number') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">PAN Number</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
-                                <input type="text" name="pan_number" class="form-control" placeholder="E.G. ABCDE2548K">
+                                <input type="text" name="pan_number" class="form-control" placeholder="E.G. ABCDE2548K" value="{{ old('pan_number') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Address</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-map-pin"></i></span>
-                                <textarea name="address" class="form-control" placeholder="Enter Address"></textarea>
+                                <textarea name="address" class="form-control" placeholder="Enter Address">{{ old('address') }}</textarea>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time In</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_in" class="form-control" value="09:30">
+                                <input type="time" name="time_in" class="form-control" value="{{ old('time_in', '09:30') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Time Out</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-clock"></i></span>
-                                <input type="time" name="time_out" class="form-control" value="18:00">
+                                <input type="time" name="time_out" class="form-control" value="{{ old('time_out', '18:00') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">Leave</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-calendar"></i></span>
-                                <input type="text" name="leave" class="form-control" value=""
+                                <input type="text" name="leave" class="form-control" value="{{ old('leave') }}"
                                     placeholder="Enter Leave Allotment">
                             </div>
                         </div>
@@ -328,47 +345,47 @@
                                 <!-- PF Section -->
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="pf" id="pfToggle">
+                                        <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ old('pf') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
                                     </div>
-                                    <div id="pfField" style="display: none;">
-                                        <label class="fw-bold small">PF No.</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                            <input type="text" name="pf_number" class="form-control" placeholder="PF No.">
+                                        <div id="pfField" style="display: {{ old('pf') ? 'block' : 'none' }};">
+                                            <label class="fw-bold small">PF No.</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                                <input type="text" name="pf_number" class="form-control" placeholder="PF No." value="{{ old('pf_number') }}">
+                                            </div>
                                         </div>
-                                    </div>
                                 </div>
 
                                 <!-- ESI Section -->
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" name="esi" id="esiToggle">
+                                        <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ old('esi') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
                                     </div>
-                                    <div id="esiField" style="display: none;">
-                                        <label class="fw-bold small">ESI No.</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                            <input type="text" name="esi_number" class="form-control" placeholder="ESI No.">
+                                        <div id="esiField" style="display: {{ old('esi') ? 'block' : 'none' }};">
+                                            <label class="fw-bold small">ESI No.</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-shield"></i></span>
+                                                <input type="text" name="esi_number" class="form-control" placeholder="ESI No." value="{{ old('esi_number') }}">
+                                            </div>
                                         </div>
-                                    </div>
                                 </div>
 
                                 <!-- Insurance Section -->
                                 <div class="col-md-4">
                                     <div class="form-check form-switch mb-2">
                                         <input class="form-check-input" type="checkbox" name="insurance"
-                                            id="insuranceToggle">
+                                            id="insuranceToggle" {{ old('insurance') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
                                     </div>
-                                    <div id="insuranceFields" style="display: none;">
+                                    <div id="insuranceFields" style="display: {{ old('insurance') ? 'block' : 'none' }};">
                                         <div class="mb-2">
                                             <label class="fw-bold small">Provider</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-shield"></i></span>
                                                 <input type="text" name="insurance_provider" class="form-control"
-                                                    placeholder="Insurance Company">
+                                                    placeholder="Insurance Company" value="{{ old('insurance_provider') }}">
                                             </div>
                                         </div>
                                         <div>
@@ -376,7 +393,7 @@
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                 <input type="text" name="insurance_policy_number" class="form-control"
-                                                    placeholder="Policy Number">
+                                                    placeholder="Policy Number" value="{{ old('insurance_policy_number') }}">
                                             </div>
                                         </div>
                                     </div>
@@ -452,7 +469,7 @@
                             <label class="fw-bold">Bank Name <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
-                                <input type="text" name="bank_name" class="form-control" placeholder="Bank Name" required>
+                                <input type="text" name="bank_name" class="form-control" placeholder="Bank Name" value="{{ old('bank_name') }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -460,14 +477,14 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-hash"></i></span>
                                 <input type="text" name="account_number" class="form-control" placeholder="Account Number"
-                                    required>
+                                    value="{{ old('account_number') }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold">IFSC Code <span class="text-danger">*</span></label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-key"></i></span>
-                                <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code" required>
+                                <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code" value="{{ old('ifsc_code') }}" required>
                             </div>
                         </div>
                     </div>
@@ -488,7 +505,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                                 <input type="number" name="basic_salary" id="basic_salary" class="form-control salary-input"
-                                    placeholder="Basic Salary" required>
+                                    placeholder="Basic Salary" value="{{ old('basic_salary') }}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -496,7 +513,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-home"></i></span>
                                 <input type="number" name="hra" id="hra" class="form-control salary-input"
-                                    placeholder="HRA">
+                                    placeholder="HRA" value="{{ old('hra') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -504,7 +521,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-truck"></i></span>
                                 <input type="number" name="conveyance_allowance" id="conveyance_allowance"
-                                    class="form-control salary-input" placeholder="Conveyance Allowance">
+                                    class="form-control salary-input" placeholder="Conveyance Allowance" value="{{ old('conveyance_allowance') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -512,7 +529,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-activity"></i></span>
                                 <input type="number" name="medical_allowance" id="medical_allowance"
-                                    class="form-control salary-input" placeholder="Medical Allowance">
+                                    class="form-control salary-input" placeholder="Medical Allowance" value="{{ old('medical_allowance') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -520,7 +537,7 @@
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-gift"></i></span>
                                 <input type="number" name="other_allowance" id="other_allowance"
-                                    class="form-control salary-input" placeholder="Other Allowance">
+                                    class="form-control salary-input" placeholder="Other Allowance" value="{{ old('other_allowance') }}">
                             </div>
                         </div>
                         <div class="col-md-4">

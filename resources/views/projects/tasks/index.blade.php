@@ -567,16 +567,17 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="text-muted small fw-bold text-uppercase"
-                                                style="font-size: 11px;">Show</span>
+                                                style="font-size: 10px; letter-spacing: 0.5px;">Show</span>
                                             <select id="modalEntriesLimit"
                                                 class="form-select border-0 bg-light shadow-none fw-bold"
                                                 onchange="changeModalEntries()"
-                                                style="width: 80px; height: 38px; font-size: 13px; border-radius: 8px;">
+                                                style="width: 75px; height: 36px; font-size: 13px; border-radius: 8px; padding: 0 10px; cursor: pointer;">
                                                 <option value="5">5</option>
                                                 <option value="10">10</option>
+                                                <option value="25">25</option>
                                             </select>
                                             <span class="text-muted small fw-bold text-uppercase"
-                                                style="font-size: 11px;">entries</span>
+                                                style="font-size: 10px; letter-spacing: 0.5px;">entries</span>
                                         </div>
                                         <div class="input-group" style="width: 180px;">
                                             <span class="input-group-text bg-light border-0 py-0"><i
@@ -589,14 +590,14 @@
                                     </div>
                                 </div>
                                 <div class="card-body p-0">
-                                    <div id="modalTableContainer" class="table-responsive"
-                                        style="max-height: 420px; overflow-y: auto;">
-                                        <table class="table table-hover align-middle mb-0">
+                                    <div id="modalTableContainer"
+                                        style="max-height: 450px; overflow-y: auto; overflow-x: hidden; width: 100%;">
+                                        <table class="table table-hover align-middle mb-0" style="width: 100%; table-layout: fixed;">
                                             <thead
                                                 style="background: #3858f9; color: white; position: sticky; top: 0; z-index: 1;">
                                                 <tr style="height: 52px; vertical-align: middle;">
                                                     <th class="ps-4"
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 65px;">
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 50px;">
                                                         #</th>
                                                     <th
                                                         style="font-size: 11px; text-transform: uppercase; color: #ffffff !important;">
@@ -608,8 +609,8 @@
                                                         style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 110px;">
                                                         Date</th>
                                                     <th class="pe-3 text-center"
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 50px;">
-                                                        Del</th>
+                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 100px;">
+                                                        Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="followUpHistoryBody">
@@ -799,8 +800,10 @@
             word-wrap: break-word;
             word-break: break-word;
             overflow-wrap: break-word;
-            padding: 25px 30px 25px 40px !important;
+            padding: 15px 20px 15px 25px !important;
             background: #fff !important;
+            overflow-x: hidden !important;
+            width: 100%;
         }
 
         /* Summernote point indentation fix */
@@ -1085,21 +1088,39 @@
                     timeDisplay = fu.time_taken + ' Hours';
                 }
 
-                let nameBtn = `<a href="javascript:void(0);" onclick="showFollowUpDesc(${fu.id})" class="text-primary fw-bold" style="text-decoration: none; font-size: 14px;"><i class="feather-user me-1"></i>${fu.reference_name || 'Anonymous'}</a>`;
+                let nameHtml = `<span class="fw-bold text-dark" style="font-size: 14px;"><i class="feather-user me-1 text-primary"></i>${fu.reference_name || 'Anonymous'}</span>`;
+                let viewBtn = `<a href="javascript:void(0);" onclick="toggleFollowUpRow(${fu.id}, this)" class="avatar-text avatar-md bg-soft-info text-info rounded-circle shadow-none me-2" title="View Details" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-eye" style="font-size:14px;"></i></a>`;
+                let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                 body.innerHTML += `
-                                    <tr style="height: 65px; border-bottom: 1px solid #f1f5f9; background: white;">
-                                        <td class="ps-4 fw-bold text-dark" style="font-size: 13px;">${startIdx + index + 1}</td>
-                                        <td style="font-size: 13px;">
-                                            ${nameBtn}
+                                    <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
+                                        <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
+                                        <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            ${nameHtml}
                                         </td>
-                                        <td style="font-size: 13px; font-weight: 700; color: #475569;">
+                                        <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             ${timeDisplay}
                                         </td>
-                                        <td style="font-size: 12px; white-space: nowrap;">
+                                        <td style="font-size: 13px; white-space: nowrap;">
                                             <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                                         </td>
-                                        <td class="pe-3 text-center"><a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="text-danger shadow-none"><i class="feather-trash-2"></i></a></td>
+                                        <td class="pe-3 text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                ${viewBtn}
+                                                ${delBtn}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
+                                        <td colspan="5" class="p-0">
+                                            <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                                <div style="padding: 20px 25px;">
+                                                    <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
+                                                        ${fu.work_description}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 `;
             });
@@ -1254,15 +1275,28 @@
             });
         }
 
-        function showFollowUpDesc(id) {
-            const fu = globalFollowUps.find(f => f.id === id);
-            if (fu) {
-                Swal.fire({
-                    title: 'Work Description',
-                    html: `<div class="custom-html-content" style="max-height: 400px; overflow-y: auto; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">${fu.work_description}</div>`,
-                    showConfirmButton: true,
-                    confirmButtonColor: '#3858f9'
+        function toggleFollowUpRow(id, btn) {
+            const row = document.getElementById('desc_row_' + id);
+            const content = document.getElementById('desc_content_' + id);
+            const icon = btn.querySelector('i');
+
+            if (row.classList.contains('d-none')) {
+                // Show Smoothly
+                row.classList.remove('d-none');
+                $(content).slideDown(400, "swing");
+                icon.classList.remove('feather-eye');
+                icon.classList.add('feather-eye-off');
+                btn.classList.remove('bg-soft-info', 'text-info');
+                btn.classList.add('bg-info', 'text-white');
+            } else {
+                // Hide Smoothly
+                $(content).slideUp(350, "swing", function() {
+                    row.classList.add('d-none');
                 });
+                icon.classList.remove('feather-eye-off');
+                icon.classList.add('feather-eye');
+                btn.classList.remove('bg-info', 'text-white');
+                btn.classList.add('bg-soft-info', 'text-info');
             }
         }
 

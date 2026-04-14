@@ -889,7 +889,7 @@
                                                             <div class="detail-card">
                                                                 <div class="detail-icon"><i class="bi bi-person-fill"></i></div>
                                                                 <div class="detail-content">
-                                                                    <label class="detail-label">Username</label>
+                                                                    <label class="detail-label">Name</label>
                                                                     <p class="detail-value">${emp.name}</p>
                                                                 </div>
                                                             </div>
