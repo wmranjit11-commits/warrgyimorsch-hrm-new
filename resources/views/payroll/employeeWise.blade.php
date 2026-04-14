@@ -16,7 +16,7 @@
                     </nav>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('payroll.attendace.employee') }}" class="btn btn-icon btn-light-brand"><label>Employee wise attendance</label></a>
+                    <a href="{{ route('payroll.attendace.employee') }}" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Employee wise attendance</label></a>
                      <div class="dropdown d-inline-block ms-auto float-end">
                         <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Import Attendance &nbsp; </label>
                             <i class="fas fa-upload"></i>
@@ -59,17 +59,30 @@
             <div class="collapse" id="filterSection">
                 <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
                     <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-2">Employee Name</label>
+                            <select id="employee_id"
+                                class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
+                                style="border-radius: 8px; height: 40px;">
+                            <option value="">Select Employee</option>
+                            @foreach($employees as $employee)
+                                <option value="{{ $employee->id }}">
+                                    {{ $employee->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                             <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                             <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
                                 <i class="feather-search"></i> APPLY
                             </button>
@@ -90,7 +103,7 @@
                 <table class="table align-middle mb-0">
                     <thead style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
                         <tr>
-                            <th class="ps-4 py-3 text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px; width: 150px;">DATE</th>
+                            <th class="ps-4 py-3 text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px; width: 150px;">Employee Name</th>
                             <th class="py-3 text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">ATTENDANCE HISTORY</th>
                             <th class="pe-4 py-3 text-muted small fw-bold text-uppercase text-end" style="width: 150px; letter-spacing: 0.5px;">ACTION</th>
                         </tr>
@@ -98,42 +111,43 @@
                     <tbody>
                         @forelse($attendance as $att)
                             <tr class="border-bottom hover-row">
+                                @php
+                                    $employeeId = $att->employee_id;
+                                    $employeeName = $att->employee_name;
+                                @endphp
                                 <td class="ps-4 py-4 text-dark fw-bold">
-                                    {{ \Carbon\Carbon::parse($att->attendance_date)->format('d-m-Y') }}
+                                    {{ $employeeName }}
                                 </td>
                                 <td>
                                     @php $date = \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d'); @endphp
                                     <div class="d-flex flex-wrap gap-2">
-                                        <div class="ref-badge badge-green clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'present')">
+                                        <div class="ref-badge badge-green clickable" title="View Present" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'present')">
                                             Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-blue clickable" title="View Overtime" onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
+                                        <div class="ref-badge badge-blue clickable" title="View Overtime" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'overtime')">
                                             Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-yellow clickable" title="View Half Day" onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
+                                        <div class="ref-badge badge-yellow clickable" title="View Half Day" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'half_day')">
                                             Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $date }}', 'leave')">
+                                        <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'leave')">
                                             Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
+                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'wfh')">
                                             WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
+                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'early_out')">
                                             Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} " class="avatar-text avatar-md bg-soft-primary text-primary">
+                                        <a href="{{ route('payroll.attendance.employee.editByName', $employeeId) }}" class="avatar-text avatar-md bg-soft-primary text-primary">
                                            <i class="feather-edit"></i>
                                         </a>
-                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $date }}')" title="View">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')" title="View">
                                             <i class="feather-eye"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deleteAttendanceByDate('{{ $date }}')" title="Delete">
-                                            <i class="feather-trash-2"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -179,7 +193,7 @@
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4 py-3 small fw-bold text-muted text-uppercase" style="width: 80px;">SR. NO.</th>
-                        <th class="py-3 small fw-bold text-muted text-uppercase">EMPLOYEE NAME</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase">Date</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">CHECK IN</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">CHECK OUT</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">Working Hrs</th>
@@ -202,10 +216,13 @@
     }
 
     function applyFilters() {
+        const employeeId = document.getElementById('employee_id').value;
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
         
         let url = new URL(window.location.href);
+
+        if (employeeId) url.searchParams.set('employee_id', employeeId);
         if(start) url.searchParams.set('start_date', start);
         if(end) url.searchParams.set('end_date', end);
         window.location.href = url.toString();
@@ -220,16 +237,23 @@
         document.getElementById('statusIndicator').innerText = 'Showing All Records';
     }
 
-    function openAttendanceDetails(date, filterStatus = null) {
-        lastDate = date;
-        fetch(`/payroll/attendance/details?date=${date}`)
+    function openAttendanceDetails(employeeId, employeeName = '', filterStatus = null) {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+
+        let url = `/payroll/attendance/employee-wise-details?employee_id=${employeeId}`;
+
+        if (start) url += `&start_date=${start}`;
+        if (end) url += `&end_date=${end}`;
+
+        fetch(url)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     lastFetchedData = data.data;
-                    document.getElementById('offcanvasDate').innerText = date;
+                    document.getElementById('offcanvasDate').innerText = data.employee_name;
                     renderTable(data.data, filterStatus);
-                    
+
                     const offcanvasEl = document.getElementById('attendanceDetailOffcanvas');
                     const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
                     offcanvas.show();
@@ -250,11 +274,10 @@
             if (filterStatus === 'late' && item.status === 'late') match = true;
             if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
             if (filterStatus === 'wfh' && item.status === 'wfh') match = true;
-            if (filterStatus === 'early_out' && item.check_out && item.employee?.time_out) {
+            if (filterStatus === 'early_out' && item.check_out && item.employee && item.employee.time_out) {
                 const shiftEnd = new Date(`1970-01-01T${item.employee.time_out}`);
-                shiftEnd.setMinutes(shiftEnd.getMinutes() - 30);
-
                 const checkOut = new Date(`1970-01-01T${item.check_out}`);
+                shiftEnd.setMinutes(shiftEnd.getMinutes() - 30);
 
                 if (checkOut <= shiftEnd) {
                     match = true;
@@ -266,7 +289,7 @@
                 body.innerHTML += `
                     <tr class="border-bottom">
                         <td class="ps-4 py-3 text-muted fw-bold">${index + 1}</td>
-                        <td class="fw-bold text-dark">${item.employee.name}</td>
+                        <td class="fw-bold text-dark">${formatDate(item.attendance_date)}</td>
                         <td class="text-center">${item.check_in ? formatTime(item.check_in) : '--'}</td>
                         <td class="text-center">${item.check_out ? formatTime(item.check_out) : '--'}</td>
                        <td class="text-center">${formatHours(item.total_hours)}</td>
@@ -274,10 +297,10 @@
                             <span class="status-badge ${getStatusBadge(item.status)}">${item.status}</span>
                         </td>
                         <td class="pe-4 text-center d-flex">
-                            <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
+                            <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id})">
                                 <i class="bi bi-trash"></i>
                             </button>
-                            <button class="btn btn-sm text-danger shadow-none" onclick="editSingleAttendance(${item.id}, '${lastDate}')">
+                            <button class="btn btn-sm text-danger shadow-none" onclick="editSingleAttendance(${item.id}, '${item.employee_id}')">
                                 <i class="feather-edit"></i>
                             </button>
                         </td>
@@ -293,6 +316,13 @@
             document.getElementById('showAllBtn').style.display = 'none';
             document.getElementById('statusIndicator').innerText = 'Showing All Records';
         }
+    }
+
+    function formatDate(date) {
+        if (!date) return '--';
+
+        const d = new Date(date);
+        return d.toLocaleDateString('en-GB'); 
     }
 
     function formatHours(decimalHours) {
@@ -328,30 +358,41 @@
         }
     }
 
-    function deleteAttendanceByDate(date) {
-        if (confirm('Are you sure you want to delete all records for ' + date + '?')) {
-            fetch(`/payroll/attendance/date/${date}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(res => res.json()).then(data => {
-                if(data.success) window.location.reload();
-            });
-        }
-    }
+    // function deleteAttendanceByDate(employeeId) {
+    //     if (confirm('Are you sure you want to delete this employee attendance record?')) {
+    //         fetch(`/payroll/attendance/date/${employeeId}`, {
+    //             method: 'DELETE',
+    //             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+    //         }).then(res => res.json()).then(data => {
+    //             if(data.success) window.location.reload();
+    //         });
+    //     }
+    // }
 
     function deleteSingleAttendance(id, date) {
         if (confirm('Delete this record?')) {
             fetch(`/payroll/attendance/${id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(res => res.json()).then(data => {
-                if(data.success) openAttendanceDetails(date);
+            }).then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Record deleted successfully');
+
+                    // refresh eye tab data
+                    const employeeName = document.getElementById('offcanvasDate').innerText;
+                    const employeeId = lastFetchedData[0]?.employee_id;
+
+                    if (employeeId) {
+                        openAttendanceDetails(employeeId, employeeName);
+                    }
+                }
             });
         }
     }
 
-    function editSingleAttendance(id) {
-        window.location.href = `/payroll/attendance/${id}/edit`;
+    function editSingleAttendance(id, employeeId) {
+        window.location.href = `/payroll/attendace/employee/${employeeId}/edit?attendance_id=${id}`;
     }
 
     function exportAttendance() {
