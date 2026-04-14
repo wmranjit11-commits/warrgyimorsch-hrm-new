@@ -94,9 +94,9 @@
 
         <form method="POST" action="{{ route('employees.store') }}" enctype="multipart/form-data">
             @csrf
-            <!-- Tab Navigation with custom style -->
+            <!-- Tab Navigation -->
             <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row custom-tabs" id="employeeTab" role="tablist"
-                style="background: #f1f5f9; border-radius: 12px 12px 0 0; padding: 5px 5px 0 5px; border-bottom: none;">
+                style="background: #f1f5f9; border-radius: 12px 12px 0 0; padding: 8px 8px 0 8px; border: none;">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
                         data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
@@ -121,20 +121,27 @@
                 .custom-tabs .nav-link {
                     color: #64748b;
                     background: transparent !important;
-                    position: relative;
                 }
                 .custom-tabs .nav-link.active {
-                    color: #4f46e5 !important;
+                    color: #3858f9 !important;
                     background: #fff !important;
-                    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+                    position: relative;
+                }
+                /* Smooth Animation for Tabs */
+                .tab-pane {
+                    animation: fadeIn 0.4s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(5px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 .custom-tabs .nav-link:not(.active):hover {
-                    background: rgba(255,255,255,0.5) !important;
+                    background: rgba(255,255,255,0.4) !important;
                     color: #334155;
                 }
             </style>
-            <div class="tab-content p-4" id="employeeTabContent"
-                style="background: #fff; border-radius: 0 0 10px 10px; border: 1px solid #e3e6ef; border-top: none;">
+
+            <div class="tab-content p-4" id="employeeTabContent" style="background: #fff; border-radius: 0 0 10px 10px;">
                 <!-- Personal Details Tab -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                     <div class="row g-3">
