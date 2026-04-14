@@ -176,7 +176,7 @@
                             <div class="col-md-4">
                                 <label class="fw-bold">Role</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
                                     <select name="role" class="form-control" required>
                                         <option value="">Select Role</option>
                                         <option value="super_admin" {{ old('role', $employee->role) == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
@@ -322,7 +322,10 @@
                                 <label class="fw-bold">Password (Leave blank to keep current)</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-lock"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="Password">
+                                    <input type="password" name="password" id="password_input" class="form-control" placeholder="Password" autocomplete="new-password">
+                                    <span class="input-group-text cursor-pointer" onclick="togglePassword('password_input', this.querySelector('i'))">
+                                        <i class="feather-eye-off"></i>
+                                    </span>
                                 </div>
                             </div>
                             <div class="col-md-4">

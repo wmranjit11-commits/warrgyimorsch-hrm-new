@@ -53,7 +53,12 @@
                                 <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required autofocus>
                             </div>
                             <div class="mb-3">
-                                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="login_password" class="form-control" placeholder="Password" required>
+                                    <span class="input-group-text cursor-pointer" onclick="togglePassword('login_password', this.querySelector('i'))">
+                                        <i class="feather-eye-off"></i>
+                                    </span>
+                                </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="form-check">
@@ -248,6 +253,18 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
+    <script>
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconElement.classList.replace('feather-eye-off', 'feather-eye');
+            } else {
+                input.type = 'password';
+                iconElement.classList.replace('feather-eye', 'feather-eye-off');
+            }
+        }
+    </script>
 </body>
 
 </html>
