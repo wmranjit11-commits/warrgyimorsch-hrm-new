@@ -68,17 +68,6 @@
                     submenu.style.display === "block" ? "none" : "block";
             }
         }
-
-        function togglePassword(inputId, iconElement) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                iconElement.classList.replace('feather-eye-off', 'feather-eye');
-            } else {
-                input.type = 'password';
-                iconElement.classList.replace('feather-eye', 'feather-eye-off');
-            }
-        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
