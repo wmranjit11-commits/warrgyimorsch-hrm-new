@@ -875,6 +875,127 @@ public function import(Request $request)
         }
     }
 
+    // Show Employee wise attendace
+    public function employeeWiseAttendace(Request $request)
+    {
+        $employees = Employee::orderBy('name', 'asc')->get();
+
+        $query = Attendance::selectRaw("
+            attendances.employee_id,
+            employees.name as employee_name,
+            COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
+            COUNT(CASE WHEN attendances.total_hours > 9 THEN 1 END) as overtime_count,
+            COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
+            COUNT(CASE WHEN attendances.status IN ('leave','absent') THEN 1 END) as leave_count,
+            COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
+            COUNT(
+                CASE 
+                    WHEN attendances.check_out IS NOT NULL 
+                    AND TIME(attendances.check_out) <= SUBTIME(employees.time_out, '00:30:00')
+                    THEN 1
+                END
+            ) as early_count
+        ")
+        ->join('employees', 'attendances.employee_id', '=', 'employees.id');
+
+        // FILTER BY EMPLOYEE NAME
+        if ($request->filled('employee_id')) {
+            $query->where('attendances.employee_id', $request->employee_id);
+        }
+
+        // FILTER BY START DATE
+        if ($request->filled('start_date')) {
+            $query->whereDate('attendances.attendance_date', '>=', $request->start_date);
+        }
+
+        // FILTER BY END DATE
+        if ($request->filled('end_date')) {
+            $query->whereDate('attendances.attendance_date', '<=', $request->end_date);
+        }
+        $attendance = $query
+        ->groupBy('attendances.employee_id', 'employees.name')
+        ->paginate(10)
+        ->appends($request->all());
+
+        return view('payroll.employeeWise', compact('attendance', 'employees'));
+    }
+
+    public function employeeWiseDetails(Request $request)
+    {
+        $query = Attendance::with('employee')->where('employee_id', $request->employee_id);
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('attendance_date', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('attendance_date', '<=', $request->end_date);
+        }
+
+        $records = $query->orderBy('attendance_date', 'desc')->get();
+
+        $employeeName = Employee::where('id', $request->employee_id)->value('name');
+
+        return response()->json([
+            'success' => true,
+            'employee_name' => $employeeName,
+            'data' => $records
+        ]);
+    }
+
+
+    public function editByName(Request $request, $employee_id)
+    {
+        $employee = Employee::findOrFail($employee_id);
+
+        $query = Attendance::where('employee_id', $employee_id);
+
+        // if single record edit from eye tab
+        if ($request->filled('attendance_id')) {
+            $query->where('id', $request->attendance_id);
+        }
+
+        $attendance = $query
+            ->orderBy('attendance_date', 'desc')
+            ->get();
+
+        return view('payroll.edit-attendance-by-name', compact('employee', 'attendance'));
+    }
+
+    public function updateByName(Request $request, $employee_id)
+    {
+        foreach ($request->attendance_ids as $id) {
+            $checkIn = $request->check_in[$id] ?? null;
+            $checkOut = $request->check_out[$id] ?? null;
+
+            $totalHours = null;
+
+            // Calculate total working hours
+            if ($checkIn && $checkOut) {
+                $inTime = \Carbon\Carbon::createFromFormat('H:i', $checkIn);
+                $outTime = \Carbon\Carbon::createFromFormat('H:i', $checkOut);
+
+                // support night shift
+                if ($outTime->lt($inTime)) {
+                    $outTime->addDay();
+                }
+
+                $minutes = $inTime->diffInMinutes($outTime);
+                $totalHours = round($minutes / 60, 2);
+            }
+
+            Attendance::where('id', $id)->update([
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'status' => $request->status[$id],
+                'total_hours' => $totalHours
+            ]);
+        }
+
+        return redirect()->route('payroll.attendace.employee')
+            ->with('success', 'Employee attendance updated successfully');
+    }
+
     /**
      * Bulk remove selected attendance records by date.
      */
