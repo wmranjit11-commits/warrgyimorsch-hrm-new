@@ -15,11 +15,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Run Master Data Seeder FIRST
+        $this->call(MasterDataSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // 2. Create System Users
+        User::firstOrCreate([
+            'email' => 'ranjit.warrgyizmorsch@gmail.com',
+        ], [
+            'name' => 'Ranjit',
+            'password' => \Hash::make('aadi2003'),
+            'role' => 'Super Admin',
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'admin@admin.com',
+        ], [
+            'name' => 'Administrator',
+            'password' => \Hash::make('password'),
+            'role' => 'Super Admin',
         ]);
     }
 }

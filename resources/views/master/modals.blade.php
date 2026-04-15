@@ -46,10 +46,8 @@
                         <label class="form-label fw-bold text-muted small text-uppercase mb-2">Short Name (Optional)</label>
                         <input type="text" name="short_name" id="editDeptShortName" class="form-control border-0 shadow-none fw-bold" style="height: 48px; border-radius: 8px;">
                     </div>
-                    <div class="form-check form-switch mt-3">
-                        <input class="form-check-input shadow-none" type="checkbox" name="is_active" id="editDeptActive" style="cursor: pointer;">
-                        <label class="form-check-label fw-bold text-muted small text-uppercase" for="editDeptActive">Is Active</label>
                     </div>
+                </div>
                 </div>
                 <div class="modal-footer bg-white border-top p-4">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
@@ -100,10 +98,8 @@
                         <label class="form-label fw-bold text-muted small text-uppercase mb-2">Designation Name <span class="text-danger">*</span></label>
                         <input type="text" name="name" id="editDesgName" class="form-control border-0 shadow-none fw-bold" required style="height: 48px; border-radius: 8px;">
                     </div>
-                    <div class="form-check form-switch mt-3">
-                        <input class="form-check-input shadow-none" type="checkbox" name="is_active" id="editDesgActive" style="cursor: pointer;">
-                        <label class="form-check-label fw-bold text-muted small text-uppercase" for="editDesgActive">Is Active</label>
                     </div>
+                </div>
                 </div>
                 <div class="modal-footer bg-white border-top p-4">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
@@ -160,10 +156,8 @@
                     <div class="alert alert-info border-0 rounded" style="font-size: 13px;">
                         <i class="feather-info me-2"></i> Slug will be automatically re-generated on save.
                     </div>
-                    <div class="form-check form-switch mt-3">
-                        <input class="form-check-input shadow-none" type="checkbox" name="is_active" id="editRoleActive" style="cursor: pointer;">
-                        <label class="form-check-label fw-bold text-muted small text-uppercase" for="editRoleActive">Is Active</label>
                     </div>
+                </div>
                 </div>
                 <div class="modal-footer bg-white border-top p-4">
                     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal">Cancel</button>

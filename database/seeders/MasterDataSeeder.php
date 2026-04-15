@@ -30,7 +30,7 @@ class MasterDataSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-            RoleMaster::firstOrCreate(['slug' => $role['slug']], $role);
+            RoleMaster::updateOrCreate(['slug' => $role['slug']], $role);
         }
 
         // 2. Departments
@@ -44,7 +44,7 @@ class MasterDataSeeder extends Seeder
         ];
 
         foreach ($departments as $dept) {
-            Department::firstOrCreate(['name' => $dept['name']], $dept);
+            Department::updateOrCreate(['name' => $dept['name']], $dept);
         }
 
         // 3. Designations
@@ -90,7 +90,7 @@ class MasterDataSeeder extends Seeder
         ];
 
         foreach ($designations as $desg) {
-            Designation::firstOrCreate(['name' => $desg['name']], $desg);
+            Designation::updateOrCreate(['name' => $desg['name']], $desg);
         }
     }
 }

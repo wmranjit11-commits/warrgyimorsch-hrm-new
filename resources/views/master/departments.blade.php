@@ -85,7 +85,7 @@
                                     <td style="font-size: 14px;">{{ $dept->short_name ?? '-' }}</td>
                                     <td class="pe-4 text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" onclick="editDept({{ $dept }})" class="avatar-text avatar-md bg-soft-info text-info rounded border-0" title="Edit">
+                                            <button type="button" onclick='editDept(@json($dept))' class="avatar-text avatar-md bg-soft-info text-info rounded border-0" title="Edit">
                                                 <i class="feather-edit-3"></i>
                                             </button>
                                             <form action="{{ route('master.department.destroy', $dept->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">

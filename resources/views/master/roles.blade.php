@@ -83,7 +83,7 @@
                                     <td><code class="text-secondary">{{ $role->slug }}</code></td>
                                     <td class="pe-4 text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <button type="button" onclick="editRole({{ $role }})" class="avatar-text avatar-md bg-soft-info text-info rounded border-0" title="Edit">
+                                            <button type="button" onclick='editRole(@json($role))' class="avatar-text avatar-md bg-soft-info text-info rounded border-0" title="Edit">
                                                 <i class="feather-edit-3"></i>
                                             </button>
                                             <form action="{{ route('master.role.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
