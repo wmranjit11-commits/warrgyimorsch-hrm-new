@@ -9,7 +9,7 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::latest()->get();
+        $projects = Project::with(['tasks.employee'])->withCount('tasks')->latest()->get();
         return view('projects.index', compact('projects'));
     }
 

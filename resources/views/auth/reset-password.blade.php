@@ -54,10 +54,20 @@
                                 <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required autofocus>
                             </div>
                             <div class="mb-4">
-                                <input type="password" name="password" class="form-control" placeholder="New Password" required>
+                                <div class="position-relative">
+                                    <input type="password" name="password" id="resetPassword" class="form-control" placeholder="New Password" required style="padding-right: 45px;">
+                                    <span onclick="togglePassword('resetPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                        <i class="feather-eye-off"></i>
+                                    </span>
+                                </div>
                             </div>
                             <div class="mb-4">
-                                <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
+                                <div class="position-relative">
+                                    <input type="password" name="password_confirmation" id="resetPasswordConfirm" class="form-control" placeholder="Confirm Password" required style="padding-right: 45px;">
+                                    <span onclick="togglePassword('resetPasswordConfirm', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                        <i class="feather-eye-off"></i>
+                                    </span>
+                                </div>
                             </div>
                             <div class="mt-5">
                                 <button type="submit" class="btn btn-lg btn-primary w-100">Reset Now</button>
@@ -229,6 +239,14 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('assets/js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
+    <script>
+        function togglePassword(inputId, el) {
+            const input = document.getElementById(inputId);
+            const icon = el.querySelector('i');
+            if (input.type === 'password') { input.type = 'text'; icon.className = 'feather-eye'; }
+            else { input.type = 'password'; icon.className = 'feather-eye-off'; }
+        }
+    </script>
 </body>
 
 </html>

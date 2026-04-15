@@ -263,6 +263,11 @@
                                             </td>
                                             <td class="pe-4 text-center">
                                                 <div class="d-flex justify-content-center gap-2">
+                                                    <a href="javascript:void(0);" onclick="showTeamModal({{ $project->id }})"
+                                                        class="avatar-text avatar-md bg-soft-primary text-primary rounded"
+                                                        title="View Team">
+                                                        <i class="feather-users"></i>
+                                                    </a>
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
                                                         title="View Description" onclick="showProjectDesc({{ $project->id }})">
@@ -331,6 +336,70 @@
             </div>
         </div>
     </div>
+
+
+
+    <!-- Team data for each project -->
+    @foreach($projects as $project)
+        <template id="team_data_{{ $project->id }}">
+            @php
+                $teamMembers = $project->tasks->filter(fn($t) => $t->employee)->groupBy('employee_id');
+            @endphp
+            @if($teamMembers->count() > 0)
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead style="background: #f8fafc;">
+                            <tr>
+                                <th class="ps-4 fw-bold text-muted" style="font-size: 11px; text-transform: uppercase;">Employee</th>
+                                <th class="fw-bold text-muted" style="font-size: 11px; text-transform: uppercase;">Task</th>
+                                <th class="fw-bold text-muted" style="font-size: 11px; text-transform: uppercase;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($teamMembers as $empId => $tasks)
+                                @php $emp = $tasks->first()->employee; @endphp
+                                @foreach($tasks as $idx => $task)
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        @if($idx === 0)
+                                            <td class="ps-4" rowspan="{{ $tasks->count() }}" style="vertical-align: middle;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="avatar-text avatar-sm rounded-circle fw-bold" style="width:36px; height:36px; background: {{ ['#3858f9','#22c55e','#f59e0b','#ef4444','#8b5cf6','#06b6d4'][$loop->parent->index % 6] }}; color:white; font-size:13px; display:flex; align-items:center; justify-content:center;">
+                                                        {{ strtoupper(substr($emp->name ?? 'U', 0, 1)) }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold" style="font-size:13px; color:#1e293b;">{{ $emp->name ?? 'Unknown' }}</div>
+                                                        <div class="text-muted" style="font-size:10px;">{{ $emp->designation ?? '' }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        @endif
+                                        <td style="max-width: 200px; white-space: normal; word-break: break-word;">
+                                            <span class="fw-bold" style="font-size:12px; color:#334155;">{{ $task->task_title }}</span>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $taskStatusClass = 'bg-soft-primary text-primary';
+                                                if($task->status == 'Completed') $taskStatusClass = 'bg-soft-success text-success';
+                                                elseif($task->status == 'In Progress') $taskStatusClass = 'bg-soft-info text-info';
+                                                elseif($task->status == 'Pending') $taskStatusClass = 'bg-soft-warning text-warning';
+                                                elseif($task->status == 'Rework') $taskStatusClass = 'bg-soft-danger text-danger';
+                                            @endphp
+                                            <span class="badge {{ $taskStatusClass }}" style="padding:5px 10px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase;">{{ $task->status }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="feather-users" style="font-size: 40px; color: #cbd5e1;"></i>
+                    <p class="text-muted mt-3 fw-bold" style="font-size: 13px;">No team members assigned yet</p>
+                </div>
+            @endif
+        </template>
+    @endforeach
 
     <!-- PROJECT ADD/EDIT OFFCANVAS -->
     <div class="offcanvas offcanvas-end border-0 shadow" tabindex="-1" id="projectOffcanvas"
@@ -576,6 +645,7 @@
             border-bottom-width: 1px;
             box-shadow: none !important;
         }
+
     </style>
 
     @push('scripts')
@@ -584,6 +654,23 @@
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
         <script>
+            function showTeamModal(projectId) {
+                const template = document.getElementById('team_data_' + projectId);
+                let html = '<div class="text-center py-5 text-muted">No team members assigned yet</div>';
+                if (template) {
+                    html = template.innerHTML;
+                }
+                Swal.fire({
+                    title: '<i class="feather-users me-2"></i> Project Team',
+                    html: '<div style="max-height:60vh; overflow-y:auto; text-align:left;">' + html + '</div>',
+                    width: '750px',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3858f9',
+                    confirmButtonText: 'Close',
+                    customClass: { popup: 'rounded-4' }
+                });
+            }
+
             function paginateTable() {
                 const limitSelect = document.getElementById('entriesLimit');
                 const limit = parseInt(limitSelect.value);

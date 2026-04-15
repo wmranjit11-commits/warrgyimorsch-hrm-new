@@ -179,7 +179,7 @@
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Assign By</th>
                                         <th class="pe-4 text-center"
-                                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
+                                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white; white-space: nowrap; width: 220px;">
                                             Action</th>
                                     </tr>
                                 </thead>
@@ -192,7 +192,7 @@
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
                                                 {{ $task->project->name ?? ($task->project_id ? 'Proj ID: ' . $task->project_id : '-') }}
                                             </td>
-                                            <td style="font-size: 14px; color: #475569;">{{ $task->task_title }}</td>
+                                            <td style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">{{ $task->task_title }}</td>
                                             <td style="font-size: 14px; color: #475569;">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="feather-calendar text-primary" style="font-size: 12px;"></i>
@@ -286,7 +286,7 @@
                                             <td style="font-size: 14px; color: #475569;">
                                                 {{ $task->creator ? $task->creator->name : '-' }}
                                             </td>
-                                            <td class="pe-4 text-center">
+                                            <td class="pe-4 text-center" style="white-space: nowrap; width: 220px;">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"

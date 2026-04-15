@@ -91,7 +91,7 @@
         @endif
 
         <div class="card stretch stretch-full">
-            <form method="POST" action="{{ route('employees.update', $employee->id) }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('employees.update', $employee->id) }}" enctype="multipart/form-data" autocomplete="off">
                 @csrf
                 @method('PUT')
                 <!-- Tab Navigation -->
@@ -322,9 +322,20 @@
                                 <label class="fw-bold">Password (Leave blank to keep current)</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="feather-lock"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="Password">
+                                    <input type="password" name="password" id="editEmpPassword" class="form-control" placeholder="Leave blank to keep current" autocomplete="new-password" value="">
+                                    <span class="input-group-text" onclick="togglePassword('editEmpPassword', this)" style="cursor:pointer; background:#fff; border-left:none; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                        <i class="feather-eye-off"></i>
+                                    </span>
                                 </div>
                             </div>
+                            <script>
+                                function togglePassword(inputId, el) {
+                                    const input = document.getElementById(inputId);
+                                    const icon = el.querySelector('i');
+                                    if (input.type === 'password') { input.type = 'text'; icon.className = 'feather-eye'; }
+                                    else { input.type = 'password'; icon.className = 'feather-eye-off'; }
+                                }
+                            </script>
                             <div class="col-md-4">
                                 <label class="fw-bold">Aadhaar Number</label>
                                 <div class="input-group mb-3">

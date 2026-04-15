@@ -178,6 +178,7 @@ class EmployeeController extends Controller
                 'designation' => 'required|string',
                 'role' => 'required|string',
                 'email' => 'nullable|email|unique:users,email,' . $userId,
+                'employee_code' => 'nullable|string|max:50|unique:employees,employee_code,' . $employee->id,
             ]);
 
             return DB::transaction(function () use ($request, $employee, $user) {
