@@ -97,6 +97,33 @@
                 </li>
             </ul>
             </li>
+            <li class="nxl-item nxl-hasmenu">
+                <a href="javascript:void(0);" class="nxl-link">
+                    <span class="nxl-micon"><i class="feather-database"></i></span>
+                    <span class="nxl-mtext">Master Module</span>
+                    <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                </a>
+                <ul class="nxl-submenu">
+                    <li class="nxl-item">
+                        <a href="{{ route('master.departments') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-circle"></i></span>
+                            <span class="nxl-mtext">Departments</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="{{ route('master.designations') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-circle"></i></span>
+                            <span class="nxl-mtext">Designations</span>
+                        </a>
+                    </li>
+                    <li class="nxl-item">
+                        <a href="{{ route('master.roles') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-circle"></i></span>
+                            <span class="nxl-mtext">Roles</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
             <!-- <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">

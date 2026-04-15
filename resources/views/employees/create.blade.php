@@ -175,12 +175,9 @@
                                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                 <select name="role" class="form-control" required>
                                     <option value="">Select Role</option>
-                                    <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-                                    <option value="hr_executive" {{ old('role') == 'hr_executive' ? 'selected' : '' }}>HR Executive</option>
-                                    <option value="hr_intern" {{ old('role') == 'hr_intern' ? 'selected' : '' }}>HR Intern</option>
-                                    <option value="team_leader" {{ old('role') == 'team_leader' ? 'selected' : '' }}>Team Leader</option>
-                                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
+                                    @foreach($roles as $rl)
+                                        <option value="{{ $rl->slug }}" {{ old('role') == $rl->slug ? 'selected' : '' }}>{{ $rl->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -198,13 +195,9 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="department" class="form-control" required>
                                     <option value="">Select department...</option>
-                                    <option value="administration" {{ old('department') == 'administration' ? 'selected' : '' }}>Administration (Admin)</option>
-                                    <option value="business_development" {{ old('department') == 'business_development' ? 'selected' : '' }}>Business Development (BD)</option>
-                                    <option value="hr" {{ old('department') == 'hr' ? 'selected' : '' }}>HR Department (HR)</option>
-                                    <option value="web_development" {{ old('department') == 'web_development' ? 'selected' : '' }}>Web Development (WD)</option>
-                                    <option value="digital_marketing" {{ old('department') == 'digital_marketing' ? 'selected' : '' }}>Digital Marketing (DM)</option>
-                                    <option value="web_graphics" {{ old('department') == 'web_graphics' ? 'selected' : '' }}>Web & Graphics Design (WGD)</option>
-                                    <!-- aur add karo jo chahiye -->
+                                    @foreach($departments as $dept)
+                                        <option value="{{ $dept->name }}" {{ old('department') == $dept->name ? 'selected' : '' }}>{{ $dept->name }} {{ $dept->short_name ? '('.$dept->short_name.')' : '' }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -214,57 +207,9 @@
                                 <span class="input-group-text"><i class="feather-users"></i></span>
                                 <select name="designation" class="form-control" required>
                                     <option value="">Select designation...</option>
-
-                                    <!-- Management -->
-                                    <option value="Chief Executive Officer (CEO)">Chief Executive Officer (CEO)</option>
-                                    <option value="Chief Finance Officer (CFO)">Chief Finance Officer (CFO)</option>
-                                    <option value="Chief Technology Officer (CTO)">Chief Technology Officer (CTO)</option>
-                                    <option value="Project Manager">Project Manager</option>
-                                    <option value="Team Lead / Tech Lead">Team Lead / Tech Lead</option>
-
-                                    <!-- Development -->
-                                    <option value="Software Engineer / Developer">Software Engineer / Developer</option>
-                                    <option value="Frontend Developer (React / Next.js)">Frontend Developer (React /
-                                        Next.js)</option>
-                                    <option value="Backend Developer (Laravel / Node.js)">Backend Developer (Laravel /
-                                        Node.js)</option>
-                                    <option value="Full Stack Developer">Full Stack Developer</option>
-                                    <option value="Mobile App Developer (Flutter / Android / iOS)">Mobile App Developer
-                                        (Flutter / Android / iOS)</option>
-                                    <option value="Web Developer Intern">Web Developer Intern</option>
-
-                                    <!-- Specialized -->
-                                    <option value="DevOps Engineer">DevOps Engineer</option>
-                                    <option value="Cloud Engineer (AWS / Azure / GCP)">Cloud Engineer (AWS / Azure / GCP)
-                                    </option>
-                                    <option value="Data Science Engineer">Data Science Engineer</option>
-                                    <option value="AI / Machine Learning Engineer">AI / Machine Learning Engineer</option>
-
-                                    <!-- Testing -->
-                                    <option value="QA Engineer / Tester">QA Engineer / Tester</option>
-                                    <option value="Automation Test Engineer">Automation Test Engineer</option>
-
-                                    <!-- Design -->
-                                    <option value="UI/UX Designer">UI/UX Designer</option>
-                                    <option value="Graphic Designer">Graphic Designer</option>
-                                    <option value="Social Media Executive">Social Media Executive</option>
-
-                                    <!-- Support -->
-                                    <option value="System Administrator">System Administrator</option>
-                                    <option value="IT Support Engineer">IT Support Engineer</option>
-
-                                    <!-- Business -->
-                                    <option value="Business Development Manager (BDM)">Business Development Manager (BDM)
-                                    </option>
-                                    <option value="Sales Executive">Sales Executive</option>
-                                    <option value="Digital Marketing Executive">Digital Marketing Executive</option>
-                                    <option value="SEO Executive">SEO Executive</option>
-                                    <option value="SEO Intern">SEO Intern</option>
-
-                                    <!-- HR -->
-                                    <option value="HR Manager">HR Manager</option>
-                                    <option value="HR Executive">HR Executive</option>
-                                    <option value="HR Intern">HR Intern</option>
+                                    @foreach($designations as $desg)
+                                        <option value="{{ $desg->name }}" {{ old('designation') == $desg->name ? 'selected' : '' }}>{{ $desg->name }} {{ $desg->short_name ? '('.$desg->short_name.')' : '' }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>

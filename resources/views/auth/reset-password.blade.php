@@ -40,31 +40,43 @@
         <div class="auth-minimal-inner">
             <div class="minimal-card-wrapper">
                 <div class="card mb-4 mt-5 mx-4 mx-sm-0 position-relative">
-                    <div class="wd-50 bg-white p-2 rounded-circle shadow-lg position-absolute translate-middle top-0 start-50">
+                    <div
+                        class="wd-50 bg-white p-2 rounded-circle shadow-lg position-absolute translate-middle top-0 start-50">
                         <img src="{{ asset('assets/images/logo-blue.png') }}" alt="" class="img-fluid">
                     </div>
                     <div class="card-body p-sm-5">
                         <h2 class="fs-20 fw-bolder mb-4">Reset</h2>
                         <h4 class="fs-13 fw-bold mb-2">Reset to your username/password</h4>
-                        <p class="fs-12 fw-medium text-muted">Enter your email and a reset link will sent to you, let's access our the best recommendation for you.</p>
+                        <p class="fs-12 fw-medium text-muted">Enter your email and a reset link will sent to you, let's
+                            access our the best recommendation for you.</p>
                         <form method="POST" action="{{ route('password.update') }}" class="w-100 mt-4 pt-2">
                             @csrf
                             <input type="hidden" name="token" value="{{ $token ?? '' }}">
                             <div class="mb-4">
-                                <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required autofocus>
+                                <input type="email" name="email" class="form-control" placeholder="Email"
+                                    value="{{ old('email') }}" required autofocus>
                             </div>
                             <div class="mb-4">
                                 <div class="position-relative">
-                                    <input type="password" name="password" id="resetPassword" class="form-control" placeholder="New Password" required style="padding-right: 45px;">
-                                    <span onclick="togglePassword('resetPassword', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                    <input type="password" name="password" id="resetPassword" class="form-control"
+                                        placeholder="New Password" required style="padding-right: 45px;">
+                                    <span onclick="togglePassword('resetPassword', this)"
+                                        style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;"
+                                        onmouseover="this.style.color='#3858f9'"
+                                        onmouseout="this.style.color='#94a3b8'">
                                         <i class="feather-eye-off"></i>
                                     </span>
                                 </div>
                             </div>
                             <div class="mb-4">
                                 <div class="position-relative">
-                                    <input type="password" name="password_confirmation" id="resetPasswordConfirm" class="form-control" placeholder="Confirm Password" required style="padding-right: 45px;">
-                                    <span onclick="togglePassword('resetPasswordConfirm', this)" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                    <input type="password" name="password_confirmation" id="resetPasswordConfirm"
+                                        class="form-control" placeholder="Confirm Password" required
+                                        style="padding-right: 45px;">
+                                    <span onclick="togglePassword('resetPasswordConfirm', this)"
+                                        style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-size:16px; z-index:5; transition: color 0.2s;"
+                                        onmouseover="this.style.color='#3858f9'"
+                                        onmouseout="this.style.color='#94a3b8'">
                                         <i class="feather-eye-off"></i>
                                     </span>
                                 </div>
@@ -73,10 +85,6 @@
                                 <button type="submit" class="btn btn-lg btn-primary w-100">Reset Now</button>
                             </div>
                         </form>
-                        <div class="mt-5 text-muted">
-                            <span> Don't have an account?</span>
-                            <a href="{{ route('register') }}" class="fw-bold">Create an Account</a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -95,7 +103,8 @@
             </a>
         </div>
         <div class="customizer-sidebar-wrapper">
-            <div class="customizer-sidebar-header px-4 ht-80 border-bottom d-flex align-items-center justify-content-between">
+            <div
+                class="customizer-sidebar-header px-4 ht-80 border-bottom d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Theme Settings</h5>
                 <a href="javascript:void(0);" class="cutomizer-close-trigger d-flex">
                     <i class="feather-x"></i>
@@ -104,110 +113,186 @@
             <div class="customizer-sidebar-body position-relative p-4" data-scrollbar-target="#psScrollbarInit">
                 <!--! BEGIN: [Skins] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
-                    <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Skins</label>
+                    <label
+                        class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label"
+                        style="top: -12px">Skins</label>
                     <div class="row g-2 theme-options-items app-skin" id="appSkinList">
                         <div class="col-6 text-center position-relative single-option light-button active">
-                            <input type="radio" class="btn-check" id="app-skin-light" name="app-skin" value="1" data-app-skin="app-skin-light">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-skin-light">Light</label>
+                            <input type="radio" class="btn-check" id="app-skin-light" name="app-skin" value="1"
+                                data-app-skin="app-skin-light">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-skin-light">Light</label>
                         </div>
                         <div class="col-6 text-center position-relative single-option dark-button">
-                            <input type="radio" class="btn-check" id="app-skin-dark" name="app-skin" value="2" data-app-skin="app-skin-dark">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-skin-dark">Dark</label>
+                            <input type="radio" class="btn-check" id="app-skin-dark" name="app-skin" value="2"
+                                data-app-skin="app-skin-dark">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-skin-dark">Dark</label>
                         </div>
                     </div>
                 </div>
                 <!--! END: [Skins] !-->
                 <!--! BEGIN: [Typography] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-0 border border-gray-2 theme-options-set">
-                    <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Typography</label>
+                    <label
+                        class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label"
+                        style="top: -12px">Typography</label>
                     <div class="row g-2 theme-options-items font-family" id="fontFamilyList">
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-lato" name="font-family" value="1" data-font-family="app-font-family-lato">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-lato">Lato</label>
+                            <input type="radio" class="btn-check" id="app-font-family-lato" name="font-family" value="1"
+                                data-font-family="app-font-family-lato">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-lato">Lato</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-rubik" name="font-family" value="2" data-font-family="app-font-family-rubik">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-rubik">Rubik</label>
+                            <input type="radio" class="btn-check" id="app-font-family-rubik" name="font-family"
+                                value="2" data-font-family="app-font-family-rubik">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-rubik">Rubik</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-inter" name="font-family" value="3" data-font-family="app-font-family-inter" checked>
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-inter">Inter</label>
+                            <input type="radio" class="btn-check" id="app-font-family-inter" name="font-family"
+                                value="3" data-font-family="app-font-family-inter" checked>
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-inter">Inter</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-cinzel" name="font-family" value="4" data-font-family="app-font-family-cinzel">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-cinzel">Cinzel</label>
+                            <input type="radio" class="btn-check" id="app-font-family-cinzel" name="font-family"
+                                value="4" data-font-family="app-font-family-cinzel">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-cinzel">Cinzel</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-nunito" name="font-family" value="6" data-font-family="app-font-family-nunito">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-nunito">Nunito</label>
+                            <input type="radio" class="btn-check" id="app-font-family-nunito" name="font-family"
+                                value="6" data-font-family="app-font-family-nunito">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-nunito">Nunito</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-roboto" name="font-family" value="7" data-font-family="app-font-family-roboto">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-roboto">Roboto</label>
+                            <input type="radio" class="btn-check" id="app-font-family-roboto" name="font-family"
+                                value="7" data-font-family="app-font-family-roboto">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-roboto">Roboto</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-ubuntu" name="font-family" value="8" data-font-family="app-font-family-ubuntu">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-ubuntu">Ubuntu</label>
+                            <input type="radio" class="btn-check" id="app-font-family-ubuntu" name="font-family"
+                                value="8" data-font-family="app-font-family-ubuntu">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-ubuntu">Ubuntu</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-poppins" name="font-family" value="9" data-font-family="app-font-family-poppins">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-poppins">Poppins</label>
+                            <input type="radio" class="btn-check" id="app-font-family-poppins" name="font-family"
+                                value="9" data-font-family="app-font-family-poppins">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-poppins">Poppins</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-raleway" name="font-family" value="10" data-font-family="app-font-family-raleway">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-raleway">Raleway</label>
+                            <input type="radio" class="btn-check" id="app-font-family-raleway" name="font-family"
+                                value="10" data-font-family="app-font-family-raleway">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-raleway">Raleway</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-system-ui" name="font-family" value="11" data-font-family="app-font-family-system-ui">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-system-ui">System UI</label>
+                            <input type="radio" class="btn-check" id="app-font-family-system-ui" name="font-family"
+                                value="11" data-font-family="app-font-family-system-ui">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-system-ui">System UI</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-noto-sans" name="font-family" value="12" data-font-family="app-font-family-noto-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-noto-sans">Noto Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-noto-sans" name="font-family"
+                                value="12" data-font-family="app-font-family-noto-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-noto-sans">Noto Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-fira-sans" name="font-family" value="13" data-font-family="app-font-family-fira-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-fira-sans">Fira Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-fira-sans" name="font-family"
+                                value="13" data-font-family="app-font-family-fira-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-fira-sans">Fira Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-work-sans" name="font-family" value="14" data-font-family="app-font-family-work-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-work-sans">Work Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-work-sans" name="font-family"
+                                value="14" data-font-family="app-font-family-work-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-work-sans">Work Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-open-sans" name="font-family" value="15" data-font-family="app-font-family-open-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-open-sans">Open Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-open-sans" name="font-family"
+                                value="15" data-font-family="app-font-family-open-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-open-sans">Open Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-maven-pro" name="font-family" value="16" data-font-family="app-font-family-maven-pro">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-maven-pro">Maven Pro</label>
+                            <input type="radio" class="btn-check" id="app-font-family-maven-pro" name="font-family"
+                                value="16" data-font-family="app-font-family-maven-pro">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-maven-pro">Maven Pro</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-quicksand" name="font-family" value="17" data-font-family="app-font-family-quicksand">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-quicksand">Quicksand</label>
+                            <input type="radio" class="btn-check" id="app-font-family-quicksand" name="font-family"
+                                value="17" data-font-family="app-font-family-quicksand">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-quicksand">Quicksand</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-montserrat" name="font-family" value="18" data-font-family="app-font-family-montserrat">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-montserrat">Montserrat</label>
+                            <input type="radio" class="btn-check" id="app-font-family-montserrat" name="font-family"
+                                value="18" data-font-family="app-font-family-montserrat">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-montserrat">Montserrat</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-josefin-sans" name="font-family" value="19" data-font-family="app-font-family-josefin-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-josefin-sans">Josefin Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-josefin-sans" name="font-family"
+                                value="19" data-font-family="app-font-family-josefin-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-josefin-sans">Josefin Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-ibm-plex-sans" name="font-family" value="20" data-font-family="app-font-family-ibm-plex-sans">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-ibm-plex-sans">IBM Plex Sans</label>
+                            <input type="radio" class="btn-check" id="app-font-family-ibm-plex-sans" name="font-family"
+                                value="20" data-font-family="app-font-family-ibm-plex-sans">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-ibm-plex-sans">IBM Plex Sans</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-source-sans-pro" name="font-family" value="5" data-font-family="app-font-family-source-sans-pro">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-source-sans-pro">Source Sans Pro</label>
+                            <input type="radio" class="btn-check" id="app-font-family-source-sans-pro"
+                                name="font-family" value="5" data-font-family="app-font-family-source-sans-pro">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-source-sans-pro">Source Sans Pro</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-montserrat-alt" name="font-family" value="21" data-font-family="app-font-family-montserrat-alt">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-montserrat-alt">Montserrat Alt</label>
+                            <input type="radio" class="btn-check" id="app-font-family-montserrat-alt" name="font-family"
+                                value="21" data-font-family="app-font-family-montserrat-alt">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-montserrat-alt">Montserrat Alt</label>
                         </div>
                         <div class="col-6 text-center single-option">
-                            <input type="radio" class="btn-check" id="app-font-family-roboto-slab" name="font-family" value="22" data-font-family="app-font-family-roboto-slab">
-                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-font-family-roboto-slab">Roboto Slab</label>
+                            <input type="radio" class="btn-check" id="app-font-family-roboto-slab" name="font-family"
+                                value="22" data-font-family="app-font-family-roboto-slab">
+                            <label
+                                class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label"
+                                for="app-font-family-roboto-slab">Roboto Slab</label>
                         </div>
                     </div>
                 </div>

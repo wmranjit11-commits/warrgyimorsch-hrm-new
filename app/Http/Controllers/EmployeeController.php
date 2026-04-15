@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Models\Department;
+use App\Models\Designation;
+use App\Models\RoleMaster;
 
 class EmployeeController extends Controller
 {
@@ -26,7 +29,10 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-        return view('employees.create');
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
+        $designations = Designation::where('is_active', true)->orderBy('name')->get();
+        $roles = RoleMaster::where('is_active', true)->orderBy('name')->get();
+        return view('employees.create', compact('departments', 'designations', 'roles'));
     }
 
     /**
@@ -52,9 +58,9 @@ class EmployeeController extends Controller
             return DB::transaction(function () use ($request) {
                 $data = $request->all();
 
-                // Password hashing
+                // Password handling: store plain in employees table for admin viewing, hash for users table
                 $rawPassword = $request->filled('password') ? $request->password : '12345678';
-                $data['password'] = Hash::make($rawPassword);
+                $data['password'] = $rawPassword;
 
                 // Defaults
                 $data['gender'] = $request->gender ?? 'male';
@@ -155,7 +161,10 @@ class EmployeeController extends Controller
     public function edit($id)
     {
         $employee = Employee::findOrFail($id);
-        return view('employees.edit', compact('employee'));
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
+        $designations = Designation::where('is_active', true)->orderBy('name')->get();
+        $roles = RoleMaster::where('is_active', true)->orderBy('name')->get();
+        return view('employees.edit', compact('employee', 'departments', 'designations', 'roles'));
     }
 
     /**
@@ -218,7 +227,11 @@ class EmployeeController extends Controller
 
                 // Only update password if provided
                 if ($request->filled('password')) {
-                    $updateData['password'] = Hash::make($request->password);
+                    $updateData['password'] = $request->password;
+                    
+                    if ($user) {
+                        $user->update(['password' => Hash::make($request->password)]);
+                    }
                 }
 
                 $employee->update($updateData);

@@ -76,6 +76,20 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.privacy');
     })->name('privacy');
 
+    // MASTER MODULE
+    Route::get('/master/departments', [\App\Http\Controllers\MasterController::class, 'departments'])->name('master.departments');
+    Route::get('/master/designations', [\App\Http\Controllers\MasterController::class, 'designations'])->name('master.designations');
+    Route::get('/master/roles', [\App\Http\Controllers\MasterController::class, 'roles'])->name('master.roles');
+    Route::post('/master/department', [\App\Http\Controllers\MasterController::class, 'storeDepartment'])->name('master.department.store');
+    Route::put('/master/department/{id}', [\App\Http\Controllers\MasterController::class, 'updateDepartment'])->name('master.department.update');
+    Route::delete('/master/department/{id}', [\App\Http\Controllers\MasterController::class, 'destroyDepartment'])->name('master.department.destroy');
+    Route::post('/master/designation', [\App\Http\Controllers\MasterController::class, 'storeDesignation'])->name('master.designation.store');
+    Route::put('/master/designation/{id}', [\App\Http\Controllers\MasterController::class, 'updateDesignation'])->name('master.designation.update');
+    Route::delete('/master/designation/{id}', [\App\Http\Controllers\MasterController::class, 'destroyDesignation'])->name('master.designation.destroy');
+    Route::post('/master/role', [\App\Http\Controllers\MasterController::class, 'storeRole'])->name('master.role.store');
+    Route::put('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'updateRole'])->name('master.role.update');
+    Route::delete('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'destroyRole'])->name('master.role.destroy');
+
 });
 
 Route::middleware(['auth'])->group(function () {
