@@ -92,7 +92,7 @@
 
 
 
-        <form method="POST" action="{{ route('employees.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('employees.store') }}" enctype="multipart/form-data" autocomplete="off">
             @csrf
             <!-- Tab Navigation -->
             <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row custom-tabs" id="employeeTab" role="tablist"
@@ -165,7 +165,7 @@
                             <label class="fw-bold">Email</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-mail"></i></span>
-                                <input type="email" name="email" class="form-control" placeholder="Enter email" value="{{ old('email') }}">
+                                <input type="email" name="email" class="form-control" placeholder="Enter email" value="{{ old('email') }}" autocomplete="off">
                             </div>
                         </div>
 
@@ -296,9 +296,20 @@
                             <label class="fw-bold">Password</label>
                             <div class="input-group mb-3">
                                 <span class="input-group-text"><i class="feather-lock"></i></span>
-                                <input type="password" name="password" class="form-control" placeholder="Password">
+                                <input type="password" name="password" id="createEmpPassword" class="form-control" placeholder="Password" autocomplete="new-password" value="">
+                                <span class="input-group-text" onclick="togglePassword('createEmpPassword', this)" style="cursor:pointer; background:#fff; border-left:none; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
+                                    <i class="feather-eye-off"></i>
+                                </span>
                             </div>
                         </div>
+                        <script>
+                            function togglePassword(inputId, el) {
+                                const input = document.getElementById(inputId);
+                                const icon = el.querySelector('i');
+                                if (input.type === 'password') { input.type = 'text'; icon.className = 'feather-eye'; }
+                                else { input.type = 'password'; icon.className = 'feather-eye-off'; }
+                            }
+                        </script>
                         <div class="col-md-4">
                             <label class="fw-bold">Aadhaar Number</label>
                             <div class="input-group mb-3">
