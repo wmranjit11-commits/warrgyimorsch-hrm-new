@@ -13,41 +13,54 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 // use Barryvdh\DomPDF\Facade\Pdf;
 // use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class PayrollController extends Controller
 {
     /**
      * Display Attendance List
      */
-   public function attendance(Request $request)
+    public function attendance(Request $request)
     {
-        $query = Attendance::query();
+        $endDate = $request->filled('end_date')
+            ? Carbon::parse($request->end_date)
+            : Carbon::today();
 
-        $query->join('employees', 'attendances.employee_id', '=', 'employees.id');
+        $startDate = $request->filled('start_date')
+            ? Carbon::parse($request->start_date)
+            : $endDate->copy()->subMonth();
 
-         // ✅ Apply only if user selects filter
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereDate('attendance_date', '>=', $request->start_date)
-                ->whereDate('attendance_date', '<=', $request->end_date);
-        }
-        // ✅ GROUPING (required for your blade)
-        $attendance = $query->selectRaw("
+        $attendance = Attendance::selectRaw("
                 attendances.attendance_date,
                 COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
+                COUNT(CASE WHEN attendances.total_hours > 9 THEN 1 END) as overtime_count,
                 COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
+                COUNT(CASE WHEN attendances.status IN ('leave','absent') THEN 1 END) as leave_count,
                 COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
-                COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count,
-                COUNT(CASE WHEN attendances.total_hours >= 9 THEN 1 END) as overtime_count,
-                SUM(CASE 
-                    WHEN TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
-                    AND attendances.check_out IS NOT NULL
-                    THEN 1
-                    ELSE 0
-                END) as early_count
+                COUNT(
+                    CASE 
+                        WHEN LOWER(leave_applications.leave_type) = 'gatepass leave'
+                        AND LOWER(leave_applications.status) = 'approved'
+                        THEN 1
+                    END
+                ) as early_count
             ")
+            ->leftJoin('leave_applications', function ($join) {
+                $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
+                    ->on(
+                        DB::raw('DATE(attendances.attendance_date)'),
+                        '=',
+                        DB::raw('DATE(leave_applications.start_date)')
+                    );
+            })
+            ->whereBetween('attendances.attendance_date', [
+                $startDate->toDateString(),
+                $endDate->toDateString()
+            ])
             ->groupBy('attendances.attendance_date')
             ->orderBy('attendances.attendance_date', 'desc')
-            ->paginate(31);
+            ->paginate(10)
+            ->appends($request->all());
 
         return view('payroll.attendance', compact('attendance'));
     }
@@ -57,15 +70,26 @@ class PayrollController extends Controller
      */
     public function getAttendanceDetails(Request $request)
     {
-        $date = $request->date;
-        $details = Attendance::with('employee')
-            ->where('attendance_date', $date)
-            ->get();
+        $records = Attendance::select(
+            'attendances.*',
+            'leave_applications.leave_type',
+            'leave_applications.status as leave_status'
+        )
+        ->with('employee')
+        ->leftJoin('leave_applications', function ($join) {
+            $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
+                 ->on(
+                     DB::raw('DATE(attendances.attendance_date)'),
+                     '=',
+                     DB::raw('DATE(leave_applications.start_date)')
+                 );
+        })
+        ->whereDate('attendances.attendance_date', $request->date)
+        ->get();
 
         return response()->json([
             'success' => true,
-            'date' => Carbon::parse($date)->format('d M Y'),
-            'data' => $details
+            'data' => $records
         ]);
     }
 
@@ -687,6 +711,7 @@ public function import(Request $request)
         ]);
     }
 
+    // Edit attendance of all employee based on date
     public function editByDate($attendance_date)
     {
         $attendances = Attendance::with('employee')
@@ -745,28 +770,8 @@ public function import(Request $request)
         ]);
     }
 
-    // public function updateByDate(Request $request, $attendance_date)
-    // {
-    //     foreach ($request->employees as $emp) {
-
-    //         $attendance = Attendance::whereDate('attendance_date', $attendance_date)
-    //             ->where('employee_id', $emp['employee_id'])
-    //             ->first();
-
-    //         if (!$attendance) {
-    //             continue;
-    //         }
-
-    //         // update values directly
-    //         $attendance->check_in = $emp['check_in'];
-    //         $attendance->check_out = $emp['check_out'];
-    //         $attendance->status = $emp['status'];
-
-    //         $attendance->save();
-    //     }
-
-    //     return redirect()->back()->with('success', 'Attendance updated successfully');
-    // }
+    
+    // Update attendance of all employee based on date
     public function updateByDate(Request $request, $attendance_date)
     {
         foreach ($request->employees as $emp) {
@@ -890,28 +895,37 @@ public function import(Request $request)
             COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
             COUNT(
                 CASE 
-                    WHEN attendances.check_out IS NOT NULL 
-                    AND TIME(attendances.check_out) <= SUBTIME(employees.time_out, '00:30:00')
+                    WHEN LOWER(leave_applications.leave_type) = 'gatepass leave'
+                    AND LOwer(leave_applications.status) = 'approved'
                     THEN 1
                 END
             ) as early_count
         ")
-        ->join('employees', 'attendances.employee_id', '=', 'employees.id');
+        ->join('employees', 'attendances.employee_id', '=', 'employees.id')
+
+        ->leftJoin('leave_applications', function ($join) {
+            $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
+                ->on(DB::raw('DATE(attendances.attendance_date)'), '=', DB::raw('DATE(leave_applications.start_date)'));
+        });
 
         // FILTER BY EMPLOYEE NAME
         if ($request->filled('employee_id')) {
             $query->where('attendances.employee_id', $request->employee_id);
         }
 
-        // FILTER BY START DATE
-        if ($request->filled('start_date')) {
-            $query->whereDate('attendances.attendance_date', '>=', $request->start_date);
-        }
+        // DEFAULT DATE RANGE = last 1 month till today
+        $endDate = $request->filled('end_date')
+            ? Carbon::parse($request->end_date)
+            : Carbon::today();
 
-        // FILTER BY END DATE
-        if ($request->filled('end_date')) {
-            $query->whereDate('attendances.attendance_date', '<=', $request->end_date);
-        }
+        $startDate = $request->filled('start_date')
+            ? Carbon::parse($request->start_date)
+            : $endDate->copy()->subMonth();
+
+        $query->whereBetween('attendances.attendance_date', [
+            $startDate->toDateString(),
+            $endDate->toDateString()
+        ]);
         $attendance = $query
         ->groupBy('attendances.employee_id', 'employees.name')
         ->paginate(10)
@@ -922,17 +936,28 @@ public function import(Request $request)
 
     public function employeeWiseDetails(Request $request)
     {
-        $query = Attendance::with('employee')->where('employee_id', $request->employee_id);
+        $query = Attendance::select(
+                'attendances.*',
+                'employees.time_out',
+                'leave_applications.leave_type',
+                'leave_applications.status as leave_status'
+            )
+            ->leftJoin('employees', 'attendances.employee_id', '=', 'employees.id')
+            ->leftJoin('leave_applications', function ($join) {
+                $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
+                    ->on('attendances.attendance_date', '=', 'leave_applications.start_date');
+            })
+            ->where('attendances.employee_id', $request->employee_id);
 
         if ($request->filled('start_date')) {
-            $query->whereDate('attendance_date', '>=', $request->start_date);
+            $query->whereDate('attendances.attendance_date', '>=', $request->start_date);
         }
 
         if ($request->filled('end_date')) {
-            $query->whereDate('attendance_date', '<=', $request->end_date);
+            $query->whereDate('attendances.attendance_date', '<=', $request->end_date);
         }
 
-        $records = $query->orderBy('attendance_date', 'desc')->get();
+        $records = $query->orderBy('attendances.attendance_date', 'desc')->get();
 
         $employeeName = Employee::where('id', $request->employee_id)->value('name');
 
@@ -943,7 +968,8 @@ public function import(Request $request)
         ]);
     }
 
-
+    
+    // Edit one employee's attendance for all dates
     public function editByName(Request $request, $employee_id)
     {
         $employee = Employee::findOrFail($employee_id);
@@ -962,6 +988,7 @@ public function import(Request $request)
         return view('payroll.edit-attendance-by-name', compact('employee', 'attendance'));
     }
 
+    // Update one employee's attendance for all dates
     public function updateByName(Request $request, $employee_id)
     {
         foreach ($request->attendance_ids as $id) {

@@ -16,7 +16,7 @@
                     </nav>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('payroll.attendace.employee') }}" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Employee wise attendance</label></a>
+                    <a href="{{ route('payroll.attendance') }}" class="btn btn-icon btn-light-brand"> <label>Date wise attendance</label></a>
                      <div class="dropdown d-inline-block ms-auto float-end">
                         <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Import Attendance &nbsp; </label>
                             <i class="fas fa-upload"></i>
@@ -75,12 +75,12 @@
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                             <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
-                                   value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
+                                   value="{{ request('start_date', now()->subMonth()->format('Y-m-d')) }}" style="border-radius: 8px; height: 40px;">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                             <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
-                                   value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
+                                   value="{{ request('end_date', now()->format('Y-m-d')) }}" style="border-radius: 8px; height: 40px;">
                         </div>
                         <div class="col-md-3">
                             <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
@@ -133,21 +133,21 @@
                                         <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'leave')">
                                             Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'wfh')">
+                                        <div class="ref-badge badge-green clickable" title="View WFH" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'wfh')">
                                             WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'early_out')">
+                                        <div class="ref-badge badge-purple clickable" title="View Early Out" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}', 'early_out')">
                                             Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('payroll.attendance.employee.editByName', $employeeId) }}" class="avatar-text avatar-md bg-soft-primary text-primary">
-                                           <i class="feather-edit"></i>
-                                        </a>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')" title="View">
                                             <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{{ route('payroll.attendance.employee.editByName', $employeeId) }}" class="avatar-text avatar-md bg-soft-danger text-primary" title="Edit">
+                                           <i class="feather-edit"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -247,13 +247,15 @@
         if (end) url += `&end_date=${end}`;
 
         fetch(url)
-            .then(res => res.json())
+            .then(res => {
+                return res.json();   // IMPORTANT FIX
+            })
             .then(data => {
                 if (data.success) {
                     lastFetchedData = data.data;
                     document.getElementById('offcanvasDate').innerText = data.employee_name;
                     renderTable(data.data, filterStatus);
-
+                    
                     const offcanvasEl = document.getElementById('attendanceDetailOffcanvas');
                     const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
                     offcanvas.show();
@@ -274,12 +276,13 @@
             if (filterStatus === 'late' && item.status === 'late') match = true;
             if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
             if (filterStatus === 'wfh' && item.status === 'wfh') match = true;
-            if (filterStatus === 'early_out' && item.check_out && item.employee && item.employee.time_out) {
-                const shiftEnd = new Date(`1970-01-01T${item.employee.time_out}`);
-                const checkOut = new Date(`1970-01-01T${item.check_out}`);
-                shiftEnd.setMinutes(shiftEnd.getMinutes() - 30);
-
-                if (checkOut <= shiftEnd) {
+            if (filterStatus === 'early_out') {
+                if (
+                    item.leave_type &&
+                    item.leave_status &&
+                    item.leave_type.toLowerCase() === 'gatepass leave' &&
+                    item.leave_status.toLowerCase() === 'approved'
+                ) {
                     match = true;
                 }
             }

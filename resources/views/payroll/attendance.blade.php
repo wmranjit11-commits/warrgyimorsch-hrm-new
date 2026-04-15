@@ -16,8 +16,8 @@
                     </nav>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('payroll.attendace.employee') }}" class="btn btn-icon btn-light-brand"><label>Employee wise attendance</label></a>
-                     <div class="dropdown d-inline-block ms-auto float-end">
+                    <a href="{{ route('payroll.attendance.employee') }}" class="btn btn-icon btn-light-brand"><label>Employee wise attendance</label></a>
+                    <div class="dropdown d-inline-block ms-auto float-end">
                         <a href="#" class="btn btn-icon btn-light-brand" data-bs-toggle="dropdown" aria-expanded="false" title="Import Attendance"> <label>Import Attendance &nbsp; </label>
                             <i class="fas fa-upload"></i>
                         </a>
@@ -62,12 +62,12 @@
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                             <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
-                                   value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
+                                   value="{{ request('start_date', now()->subMonth()->format('Y-m-d')) }}" style="border-radius: 8px; height: 40px;">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                             <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
-                                   value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
+                                   value="{{ request('end_date', now()->format('Y-m-d')) }}" style="border-radius: 8px; height: 40px;">
                         </div>
                         <div class="col-md-4">
                             <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
@@ -116,21 +116,21 @@
                                         <div class="ref-badge badge-red clickable" title="View Leave" onclick="openAttendanceDetails('{{ $date }}', 'leave')">
                                             Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
+                                        <div class="ref-badge badge-green clickable" title="View WFH" onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
                                             WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
                                         </div>
-                                        <div class="ref-badge badge-purple clickable" title="View Present" onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
+                                        <div class="ref-badge badge-purple clickable" title="View Early out" onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
                                             Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} " class="avatar-text avatar-md bg-soft-primary text-primary">
-                                           <i class="feather-edit"></i>
-                                        </a>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary" onclick="openAttendanceDetails('{{ $date }}')" title="View">
                                             <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} " class="avatar-text avatar-md bg-soft-danger text-primary" title="Edit">
+                                           <i class="feather-edit"></i>
                                         </a>
                                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger" onclick="deleteAttendanceByDate('{{ $date }}')" title="Delete">
                                             <i class="feather-trash-2"></i>
@@ -250,13 +250,13 @@
             if (filterStatus === 'late' && item.status === 'late') match = true;
             if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
             if (filterStatus === 'wfh' && item.status === 'wfh') match = true;
-            if (filterStatus === 'early_out' && item.check_out && item.employee?.time_out) {
-                const shiftEnd = new Date(`1970-01-01T${item.employee.time_out}`);
-                shiftEnd.setMinutes(shiftEnd.getMinutes() - 30);
-
-                const checkOut = new Date(`1970-01-01T${item.check_out}`);
-
-                if (checkOut <= shiftEnd) {
+            if (filterStatus === 'early_out') {
+                if (
+                    item.leave_type &&
+                    item.leave_status &&
+                    item.leave_type.toLowerCase() === 'gatepass leave' &&
+                    item.leave_status.toLowerCase() === 'approved'
+                ) {
                     match = true;
                 }
             }
