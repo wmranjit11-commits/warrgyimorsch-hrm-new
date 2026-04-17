@@ -148,6 +148,7 @@
                                                         <td class="text-end py-3 text-danger fs-5"
                                                             id="tableTotalDeductions">₹ 0.00</td>
                                                     </tr>
+                                                   <div id="overtime_box"></div>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -392,9 +393,11 @@
         document.getElementById('inputPF').value = p.pf_deduction;
         document.getElementById('inputESI').value = p.esi_deduction;
         document.getElementById('inputOther').value = p.other_deduction || 0;
-
-       
-
+        document.getElementById('overtime_box').innerHTML =
+        p.emp_name + " worked " +
+        p.overtime_hours + " hrs (" +
+        p.overtime_days + " days) extra this month";
+      
         recalculate();
     }
            

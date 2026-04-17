@@ -37,13 +37,33 @@ class PayrollController extends Controller
                 COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
                 COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
                 COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count,
-                COUNT(CASE WHEN attendances.total_hours >= 9 THEN 1 END) as overtime_count,
-                SUM(CASE 
-                    WHEN TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
-                    AND attendances.check_out IS NOT NULL
-                    THEN 1
-                    ELSE 0
-                END) as early_count
+                COUNT(CASE WHEN attendances.total_hours >= 9.50 THEN 1 END) as overtime_count,
+                SUM(
+                    CASE 
+                        WHEN attendances.check_out IS NOT NULL AND (
+
+                            -- ✅ Full Day Early Out
+                            (
+                                attendances.status = 'present'
+                                AND TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
+                            )
+
+                            OR
+
+                            -- ✅ Half Day Early Out (half shift time)
+                            (
+                                attendances.status = 'half_day'
+                                AND TIME(attendances.check_out) <= SUBTIME(
+                                    ADDTIME(TIME(employees.time_in), SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(employees.time_out, employees.time_in)) / 2)),
+                                    '00:30:00'
+                                )
+                            )
+
+                        )
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as early_count
             ")
             ->groupBy('attendances.attendance_date')
             ->orderBy('attendances.attendance_date', 'desc')
@@ -203,8 +223,19 @@ class PayrollController extends Controller
                         $diffMinutes += 24 * 60;
                     }
 
-                    $totalHours = round($diffMinutes / 60, 2);
+                $totalHours = round($diffMinutes / 60, 2);
+                // ✅ Apply your attendance logic
+                $fullDay = 8.5;
+                $graceMinutes = 15;
+                $minFullDay = $fullDay - ($graceMinutes / 60);
 
+                if ($totalHours >= $minFullDay) {
+                    $status = 'present';
+                } elseif ($totalHours >= 3.90) {
+                    $status = 'half_day';
+                } else {
+                    $status = 'absent';
+                }
                 } catch (\Exception $e) {
                     $totalHours = 0;
                 }
@@ -276,15 +307,16 @@ class PayrollController extends Controller
                     }
                 }
 
-           $attendanceDays = 0;
-
+            $attendanceDays = 0;
+            $overtimeMinutes = 0;
             foreach ($records as $r) {
 
                 switch ($r->status) {
 
                     case 'present':
-                    case 'work_from_home':
+                    case 'wfh':
                     case 'late':
+                    case 'leave':
                         $attendanceDays += 1;
                         break;
 
@@ -296,7 +328,25 @@ class PayrollController extends Controller
                     default:
                         break;
                 }
+                // 🔥 OVERTIME LOGIC
+                
+                $shiftMinutes = 8 * 60 + 30; // 510 min
+
+                if ($r->total_hours > 0) {
+                    $workedMinutes = $r->total_hours * 60;
+
+                    if ($workedMinutes > $shiftMinutes) {
+                        $overtimeMinutes += ($workedMinutes - $shiftMinutes);
+                    }
+                }
+
             }
+
+            $overtimeHours = $overtimeMinutes / 60;
+
+            // Convert to days (for reference)
+            $overtimeDays = $overtimeMinutes / (8 * 60 + 30);
+
 
             // Leaves
             $leaveDays = 0;
@@ -368,7 +418,9 @@ class PayrollController extends Controller
            $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $month,
-
+                'emp_name' => $employee->name,
+                'overtime_hours' => round($overtimeHours, 2),
+                'overtime_days' => round($overtimeDays, 2),
                 // Attendance
                 'payable_days' => $payableDays,
                 'unpaid_days' => round($unpaidDays, 2),
@@ -880,23 +932,49 @@ public function import(Request $request)
     {
         $employees = Employee::orderBy('name', 'asc')->get();
 
-        $query = Attendance::selectRaw("
-            attendances.employee_id,
-            employees.name as employee_name,
-            COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
-            COUNT(CASE WHEN attendances.total_hours > 9 THEN 1 END) as overtime_count,
-            COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
-            COUNT(CASE WHEN attendances.status IN ('leave','absent') THEN 1 END) as leave_count,
-            COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
-            COUNT(
-                CASE 
-                    WHEN attendances.check_out IS NOT NULL 
-                    AND TIME(attendances.check_out) <= SUBTIME(employees.time_out, '00:30:00')
-                    THEN 1
-                END
-            ) as early_count
-        ")
-        ->join('employees', 'attendances.employee_id', '=', 'employees.id');
+       $query = Attendance::selectRaw("
+        attendances.employee_id,
+        employees.name as employee_name,
+
+        COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
+        COUNT(CASE WHEN attendances.total_hours > 9.50 THEN 1 END) as overtime_count,
+        COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
+        COUNT(CASE WHEN attendances.status IN ('leave','absent') THEN 1 END) as leave_count,
+        COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
+
+        COUNT(
+            CASE 
+                WHEN attendances.check_out IS NOT NULL AND (
+                    
+                    -- ✅ Full Day Early
+                    (
+                        attendances.status = 'present'
+                        AND TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
+                    )
+
+                    OR
+
+                    -- ✅ Half Day Early
+                    (
+                        attendances.status = 'half_day'
+                        AND TIME(attendances.check_out) <= SUBTIME(
+                            ADDTIME(
+                                TIME(employees.time_in),
+                                SEC_TO_TIME(
+                                    TIME_TO_SEC(TIMEDIFF(employees.time_out, employees.time_in)) / 2
+                                )
+                            ),
+                            '00:30:00'
+                        )
+                    )
+
+                )
+                THEN 1
+            END
+        ) as early_count
+    ")
+    ->join('employees', 'attendances.employee_id', '=', 'employees.id');
+    
 
         // FILTER BY EMPLOYEE NAME
         if ($request->filled('employee_id')) {
