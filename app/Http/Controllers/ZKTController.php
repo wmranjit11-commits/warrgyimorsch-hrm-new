@@ -11,7 +11,7 @@ class ZKTController extends Controller
 
     public function syncAttendance(AttendanceService $service)
     {
-        $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.29.201', 4370, 5);
+        $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.29.101', 4370, 5);
         $connect = $zk->connect();
 
         if (!$connect) {
