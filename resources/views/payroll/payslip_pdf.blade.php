@@ -199,8 +199,8 @@
             <tr>
                 <td style="width: 40%; vertical-align: middle;">
                     <!-- Real Logo Image Optimized -->
-                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/logo-blue.png'))) }}"
-                        style="width: 150px; height: auto; display: block;">
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/Warr.png'))) }}"
+                        style="width: 140px; height: auto; display: block;">
                 </td>
                 <td style="width: 60%;">
                     <div class="company-address-box">

@@ -18,7 +18,7 @@ class LeaveApplicationController extends Controller
 
         // Search Filters
         if ($request->filled('search')) {
-            $query->whereHas('employee', function($q) use ($request) {
+            $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search . '%');
             });
         }
@@ -35,8 +35,15 @@ class LeaveApplicationController extends Controller
             $query->whereDate('start_date', '<=', $request->to_date);
         }
 
+        $role = strtoupper(auth()->user()->role);
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+            $query->where('employee_id', auth()->user()->employee_id);
+            $employees = Employee::where('id', auth()->user()->employee_id)->get();
+        } else {
+            $employees = Employee::all();
+        }
+
         $leaves = $query->orderBy('created_at', 'desc')->paginate(15);
-        $employees = Employee::all();
 
         return view('leave.history', compact('leaves', 'employees'));
     }
@@ -77,7 +84,7 @@ class LeaveApplicationController extends Controller
         $query = LeaveApplication::with('employee');
 
         if ($request->filled('search')) {
-            $query->whereHas('employee', function($q) use ($request) {
+            $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search . '%');
             });
         }

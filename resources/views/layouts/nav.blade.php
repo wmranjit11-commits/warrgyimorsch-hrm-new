@@ -76,14 +76,6 @@
                                     </a>
                                 </li>
                                 <li class="nxl-item">
-                                    <a href="{{ route('payroll.calculation') }}" class="nxl-link">
-                                        <span class="nxl-micon">
-                                            <i class="feather-circle"></i>
-                                        </span>
-                                        <span class="nxl-mtext">Payroll Calculation</span>
-                                    </a>
-                                </li>
-                                <li class="nxl-item">
                                     <a href="{{ route('payroll.index') }}" class="nxl-link">
                                         <span class="nxl-micon">
                                             <i class="feather-circle"></i>

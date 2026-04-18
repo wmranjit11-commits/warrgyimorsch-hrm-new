@@ -21,20 +21,37 @@ class LeaveController extends Controller
     {
         $selectedMonth = $request->get('month', Carbon::now()->format('m'));
         $year = Carbon::now()->format('Y');
-
         $month = $selectedMonth;
 
-        $employees = Employee::orderBy('name', 'asc')->get();
-        $allotments = LeaveAllotment::where('month', $month)
-            ->where('year', $year)
-            ->get()
-            ->keyBy('employee_id');
+        $role = strtoupper(auth()->user()->role);
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+            $employee_id = auth()->user()->employee_id;
+            $employees = Employee::where('id', $employee_id)->get();
+            $allotments = LeaveAllotment::where('month', $month)
+                ->where('year', $year)
+                ->where('employee_id', $employee_id)
+                ->get()
+                ->keyBy('employee_id');
 
-        $history = LeaveAllotment::with('employee')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
+            $history = LeaveAllotment::with('employee')
+                ->where('employee_id', $employee_id)
+                ->orderBy('year', 'desc')
+                ->orderBy('month', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $employees = Employee::orderBy('name', 'asc')->get();
+            $allotments = LeaveAllotment::where('month', $month)
+                ->where('year', $year)
+                ->get()
+                ->keyBy('employee_id');
+
+            $history = LeaveAllotment::with('employee')
+                ->orderBy('year', 'desc')
+                ->orderBy('month', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return view('leave.allotment', compact('employees', 'allotments', 'selectedMonth', 'history'));
     }

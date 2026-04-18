@@ -13,6 +13,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+        $employeeId = auth()->user()->employee_id;
+
         $today = Carbon::today()->toDateString();
 
         // Month Filtering
@@ -27,38 +31,53 @@ class DashboardController extends Controller
         $selectedMonthLabel = $selectedDate->format('F Y');
 
         // Employee Metrics
-        $totalEmployees = Employee::count();
+        $totalEmployees = $isAdmin ? Employee::count() : 1;
 
-        // Attendance Metrics (If current month selected, use today. If past, use month avg)
+        // Attendance Metrics
         $isCurrentMonth = ($selectedMonth == Carbon::now()->format('Y-m'));
 
-        if ($isCurrentMonth) {
-            $todayPresent = Attendance::where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
-            $todayLeave = Attendance::where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
-            $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100, 1) : 0;
-        } else {
-            // For past months, show average based on actual days in that month
-            $daysInMonth = $selectedDate->daysInMonth;
-            $monthPresent = Attendance::whereMonth('attendance_date', $selectedDate->month)
-                ->whereYear('attendance_date', $selectedDate->year)
-                ->whereIn('status', ['present', 'half_day', 'late', 'leave', 'absent'])
-                ->count();
+        if ($isAdmin) {
+            if ($isCurrentMonth) {
+                $todayPresent = Attendance::where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
+                $todayLeave = Attendance::where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
+                $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100, 1) : 0;
+            } else {
+                $daysInMonth = $selectedDate->daysInMonth;
+                $monthPresent = Attendance::whereMonth('attendance_date', $selectedDate->month)
+                    ->whereYear('attendance_date', $selectedDate->year)
+                    ->whereIn('status', ['present', 'half_day', 'late', 'leave', 'absent'])
+                    ->count();
 
-            $todayPresent = $daysInMonth > 0 ? round($monthPresent / $daysInMonth) : 0;
-            $todayLeave = 0; // Average leave is complex, default to 0 for past summary
-            $attendanceRate = ($totalEmployees > 0 && $daysInMonth > 0) ? round(($monthPresent / ($totalEmployees * $daysInMonth)) * 100, 1) : 0;
+                $todayPresent = $daysInMonth > 0 ? round($monthPresent / $daysInMonth) : 0;
+                $todayLeave = 0;
+                $attendanceRate = ($totalEmployees > 0 && $daysInMonth > 0) ? round(($monthPresent / ($totalEmployees * $daysInMonth)) * 100, 1) : 0;
+            }
+
+            // Payroll Metrics (Selected Month)
+            $totalPaidAmount = Payroll::where('month', $selectedMonth)->where('status', 'paid')->sum('net_salary');
+            $totalPendingAmount = Payroll::where('month', $selectedMonth)->where('status', 'pending')->sum('net_salary');
+            $totalRejectedAmount = Payroll::where('month', $selectedMonth)->where('status', 'rejected')->sum('net_salary');
+            $totalNetSalary = Payroll::where('month', $selectedMonth)->sum('net_salary');
+
+            $totalEmpPaid = Payroll::where('month', $selectedMonth)->where('status', 'paid')->count();
+            $totalEmpPending = Payroll::where('month', $selectedMonth)->where('status', 'pending')->count();
+        } else {
+            // Employee specific metrics
+            $todayPresent = Attendance::where('employee_id', $employeeId)->where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
+            $todayLeave = Attendance::where('employee_id', $employeeId)->where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
+            $attendanceRate = $todayPresent > 0 ? 100 : 0;
+
+            $myPayroll = Payroll::where('employee_id', $employeeId)->where('month', $selectedMonth)->first();
+            $totalPaidAmount = ($myPayroll && $myPayroll->status == 'paid') ? $myPayroll->net_salary : 0;
+            $totalPendingAmount = ($myPayroll && $myPayroll->status == 'pending') ? $myPayroll->net_salary : 0;
+            $totalRejectedAmount = ($myPayroll && $myPayroll->status == 'rejected') ? $myPayroll->net_salary : 0;
+            $totalNetSalary = $myPayroll ? $myPayroll->net_salary : 0;
+
+            $totalEmpPaid = ($myPayroll && $myPayroll->status == 'paid') ? 1 : 0;
+            $totalEmpPending = ($myPayroll && $myPayroll->status == 'pending') ? 1 : 0;
         }
 
-        // Payroll Metrics (Selected Month)
-        $totalPaidAmount = Payroll::where('month', $selectedMonth)->where('status', 'paid')->sum('net_salary');
-        $totalPendingAmount = Payroll::where('month', $selectedMonth)->where('status', 'pending')->sum('net_salary');
-        $totalRejectedAmount = Payroll::where('month', $selectedMonth)->where('status', 'rejected')->sum('net_salary');
-        $totalNetSalary = Payroll::where('month', $selectedMonth)->sum('net_salary');
-
-        $totalEmpPaid = Payroll::where('month', $selectedMonth)->where('status', 'paid')->count();
-        $totalEmpPending = Payroll::where('month', $selectedMonth)->where('status', 'pending')->count();
-
-        // Chart Data: 6 Months leading to selected month
+        // Chart Data: 6 Months
         $chartMonths = [];
         $chartTotal = [];
         $chartPaid = [];
@@ -70,17 +89,20 @@ class DashboardController extends Controller
             $mValue = $m->format('Y-m');
 
             $chartMonths[] = $mLabel;
-            $chartTotal[] = Payroll::where('month', $mValue)->sum('net_salary');
-            $chartPaid[] = Payroll::where('month', $mValue)->where('status', 'paid')->sum('net_salary');
-            $chartPending[] = Payroll::where('month', $mValue)->where('status', 'pending')->sum('net_salary');
+            
+            $pQuery = Payroll::where('month', $mValue);
+            if (!$isAdmin) $pQuery->where('employee_id', $employeeId);
+
+            $chartTotal[] = (clone $pQuery)->sum('net_salary');
+            $chartPaid[] = (clone $pQuery)->where('status', 'paid')->sum('net_salary');
+            $chartPending[] = (clone $pQuery)->where('status', 'pending')->sum('net_salary');
         }
 
-        // Recent Activity (Filtered by Month)
-        $recentPayrolls = Payroll::with('employee')
-            ->where('month', $selectedMonth)
-            ->latest()
-            ->paginate(10);
-        // dd($recentPayrolls);
+        // Recent Activity
+        $pRecent = Payroll::with('employee')->where('month', $selectedMonth);
+        if (!$isAdmin) $pRecent->where('employee_id', $employeeId);
+        $recentPayrolls = $pRecent->latest()->paginate(10);
+
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();
 
@@ -105,6 +127,7 @@ class DashboardController extends Controller
             'upcomingHolidays'
         ));
     }
+
 
     /**
      * Get Full Year Breakdown (Requested by User)

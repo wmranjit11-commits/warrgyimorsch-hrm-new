@@ -142,19 +142,26 @@
                                         <td>
                                             @php
                                                 $catRaw = strtolower(trim($leave->leave_category));
+                                                $catClass = 'bg-soft-primary text-primary';
+                                                
                                                 if (str_contains($catRaw, 'half')) {
                                                     $catDisplay = 'HALF DAY';
+                                                    $catClass = 'bg-soft-warning text-warning';
                                                     if (str_contains($catRaw, 'first'))
-                                                        $catDisplay .= ' (FIRST HALF)';
+                                                        $catDisplay .= ' (FIRST)';
                                                     else if (str_contains($catRaw, 'second'))
-                                                        $catDisplay .= ' (SECOND HALF)';
+                                                        $catDisplay .= ' (SECOND)';
                                                 } elseif ($catRaw === 'full' || $catRaw === 'full day') {
                                                     $catDisplay = 'FULL DAY';
+                                                    $catClass = 'bg-soft-primary text-primary';
+                                                } elseif (str_contains($catRaw, 'gatepass')) {
+                                                    $catDisplay = 'GATEPASS';
+                                                    $catClass = 'bg-soft-info text-info';
                                                 } else {
                                                     $catDisplay = strtoupper($catRaw);
                                                 }
                                             @endphp
-                                            <span class="badge bg-soft-primary text-primary px-3 rounded-pill fw-bold"
+                                            <span class="badge {{ $catClass }} px-3 rounded-pill fw-bold"
                                                 style="font-size: 11px;">{{ $catDisplay }}</span>
                                         </td>
                                         <td class="small text-muted">
@@ -643,13 +650,22 @@
                     document.getElementById('viewAvatarLetter').textContent = data.employee.name.charAt(0);
                     document.getElementById('viewLeaveType').textContent = data.leave_type;
 
+                    const catRaw = data.leave_category.toLowerCase();
                     let catDisp = data.leave_category.toUpperCase();
-                    if (catDisp.includes('HALF')) {
+                    let catClass = 'bg-soft-primary text-primary';
+
+                    if (catRaw.includes('half')) {
                         catDisp = catDisp.replace('HALF', 'HALF DAY').replace('HALF DAY DAY', 'HALF DAY');
-                    } else if (catDisp === 'FULL' || catDisp.trim() === 'FULL') {
+                        catClass = 'bg-soft-warning text-warning';
+                    } else if (catRaw === 'full' || catRaw.trim() === 'full') {
                         catDisp = 'FULL DAY';
+                    } else if (catRaw.includes('gatepass')) {
+                        catClass = 'bg-soft-info text-info';
                     }
-                    document.getElementById('viewCategoryBadge').textContent = catDisp;
+
+                    const catBadge = document.getElementById('viewCategoryBadge');
+                    catBadge.textContent = catDisp;
+                    catBadge.className = `badge ${catClass} border border-opacity-10`;
 
                     const statusBadge = document.getElementById('viewStatusBadge');
                     const status = data.status.toLowerCase();
@@ -746,11 +762,17 @@
                             'rejected': 'bg-soft-danger text-danger'
                         }[item.status] || 'bg-light';
 
+                        const catRaw = item.leave_category.toLowerCase();
+                        let catClass = 'bg-soft-primary text-primary';
                         let catDisp = item.leave_category.toUpperCase();
-                        if (catDisp.includes('HALF')) {
+                        
+                        if (catRaw.includes('half')) {
                             catDisp = catDisp.replace('HALF', 'HALF DAY').replace('HALF DAY DAY', 'HALF DAY');
-                        } else if (catDisp === 'FULL' || catDisp.trim() === 'FULL') {
+                            catClass = 'bg-soft-warning text-warning';
+                        } else if (catRaw === 'full' || catRaw === 'full day') {
                             catDisp = 'FULL DAY';
+                        } else if (catRaw.includes('gatepass')) {
+                            catClass = 'bg-soft-info text-info';
                         }
 
                         tbody.innerHTML += `
@@ -761,7 +783,7 @@
                                                         </td>
                                                         <td>
                                                             <div class="fw-semibold text-dark small">${item.leave_type}</div>
-                                                            <div class="text-muted" style="font-size: 9px;">${catDisp}</div>
+                                                            <span class="badge ${catClass} p-1 px-2 mt-1" style="font-size: 8px; font-weight: 800;">${catDisp}</span>
                                                         </td>
                                                         <td class="text-center">
                                                             <span class="badge ${statusClass} px-2 rounded-pill fw-bold" style="font-size: 10px;">${item.status.toUpperCase()}</span>
