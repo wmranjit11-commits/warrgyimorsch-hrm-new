@@ -95,7 +95,7 @@ class PayrollController extends Controller
     public function getAttendance(Request $request)
     {
         $role = strtoupper(auth()->user()->role ?? 'USER');
-        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
 
         $query = Attendance::with('employee');
 
@@ -536,7 +536,7 @@ public function import(Request $request)
     public function index(Request $request)
     {
         $role = strtoupper(auth()->user()->role ?? 'USER');
-        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
 
         $query = Payroll::with('employee');
 

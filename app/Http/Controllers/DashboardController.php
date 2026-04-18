@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $role = strtoupper(auth()->user()->role ?? 'USER');
-        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
         $employeeId = auth()->user()->employee_id;
 
         $today = Carbon::today()->toDateString();

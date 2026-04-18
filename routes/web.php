@@ -18,14 +18,6 @@ Route::get('/', function () {
 use App\Http\Controllers\DashboardController;
 
 // Emergency Role Fix Route
-Route::get('/fix-my-role', function() {
-    $user = auth()->user();
-    if (str_contains(strtolower($user->name), 'ranjit')) {
-        $user->update(['role' => 'Super Admin']);
-        return redirect()->back()->with('success', 'Role Fixed to Super Admin!');
-    }
-    return redirect()->back()->with('error', 'Unauthorized!');
-})->middleware('auth');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/dashboard/summary', [DashboardController::class, 'getMonthlySummary'])->middleware(['auth'])->name('dashboard.summary');
