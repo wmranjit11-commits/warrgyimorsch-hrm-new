@@ -7,8 +7,10 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveApplicationController;
+use App\Http\Controllers\ZKTController;
 
 
+Route::get('/sync-attendance', [ZKTController::class, 'syncAttendance']);
 Route::get('/', function () {
     return view('auth.login');
 });
