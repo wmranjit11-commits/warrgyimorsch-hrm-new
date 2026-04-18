@@ -36,6 +36,7 @@
                                 <i class="feather-refresh-cw"></i>
                             </a>
 
+                            @if(in_array(strtolower(auth()->user()->role), ['admin', 'super admin']))
                             <a href="{{ route('employees.export') }}" class="avatar-text avatar-md bg-soft-success text-success"
                                 title="Export All Employees">
                                 <i class="feather-download"></i>
@@ -52,6 +53,7 @@
                                     <i class="feather-trash-2"></i>
                                 </a>
                             @endif
+                            @endif
                         </div>
                     </div>
 
@@ -65,12 +67,13 @@
                                         placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 44px;">
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                                    <select id="filterEmployeeType" class="form-select border-0 shadow-sm" onchange="applyFilters()"
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
+                                    <select id="filterRole" class="form-select border-0 shadow-sm" onchange="applyFilters()"
                                         style="border-radius: 8px; height: 44px;">
-                                        <option value="">All Types</option>
-                                        <option value="permanent">Employee</option>
-                                        <option value="contract">Worker</option>
+                                        <option value="">All Roles</option>
+                                        @foreach (\App\Models\RoleMaster::all() as $role)
+                                            <option value="{{ strtolower($role->name) }}">{{ $role->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-3">
@@ -78,15 +81,10 @@
                                     <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()"
                                         style="border-radius: 8px; height: 44px;">
                                         <option value="">All Departments</option>
-                                        <option value="administration">Administration</option>
-                                        <option value="business_development">Business Development</option>
-                                        <option value="hr">HR Department</option>
+                                        @foreach (\App\Models\Department::all() as $dept)
+                                            <option value="{{ strtolower($dept->name) }}">{{ $dept->name }}</option>
+                                        @endforeach
                                     </select>
-                                </div>
-                                <div class="col-md-2" id="filterRoleWrapper" style="display: none;">
-                                    <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
-                                    <input type="text" id="filterRole" class="form-control border-0 shadow-sm" onkeyup="applyFilters()"
-                                        placeholder="Search..." style="border-radius: 8px; height: 44px;">
                                 </div>
                                 <div class="col-md-3 d-flex gap-2 align-items-end">
                                     <button class="btn btn-primary flex-grow-1 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="applyFilters()"
@@ -113,8 +111,8 @@
                             </select>
                             <span class="text-muted small fw-bold text-uppercase">entries</span>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table align-middle table-hover" id="employeeTable">
+                        <div class="table-responsive" style="overflow: visible !important;">
+                            <table class="table align-middle table-hover" id="employeeTable" style="margin-bottom: 50px;">
 
                                 <thead class="bg-light">
                                     <tr style="height: 60px;">
@@ -158,8 +156,8 @@
                                                         <span class="ms-2 text-muted"
                                                             style="font-size:12px; color:#3b82f6;">({{ $emp->employee_code }})</span>
                                                     </a>
-                                                    <ul class="dropdown-menu shadow-sm border-0 p-2"
-                                                        style="min-width:180px;left:0 !important;top:100% !important;max-height:none !important;overflow-y:visible !important;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-radius:8px;">
+                                                    <ul class="dropdown-menu shadow-lg border-0 p-2"
+                                                        style="min-width:180px;left:0 !important;top:100% !important;max-height:none !important;overflow-y:visible !important;box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important; border-radius:12px; z-index: 999999 !important;">
                                                         <li>
                                                             <a class="dropdown-item d-flex align-items-center gap-2"
                                                                 href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})"
@@ -168,6 +166,7 @@
                                                                 View Details
                                                             </a>
                                                         </li>
+                                                        @if(in_array(strtolower(auth()->user()->role), ['admin', 'super admin']))
                                                         <li>
                                                             <a class="dropdown-item d-flex align-items-center gap-2"
                                                                 href="{{ route('employees.edit', $emp->id) }}"
@@ -184,6 +183,7 @@
                                                                 Delete
                                                             </a>
                                                         </li>
+                                                        @endif
                                                     </ul>
                                                 </div>
                                             </td>
@@ -1319,34 +1319,31 @@
                 // Apply Filters
                 function applyFilters() {
                     const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
-                    const employeeType = document.getElementById('filterEmployeeType').value.toLowerCase();
                     const department = document.getElementById('filterDepartment').value.toLowerCase();
-                    const roleEl = document.getElementById('filterRole');
-                    const role = roleEl ? roleEl.value.toLowerCase() : '';
+                    const role = document.getElementById('filterRole').value.toLowerCase();
 
                     const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
                     let visibleCount = 0;
 
                     rows.forEach(row => {
-                        const name = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-                        const rowType = row.getAttribute('data-employee-type') || '';
-                        const rowDept = row.getAttribute('data-employee-dept') || '';
-                        const rowRole = row.getAttribute('data-employee-role') || '';
+                        const nameCell = row.querySelector('td:nth-child(3)');
+                        const name = nameCell ? nameCell.innerText.toLowerCase() : '';
+                        const rowDept = (row.getAttribute('data-employee-dept') || '').toLowerCase();
+                        const rowRole = (row.getAttribute('data-employee-role') || '').toLowerCase();
 
                         // Filtering conditions
                         const nameMatch = name.includes(employeeName);
-                        const typeMatch = employeeType === '' || rowType.toLowerCase() === employeeType;
-
+                        
                         // Robust matching for department and role (handles underscores and spaces)
                         const normDepartment = department.replace(/_/g, ' ');
                         const normRowDept = rowDept.replace(/_/g, ' ');
-                        const departmentMatch = department === '' || normRowDept.includes(normDepartment);
+                        const departmentMatch = department === '' || normRowDept.includes(normDepartment) || rowDept === department;
 
                         const normRole = role.replace(/_/g, ' ');
                         const normRowRole = rowRole.replace(/_/g, ' ');
-                        const roleMatch = role === '' || normRowRole.includes(normRole);
+                        const roleMatch = role === '' || normRowRole.includes(normRole) || rowRole === role;
 
-                        if (nameMatch && typeMatch && departmentMatch && roleMatch) {
+                        if (nameMatch && departmentMatch && roleMatch) {
                             row.style.display = '';
                             visibleCount++;
                         } else {
@@ -1355,12 +1352,12 @@
                     });
 
                     // Show "no results" message if no rows match
-                    if (visibleCount === 0) {
+                    if (visibleCount === 0 && rows.length > 0) {
                         const tbody = document.querySelector("#employeeTable tbody");
                         if (!document.getElementById('noResultsRow')) {
                             const noResultsRow = document.createElement('tr');
                             noResultsRow.id = 'noResultsRow';
-                            noResultsRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted">No employees match the filters</td>';
+                            noResultsRow.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No employees match the filters</td>';
                             tbody.appendChild(noResultsRow);
                         }
                     } else {
@@ -1374,7 +1371,6 @@
                 // Clear Filters
                 function clearFilters() {
                     document.getElementById('filterEmployeeName').value = '';
-                    document.getElementById('filterEmployeeType').value = '';
                     document.getElementById('filterDepartment').value = '';
                     document.getElementById('filterRole').value = '';
 
@@ -1388,8 +1384,6 @@
                     if (noResultsRow) {
                         noResultsRow.remove();
                     }
-
-                    document.getElementById('filterSection').style.display = 'none';
                 }
 
                 // Delete Selected Employees (Bulk Delete)

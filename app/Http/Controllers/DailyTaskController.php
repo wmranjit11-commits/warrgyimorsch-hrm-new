@@ -14,6 +14,17 @@ class DailyTaskController extends Controller
     public function index(Request $request)
     {
         $query = DailyTask::with(['project', 'employee', 'creator', 'followUps']);
+        
+        // Data Restriction Logic
+        $role = strtoupper(auth()->user()->role);
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+            $query->where('employee_id', auth()->user()->employee_id);
+            $employees = Employee::where('id', auth()->user()->employee_id)->get();
+            $projects = Project::orderBy('name')->get();
+        } else {
+            $projects = Project::orderBy('name')->get();
+            $employees = Employee::orderBy('name')->get();
+        }
 
         // Filtering
         if ($request->project_id) {
@@ -33,8 +44,6 @@ class DailyTaskController extends Controller
         }
 
         $tasks = $query->latest()->get();
-        $projects = Project::orderBy('name')->get();
-        $employees = Employee::orderBy('name')->get();
 
         return view('projects.tasks.index', compact('tasks', 'projects', 'employees'));
     }
@@ -53,6 +62,12 @@ class DailyTaskController extends Controller
         ]);
 
         $validated['assigned_by'] = Auth::id();
+        
+        // Force employee_id for non-admins
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+            $validated['employee_id'] = auth()->user()->employee_id;
+        }
 
         DailyTask::create($validated);
 
@@ -71,6 +86,11 @@ class DailyTaskController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'description' => 'nullable|string',
         ]);
+
+        // Force employee_id for non-admins
+        if (strtoupper(auth()->user()->role) !== 'ADMIN') {
+            $validated['employee_id'] = auth()->user()->employee_id;
+        }
 
         $dailyTask->update($validated);
 
@@ -102,6 +122,11 @@ class DailyTaskController extends Controller
             'time_taken' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp|max:10240',
         ]);
+
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+            $validated['reference_name'] = auth()->user()->name;
+        }
 
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('task_followups', 'public');

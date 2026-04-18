@@ -10,7 +10,7 @@
         }
 
         body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 10px;
             line-height: 1.5;
             color: #333;
@@ -206,8 +206,8 @@
                 <tr>
                     <td style="width: 40%; vertical-align: middle;">
                         <!-- Real Logo Image (logo-blue.png) -->
-                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/logo-blue.png'))) }}"
-                            style="width: 180px; height: auto; display: block;">
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/images/Warr.png'))) }}"
+                            style="width: 160px; height: auto; display: block;">
                     </td>
                     <td style="width: 60%;">
                         <div class="company-address-box">

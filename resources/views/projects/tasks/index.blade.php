@@ -211,8 +211,9 @@
                                                             <i class="feather-check-circle me-1"></i> Completed
                                                         </div>
                                                     @endif
-                                                    <span class="text-muted" style="font-size: 11px; font-weight: 600;">
-                                                        Deadline: {{ $task->end_date->format('d M Y') }}
+                                                    <span class="text-muted d-flex align-items-center gap-1" style="font-size: 11px; font-weight: 600;">
+                                                        <i class="feather-clock" style="font-size: 10px;"></i>
+                                                        Spent: <span class="text-dark">{{ $task->total_time }} hrs</span>
                                                     </span>
                                                 </div>
                                             </td>
@@ -290,11 +291,61 @@
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
-                                                        title="View Description" onclick="showTaskDesc({{ $task->id }})">
+                                                        title="View Details & History" onclick="showTaskDesc({{ $task->id }})">
                                                         <i class="feather-file-text"></i>
                                                     </a>
-                                                    <template
-                                                        id="task_desc_{{ $task->id }}">{!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}</template>
+                                                    <template id="task_desc_{{ $task->id }}">
+                                                        <div class="p-2">
+                                                            <div class="mb-4">
+                                                                <h6 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                                                                    <i class="feather-info"></i> Original Task Description
+                                                                </h6>
+                                                                <div class="p-3 bg-white rounded border" style="font-size: 14px; min-height: 100px;">
+                                                                    {!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}
+                                                                </div>
+                                                            </div>
+
+                                                            <hr class="my-4">
+
+                                                            <div class="mb-3">
+                                                                <h6 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                                                                    <i class="feather-clock"></i> Work Progress History
+                                                                </h6>
+                                                                @if($task->followUps->count() > 0)
+                                                                    <div class="timeline-container px-2">
+                                                                        @foreach($task->followUps->sortByDesc('created_at') as $fu)
+                                                                            <div class="mb-4 ps-4 position-relative" style="border-left: 2px dashed #cbd5e1;">
+                                                                                <div class="position-absolute" style="left: -9px; top: 0; width: 16px; height: 16px; background: #3858f9; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #3858f920;"></div>
+                                                                                <div class="card border-0 shadow-sm" style="border-radius: 12px; background: #f8fafc;">
+                                                                                    <div class="card-body p-3">
+                                                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                                            <span class="fw-bold text-dark small">{{ $fu->reference_name ?? 'Employee' }}</span>
+                                                                                            <span class="badge bg-soft-primary text-primary small">{{ $fu->created_at->format('d M, Y') }}</span>
+                                                                                        </div>
+                                                                                        <div class="text-muted small mb-2">{!! $fu->work_description !!}</div>
+                                                                                        <div class="d-flex align-items-center gap-2 mt-2">
+                                                                                            <span class="badge bg-soft-dark text-dark fw-bold" style="font-size: 10px;">
+                                                                                                <i class="feather-clock me-1"></i> {{ $fu->time_taken }} hrs
+                                                                                            </span>
+                                                                                            @if($fu->photo)
+                                                                                                <a href="{{ asset('storage/' . $fu->photo) }}" target="_blank" class="badge bg-soft-info text-info text-decoration-none">
+                                                                                                    <i class="feather-image"></i> View Image
+                                                                                                </a>
+                                                                                            @endif
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                @else
+                                                                    <div class="alert alert-soft-secondary py-3 text-center" style="border-radius: 12px;">
+                                                                        <i class="feather-info me-2"></i> No history available for this task.
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </template>
 
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-primary text-primary rounded"
@@ -444,9 +495,11 @@
                         <select name="employee_id" id="taskEmployeeId"
                             class="form-select border-0 bg-light shadow-none fw-bold"
                             style="height: 48px; border-radius: 10px; font-size: 14px;" required>
-                            <option value="">Employee name</option>
+                            @if(count($employees) > 1)
+                                <option value="">Employee name</option>
+                            @endif
                             @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                <option value="{{ $employee->id }}" {{ count($employees) == 1 ? 'selected' : '' }}>{{ $employee->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -1393,6 +1446,17 @@
                         Toast.fire({ icon: 'error', title: 'Update failed' });
                     }
                 });
+        }
+
+        function showTaskDesc(id) {
+            const html = document.getElementById('task_desc_' + id).innerHTML;
+            Swal.fire({
+                title: 'Task Details & Progress',
+                html: `<div class="custom-html-content" style="max-height: 75vh; overflow-y: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left;">${html}</div>`,
+                width: '800px',
+                showConfirmButton: true,
+                confirmButtonColor: '#3858f9'
+            });
         }
     </script>
 
