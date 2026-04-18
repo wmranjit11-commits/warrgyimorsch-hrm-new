@@ -2199,9 +2199,11 @@
                 <div class="dropdown nxl-h-item">
                     <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
                         @if(auth()->user()->avatar)
-                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="user-image" class="img-fluid user-avtar me-0" />
+                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="user-image"
+                                class="img-fluid user-avtar me-0" />
                         @else
-                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 14px;">
+                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                style="width: 35px; height: 35px; font-size: 14px;">
                                 {{ substr(auth()->user()->name, 0, 1) }}
                             </div>
                         @endif
@@ -2210,9 +2212,11 @@
                         <div class="dropdown-header">
                             <div class="d-flex align-items-center">
                                 @if(auth()->user()->avatar)
-                                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="user-image" class="img-fluid user-avtar" />
+                                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="user-image"
+                                        class="img-fluid user-avtar" />
                                 @else
-                                    <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" style="width: 45px; height: 45px; font-size: 18px;">
+                                    <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold me-2"
+                                        style="width: 45px; height: 45px; font-size: 18px;">
                                         {{ substr(auth()->user()->name, 0, 1) }}
                                     </div>
                                 @endif

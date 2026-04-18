@@ -33,8 +33,9 @@ class DashboardController extends Controller
         $isCurrentMonth = ($selectedMonth == Carbon::now()->format('Y-m'));
 
         if ($isCurrentMonth) {
-            $todayPresent = Attendance::where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
-            $todayLeave = Attendance::where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
+            $todayAttendance = Attendance::where('attendance_date', $today)->get()->unique('employee_id');
+            $todayPresent = $todayAttendance->whereIn('status', ['present', 'half_day', 'late', 'wfh'])->count();
+            $todayLeave = $todayAttendance->whereIn('status', ['absent', 'leave'])->count();
             $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100, 1) : 0;
         } else {
             // For past months, show average based on actual days in that month
@@ -84,6 +85,56 @@ class DashboardController extends Controller
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();
 
+        // New Logic: Upcoming Leaves
+        $user = auth()->user();
+        $isEmployee = ($user->role == 'employee');
+        $employeeId = $user->employee_id;
+
+        $upcomingLeavesQuery = \App\Models\LeaveApplication::with('employee')
+            ->where('start_date', '>=', $today)
+            ->orderBy('start_date', 'asc');
+
+        if ($isEmployee) {
+            $upcomingLeavesQuery->where('employee_id', $employeeId);
+        }
+        $upcomingLeaves = $upcomingLeavesQuery->paginate(5, ['*'], 'upcoming_leaves_page');
+
+        // New Logic: Top Leave Takers (Role-based)
+        if ($isEmployee) {
+            // For employee, just show their own leave summary
+            $leaveHistory = Employee::withCount(['leaves' => function($q) {
+                $q->where('status', 'approved');
+            }])
+            ->where('id', $employeeId)
+            ->paginate(5, ['*'], 'leave_history_page');
+        } else {
+            // For admin, show descending list of all employees
+            $leaveHistory = Employee::withCount(['leaves' => function($q) {
+                $q->where('status', 'approved');
+            }])
+            ->orderBy('leaves_count', 'desc')
+            ->paginate(5, ['*'], 'leave_history_page');
+        }
+
+        // Detailed Attendance Counts for Today (Unique by Employee)
+        $dayAttendance = Attendance::where('attendance_date', $today)->get()->unique('employee_id');
+        
+        $stats = [
+            'present' => $dayAttendance->where('status', 'present')->count(),
+            'wfh' => $dayAttendance->where('status', 'wfh')->count(),
+            'half_day' => $dayAttendance->where('status', 'half_day')->count(),
+            'leave' => $dayAttendance->whereIn('status', ['leave', 'absent'])->count(),
+        ];
+
+        if ($request->ajax()) {
+            if ($request->has('upcoming_leaves_page')) {
+                return view('partials.upcoming_leaves', compact('upcomingLeaves', 'isEmployee'))->render();
+            }
+            if ($request->has('leave_history_page')) {
+                return view('partials.leave_history', compact('leaveHistory', 'isEmployee'))->render();
+            }
+        }
+
         return view('dashboard', compact(
             'totalEmployees',
             'todayPresent',
@@ -102,7 +153,11 @@ class DashboardController extends Controller
             'selectedMonth',
             'selectedMonthLabel',
             'recentPayrolls',
-            'upcomingHolidays'
+            'upcomingHolidays',
+            'upcomingLeaves',
+            'leaveHistory',
+            'stats',
+            'isEmployee'
         ));
     }
 

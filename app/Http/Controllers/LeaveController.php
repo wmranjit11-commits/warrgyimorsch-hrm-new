@@ -54,6 +54,7 @@ class LeaveController extends Controller
             ->delete();
 
         foreach ($allotments as $employeeId => $count) {
+            $emp = Employee::find($employeeId);
             LeaveAllotment::updateOrCreate(
                 [
                     'employee_id' => $employeeId,
@@ -62,6 +63,7 @@ class LeaveController extends Controller
                 ],
                 [
                     'leave_count' => $count ?? 0,
+                    'employee_name' => $emp ? $emp->name : null,
                 ]
             );
         }

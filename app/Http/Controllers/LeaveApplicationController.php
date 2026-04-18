@@ -18,7 +18,7 @@ class LeaveApplicationController extends Controller
 
         // Search Filters
         if ($request->filled('search')) {
-            $query->whereHas('employee', function($q) use ($request) {
+            $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search . '%');
             });
         }
@@ -56,6 +56,12 @@ class LeaveApplicationController extends Controller
         $data = $request->only(['employee_id', 'leave_type', 'leave_category', 'start_date', 'end_date', 'reason', 'message', 'total_days', 'start_time', 'end_time']);
         $data['status'] = 'pending';
 
+        // Add Employee Name
+        $emp = Employee::find($request->employee_id);
+        if ($emp) {
+            $data['employee_name'] = $emp->name;
+        }
+
         if (str_contains(strtolower($request->leave_category), 'gatepass')) {
             $data['end_date'] = $request->start_date;
             $data['total_days'] = 0;
@@ -77,7 +83,7 @@ class LeaveApplicationController extends Controller
         $query = LeaveApplication::with('employee');
 
         if ($request->filled('search')) {
-            $query->whereHas('employee', function($q) use ($request) {
+            $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search . '%');
             });
         }

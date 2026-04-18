@@ -228,7 +228,7 @@ class EmployeeController extends Controller
                 // Only update password if provided
                 if ($request->filled('password')) {
                     $updateData['password'] = $request->password;
-                    
+
                     if ($user) {
                         $user->update(['password' => Hash::make($request->password)]);
                     }

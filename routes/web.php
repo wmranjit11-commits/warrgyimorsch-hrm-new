@@ -90,6 +90,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'updateRole'])->name('master.role.update');
     Route::delete('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'destroyRole'])->name('master.role.destroy');
 
+    // CELEBRATIONS MODULE
+    Route::get('/celebrations', [\App\Http\Controllers\CelebrationController::class, 'index'])->name('celebrations.index');
+
 });
 
 Route::middleware(['auth'])->group(function () {

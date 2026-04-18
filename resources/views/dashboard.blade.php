@@ -620,34 +620,41 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body pt-3 text-center">
-                                <div class="py-4 position-relative">
-                                    <div class="fs-1 fw-black text-primary mb-1 mt-2">{{ $attendanceRate }}%</div>
-                                    <div class="text-muted fw-bold small text-uppercase">Average Attendance Rate</div>
+                            <div class="card-body pt-3">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-soft-primary rounded-3 text-center border border-dashed border-primary">
+                                            <div class="fs-4 fw-black text-primary mb-1">{{ $stats['present'] }}</div>
+                                            <div class="text-muted fw-bold small text-uppercase">Present</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-soft-info rounded-3 text-center border border-dashed border-info">
+                                            <div class="fs-4 fw-black text-info mb-1">{{ $stats['wfh'] }}</div>
+                                            <div class="text-muted fw-bold small text-uppercase">WFH</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-soft-warning rounded-3 text-center border border-dashed border-warning">
+                                            <div class="fs-4 fw-black text-warning mb-1">{{ $stats['half_day'] }}</div>
+                                            <div class="text-muted fw-bold small text-uppercase">Half Day</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-soft-danger rounded-3 text-center border border-dashed border-danger">
+                                            <div class="fs-4 fw-black text-danger mb-1">{{ $stats['leave'] }}</div>
+                                            <div class="text-muted fw-bold small text-uppercase">On Leave</div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="p-3 bg-soft-primary rounded-3 text-start mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Staff Presence Today</span>
+                                <div class="mt-4 p-3 bg-gray-100 rounded-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small fw-bold text-dark">Overall Status</span>
                                         <span class="small fw-black text-primary">{{ $todayPresent }}/{{ $totalEmployees }}</span>
                                     </div>
-                                    <div class="progress ht-5 bg-white mb-3">
+                                    <div class="progress ht-5 bg-white mb-0">
                                         <div class="progress-bar" role="progressbar" style="width: {{ $totalEmployees > 0 ? ($todayPresent / $totalEmployees) * 100 : 0 }}%"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="small fw-bold text-dark">Leave Today</span>
-                                        <span class="small fw-black text-danger">{{ $todayLeave ?? 0 }} Staff</span>
-                                    </div>
-                                </div>
-
-                                <div class="row g-2 text-start">
-                                    <div class="col-6 border-end">
-                                        <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
-                                        <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
-                                    </div>
-                                    <div class="col-6 ps-3">
-                                        <div class="fs-5 fw-bold text-success">{{ $todayPresent }}</div>
-                                        <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
                                     </div>
                                 </div>
                             </div>
@@ -661,108 +668,64 @@
                     <!--! END: [Attendance Analytics] !-->
                 </div><!-- row end -->
                 <div class="row pt-4">
-
-                    <!--! BEGIN: [Team Progress] !-->
-                    <!-- <div class="col-xxl-4">
+                    <!--! BEGIN: [Upcoming Leaves] !-->
+                    <div class="col-xxl-6">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
-                                <h5 class="card-title">Team Progress</h5>
+                                <h5 class="card-title">@if($isEmployee) My Upcoming Leaves @else Upcoming Leave Applications @endif</h5>
                                 <div class="card-header-action">
-                                    <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                                data-bs-toggle="remove"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                                data-bs-toggle="refresh"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                                data-bs-toggle="expand"> </a>
-                                        </div>
-                                    </div>
-                                    <div class="dropdown">
-                                        <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                            data-bs-offset="25, 25">
-                                            <div data-bs-toggle="tooltip" title="Options">
-                                                <i class="feather-more-vertical"></i>
-                                            </div>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-end">
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-at-sign"></i>New</a>
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-calendar"></i>Event</a>
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-bell"></i>Snoozed</a>
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-trash-2"></i>Deleted</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-settings"></i>Settings</a>
-                                            <a href="javascript:void(0);" class="dropdown-item"><i
-                                                    class="feather-life-buoy"></i>Tips & Tricks</a>
-                                        </div>
-                                    </div>
+                                    <span class="badge bg-soft-primary text-primary">{{ $upcomingLeaves->total() }} Scheduled</span>
                                 </div>
                             </div>
-                            <div class="card-body custom-card-action">
-                                <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                                    <div class="hstack gap-3">
-                                        <div class="avatar-image">
-                                            <img src="assets/images/avatar/1.png" alt="" class="img-fluid" />
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">Alexandra Della</a>
-                                            <div class="fs-11 text-muted">Frontend Developer</div>
-                                        </div>
-                                    </div>
-                                    <div class="team-progress-1"></div>
-                                </div>
-                                <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                                    <div class="hstack gap-3">
-                                        <div class="avatar-image">
-                                            <img src="assets/images/avatar/2.png" alt="" class="img-fluid" />
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">Archie Cantones</a>
-                                            <div class="fs-11 text-muted">UI/UX Designer</div>
-                                        </div>
-                                    </div>
-                                    <div class="team-progress-2"></div>
-                                </div>
-                                <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-3">
-                                    <div class="hstack gap-3">
-                                        <div class="avatar-image">
-                                            <img src="assets/images/avatar/3.png" alt="" class="img-fluid" />
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">Malanie Hanvey</a>
-                                            <div class="fs-11 text-muted">Backend Developer</div>
-                                        </div>
-                                    </div>
-                                    <div class="team-progress-3"></div>
-                                </div>
-                                <div class="hstack justify-content-between border border-dashed rounded-3 p-3 mb-2">
-                                    <div class="hstack gap-3">
-                                        <div class="avatar-image">
-                                            <img src="assets/images/avatar/4.png" alt="" class="img-fluid" />
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">Kenneth Hune</a>
-                                            <div class="fs-11 text-muted">Digital Marketer</div>
-                                        </div>
-                                    </div>
-                                    <div class="team-progress-4"></div>
-                                </div>
+                            <div class="card-body custom-card-action p-0" id="upcoming-leaves-container">
+                                @include('partials.upcoming_leaves')
                             </div>
-                            <a href="javascript:void(0);" class="card-footer fs-11 fw-bold text-uppercase text-center">Update 30 Min
-                                Ago</a>
                         </div>
-                    </div> -->
-                    <!--! END: [Team Progress] !-->
+                    </div>
+                    <!--! END: [Upcoming Leaves] !-->
+
+                    <!--! BEGIN: [Leave Analysis - Top Takers] !-->
+                    <div class="col-xxl-6">
+                        <div class="card stretch stretch-full">
+                            <div class="card-header">
+                                <h5 class="card-title">@if($isEmployee) My Leave Summary @else Leave Analysis @endif</h5>
+                                <div class="card-header-action">
+                                    <span class="badge bg-soft-danger text-danger">Top Takers</span>
+                                </div>
+                            </div>
+                            <div class="card-body custom-card-action p-0" id="leave-history-container">
+                                @include('partials.leave_history')
+                            </div>
+                        </div>
+                    </div>
+                    <!--! END: [Leave Analysis] !-->
                 </div><!-- second row end -->
+
+                @push('scripts')
+                <script>
+                    $(document).ready(function() {
+                        $(document).on('click', '.pagination-ajax a', function(e) {
+                            e.preventDefault();
+                            var url = $(this).attr('href');
+                            var target = $(this).closest('.pagination-ajax').data('target');
+                            
+                            $(target).css('opacity', '0.5'); // Visual feedback
+                            
+                            $.ajax({
+                                url: url,
+                                success: function(data) {
+                                    $(target).html(data);
+                                    $(target).css('opacity', '1');
+                                },
+                                error: function() {
+                                    alert('Error loading data.');
+                                    $(target).css('opacity', '1');
+                                }
+                            });
+                        });
+                    });
+                </script>
+                @endpush
                 <!-- Monthly Summary Modal [ENHANCED] -->
             <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">

@@ -125,6 +125,13 @@
                 </ul>
             </li>
 
+            <li class="nxl-item">
+                <a href="{{ route('celebrations.index') }}" class="nxl-link">
+                    <span class="nxl-micon"><i class="feather-gift"></i></span>
+                    <span class="nxl-mtext">Staff Celebrations</span>
+                </a>
+            </li>
+
             <!-- <li class="nxl-item nxl-hasmenu">
                     <a href="javascript:void(0);" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-calendar"></i></span>

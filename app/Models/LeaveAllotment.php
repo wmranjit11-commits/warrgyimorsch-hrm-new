@@ -8,6 +8,7 @@ class LeaveAllotment extends Model
 {
     protected $fillable = [
         'employee_id',
+        'employee_name',
         'month',
         'year',
         'leave_count',

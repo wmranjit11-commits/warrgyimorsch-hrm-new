@@ -56,6 +56,10 @@ class Employee extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+    public function leaves()
+    {
+        return $this->hasMany(LeaveApplication::class);
+    }
     public function user()
     {
         return $this->hasOne(User::class, 'employee_id');
