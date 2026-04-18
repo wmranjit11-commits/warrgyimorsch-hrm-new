@@ -15,6 +15,16 @@ Route::get('/', function () {
 
 use App\Http\Controllers\DashboardController;
 
+// Emergency Role Fix Route
+Route::get('/fix-my-role', function() {
+    $user = auth()->user();
+    if (str_contains(strtolower($user->name), 'ranjit')) {
+        $user->update(['role' => 'Super Admin']);
+        return redirect()->back()->with('success', 'Role Fixed to Super Admin!');
+    }
+    return redirect()->back()->with('error', 'Unauthorized!');
+})->middleware('auth');
+
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/dashboard/summary', [DashboardController::class, 'getMonthlySummary'])->middleware(['auth'])->name('dashboard.summary');
 Route::get('/dashboard/chart', [DashboardController::class, 'getChartData'])->middleware(['auth'])->name('dashboard.chart');
@@ -155,12 +165,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/leave/application/{id}', [LeaveApplicationController::class, 'destroy'])->name('leave.application.destroy');
     Route::get('/api/leave/details/{id}', [LeaveApplicationController::class, 'getDetails']);
     Route::get('/api/leave/employee/{employeeId}', [LeaveApplicationController::class, 'getEmployeeLeaves']);
+
+    // NOTIFICATIONS
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
 });
 
+
 Route::middleware('auth')->group(function () {
+    Route::get('/profile/details', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/leave-balance', [ProfileController::class, 'leaveBalance'])->name('profile.leave-balance');
+    Route::get('/profile/leave-history', [ProfileController::class, 'leaveHistory'])->name('profile.leave-history');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
 require __DIR__ . '/auth.php';

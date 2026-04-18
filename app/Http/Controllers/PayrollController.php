@@ -94,7 +94,14 @@ class PayrollController extends Controller
      */
     public function getAttendance(Request $request)
     {
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+
         $query = Attendance::with('employee');
+
+        if (!$isAdmin) {
+            $query->where('employee_id', auth()->user()->employee_id);
+        }
 
         // Filter by Date Range (Start Date to End Date)
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -105,7 +112,7 @@ class PayrollController extends Controller
         }
 
         // Filter by employee
-        if ($request->filled('employee_id')) {
+        if ($isAdmin && $request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
 
@@ -113,6 +120,7 @@ class PayrollController extends Controller
 
         return view('payroll.attendance', compact('attendance'));
     }
+
 
     /**
      * Add Attendance - Show form
@@ -527,7 +535,14 @@ public function import(Request $request)
      */
     public function index(Request $request)
     {
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $isAdmin = ($role === 'ADMIN' || $role === 'SUPER ADMIN');
+
         $query = Payroll::with('employee');
+
+        if (!$isAdmin) {
+            $query->where('employee_id', auth()->user()->employee_id);
+        }
 
         // Filter by month
         if ($request->filled('month')) {
@@ -535,7 +550,7 @@ public function import(Request $request)
         }
 
         // Filter by employee
-        if ($request->filled('employee_id')) {
+        if ($isAdmin && $request->filled('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
 
@@ -547,6 +562,7 @@ public function import(Request $request)
         $payrolls = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('payroll.index', compact('payrolls'));
     }
+
 
     /**
      * Get payroll records with filtering
@@ -1103,7 +1119,14 @@ public function import(Request $request)
     public function downloadPdf($id)
     {
         $payroll = Payroll::with('employee')->findOrFail($id);
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.payslip_pdf', compact('payroll'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.payslip_pdf', compact('payroll'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'sans-serif',
+                'isFontSubsettingEnabled' => true, // This is key for size reduction
+            ]);
         
         $filename = 'payslip_' . str_replace(' ', '_', $payroll->employee->name) . '_' . $payroll->month . '.pdf';
         return $pdf->download($filename);
@@ -1135,7 +1158,14 @@ public function import(Request $request)
         }
 
         // Generate a single PDF with all slips separated by page breaks
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.bulk_payslip_pdf', compact('payrolls'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('payroll.bulk_payslip_pdf', compact('payrolls'))
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'sans-serif',
+                'isFontSubsettingEnabled' => true,
+            ]);
         
         $filename = 'bulk_payslips_' . ($request->month ?? date('Y-m')) . '.pdf';
         return $pdf->download($filename);

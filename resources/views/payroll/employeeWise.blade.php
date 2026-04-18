@@ -64,20 +64,35 @@
                             <select id="employee_id"
                                 class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
                                 style="border-radius: 8px; height: 40px;">
-                            <option value="">Select Employee</option>
-                            @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}">
-                                    {{ $employee->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                                <option value="">Select Employee</option>
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
+                                        {{ $employee->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted mb-2">Range</label>
+                            <select id="quickRange" class="form-select border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
+                                    onchange="updateDateRange(this.value)" style="border-radius: 8px; height: 40px;">
+                                <option value="">All Time</option>
+                                <option value="today" {{ request('range') == 'today' ? 'selected' : '' }}>Today</option>
+                                <option value="yesterday" {{ request('range') == 'yesterday' ? 'selected' : '' }}>Yesterday</option>
+                                <option value="week" {{ request('range') == 'week' ? 'selected' : '' }}>This Week</option>
+                                <option value="month" {{ request('range') == 'month' ? 'selected' : '' }}>This Month</option>
+                                <option value="3months" {{ request('range') == '3months' ? 'selected' : '' }}>Last 3 Months</option>
+                                <option value="6months" {{ request('range') == '6months' ? 'selected' : '' }}>Last 6 Months</option>
+                                <option value="1year" {{ request('range') == '1year' ? 'selected' : '' }}>Last 1 Year</option>
+                                <option value="custom" {{ (request('start_date') && request('range') == 'custom') ? 'selected' : '' }}>Custom</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                             <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                             <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
@@ -210,21 +225,74 @@
 
 @push('scripts')
 <script>
-    function toggleFilter() {
-        const filter = document.getElementById('filterSection');
-        filter.style.display = filter.style.display === 'none' ? 'block' : 'none';
+    function updateDateRange(range) {
+        const startInput = document.getElementById('startDate');
+        const endInput = document.getElementById('endDate');
+        const today = new Date();
+        let start = new Date();
+        let end = new Date();
+
+        switch (range) {
+            case 'today':
+                break;
+            case 'yesterday':
+                start.setDate(today.getDate() - 1);
+                end.setDate(today.getDate() - 1);
+                break;
+            case 'week':
+                start.setDate(today.getDate() - today.getDay());
+                break;
+            case 'month':
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+                break;
+            case '3months':
+                start.setMonth(today.getMonth() - 2);
+                start.setDate(1);
+                break;
+            case '6months':
+                start.setMonth(today.getMonth() - 5);
+                start.setDate(1);
+                break;
+            case '1year':
+                start.setFullYear(today.getFullYear() - 1);
+                start.setMonth(today.getMonth() + 1);
+                start.setDate(1);
+                break;
+            case 'custom':
+                return;
+        }
+
+        startInput.value = start.toISOString().split('T')[0];
+        endInput.value = end.toISOString().split('T')[0];
     }
+
+    // Initialize custom listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const startInput = document.getElementById('startDate');
+        const endInput = document.getElementById('endDate');
+        const quickRange = document.getElementById('quickRange');
+
+        if(startInput && endInput && quickRange) {
+            [startInput, endInput].forEach(el => {
+                el.addEventListener('change', () => {
+                    quickRange.value = 'custom';
+                });
+            });
+        }
+    });
 
     function applyFilters() {
         const employeeId = document.getElementById('employee_id').value;
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
+        const range = document.getElementById('quickRange').value;
         
         let url = new URL(window.location.href);
 
         if (employeeId) url.searchParams.set('employee_id', employeeId);
         if(start) url.searchParams.set('start_date', start);
         if(end) url.searchParams.set('end_date', end);
+        if(range) url.searchParams.set('range', range);
         window.location.href = url.toString();
     }
 

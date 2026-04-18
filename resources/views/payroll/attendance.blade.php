@@ -59,17 +59,32 @@
             <div class="collapse" id="filterSection">
                 <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
                     <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted mb-2">Quick Range</label>
+                            <select id="quickRange" class="form-select border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
+                                    onchange="updateDateRange(this.value)" style="border-radius: 8px; height: 40px;">
+                                <option value="">All Time</option>
+                                <option value="today" {{ request('range') == 'today' ? 'selected' : '' }}>Today</option>
+                                <option value="yesterday" {{ request('range') == 'yesterday' ? 'selected' : '' }}>Yesterday</option>
+                                <option value="week" {{ request('range') == 'week' ? 'selected' : '' }}>This Week</option>
+                                <option value="month" {{ request('range') == 'month' ? 'selected' : '' }}>This Month</option>
+                                <option value="3months" {{ request('range') == '3months' ? 'selected' : '' }}>Last 3 Months</option>
+                                <option value="6months" {{ request('range') == '6months' ? 'selected' : '' }}>Last 6 Months</option>
+                                <option value="1year" {{ request('range') == '1year' ? 'selected' : '' }}>Last 1 Year</option>
+                                <option value="custom" {{ (request('start_date') && request('range') == 'custom') ? 'selected' : '' }}>Custom Date</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                             <input type="date" id="startDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('start_date') }}" style="border-radius: 8px; height: 40px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                             <input type="date" id="endDate" class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold" 
                                    value="{{ request('end_date') }}" style="border-radius: 8px; height: 40px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <button class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="applyFilters()" style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
                                 <i class="feather-search"></i> APPLY
                             </button>
@@ -196,18 +211,75 @@
 
 @push('scripts')
 <script>
-    function toggleFilter() {
-        const filter = document.getElementById('filterSection');
-        filter.style.display = filter.style.display === 'none' ? 'block' : 'none';
+    function updateDateRange(range) {
+        const startInput = document.getElementById('startDate');
+        const endInput = document.getElementById('endDate');
+        const today = new Date();
+        let start = new Date();
+        let end = new Date();
+
+        switch (range) {
+            case 'today':
+                // already set to today
+                break;
+            case 'yesterday':
+                start.setDate(today.getDate() - 1);
+                end.setDate(today.getDate() - 1);
+                break;
+            case 'week':
+                start.setDate(today.getDate() - today.getDay());
+                break;
+            case 'month':
+                start = new Date(today.getFullYear(), today.getMonth(), 1);
+                break;
+            case '3months':
+                start.setMonth(today.getMonth() - 2);
+                start.setDate(1);
+                break;
+            case '6months':
+                start.setMonth(today.getMonth() - 5);
+                start.setDate(1);
+                break;
+            case '1year':
+                start.setFullYear(today.getFullYear() - 1);
+                start.setMonth(today.getMonth() + 1);
+                start.setDate(1);
+                break;
+            case 'custom':
+                return; // don't change inputs
+        }
+
+        startInput.value = start.toISOString().split('T')[0];
+        endInput.value = end.toISOString().split('T')[0];
     }
+
+    // If user manually changes date, switch range to custom
+    document.addEventListener('DOMContentLoaded', function() {
+        const startInput = document.getElementById('startDate');
+        const endInput = document.getElementById('endDate');
+        const quickRange = document.getElementById('quickRange');
+
+        [startInput, endInput].forEach(el => {
+            el.addEventListener('change', () => {
+                quickRange.value = 'custom';
+            });
+        });
+
+        // Initialize today if no range/date is set
+        if (!quickRange.value || (quickRange.value === 'today' && !startInput.value)) {
+            updateDateRange('today');
+        }
+    });
 
     function applyFilters() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
+        const range = document.getElementById('quickRange').value;
         
         let url = new URL(window.location.href);
         if(start) url.searchParams.set('start_date', start);
         if(end) url.searchParams.set('end_date', end);
+        if(range) url.searchParams.set('range', range);
         window.location.href = url.toString();
     }
 

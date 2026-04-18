@@ -37,10 +37,11 @@
                             <i class="feather-download"></i>
                         </a>
 
-                        <a href="{{ route('payroll.calculation') }}" class="avatar-text avatar-md bg-primary text-white"
+                        <button type="button" class="avatar-text avatar-md bg-primary text-white border-0 shadow-sm"
+                            data-bs-toggle="offcanvas" data-bs-target="#payrollCalculationOffcanvas"
                             title="New Calculation">
                             <i class="feather-plus"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -117,15 +118,26 @@
                                     <td class="text-end fw-bold text-primary" style="font-size: 15px;">
                                         ₹{{ number_format($payroll->net_salary, 2) }}</td>
                                     <td class="text-center">
-                                        <select onchange="updateStatus({{ $payroll->id }}, this.value)"
-                                            class="form-select form-select-sm border-0 fw-bold shadow-none {{ $payroll->status == 'paid' ? 'text-success' : 'text-warning' }}"
-                                            style="background: #f8fafc; border-radius: 6px; cursor: pointer;">
-                                            <option value="pending" {{ $payroll->status == 'pending' ? 'selected' : '' }}>PENDING
-                                            </option>
-                                            <option value="paid" {{ $payroll->status == 'paid' ? 'selected' : '' }}>PAID</option>
-                                            <option value="rejected" {{ $payroll->status == 'rejected' ? 'selected' : '' }}>
-                                                REJECTED</option>
-                                        </select>
+                                        @php
+                                            $statusClass = 'bg-soft-warning text-warning';
+                                            if ($payroll->status == 'paid') $statusClass = 'bg-soft-success text-success';
+                                            elseif ($payroll->status == 'rejected') $statusClass = 'bg-soft-danger text-danger';
+                                        @endphp
+                                        <div class="dropdown">
+                                            <span class="badge {{ $statusClass }} dropdown-toggle cursor-pointer"
+                                                data-bs-toggle="dropdown" 
+                                                data-bs-boundary="viewport"
+                                                aria-expanded="false"
+                                                style="padding: 7px 14px; border-radius: 9px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; min-width: 105px; display: inline-block; text-align: center;">
+                                                {{ $payroll->status }}
+                                            </span>
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" 
+                                                style="border-radius: 16px; min-width: 160px; z-index: 9999999 !important; border: 1px solid rgba(0,0,0,0.05) !important; position: absolute !important;">
+                                                <li><a class="dropdown-item fw-bold text-warning rounded-3 py-2 px-3 mb-1" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'pending')" style="font-size: 13px;">Pending</a></li>
+                                                <li><a class="dropdown-item fw-bold text-success rounded-3 py-2 px-3 mb-1" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'paid')" style="font-size: 13px;">Paid</a></li>
+                                                <li><a class="dropdown-item fw-bold text-danger rounded-3 py-2 px-3" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'rejected')" style="font-size: 13px;">Rejected</a></li>
+                                            </ul>
+                                        </div>
                                     </td>
                                     <td class="pe-4 text-center">
                                         <div class="d-flex justify-content-center gap-2">
@@ -170,6 +182,25 @@
 @endsection
 
 @push('modals')
+    <!-- Payroll Calculation Offcanvas -->
+    <div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="payrollCalculationOffcanvas" style="width: 650px !important; background: #f8fafc;">
+        <div class="offcanvas-header bg-white border-bottom px-4 py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-3">
+                    <i class="feather-calculator"></i>
+                </div>
+                <div>
+                    <h5 class="offcanvas-title fw-bold text-dark">Enterprise Payroll Engine</h5>
+                    <p class="text-muted small mb-0">Generate and validate monthly employee payslips</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            @include('payroll._calculation_form')
+        </div>
+    </div>
+
     <!-- Statement Modal -->
     <div class="modal fade" id="payrollDetailModal" tabindex="-1" aria-labelledby="payrollModalLabel" aria-hidden="true"
         data-bs-backdrop="true">
@@ -290,6 +321,14 @@
             justify-content: center;
             transition: all 0.2s;
             color: #64748b;
+        }
+
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        .dropdown-menu {
+            z-index: 99999999 !important;
         }
 
         .action-btn-outline:hover {
