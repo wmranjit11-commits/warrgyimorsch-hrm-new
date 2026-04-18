@@ -69,7 +69,7 @@ class EmployeeController extends Controller
 
                 // Password handling: store plain in employees table for admin viewing, hash for users table
                 $rawPassword = $request->filled('password') ? $request->password : '12345678';
-                $data['password'] = $rawPassword;
+                $data['password'] = Hash::make($rawPassword);
 
                 // Defaults
                 $data['gender'] = $request->gender ?? 'male';

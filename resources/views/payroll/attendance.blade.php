@@ -320,7 +320,7 @@
             if (filterStatus === 'half_day' && item.status === 'half_day') match = true;
             if (filterStatus === 'leave' && (item.status === 'leave' || item.status === 'absent')) match = true;
             if (filterStatus === 'late' && item.status === 'late') match = true;
-            if (filterStatus === 'overtime' && item.total_hours > 9) match = true;
+            if (filterStatus === 'overtime' && item.total_hours > 9.30) match = true;
             if (filterStatus === 'wfh' && item.status === 'wfh') match = true;
             if (filterStatus === 'early_out' && item.check_out && item.employee?.time_out) {
                 const shiftEnd = new Date(`1970-01-01T${item.employee.time_out}`);
