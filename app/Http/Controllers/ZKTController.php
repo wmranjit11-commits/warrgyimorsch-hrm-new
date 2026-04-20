@@ -11,14 +11,12 @@ class ZKTController extends Controller
 
     public function syncAttendance(AttendanceService $service)
     {
-        $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.29.101', 4370, 5);
-        $connect = $zk->connect();
-
-        if (!$connect) {
-            return "❌ Connect failed even after network OK";
+        $zk = new ZKTeco('192.168.29.101');
+        // dd($zk);
+        if (!$zk->connect()) {
+            return "❌ Device Connection Failed";
         }
-        // return "✅ Connected";
-        
+
         $zk->disableDevice();
 
         $attendances = $zk->getAttendance();
