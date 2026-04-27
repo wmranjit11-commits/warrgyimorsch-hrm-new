@@ -81,11 +81,15 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center">
-                                                    <input type="number" step="0.5"
-                                                        class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
-                                                        data-employee-id="{{ $emp->id }}"
-                                                        value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
-                                                        style="border-radius: 8px; width: 80px; height: 40px;">
+                                                    @if(auth()->user()->role === 'admin')
+                                                        <input type="number" step="0.5"
+                                                            class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
+                                                            data-employee-id="{{ $emp->id }}"
+                                                            value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
+                                                            style="border-radius: 8px; width: 80px; height: 40px;">
+                                                    @else
+                                                        <span class="fw-bold">{{ $allotments[$emp->id]->leave_count ?? 1.5 }}</span>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td class="text-center">

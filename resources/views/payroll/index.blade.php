@@ -19,6 +19,12 @@
                         </nav>
                     </div>
                     <div class="d-flex align-items-center gap-2">
+                        <!-- Share Salary Report -->
+                        <a href="javascript:void(0)" id="shareReportBtn" class="btn btn-icon btn-light-brand text-white bg-primary" 
+                            title="Share Salary Report">
+                            <label>Share salary report</label>
+                        </a>
+                        
                         <!-- Right Aligned Search & Actions -->
                         <div class="input-group d-none d-md-flex" style="width: 250px;">
                             <span class="input-group-text bg-light border-0"><i
@@ -32,10 +38,35 @@
                             <i class="feather-filter"></i>
                         </a>
 
-                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
+                        <!-- <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
                             onclick="exportPayroll('pdf')" title="Download All (PDF)">
                             <i class="feather-download"></i>
-                        </a>
+                        </a> -->
+                        <div class="relative inline-block" id="exportWrapper">
+                            <!-- Button -->
+                            <a href="javascript:void(0);"
+                            id="exportBtn"
+                            class="avatar-text avatar-md bg-soft-primary text-primary d-flex align-items-center justify-content-center">
+                                <i class="feather-download"></i>
+                            </a>
+
+                            <!-- Dropdown -->
+                            <div id="exportMenu"
+                                class="d-none position-absolute end-0 mt-2 bg-white border rounded shadow"
+                                style="width: 140px; z-index: 9999;">
+
+                                <button onclick="exportPayroll('pdf')"
+                                    class="dropdown-item text-start">
+                                    📄 PDF
+                                </button>
+
+                                <button onclick="exportPayroll('excel')"
+                                    class="dropdown-item text-start">
+                                    📊 Excel
+                                </button>
+
+                            </div>
+                        </div>
 
                         <button type="button" class="avatar-text avatar-md bg-primary text-white border-0 shadow-sm"
                             data-bs-toggle="offcanvas" data-bs-target="#payrollCalculationOffcanvas"
@@ -43,6 +74,39 @@
                             <i class="feather-plus"></i>
                         </button>
                     </div>
+                </div>
+
+                <!-- salary report -->
+                <div id="salaryFormSection" class="card mt-4 p-4" style="display: none;">
+                    <h4>Salary Slip</h4>
+
+                    <form action="{{ route('payroll.sendDateRange') }}" method="POST">
+                        @csrf
+                        <!-- Employee Dropdown -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Employee</label>
+                            <select class="form-control" name="employee_id">
+                                <option value="">Select</option>
+                                @foreach (\App\Models\Employee::all() as $emp)
+                                    <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="mb-3">
+                            <label class="form-label">From Date</label>
+                            <input type="date" name="from_date" class="form-control">
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="mb-3">
+                            <label class="form-label">To Date</label>
+                            <input type="date" name="to_date" class="form-control">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Generate</button>
+                    </form>
                 </div>
 
                 <!-- Collapsible Filter Section -->
@@ -155,6 +219,14 @@
                                                 onclick="deletePayroll({{ $payroll->id }})" title="Delete">
                                                 <i class="feather-trash-2"></i>
                                             </a>
+                                            <a href="javascript:void(0);"
+                                                class="avatar-text avatar-md bg-soft-secondary text-secondary comment-btn"
+                                                data-id="{{ $payroll->id }}"
+                                                data-remark="{{ $payroll->remarks ?? '' }}"
+                                                data-role="{{ auth()->user()->role }}"
+                                                title="Comment">
+                                                <i class="feather-message-square"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -170,6 +242,29 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <div class="modal fade" id="commentModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content" style="border-radius: 12px;">
+                                
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Add Comment</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <textarea id="remarksField" class="form-control" rows="4" placeholder="Write comment..."></textarea>
+                                    <input type="hidden" id="userRole">
+                                    <input type="hidden" id="payrollId">
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                    <button id="saveBtn" class="btn btn-primary" onclick="saveComment()">Save</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 @if($payrolls->hasPages())
                     <div class="card-footer bg-white border-0 py-3">
@@ -229,6 +324,107 @@
 
 @push('scripts')
     <script>
+
+        document.querySelectorAll('.comment-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const id = this.dataset.id;
+                const remark = this.dataset.remark; // already JSON-safe string
+                const role = this.dataset.role;
+
+                openCommentModal(id, remark, role);
+            });
+        });
+
+        function openCommentModal(id, remarks, role) {
+            role = (role || '').toLowerCase();
+            let modalEl = document.getElementById('commentModal');
+            let modal = new bootstrap.Modal(modalEl);
+            modal.show();
+
+            // Set hidden fields
+            document.getElementById('payrollId').value = id;
+            document.getElementById('userRole').value = role;
+
+            let field = document.getElementById('remarksField');
+            let title = modalEl.querySelector('.modal-title');
+            let saveBtn = document.getElementById('saveBtn');
+
+            field.value = remarks || '';
+            
+            if (role === 'employee') {
+                // ✅ Employee: can edit
+                field.removeAttribute('readonly');
+                field.style.display = 'block';
+
+                title.innerText = 'Add Comment';
+            } else {
+                // ✅ Admin/HR: view only
+                field.setAttribute('readonly', true);
+                field.style.display = 'block'; // keep visible
+                title.innerText = 'Remarks';
+                saveBtn.style.display = 'none';
+            }
+        }
+
+        function saveComment() {
+            let role = document.getElementById('userRole').value;
+            if (role.toLowerCase() !== 'employee') return;
+
+            let id = document.getElementById('payrollId').value;
+            let remarks = document.getElementById('remarksField').value;
+
+            let formData = new FormData();
+            formData.append('remarks', remarks);
+
+            fetch(`/payroll/${id}/remarks`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+                    location.reload();
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(err => console.error("Fetch Error:", err));
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const btn = document.getElementById('exportBtn');
+            const menu = document.getElementById('exportMenu');
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                menu.classList.toggle('d-none');
+            });
+
+            menu.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+
+            document.addEventListener('click', function () {
+                menu.classList.add('d-none');
+            });
+
+        });
+
+        document.getElementById("shareReportBtn").addEventListener("click", function () {
+            let section = document.getElementById("salaryFormSection");
+
+            if (section.style.display === "none") {
+                section.style.display = "block";
+            } else {
+                section.style.display = "none";
+            }
+        });
+
         function applyFilters() {
             const month = document.getElementById('monthFilter').value;
             const empId = document.getElementById('employeeFilter').value;

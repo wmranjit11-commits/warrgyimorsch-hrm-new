@@ -58,6 +58,9 @@ class LeaveController extends Controller
 
     public function storeAllotment(Request $request)
     {
+        if (auth()->user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         $month = $request->input('month');
         $year = Carbon::now()->format('Y');
 

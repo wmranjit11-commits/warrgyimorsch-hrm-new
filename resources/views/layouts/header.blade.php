@@ -38,12 +38,31 @@
                     @php
                         $notifications = [];
                         $role = strtoupper(auth()->user()->role);
+                        
+
                         if ($role == 'ADMIN' || $role == 'SUPER ADMIN') {
-                            $notifications = \App\Models\LeaveApplication::with('employee')
-                                ->whereIn('status', ['pending', 'Pending'])
+
+                            // 1. Leave Notifications (existing)
+                            $leaveNotifications = \App\Models\LeaveApplication::with('employee')
                                 ->latest()
-                                ->limit(3)
                                 ->get();
+
+                            // 2. Payroll Comment Notifications (NEW)
+                            $payrollNotifications = \App\Models\Payroll::with('employee')
+                                ->whereNotNull('remarks')
+                                ->where('remarks', '!=', '')
+                                ->latest()
+                                ->get();
+
+                            // Merge both
+                            $notifications = $leaveNotifications
+                            ->concat($payrollNotifications)
+                            ->sortByDesc(function ($item) {
+                                return isset($item->remarks) 
+                                    ? $item->updated_at 
+                                    : $item->created_at;
+                            })->take(3);
+
                         } else {
                             $notifications = \App\Models\LeaveApplication::where('employee_id', auth()->user()->employee_id)
                                 ->whereIn('status', ['approved', 'rejected', 'Approved', 'Rejected'])
@@ -71,6 +90,7 @@
                             @forelse($notifications as $item)
                                 <div class="notifications-item">
                                     @php
+                                        $isPayroll = isset($item->remarks);
                                         $emp = ($role == 'ADMIN' || $role == 'SUPER ADMIN') ? $item->employee : auth()->user()->employee;
                                         $photo = ($emp && $emp->photo) ? asset('storage/' . $emp->photo) : null;
                                     @endphp
@@ -82,10 +102,17 @@
                                         </div>
                                     @endif
                                     <div class="notifications-desc">
-                                        <a href="{{ route('leave.history') }}" class="font-body text-truncate-2-line">
+                                        <a href="{{ $isPayroll ? route('payroll.index') : route('leave.history') }}" class="font-body text-truncate-2-line">
+                                            
                                             @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-                                                <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span>
-                                                applied for {{ $item->leave_type }} leave.
+
+                                                @if($isPayroll)
+                                                    <span class="fw-semibold text-dark">{{ $item->employee->name ?? 'Someone' }}</span>
+                                                    commented: <span class="text-muted">"{{ $item->remarks }}"</span>
+                                                @else
+                                                    <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span>
+                                                    applied for {{ $item->leave_type }} leave.
+                                                @endif
                                             @else
                                                 Your leave application for {{ $item->leave_type }} has been
                                                 <span class="fw-bold {{ $item->status == 'approved' ? 'text-success' : 'text-danger' }}">
@@ -96,7 +123,12 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="notifications-date text-muted border-bottom border-bottom-dashed" style="font-size: 10px;">
                                                 @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-                                                    <i class="feather-clock fs-10 me-1"></i> Applied: {{ $item->created_at->format('d M, h:i A') }}
+                
+                                                    @if($isPayroll)
+                                                        <i class="feather-message-square fs-10 me-1"></i> Commented: {{ $item->updated_at->format('d M, h:i A') }}
+                                                    @else
+                                                        <i class="feather-clock fs-10 me-1"></i> Applied: {{ $item->created_at->format('d M, h:i A') }}
+                                                    @endif
                                                 @else
                                                     <i class="feather-check-circle fs-10 me-1 text-success"></i> Reply: {{ $item->updated_at->format('d M, h:i A') }}
                                                 @endif

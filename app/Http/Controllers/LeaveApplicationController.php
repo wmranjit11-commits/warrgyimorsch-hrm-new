@@ -111,7 +111,7 @@ class LeaveApplicationController extends Controller
     {
         $request->validate([
             'leave_id' => 'required|exists:leave_applications,id',
-            'status' => 'required|in:pending,approved,rejected,on_hold',
+            'status' => 'required|in:pending,approved,rejected,on_hold,unauthorised',
         ]);
 
         $leave = LeaveApplication::findOrFail($request->leave_id);

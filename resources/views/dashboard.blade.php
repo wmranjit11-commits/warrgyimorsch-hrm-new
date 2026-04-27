@@ -14,7 +14,7 @@
         </div>
         <!-- [ page-header ] end -->
         <!-- [ Main Content ] start -->
-        <div class="main-content pt-4">
+        <div class="main-content pt-4" style="overflow: visible !important;">
             <div class="row">
                 <!-- [Invoices Awaiting Payment] start -->
                 <div class="col-xxl-3 col-md-6">
@@ -255,32 +255,54 @@
                     </div>
                 </div>
                 <!-- [Total Employees] end -->
-                <!-- [Payment Records] start -->
+                <!-- [Today Leave Records] start -->
                 <div class="col-xxl-8">
                     <div class="card stretch stretch-full">
                         <div class="card-header">
-                            <h5 class="card-title">Monthly Payroll Trends</h5>
-                            <div class="card-header-action">
-                                <div class="card-header-btn">
-                                    <div data-bs-toggle="tooltip" title="Delete">
-                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                            data-bs-toggle="remove"> </a>
-                                    </div>
-                                    <div data-bs-toggle="tooltip" title="Refresh">
-                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                            data-bs-toggle="refresh"> </a>
-                                    </div>
-                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                            data-bs-toggle="expand"> </a>
+                                <h5 class="card-title">Today Leave</h5>
+                                <div class="card-header-action">
+                                    <div class="card-header-btn">
+                                        <div data-bs-toggle="tooltip" title="Delete text-primary">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                                data-bs-toggle="remove"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Refresh">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                                data-bs-toggle="refresh"> </a>
+                                        </div>
+                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                                data-bs-toggle="expand"> </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card-body custom-card-action p-0">
-                            <div id="payment-records-chart"></div>
-                        </div>
-                        <div class="card-footer">
+                            <div class="card-body">
+                                @forelse($todayLeaveEmployees as $todayLeave)
+                                    <div class="p-3 border border-dashed rounded-3 mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">
+                                                        {{ $todayLeave->employee->name ?? 'N/A' }}
+                                                    </div>
+                                                    <div class="fs-11 text-muted">
+                                                        On Leave Today
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-4 text-muted">
+                                        No employees on leave today.
+                                    </div>
+                                @endforelse
+                            </div>
+                        <div class="card-footer d-none">
                             <div class="row g-4">
                                 <div class="col-lg-3">
                                     <div class="p-3 border border-dashed rounded">
@@ -322,7 +344,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [Payment Records] end -->
+                    <!-- [Today Leave Records] end -->
                     <!--! BEGIN: [Upcoming Schedule] !-->
                     <div class="col-xxl-4">
                         <div class="card stretch stretch-full">
@@ -387,7 +409,97 @@
                     <div class="col-xxl-8">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
-                                <h5 class="card-title">Recent Payroll History</h5>
+                                <h5 class="card-title">Latest Leave Report</h5>
+
+                                <form method="GET" class="d-flex gap-2">
+                                    <!-- Employee Dropdown -->
+                                    <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option value="">All Employees</option>
+                                        @foreach($employees as $emp)
+                                            <option value="{{ $emp->id }}" 
+                                                {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
+                                                {{ $emp->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <!-- Keep filter value -->
+                                    
+
+                                </form>
+                                <form method="GET">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                                            @php
+                                            $label = 'Current Month';
+
+                                            if (request('from') && request('to')) {
+                                                $label = \Carbon\Carbon::parse(request('from'))->format('d M Y') 
+                                                        . ' → ' . 
+                                                        \Carbon\Carbon::parse(request('to'))->format('d M Y');
+                                            } elseif (request('filter') == 'week') {
+                                                $label = 'Last Week';
+                                            } elseif (request('filter') == 'month') {
+                                                $label = 'Last Month';
+                                            } elseif (request('filter') == '3month') {
+                                                $label = 'Last 3 Months';
+                                            } elseif (request('filter') == '6month') {
+                                                $label = 'Last 6 Months';
+                                            } elseif (request('filter') == 'year') {
+                                                $label = 'Last 1 Year';
+                                            }
+                                        @endphp
+
+                                        {{ $label }}
+                                        </button>
+
+                                        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
+
+                                            <!-- Normal Filters -->
+                                            <div id="normalFilters">
+                                                <button type="submit" name="filter" value="week" class="dropdown-item">Last Week</button>
+                                                <button type="submit" name="filter" value="month" class="dropdown-item">Last Month</button>
+                                                <button type="submit" name="filter" value="3month" class="dropdown-item">Last 3 Months</button>
+                                                <button type="submit" name="filter" value="6month" class="dropdown-item">Last 6 Months</button>
+                                                <button type="submit" name="filter" value="year" class="dropdown-item">Last 1 Year</button>
+            
+
+                                                <div class="dropdown-divider"></div>
+
+                                                <a href="javascript:void(0);" 
+                                                class="dropdown-item text-primary fw-bold"
+                                                onclick="event.stopPropagation(); showCustomFilter()">
+                                                Custom Range →
+                                                </a>
+                                            </div>
+
+                                            <!-- Custom Form -->
+                                            <div id="customFilterBox" style="display:none;" onclick="event.stopPropagation();">
+                                                <form method="GET">
+
+                                                    <!-- keep employee selection -->
+                                                    <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
+
+                                                    <label class="form-label small mb-1">From</label>
+                                                    <input type="date" name="from" class="form-control form-control-sm mb-2"
+                                                        value="{{ request('from') }}">
+
+                                                    <label class="form-label small mb-1">To</label>
+                                                    <input type="date" name="to" class="form-control form-control-sm mb-2"
+                                                        value="{{ request('to') }}">
+
+                                                    <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                                        Apply
+                                                    </button>
+
+                                                    <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                    onclick="hideCustomFilter()">← Back</a>
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </form>
                                 <div class="card-header-action">
                                     <div class="card-header-btn">
                                         <div data-bs-toggle="tooltip" title="Delete">
@@ -409,48 +521,44 @@
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
                                         <thead>
-                                            <tr class="border-b">
-                                                <th scope="row">Employee</th>
+                                            <tr>
+                                                <th>Employee</th>
                                                 <th>Month</th>
-                                                <th>Amount</th>
-                                                <th>Status</th>
-                                                <th class="text-end">Actions</th>
+                                                <th>Leave Count</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse($recentPayrolls as $rp)
+                                            @forelse($leaveReport as $emp)
                                                 <tr>
                                                     <td>
                                                         <div class="d-flex align-items-center gap-3">
                                                             <div class="avatar-text avatar-md bg-soft-primary text-primary">
-                                                                {{ substr($rp->employee->name, 0, 1) }}
+                                                                {{ substr($emp->name, 0, 1) }}
                                                             </div>
-                                                            <a href="javascript:void(0);">
-                                                                <span class="d-block text-truncate-1-line">{{ $rp->employee->name }}</span>
-                                                                <span class="fs-12 d-block fw-normal text-muted small text-uppercase">{{ $rp->employee->designation }}</span>
-                                                            </a>
+                                                            <div>
+                                                                <span class="d-block">{{ $emp->name }}</span>
+                                                                <span class="fs-12 text-muted">{{ $emp->designation }}</span>
+                                                            </div>
                                                         </div>
                                                     </td>
+
                                                     <td>
-                                                        <span class="badge bg-gray-200 text-dark">{{ $rp->month }}</span>
-                                                    </td>
-                                                    <td>₹{{ number_format($rp->net_salary, 0) }}</td>
-                                                    <td>
-                                                        <span class="badge {{ $rp->status == 'paid' ? 'bg-soft-success text-success' : 'bg-soft-warning text-warning' }} text-uppercase">
-                                                            {{ $rp->status }}
+                                                        <span class="badge bg-gray-200 text-dark">
+                                                            {{ request('filter') ?? 'Last Month' }}
                                                         </span>
                                                     </td>
-                                                    <td class="text-end">
-                                                        <div class="d-flex align-items-center justify-content-end gap-2">
-                                                            <a href="{{ route('payroll.export', ['id' => $rp->id, 'format' => 'pdf']) }}" class="avatar-text avatar-md bg-soft-info text-info" title="Download PDF">
-                                                                <i class="feather-download"></i>
-                                                            </a>
-                                                        </div>
+
+                                                    <td>
+                                                        <span class="badge bg-soft-danger text-danger">
+                                                            {{ $emp->leave_count }} Days
+                                                        </span>
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="4" class="text-center py-4 text-muted">No recent payrolls found.</td>
+                                                    <td colspan="3" class="text-center text-muted py-4">
+                                                        No leave data found.
+                                                    </td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
@@ -492,39 +600,114 @@
                         <div class="card stretch stretch-full">
                             <div class="card-header border-bottom-0 pb-0">
                                 <h5 class="card-title">Attendance Analytics</h5>
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown">
-                                        <i class="feather-more-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
+                            
+                                    <!-- <div class="dropdown-menu dropdown-menu-end">
                                         <a href="{{ route('payroll.attendance') }}" class="dropdown-item">
                                             <i class="feather-external-link me-2"></i>
                                             <span>Full Attendance List</span>
                                         </a>
+                                    </div> -->
+                                <div class="dropdown">
+                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown">
+                                        <i class="feather-more-vertical"></i>
+                                    </a>
+
+                                    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
+
+                                        <!-- Normal Filters -->
+                                        <div id="normalFilters">
+                                            <a href="?filter=today" class="dropdown-item">Today</a>
+                                            <a href="?filter=yesterday" class="dropdown-item">Yesterday</a>
+                                            <a href="?filter=week" class="dropdown-item">Last Week</a>
+                                            <a href="?filter=month" class="dropdown-item">Last Month</a>
+
+                                            <div class="dropdown-divider"></div>
+
+                                            <a href="javascript:void(0);" class="dropdown-item text-primary fw-bold" onclick="event.stopPropagation(); showCustomFilter()">
+                                                Custom Range →
+                                            </a>
+                                        </div>
+
+                                        <!-- Custom Form (hidden initially) -->
+                                        <div id="customFilterBox" style="display:none;" onclick="event.stopPropagation();">
+                                            <form method="GET">
+                                                <label class="form-label small mb-1">From</label>
+                                                <input type="date" name="from" class="form-control form-control-sm mb-2"
+                                                    value="{{ request('from') }}">
+
+                                                <label class="form-label small mb-1">To</label>
+                                                <input type="date" name="to" class="form-control form-control-sm mb-2"
+                                                    value="{{ request('to') }}">
+
+                                                <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                                    Apply
+                                                </button>
+
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                onclick="hideCustomFilter()">← Back</a>
+                                            </form>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                             <div class="card-body pt-3 text-center">
                                 <div class="py-4 position-relative">
-                                    <div class="fs-1 fw-black text-primary mb-1 mt-2">{{ $attendanceRate }}%</div>
+                                    <div class="fs-1 fw-black text-primary mb-1 mt-2">
+                                        @if(request()->has('from') || request()->has('filter'))
+                                            {{ $rangeAttendanceRate }}%
+                                        @else
+                                            {{ $attendanceRate }}%
+                                        @endif
+                                    </div>
                                     <div class="text-muted fw-bold small text-uppercase">Average Attendance Rate</div>
                                 </div>
 
                                 <div class="p-3 bg-soft-primary rounded-3 text-start mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Staff Presence Today</span>
-                                        <span class="small fw-black text-primary">{{ $todayPresent }}/{{ $totalEmployees }}</span>
-                                    </div>
-                                    <div class="progress ht-5 bg-white mb-3">
-                                        <div class="progress-bar" role="progressbar" style="width: {{ $totalEmployees > 0 ? ($todayPresent / $totalEmployees) * 100 : 0 }}%"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="small fw-bold text-dark">Leave Today</span>
-                                        <span class="small fw-black text-danger">{{ $todayLeave ?? 0 }} Staff</span>
-                                    </div>
-                                </div>
 
-                                <div class="row g-2 text-start">
+                                    @php
+                                        $isFiltered = request()->has('from') || request()->has('filter');
+                                    @endphp
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-bold text-dark">Staff Present</span>
+                                        <span class="small fw-black text-primary">
+                                            {{ $isFiltered ? $rangePresent : $present }}/{{ $totalEmployees }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-bold text-dark">Work from home</span>
+                                        <span class="small fw-black text-primary">
+                                            {{ $isFiltered ? $rangeWFH : $wfh }}/{{ $totalEmployees }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-bold text-dark">Late</span>
+                                        <span class="small fw-black text-primary">
+                                            {{ $isFiltered ? $rangeLate : $late }}/{{ $totalEmployees }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-bold text-dark">Leave</span>
+                                        <span class="small fw-black text-primary">
+                                            {{ $isFiltered ? $rangeLeave : $leave }}/{{ $totalEmployees }}
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-bold text-dark">Early out</span>
+                                        <span class="small fw-black text-primary">
+                                            {{ $isFiltered ? $rangeEarly : $early }}/{{ $totalEmployees }}
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                <!-- <div class="row g-2 text-start">
                                     <div class="col-6 border-end">
                                         <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
                                         <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
@@ -533,7 +716,7 @@
                                         <div class="fs-5 fw-bold text-success">{{ $todayPresent }}</div>
                                         <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="card-footer border-top p-3 bg-light bg-opacity-10 text-center">
                                 <a href="{{ route('payroll.attendance.add') }}" class="fs-12 fw-bold text-primary text-uppercase">
@@ -548,45 +731,45 @@
 
                 </div><!-- second row end -->
                 <!-- Monthly Summary Modal [ENHANCED] -->
-            <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                        <div class="modal-header bg-soft-primary border-0 p-4">
-                            <div>
-                                <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
-                                <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
-                            </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
-                                        <tr>
-                                            <th class="ps-4">Month</th>
-                                            <th>Basic / Earnings</th>
-                                            <th>Deductions</th>
-                                            <th>Net Payable</th>
-                                            <th class="pe-4 text-end">Trends</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modalHistoryTable">
-                                        <!-- Populated via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
-                            <div class="w-100 d-flex justify-content-between align-items-center">
-                                <div class="text-muted small">
-                                    <i class="feather-info me-1"></i> Data shown is aggregated for all employees.
+                <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                            <div class="modal-header bg-soft-primary border-0 p-4">
+                                <div>
+                                    <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
+                                    <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
                                 </div>
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close Summary</button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
+                                            <tr>
+                                                <th class="ps-4">Month</th>
+                                                <th>Basic / Earnings</th>
+                                                <th>Deductions</th>
+                                                <th>Net Payable</th>
+                                                <th class="pe-4 text-end">Trends</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="modalHistoryTable">
+                                            <!-- Populated via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
+                                <div class="w-100 d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small">
+                                        <i class="feather-info me-1"></i> Data shown is aggregated for all employees.
+                                    </div>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close Summary</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
                 </div>
             </div>
 
@@ -619,40 +802,40 @@
                 }
             },
             colors: ["#e2e8f0", "#10b981", "#f59e0b"], 
-            series: [
-                {
-                    name: "Total Payroll (Expected)",
-                    type: "bar",
-                    data: {!! json_encode($chartTotal) !!}
-                },
-                {
-                    name: "Completed (Paid)",
-                    type: "bar",
-                    data: {!! json_encode($chartPaid) !!}
-                },
-                {
-                    name: "Pending (Unpaid)",
-                    type: "bar",
-                    data: {!! json_encode($chartPending) !!}
-                }
-            ],
-            fill: {
-                opacity: [1, 1, 1],
-                type: ['solid', 'solid', 'solid']
-            },
-            markers: { size: 0 },
-            xaxis: {
-                categories: {!! json_encode($chartMonths) !!},
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-                labels: {
-                    style: {
-                        fontSize: "10px",
-                        colors: "#64748b",
-                        fontWeight: 600
-                    }
-                }
-            },
+            // series: [
+            //     {
+            //         name: "Total Payroll (Expected)",
+            //         type: "bar",
+            //         data: {!! json_encode($chartTotal) !!}
+            //     },
+            //     {
+            //         name: "Completed (Paid)",
+            //         type: "bar",
+            //         data: {!! json_encode($chartPaid) !!}
+            //     },
+            //     {
+            //         name: "Pending (Unpaid)",
+            //         type: "bar",
+            //         data: {!! json_encode($chartPending) !!}
+            //     }
+            // ],
+            // fill: {
+            //     opacity: [1, 1, 1],
+            //     type: ['solid', 'solid', 'solid']
+            // },
+            // markers: { size: 0 },
+            // xaxis: {
+            //     categories: {!! json_encode($chartMonths) !!},
+            //     axisBorder: { show: false },
+            //     axisTicks: { show: false },
+            //     labels: {
+            //         style: {
+            //             fontSize: "10px",
+            //             colors: "#64748b",
+            //             fontWeight: 600
+            //         }
+            //     }
+            // },
             yaxis: {
                 labels: {
                     formatter: function(e) {
@@ -806,5 +989,15 @@
             }
         }, 500);
     });
+
+    function showCustomFilter() {
+        document.getElementById('normalFilters').style.display = 'none';
+        document.getElementById('customFilterBox').style.display = 'block';
+    }
+
+    function hideCustomFilter() {
+        document.getElementById('normalFilters').style.display = 'block';
+        document.getElementById('customFilterBox').style.display = 'none';
+    }
     </script>
 @endpush
