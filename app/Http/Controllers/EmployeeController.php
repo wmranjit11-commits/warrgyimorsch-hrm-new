@@ -23,9 +23,9 @@ class EmployeeController extends Controller
        $role = strtoupper(auth()->user()->role ?? 'employee');
         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
         if ($isAdmin) {
-            $employees = Employee::orderBy('name')->paginate(10);
+            $employees = Employee::orderBy('name')->paginate(30);
         } else {
-            $employees = Employee::where('id', auth()->user()->employee_id)->paginate(10);
+            $employees = Employee::where('id', auth()->user()->employee_id)->paginate(30);
         }
 
         return view('employees.index', compact('employees'));

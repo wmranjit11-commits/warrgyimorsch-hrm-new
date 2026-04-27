@@ -333,6 +333,8 @@ class PayrollController extends Controller
                         break;
 
                     case 'absent':
+                    case 'unpaid':
+                    case 'unauthorised':
                     default:
                         break;
                 }

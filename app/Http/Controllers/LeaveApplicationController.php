@@ -14,6 +14,7 @@ class LeaveApplicationController extends Controller
 {
     public function index(Request $request)
     {
+        // echo auth()->user()->role;exit;
         $query = LeaveApplication::with('employee');
 
         // Search Filters
@@ -111,7 +112,7 @@ class LeaveApplicationController extends Controller
     {
         $request->validate([
             'leave_id' => 'required|exists:leave_applications,id',
-            'status' => 'required|in:pending,approved,rejected,on_hold,unauthorised',
+            'status' => 'required|in:pending,approved,rejected,on_hold,unauthorised,unpaid',
         ]);
 
         $leave = LeaveApplication::findOrFail($request->leave_id);

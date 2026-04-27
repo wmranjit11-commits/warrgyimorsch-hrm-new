@@ -376,6 +376,7 @@
                             <option value="approved">Approved</option>
                             <option value="on_hold">On Hold</option>
                             <option value="rejected">Rejected</option>
+                            <option value="unpaid">Unpaid Leave</option>
                             <option value="unauthorised">Unauthorised</option>
                         </select>
                     </div>
