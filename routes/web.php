@@ -140,6 +140,7 @@ Route::middleware(['auth'])->group(function () {
     // PAYROLL CALCULATION ROUTES
     Route::get('/payroll/calculation', [PayrollController::class, 'calculation'])->name('payroll.calculation');
     Route::post('/payroll/calculate', [PayrollController::class, 'calculatePayroll'])->name('payroll.calculate');
+    Route::post('/payroll/sendDateRange', [PayrollController::class, 'calculateInRage'])->name('payroll.sendDateRange');
     Route::post('/payroll/store', [PayrollController::class, 'storePayroll'])->name('payroll.store');
 
     // PAYROLL LIST ROUTES
@@ -149,6 +150,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payroll/{id}', [PayrollController::class, 'show'])->name('payroll.show');
     Route::post('/payroll/{id}/status', [PayrollController::class, 'updateStatus'])->name('payroll.status');
     Route::delete('/payroll/{id}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
+
+    // Payroll remarks
+    Route::post('/payroll/{id}/remarks', [PayrollController::class, 'saveRemarks']);
 });
 
 // LEAVE MODULE ROUTES

@@ -475,6 +475,87 @@ class PayrollController extends Controller
         }
     }
 
+    public function calculateInRage(Request $request)
+    {
+        try {
+            $employee = Employee::findOrFail($request->employee_id);
+
+            $start = \Carbon\Carbon::parse($request->from_date)->startOfMonth();
+            $end = \Carbon\Carbon::parse($request->to_date)->endOfMonth();
+
+            $allPayrolls = [];
+
+            while ($start <= $end) {
+
+                $month = $start->format('Y-m');
+
+                // 👇 reuse your existing function logic
+                $payroll = $this->calculatePayrollInternal($employee->id, $month);
+
+                $allPayrolls[] = $payroll;
+
+                $start->addMonth();
+            }
+
+            $total = [
+                'employee_id' => $employee->id,
+                'emp_name' => $employee->name,
+                'from' => $request->from_date,
+                'to' => $request->to_date,
+
+                'payable_days' => 0,
+                'unpaid_days' => 0,
+                'overtime_hours' => 0,
+
+                'gross_salary' => 0,
+                'deductions' => 0,
+                'net_salary' => 0,
+                'salary_loss' => 0,
+            ];
+
+            foreach ($allPayrolls as $p) {
+                $total['payable_days'] += $p->payable_days;
+                $total['unpaid_days'] += $p->unpaid_days;
+                $total['overtime_hours'] += $p->overtime_hours;
+
+                $total['gross_salary'] += $p->gross_salary;
+                $total['deductions'] += $p->deductions;
+                $total['net_salary'] += $p->net_salary;
+                $total['salary_loss'] += $p->salary_loss;
+            }
+
+            // 📧 Send Email
+            \Mail::to('mohammadkaif.warrgyizmorsch@gmail.com')->send(
+                new \App\Mail\SalarySlipMail($employee, $total, $allPayrolls)
+            );
+            // return response()->json([
+            //     'success' => true,
+            //     'summary' => $total,
+            //     'months' => $allPayrolls // optional (keep for breakdown)
+            // ]);
+
+            return back()->with('success', 'Salary sent to email');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    private function calculatePayrollInternal($employeeId, $month)
+    {
+        $request = new Request([
+            'employee_id' => $employeeId,
+            'month' => $month
+        ]);
+
+        $response = $this->calculatePayroll($request);
+
+        $payroll = $response->getData()->payroll;
+        $payroll->employee = Employee::find($employeeId);
+
+        return $payroll;
+    }
+
     /**
      * Store calculated payroll
      */
@@ -637,6 +718,70 @@ public function import(Request $request)
             } else {
                 return $this->bulkDownloadPdf($request);
             }
+        }
+
+        // Excel format
+        if ($format === 'excel') {
+
+            $filename = 'payroll_report_' . date('Y-m-d') . '.xlsx';
+
+            return Excel::download(new class($payrolls) implements 
+                \Maatwebsite\Excel\Concerns\FromArray,
+                \Maatwebsite\Excel\Concerns\WithHeadings {
+
+                private $payrolls;
+
+                public function __construct($payrolls)
+                {
+                    $this->payrolls = $payrolls;
+                }
+
+                public function headings(): array
+                {
+                    return [
+                        'Name',
+                        'ID',
+                        'Department',
+                        'Shift Time',
+                        'Month Day',
+                        'Basic Working Days',
+                        'Leave',
+                        'Net Payable',
+                        'Additional'
+                    ];
+                }
+
+                public function array(): array
+                {
+                    $data = [];
+
+                    foreach ($this->payrolls as $payroll) {
+
+                        $shiftTime = ($payroll->employee->time_in && $payroll->employee->time_out)
+                            ? $payroll->employee->time_in . ' - ' . $payroll->employee->time_out
+                            : '-';
+
+                        $monthDays = Carbon::parse($payroll->month)->daysInMonth;
+
+                        $leave = $monthDays - ($payroll->payable_days ?? 0);
+
+                        $data[] = [
+                            $payroll->employee->name,
+                            $payroll->employee->id,
+                            $payroll->employee->department ?? '-',
+                            $shiftTime,
+                            $monthDays,
+                            $payroll->payable_days,
+                            $leave,
+                            $payroll->net_payable ?? $payroll->net_salary ?? 0,
+                            $payroll->other_allowance,
+                        ];
+                    }
+
+                    return $data;
+                }
+
+            }, $filename);
         }
 
         $headers = [
@@ -1169,5 +1314,22 @@ public function import(Request $request)
         
         $filename = 'bulk_payslips_' . ($request->month ?? date('Y-m')) . '.pdf';
         return $pdf->download($filename);
+    }
+
+    public function saveRemarks(Request $request, $id)
+    {
+        $payroll = Payroll::findOrFail($id);
+
+        // backend protection
+        if (strtolower(auth()->user()->role) !== 'employee') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $payroll->remarks = $request->remarks;
+        if ($payroll->save()) {
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false, 'error' => 'Failed to save'], 500);
     }
 }

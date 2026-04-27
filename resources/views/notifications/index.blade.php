@@ -26,6 +26,13 @@
             <div class="list-group list-group-flush">
                 @forelse($notifications as $item)
                     @php
+                        $isPayroll = isset($item->remarks);
+                        // Hide other employees' payroll comments for non-admin
+                        if ($isPayroll && !in_array($role, ['ADMIN', 'SUPER ADMIN'])) {
+                            if ($item->employee_id != auth()->user()->employee_id) {
+                                continue; // skip this item
+                            }
+                        }
                         $emp = ($role == 'ADMIN' || $role == 'SUPER ADMIN') ? $item->employee : auth()->user()->employee;
                         $photo = ($emp && $emp->photo) ? asset('storage/' . $emp->photo) : null;
                     @endphp
@@ -41,32 +48,53 @@
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h6 class="fw-bold text-dark mb-0">
-                                        @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-                                            {{ $emp->name ?? 'Employee' }} Applied for Leave
+                                        @if($isPayroll)
+                                            Payroll Comment
                                         @else
-                                            Leave Application Status Updated
+                                            @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
+                                                New Leave Application
+                                            @else
+                                                Leave Status Updated
+                                            @endif
                                         @endif
                                     </h6>
-                                    <span class="text-muted small fw-medium">
+                                    <!-- <span class="text-muted small fw-medium">
                                         <i class="feather-clock me-1"></i>
                                         {{ $item->updated_at->diffForHumans() }}
-                                    </span>
+                                    </span> -->
+                                    @if($isPayroll)
+                                        <i class="feather-message-square me-1"></i>
+                                        {{ $item->updated_at->diffForHumans() }}
+                                    @else
+                                        <i class="feather-clock me-1"></i>
+                                        {{ $item->updated_at->diffForHumans() }}
+                                    @endif
                                 </div>
                                 <p class="text-muted mb-3" style="font-size: 14px; line-height: 1.6;">
-                                    @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-                                        <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span> has applied for a 
-                                        <span class="badge bg-soft-info text-info">{{ $item->leave_type }}</span> leave starting from 
-                                        <span class="fw-bold text-dark">{{ \Carbon\Carbon::parse($item->start_date)->format('d M, Y') }}</span>. 
-                                        Reason: "{{ $item->reason }}".
+                                    @if($isPayroll)
+                                        <span class="fw-semibold text-dark">{{ $item->employee->name ?? 'Someone' }}</span>
+                                        commented:
+                                        <span class="text-muted">"{{ $item->remarks }}"</span>
                                     @else
-                                        Your leave application for <span class="badge bg-soft-info text-info">{{ $item->leave_type }}</span> has been 
-                                        <span class="badge rounded-pill fw-bold {{ in_array(strtolower($item->status), ['approved', 'Approved']) ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger' }}" style="font-size: 10px;">
-                                            {{ strtoupper($item->status) }}
-                                        </span>.
+                                        @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
+                                            <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span> has applied for a 
+                                            <span class="badge bg-soft-info text-info">{{ $item->leave_type }}</span> leave starting from 
+                                            <span class="fw-bold text-dark">{{ \Carbon\Carbon::parse($item->start_date)->format('d M, Y') }}</span>. 
+                                            Reason: "{{ $item->reason }}".
+                                        @else
+                                            Your leave application for <span class="badge bg-soft-info text-info">{{ $item->leave_type }}</span> has been 
+                                            <span class="badge rounded-pill fw-bold {{ in_array(strtolower($item->status), ['approved', 'Approved']) ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger' }}" style="font-size: 10px;">
+                                                {{ strtoupper($item->status) }}
+                                            </span>.
+                                        @endif
                                     @endif
                                 </p>
                                 <div class="hstack gap-2">
-                                    <a href="{{ route('leave.history') }}" class="btn btn-sm btn-primary border-0 rounded-pill px-3 fw-bold" style="font-size: 11px;">View Details</a>
+                                    <a href="{{ $isPayroll ? route('payroll.index') : route('leave.history') }}" 
+                                    class="btn btn-sm btn-primary border-0 rounded-pill px-3 fw-bold" 
+                                    style="font-size: 11px;">
+                                        View Details
+                                    </a>
                                     @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
                                         <button class="btn btn-sm btn-soft-success border-0 rounded-pill px-3 fw-bold" style="font-size: 11px;">Quick Approve</button>
                                     @endif
@@ -86,12 +114,9 @@
                 @endforelse
             </div>
             
-            @if($notifications->hasPages())
-                <div class="card-footer bg-white border-0 p-4">
-                    {{ $notifications->links() }}
-                </div>
-            @endif
+            
         </div>
     </div>
 </div>
 @endsection
+

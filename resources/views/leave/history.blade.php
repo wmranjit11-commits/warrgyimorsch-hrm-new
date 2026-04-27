@@ -57,7 +57,7 @@
                             </option>
                             <option value="Half Day" {{ request('category') == 'Half Day' ? 'selected' : '' }}>Half Day
                             </option>
-                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Gatepass
+                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Early Leave
                             </option>
                         </select>
                     </div>
@@ -71,6 +71,7 @@
                             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>On Hold</option>
                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="unauthorised" {{ request('status') == 'unauthorised' ? 'selected' : '' }}>Unauthorised</option>
                         </select>
                     </div>
                     <div class="col-md-1.5" style="flex: 1;">
@@ -130,7 +131,8 @@
                                                     'pending' => 'bg-soft-dark text-dark',
                                                     'approved' => 'bg-soft-primary text-primary',
                                                     'on_hold' => 'bg-soft-warning text-warning',
-                                                    'rejected' => 'bg-soft-danger text-danger'
+                                                    'rejected' => 'bg-soft-danger text-danger',
+                                                    'unauthorised' => 'bg-soft-danger text-danger',
                                                 ][$leave->status] ?? 'bg-soft-secondary text-secondary';
                                             @endphp
                                             <span class="badge {{ $statusClass }} px-3 rounded-pill fw-bold text-capitalize"
@@ -138,7 +140,7 @@
                                                 {{ str_replace('_', ' ', $leave->status) }}
                                             </span>
                                         </td>
-                                        <td><span class="fw-semibold text-dark">{{ $leave->leave_type }}</span></td>
+                                        <td><span class="fw-semibold text-dark">{{ $leave->leave_type == 'Gatepass Leave' ? 'Early leave' : $leave->leave_type }}</span></td>
                                         <td>
                                             @php
                                                 $catRaw = strtolower(trim($leave->leave_category));
@@ -155,7 +157,7 @@
                                                     $catDisplay = 'FULL DAY';
                                                     $catClass = 'bg-soft-primary text-primary';
                                                 } elseif (str_contains($catRaw, 'gatepass')) {
-                                                    $catDisplay = 'GATEPASS';
+                                                    $catDisplay = 'Early Leave';
                                                     $catClass = 'bg-soft-info text-info';
                                                 } else {
                                                     $catDisplay = strtoupper($catRaw);
@@ -183,10 +185,12 @@
                                                     onclick="openViewModal({{ $leave->id }})" title="View Details">
                                                     <i data-feather="eye" style="width: 14px; height: 14px;"></i>
                                                 </button>
-                                                <button class="btn btn-icon btn-soft-primary"
-                                                    onclick="openActionModal({{ $leave->id }})" title="Take Action">
-                                                    <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
-                                                </button>
+                                                @if(in_array(strtoupper(auth()->user()->role), ['ADMIN', 'SUPER ADMIN']))
+                                                    <button class="btn btn-icon btn-soft-primary"
+                                                        onclick="openActionModal({{ $leave->id }})" title="Take Action">
+                                                        <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
+                                                    </button>
+                                                @endif
                                                 <button class="btn btn-icon btn-soft-danger"
                                                     onclick="deleteApplication({{ $leave->id }})" title="Delete">
                                                     <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
@@ -257,7 +261,7 @@
                             <div class="form-check d-flex align-items-center mb-0 ps-2">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
                                     id="catGate" onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catGate">Gatepass</label>
+                                <label class="form-check-label small fw-bold ms-1" for="catGate">Early Leave</label>
                             </div>
                         </div>
                     </div>
@@ -280,7 +284,8 @@
                             <option value="">Select Type...</option>
                             <option value="Paid Leave">Paid Leave</option>
                             <option value="Sick Leave">Sick Leave</option>
-                            <option value="Gatepass Leave">Gatepass Leave</option>
+                            <option value="Gatepass Leave">Early Leave</option>
+                            <option value="Casual Leave">Casual Leave</option>
                         </select>
                     </div>
 
@@ -371,6 +376,7 @@
                             <option value="approved">Approved</option>
                             <option value="on_hold">On Hold</option>
                             <option value="rejected">Rejected</option>
+                            <option value="unauthorised">Unauthorised</option>
                         </select>
                     </div>
 
@@ -677,7 +683,8 @@
                         'pending': 'bg-soft-dark text-dark',
                         'approved': 'bg-soft-primary text-primary',
                         'on_hold': 'bg-soft-warning text-warning',
-                        'rejected': 'bg-soft-danger text-danger'
+                        'rejected': 'bg-soft-danger text-danger',
+                        'unauthorised': 'bg-soft-danger text-danger'
                     }[status] || 'bg-light';
                     statusBadge.classList.add(...statusClass.split(' '));
 
@@ -759,7 +766,8 @@
                             'pending': 'bg-soft-dark text-dark',
                             'approved': 'bg-soft-primary text-primary',
                             'on_hold': 'bg-soft-warning text-warning',
-                            'rejected': 'bg-soft-danger text-danger'
+                            'rejected': 'bg-soft-danger text-danger',
+                            'unauthorised': 'bg-soft-danger text-danger'
                         }[item.status] || 'bg-light';
 
                         const catRaw = item.leave_category.toLowerCase();
