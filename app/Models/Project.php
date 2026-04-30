@@ -17,11 +17,16 @@ class Project extends Model
         'department',
         'description',
         'technology',
+        'type',
+        'leaders',
+        'members',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'leaders' => 'array',
+        'members' => 'array',
     ];
 
     public function tasks()

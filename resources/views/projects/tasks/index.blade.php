@@ -192,7 +192,19 @@
                                             <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
                                                 {{ $task->project->name ?? ($task->project_id ? 'Proj ID: ' . $task->project_id : '-') }}
                                             </td>
-                                            <td style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">{{ $task->task_title }}</td>
+                                            <td style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">
+                                                <div class="fw-bold text-dark">{{ $task->task_title }}</div>
+                                                @if($task->followUps->where('photo', '!=', null)->count() > 0)
+                                                    @php
+                                                        $latestPhoto = $task->followUps->where('photo', '!=', null)->sortByDesc('created_at')->first()->photo;
+                                                    @endphp
+                                                    <div class="mt-2 text-center">
+                                                        <a href="javascript:void(0);" onclick="viewAttachmentPopup('{{ asset('storage/' . $latestPhoto) }}')" class="badge bg-soft-primary text-primary text-decoration-none" style="padding: 6px 10px; font-size: 11px;">
+                                                            <i class="feather-paperclip me-1"></i> View Attachment
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </td>
                                             <td style="font-size: 14px; color: #475569;">
                                                 <div class="d-flex align-items-center gap-2">
                                                     <i class="feather-calendar text-primary" style="font-size: 12px;"></i>
@@ -328,7 +340,7 @@
                                                                                                 <i class="feather-clock me-1"></i> {{ $fu->time_taken }} hrs
                                                                                             </span>
                                                                                             @if($fu->photo)
-                                                                                                <a href="{{ asset('storage/' . $fu->photo) }}" target="_blank" class="badge bg-soft-info text-info text-decoration-none">
+                                                                                                <a href="javascript:void(0);" onclick="viewAttachmentPopup('{{ asset('storage/' . $fu->photo) }}')" class="badge bg-soft-info text-info text-decoration-none">
                                                                                                     <i class="feather-image"></i> View Image
                                                                                                 </a>
                                                                                             @endif
@@ -586,19 +598,23 @@
                                         
                                         <div class="mb-4">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upload
-                                                Photo</label>
+                                                Attachment (Image/PDF/Doc)</label>
                                             <input type="file" name="photo" id="photoInput"
                                                 class="form-control border-0 bg-light shadow-none fw-bold"
                                                 onchange="previewImage(this)"
-                                                style="border-radius: 10px; padding: 10px; font-size: 14px;">
+                                                style="border-radius: 10px; padding: 10px; font-size: 14px;"
+                                                accept=".jpeg,.jpg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
                                             <!-- REAL-TIME PREVIEW AREA -->
                                             <div id="previewContainer" class="mt-3 d-none"
-                                                style="position: relative; width: 100%; height: 180px; border-radius: 12px; overflow: hidden; border: 2px dashed #e2e8f0; padding: 10px; background: #f8fafc;">
+                                                style="position: relative; width: 100%; height: auto; min-height: 50px; border-radius: 12px; overflow: hidden; border: 2px dashed #e2e8f0; padding: 10px; background: #f8fafc; text-align: center;">
                                                 <img id="photoPreview" src="#" alt="Preview"
-                                                    style="width: 100%; height: 100%; object-fit: contain !important; border-radius: 8px;">
+                                                    style="width: 100%; max-height: 180px; object-fit: contain !important; border-radius: 8px; display: none;">
+                                                <div id="documentPreview" class="fw-bold text-primary" style="display: none; padding: 20px;">
+                                                    <i class="feather-file-text me-2" style="font-size: 24px;"></i> Document Selected
+                                                </div>
                                                 <button type="button" class="btn btn-sm btn-danger rounded-circle"
                                                     onclick="removePreview()"
-                                                    style="position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                                                    style="position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; z-index: 10;">
                                                     <i class="feather-x"></i>
                                                 </button>
                                             </div>
@@ -686,6 +702,15 @@
                     </div>
                 </div>
             </div>
+        </div>
+    <!-- CUSTOM ATTACHMENT VIEWER MODAL -->
+    <div id="customAttachmentModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:999999; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+        <div style="position:relative; width:85%; max-width:1000px; background:#ffffff; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column;">
+            <div style="padding: 15px 25px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <h5 class="fw-bold text-primary m-0" style="font-size: 18px;"><i class="feather-paperclip me-2"></i>Attached File</h5>
+                <button onclick="document.getElementById('customAttachmentModal').style.display='none'" style="background:none; border:none; font-size:28px; line-height: 1; cursor:pointer; color: #64748b;">&times;</button>
+            </div>
+            <div id="customAttachmentContent" style="padding: 20px; text-align:center; overflow:hidden;"></div>
         </div>
     </div>
 @endsection
@@ -930,11 +955,29 @@
 
         function previewImage(input) {
             const preview = document.getElementById('photoPreview');
+            const docPreview = document.getElementById('documentPreview');
             const container = document.getElementById('previewContainer');
+            
             if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) { preview.src = e.target.result; container.classList.remove('d-none'); }
-                reader.readAsDataURL(input.files[0]);
+                const file = input.files[0];
+                const isImage = file.type.startsWith('image/');
+                
+                container.classList.remove('d-none');
+                
+                if (isImage) {
+                    preview.style.display = 'block';
+                    docPreview.style.display = 'none';
+                    const reader = new FileReader();
+                    reader.onload = function (e) { preview.src = e.target.result; }
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.display = 'none';
+                    docPreview.style.display = 'block';
+                    docPreview.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
+                        <span class="text-dark small">${file.name}</span>
+                    </div>`;
+                }
             }
         }
 
@@ -1171,6 +1214,12 @@
                                                     <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
                                                         ${fu.work_description}
                                                     </div>
+                                                    ${fu.photo ? `
+                                                    <div class="mt-3">
+                                                        <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
+                                                            <i class="feather-image me-1"></i> View Attached File
+                                                        </a>
+                                                    </div>` : ''}
                                                 </div>
                                             </div>
                                         </td>
@@ -1457,6 +1506,18 @@
                 showConfirmButton: true,
                 confirmButtonColor: '#3858f9'
             });
+        }
+
+        function viewAttachmentPopup(url) {
+            const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
+            let htmlContent = '';
+            if (isImage) {
+                htmlContent = `<img src="${url}" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px;">`;
+            } else {
+                htmlContent = `<iframe src="${url}" style="width: 100%; height: 75vh; border: none; border-radius: 8px;"></iframe>`;
+            }
+            document.getElementById('customAttachmentContent').innerHTML = htmlContent;
+            document.getElementById('customAttachmentModal').style.display = 'flex';
         }
     </script>
 

@@ -88,7 +88,8 @@ class DailyTaskController extends Controller
         ]);
 
         // Force employee_id for non-admins
-        if (strtoupper(auth()->user()->role) !== 'ADMIN') {
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
             $validated['employee_id'] = auth()->user()->employee_id;
         }
 
@@ -120,7 +121,7 @@ class DailyTaskController extends Controller
             'work_description' => 'required|string',
             'reference_name' => 'nullable|string',
             'time_taken' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp|max:10240',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
         ]);
 
         $role = strtoupper(auth()->user()->role ?? 'USER');
