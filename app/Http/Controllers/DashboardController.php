@@ -6,50 +6,33 @@ use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Payroll;
 use App\Models\Holiday;
+use App\Models\LeaveApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
 
-
     private function getAttendanceAnalytics($from, $to, $employeeId = null)
     {
-        $query = Attendance::join('employees', 'attendances.employee_id', '=', 'employees.id')
-            ->whereDate('attendance_date', '>=', $from)
-            ->whereDate('attendance_date', '<=', $to);
+        $fromDate = Carbon::parse($from)->toDateString();
+        $toDate = Carbon::parse($to)->toDateString();
+
+        $query = Attendance::whereBetween('attendance_date', [$fromDate, $toDate]);
 
         if ($employeeId) {
-            $query->where('attendances.employee_id', $employeeId);
+            $query->where('employee_id', $employeeId);
         }
 
         return $query->selectRaw("
-            COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present,
-            COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day,
-            COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh,
-            COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count,
-            COUNT(CASE WHEN attendances.status = 'late' THEN 1 END) as late,
-
-            SUM(
-                CASE 
-                    WHEN attendances.check_out IS NOT NULL AND (
-                        (
-                            attendances.status = 'present'
-                            AND TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
-                        )
-                        OR
-                        (
-                            attendances.status = 'half_day'
-                            AND TIME(attendances.check_out) <= SUBTIME(
-                                ADDTIME(TIME(employees.time_in), 
-                                SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(employees.time_out, employees.time_in)) / 2)),
-                                '00:30:00'
-                            )
-                        )
-                    )
-                    THEN 1 ELSE 0
-                END
-            ) as early_out
+            SUM(IF(status IN ('present', 'half_day', 'late') OR check_in IS NOT NULL, 1, 0)) as present_count,
+            SUM(IF(status = 'wfh', 1, 0)) as wfh_count,
+            SUM(IF(status = 'half_day', 1, 0)) as halfDay_count,
+            SUM(IF(status = 'leave', 1, 0)) as leave_count,
+            SUM(IF(status = 'late' OR (check_in IS NOT NULL AND TIME(check_in) > '09:30:00'), 1, 0)) as late_count,
+            SUM(IF(status = 'early_leave', 1, 0)) as early_count,
+            SUM(IF(status = 'absent', 1, 0)) as absent_count
         ")->first();
     }
 
@@ -76,12 +59,16 @@ class DashboardController extends Controller
         // $totalEmployees = $isAdmin ? Employee::count() : 1;
         $totalEmployees = Employee::count();
 
+        $analyticsEmployeeId = $isAdmin ? null : $employeeId;
+        $todayAnalytics = $this->getAttendanceAnalytics($today, $today, $analyticsEmployeeId);
+        $todayDashboardAnalytics = $this->getAttendanceAnalytics($today, $today);
+
         // Attendance Metrics
         $isCurrentMonth = ($selectedMonth == Carbon::now()->format('Y-m'));
 
         if ($isAdmin) {
             if ($isCurrentMonth) {
-                $todayPresent = Attendance::where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
+                $todayPresent = (int) ($todayAnalytics->present_count ?? 0);
                 $todayLeave = Attendance::where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
                 $attendanceRate = $totalEmployees > 0 ? round(($todayPresent / $totalEmployees) * 100, 1) : 0;
             } else {
@@ -106,9 +93,9 @@ class DashboardController extends Controller
             $totalEmpPending = Payroll::where('month', $selectedMonth)->where('status', 'pending')->count();
         } else {
             // Employee specific metrics
-            $todayPresent = Attendance::where('employee_id', $employeeId)->where('attendance_date', $today)->whereIn('status', ['present', 'half_day', 'late'])->count();
+            $todayPresent = (int) ($todayAnalytics->present_count ?? 0);
             $todayLeave = Attendance::where('employee_id', $employeeId)->where('attendance_date', $today)->whereIn('status', ['absent', 'leave'])->count();
-            $attendanceRate = $todayPresent > 0 ? 100 : 0;
+            $attendanceRate = ($totalEmployees > 0) ? number_format(($todayPresent / $totalEmployees) * 100, 2) : 0;
 
             $myPayroll = Payroll::where('employee_id', $employeeId)->where('month', $selectedMonth)->first();
             $totalPaidAmount = ($myPayroll && $myPayroll->status == 'paid') ? $myPayroll->net_salary : 0;
@@ -120,80 +107,62 @@ class DashboardController extends Controller
             $totalEmpPending = ($myPayroll && $myPayroll->status == 'pending') ? 1 : 0;
         }
 
-        // OLD dashboard values (for Blade when NOT filtered)
-        $present = $todayPresent;
-
-        $wfh = Attendance::whereDate('attendance_date', $today)
-                ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
-                ->where('status', 'wfh')
-                ->count();
-
-        $late = Attendance::whereDate('attendance_date', $today)
-                ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
-                ->where('status', 'late')
-                ->count();
-
-        $leave = $todayLeave;
-
-        // simple early count (basic version)
-        $early = Attendance::whereDate('attendance_date', $today)
-                ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
-                ->whereNotNull('check_out')
-                ->count();
-
+        // Attendance analytics card for all roles.
+        $present = (int) ($todayDashboardAnalytics->present_count ?? 0);
+        $wfh = (int) ($todayDashboardAnalytics->wfh_count ?? 0);
+        $late = (int) ($todayDashboardAnalytics->late_count ?? 0);
+        $half_day = (int) ($todayDashboardAnalytics->halfDay_count ?? 0);
+        $leave = (int) ($todayDashboardAnalytics->leave_count ?? 0);
+        $early = (int) ($todayDashboardAnalytics->early_count ?? 0);
+        $absent = (int) ($todayDashboardAnalytics->absent_count ?? 0);
+        $attendanceRate = $totalEmployees > 0 ? round(($present / $totalEmployees) * 100, 2) : 0;
 
         // NEW DATE FILTER ANALYTICS (ADD HERE ONLY)
 
         if ($request->has('from') || $request->has('filter')) {
-
             if ($request->filter == 'today') {
-                $from = Carbon::today();
-                $to   = Carbon::today();
+                $from = Carbon::today()->toDateString();
+                $to   = Carbon::today()->toDateString();
             } elseif ($request->filter == 'yesterday') {
-                $from = Carbon::yesterday();
-                $to   = Carbon::yesterday();
+                $from = Carbon::yesterday()->toDateString();
+                $to   = Carbon::yesterday()->toDateString();
             } elseif ($request->filter == 'week') {
-                $from = Carbon::now()->subDays(7);
-                $to   = Carbon::today();
+                $from = Carbon::now()->subDays(6)->toDateString();
+                $to   = Carbon::today()->toDateString();
             } elseif ($request->filter == 'month') {
-                $from = Carbon::now()->startOfMonth();
-                $to   = Carbon::today();
+                $from = Carbon::now()->startOfMonth()->toDateString();
+                $to   = Carbon::today()->toDateString();
             } else {
-                $from = $request->from ?? Carbon::today();
-                $to   = $request->to ?? Carbon::today();
+                $from = $request->from ?? Carbon::today()->toDateString();
+                $to   = $request->to ?? Carbon::today()->toDateString();
             }
 
-            $analytics = $this->getAttendanceAnalytics(
-                $from,
-                $to,
-                $isAdmin ? null : $employeeId
-            );
+            $analytics = $this->getAttendanceAnalytics($from, $to);
 
-            $rangePresent = $analytics->present ?? 0;
-            $rangeWFH     = $analytics->wfh ?? 0;
-            $rangeLeave   = $analytics->leave_count ?? 0;
-            $rangeLate    = $analytics->late ?? 0;
-            $rangeEarly   = $analytics->early_out ?? 0;
-            $rangeHalfDay = $analytics->half_day ?? 0;
+            $rangePresent = (int) ($analytics->present_count ?? 0);
+            $rangeWFH     = (int) ($analytics->wfh_count ?? 0);
+            $rangeLeave   = (int) ($analytics->leave_count ?? 0);
+            $rangeLate    = (int) ($analytics->late_count ?? 0);
+            $rangeEarly   = (int) ($analytics->early_count ?? 0);
+            $rangeAbsent  = (int) ($analytics->absent_count ?? 0);
+            $rangeHalfday = (int) ($analytics->halfDay_count ?? 0);
 
-            $rangeCheckedIn = $rangePresent + $rangeWFH + $rangeHalfDay + $rangeLate;
+            $rangeCheckedIn = $rangePresent;
+            $days = Carbon::parse($from)->diffInDays(Carbon::parse($to)) + 1;
+            $denominator = $totalEmployees * $days;
 
-            // $days = Carbon::parse($from)->diffInDays(Carbon::parse($to)) + 1;
-            // $rangeAttendanceRate = ($totalEmployees > 0 && $days > 0)
-            //     ? round(($rangeCheckedIn / ($totalEmployees * $days)) * 100, 1)
-            //     : 0;
-
-            $rangeAttendanceRate = $totalEmployees > 0
-            ? round(($rangeCheckedIn / $totalEmployees) * 100, 1)
-            : 0;
-
-
+            $rangeAttendanceRate = ($denominator > 0)
+                ? number_format(($rangeCheckedIn / $denominator) * 100, 2)
+                : 0;
         } else {
             $rangePresent = 0;
             $rangeWFH     = 0;
             $rangeLeave   = 0;
             $rangeLate    = 0;
             $rangeEarly   = 0;
+            $rangeAbsent  = 0;
+            $rangeHalfday = 0;
+
             $rangeAttendanceRate = 0;
         }
 
@@ -226,16 +195,42 @@ class DashboardController extends Controller
         // Upcoming Holidays
         $upcomingHolidays = Holiday::where('date', '>=', $today)->orderBy('date')->limit(20)->get();
 
-        // Selected month for leave report (default = last month)
+        // Selected month for leave report (default = current month)
         $leaveReport = $this->getLeaveReport($request);
         $employees = Employee::all();
 
         // Employee Leave on Today
-        $todayLeaveEmployees = Attendance::with('employee')
-            ->whereDate('attendance_date', $today)
-            ->whereIn('status', ['leave']) // only leave (not absent)
-            ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
+        $todayLeaveEmployees = Attendance::with('employee') 
+            ->whereDate('attendance_date', $today) 
+            ->whereIn('status', ['leave'])
+            // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId)) 
             ->get();
+
+        // Late arrival on today
+        $todayLateEmployees = Attendance::with('employee')
+        ->whereDate('attendance_date', $today)
+        ->whereTime('check_in', '>', '09:30:00')
+        // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
+        ->get();
+
+        $officeTime = Carbon::createFromTime(9, 30, 0);
+
+        $todayLateEmployees = $todayLateEmployees->map(function ($item) use ($officeTime) {
+            $checkIn = Carbon::parse($item->check_in);
+
+            $lateMinutes = $officeTime->diffInMinutes($checkIn);
+
+            $hours = floor($lateMinutes / 60);
+            $minutes = $lateMinutes % 60;
+
+            if ($hours > 0) {
+                $item->late_duration = $hours . ' hr ' . $minutes . ' min';
+            } else {
+                $item->late_duration = $minutes . ' min';
+            }
+
+            return $item;
+        });
 
         return view('dashboard', compact(
             'totalEmployees',
@@ -262,91 +257,96 @@ class DashboardController extends Controller
             'rangeLate',
             'rangeEarly',
             'rangeAttendanceRate',
+            'rangeAbsent',
+            'rangeHalfday',
             'present',
             'wfh',
             'leave',
             'late',
             'early',
+            'absent',
+            'half_day',
             'leaveReport',
             'employees',
             'todayLeaveEmployees',
+            'todayLateEmployees',
         ));
     }
 
-    // Latest Leave Report
     private function getLeaveReport(Request $request)
     {
-        $query = \App\Models\Attendance::join('employees', 'attendances.employee_id', '=', 'employees.id')
-            ->join('leave_applications', function ($join) {
-                $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
-                    ->whereColumn('attendances.attendance_date', '>=', 'leave_applications.start_date')
-                    ->whereColumn('attendances.attendance_date', '<=', 'leave_applications.end_date');
-            })
-            ->where('leave_applications.status', 'approved');
+        // $query = Attendance::join('employees', 'attendances.employee_id', '=', 'employees.id')
+        //     ->join('leave_applications', function ($join) {
+        //         $join->on('attendances.employee_id', '=', 'leave_applications.employee_id')
+        //             ->whereColumn('attendances.attendance_date', '>=', 'leave_applications.start_date')
+        //             ->whereColumn('attendances.attendance_date', '<=', 'leave_applications.end_date');
+        //     })
+        //     ->where('leave_applications.status', 'approved');
 
-        // Employee filter
+        $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
+        ->where('leave_applications.status', 'approved');
+
         if ($request->employee_id) {
             $query->where('employees.id', $request->employee_id);
         }
 
-        // Date range
         $from = null;
-        $to   = \Carbon\Carbon::today();
+        $to   = Carbon::today();
 
-        if ($request->filter) {
-            switch ($request->filter) {
-                case 'week':   
+        if ($request->leave_filter) {
+            switch ($request->leave_filter) {
+                case 'week':
                     $from = Carbon::now()->subWeek();
-                    $to   = Carbon::today();
                     break;
-                case 'month':  
+                case 'last_month':
                     $from = Carbon::now()->subMonth()->startOfMonth();
                     $to   = Carbon::now()->subMonth()->endOfMonth();
                     break;
-                case '3month': 
+                case '3month':
                     $from = Carbon::now()->subMonths(3);
-                    $to   = Carbon::today();
                     break;
-                case '6month': 
+                case '6month':
                     $from = Carbon::now()->subMonths(6);
-                    $to   = Carbon::today();
                     break;
-                case 'year': 
+                case 'year':
                     $from = Carbon::now()->subYear();
-                    $to   = Carbon::today();
                     break;
             }
         }
 
-        // Custom range overrides
-        if ($request->from && $request->to) {
-            $from = \Carbon\Carbon::parse($request->from);
-            $to   = \Carbon\Carbon::parse($request->to);
+        // Custom range
+        if ($request->leave_from && $request->leave_to) {
+            $from = Carbon::parse($request->leave_from);
+            $to   = Carbon::parse($request->leave_to);
         }
 
         // Default = last month
-        if (!$request->filter && !$request->from) {
+        if (!$request->leave_filter && !$request->leave_from) {
             $from = Carbon::now()->startOfMonth();
-            $to = Carbon::now()->endOfMonth();
+            $to   = Carbon::now();
         }
 
         if ($from && $to) {
-            $query->whereBetween('attendances.attendance_date', [$from, $to])
-                ->whereDate('attendances.attendance_date', '<=', Carbon::today());
+            // $query->whereBetween('attendances.attendance_date', [$from, $to]);
+            $query->where(function($q) use ($from, $to) {
+                $q->whereBetween('leave_applications.start_date', [$from, $to])
+                ->orWhereBetween('leave_applications.end_date', [$from, $to]);
+            });
         }
+
+        // dd($request->leave_from, $request->leave_to);
 
         return $query->selectRaw("
                 employees.id,
                 employees.name,
                 employees.designation,
-                COUNT(CASE WHEN attendances.status IN ('leave') THEN 1 END) as leave_count
+                COUNT(*) as leave_count
             ")
             ->groupBy('employees.id', 'employees.name', 'employees.designation')
             ->havingRaw("leave_count > 0")
             ->orderByDesc('leave_count')
             ->get();
     }
-
 
     /**
      * Get Full Year Breakdown (Requested by User)
