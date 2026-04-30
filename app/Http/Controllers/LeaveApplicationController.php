@@ -37,12 +37,12 @@ class LeaveApplicationController extends Controller
         }
 
         $role = strtoupper(auth()->user()->role);
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
-            $query->where('employee_id', auth()->user()->employee_id);
-            $employees = Employee::where('id', auth()->user()->employee_id)->get();
-        } else {
+        // if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        //     $query->where('employee_id', auth()->user()->employee_id);
+        //     $employees = Employee::where('id', auth()->user()->employee_id)->get();
+        // } else {
             $employees = Employee::all();
-        }
+        // }
 
         $leaves = $query->orderBy('created_at', 'desc')->paginate(15);
 
