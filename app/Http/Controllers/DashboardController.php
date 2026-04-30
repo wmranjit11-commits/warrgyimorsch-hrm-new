@@ -200,10 +200,76 @@ class DashboardController extends Controller
         $employees = Employee::all();
 
         // Employee Leave on Today
-        $todayLeaveEmployees = Attendance::with('employee') 
-            ->whereDate('attendance_date', $today) 
-            ->whereIn('status', ['leave'])
-            // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId)) 
+        // $todayLeaveEmployees = Attendance::with('employee') 
+        //     ->whereDate('attendance_date', $today) 
+        //     ->whereIn('status', ['leave'])
+        //     // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId)) 
+        //     ->get();
+
+        $approvedLeave = DB::table('leave_applications')
+            ->join('employees', 'employees.id', '=', 'leave_applications.employee_id')
+            ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
+            ->whereDate('leave_applications.start_date', '<=', $today)
+            ->whereDate('leave_applications.end_date', '>=', $today)
+            ->select(
+                'employees.id as employee_id',
+                'employees.name as employee_name',
+                DB::raw("
+                    CASE 
+                        WHEN leave_applications.leave_category = 'Full Day' THEN 'Full Day Leave'
+                        WHEN LOWER(leave_applications.leave_category) LIKE '%Half%' THEN 'Half Day'
+                        WHEN leave_applications.leave_category = 'Gatepass' THEN 'Early Leave'
+                    END as leave_type
+                ")
+            );
+
+        $attendanceLeave = DB::table('attendances')
+            ->join('employees', 'employees.id', '=', 'attendances.employee_id')
+            ->whereDate('attendances.attendance_date', $today)
+            ->whereIn('attendances.status', ['leave', 'half_day', 'early_leave'])
+            ->whereNotIn('attendances.employee_id', function ($q) use ($today) {
+                $q->select('employee_id')
+                ->from('leave_applications')
+                ->whereIn('status', ['approved', 'unauthorised'])
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today);
+            })
+            ->select(
+                'employees.id as employee_id',
+                'employees.name as employee_name',
+                DB::raw("
+                    CASE 
+                        WHEN attendances.status = 'leave' THEN 'Full Day Leave'
+                        WHEN attendances.status = 'half_day' THEN 'Half Day'
+                        WHEN attendances.status = 'early_leave' THEN 'Early Leave'
+                    END as leave_type
+                ")
+        );
+
+        $absentEmployees = DB::table('attendances')
+            ->join('employees', 'employees.id', '=', 'attendances.employee_id')
+            ->whereDate('attendances.attendance_date', $today)
+            ->where('attendances.status', 'absent')
+            ->where(function ($q) {
+                $q->whereNull('attendances.check_in')
+                ->orWhereNull('attendances.check_out');
+            })
+            ->whereNotIn('attendances.employee_id', function ($q) use ($today) {
+                $q->select('employee_id')
+                ->from('leave_applications')
+                ->where('status', 'approved')
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today);
+            })
+            ->select(
+                'employees.id as employee_id',
+                'employees.name as employee_name',
+                DB::raw("'Absent' as leave_type")
+            );
+
+        $todayLeaveEmployees = $attendanceLeave
+            ->union($approvedLeave)
+            ->union($absentEmployees)
             ->get();
 
         // Late arrival on today

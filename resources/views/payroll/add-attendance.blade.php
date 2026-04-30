@@ -48,16 +48,36 @@
             @if(isset($is_edit))
                 @method('PUT')
             @endif
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
-                <input type="date" name="attendance_date" 
-                       value="{{ $edit_date ?? date('Y-m-d') }}" 
-                       {{ isset($is_edit) ? 'readonly' : 'required' }} 
-                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px; background: {{ isset($is_edit) ? '#f5f5f5' : 'white' }};">
-                
-                @if(isset($is_edit))
-                    <small style="color: #d9534f; margin-left: 10px;">Date cannot be changed in edit mode.</small>
-                @endif
+            <div class="w-100 d-flex justify-content-between">
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Attendance Date:</label>
+                    <input type="date" name="attendance_date" 
+                           value="{{ $edit_date ?? date('Y-m-d') }}" 
+                           {{ isset($is_edit) ? 'readonly' : 'required' }} 
+                           style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 200px; font-size: 14px; background: {{ isset($is_edit) ? '#f5f5f5' : 'white' }};">
+                    
+                    @if(isset($is_edit))
+                        <small style="color: #d9534f; margin-left: 10px;">Date cannot be changed in edit mode.</small>
+                    @endif
+                </div>
+    
+                <!-- Right: Bulk Status Dropdown -->
+                <div>
+                    <select id="bulk_status"
+                            onchange="applyBulkStatus()"
+                            style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 150px; cursor: pointer; height: 40px; margin: 35px;">
+                        <option value="">Select</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="half_day">Half Day</option>
+                        <option value="wfh">WFH</option>
+                        <option value="leave">Leave</option>
+                        <option value="late">Late</option>
+                        <option value="activity">Activity</option>
+                        <option value="early_leave">Early Leave</option>
+                    </select>
+                </div>
             </div>
 
             @if(count($employees) == 0)
@@ -71,6 +91,9 @@
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                         <thead>
                             <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                                <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd;">
+                                    <input type="checkbox" id="select_all" onclick="toggleAllCheckboxes(this)">
+                                </th>
                                 <th style="padding: 15px; text-align: left; border-right: 1px solid #ddd; font-weight: bold;">Employee Name</th>
                                 <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check In</th>
                                 <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd; font-weight: bold; width: 140px;">Check Out</th>
@@ -81,6 +104,9 @@
                         <tbody>
                             @foreach($employees as $index => $emp)
                             <tr style="border-bottom: 1px solid #ddd; background: {{ $loop->even ? '#fafafa' : 'white' }};">
+                                <td style="padding: 15px; text-align: center; border-right: 1px solid #ddd;">
+                                    <input type="checkbox" class="row_checkbox" data-index="{{ $index }}">
+                                </td>
                                 <td style="padding: 15px; border-right: 1px solid #ddd; font-weight: 500;">
                                     {{ $emp->name }}
                                     <input type="hidden" name="employees[{{ $index }}][employee_id]" value="{{ $emp->id }}">
@@ -122,12 +148,15 @@
                                     <select name="employees[{{ $index }}][status]" 
                                             id="status_{{ $index }}"
                                             style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
-                                        <option value="present" {{ (!isset($emp->old_status) || (isset($emp->old_status) && $emp->old_status == 'present')) ? 'selected' : '' }}>Present</option>
+                                        <option value="" {{ !isset($emp->old_status) ? 'selected' : '' }}>Select</option>
+                                        <option value="present" {{ (isset($emp->old_status) && $emp->old_status == 'present') ? 'selected' : '' }}>Present</option>
                                         <option value="absent" {{ (isset($emp->old_status) && $emp->old_status == 'absent') ? 'selected' : '' }}>Absent</option>
                                         <option value="half_day" {{ (isset($emp->old_status) && $emp->old_status == 'half_day') ? 'selected' : '' }}>Half Day</option>
                                         <option value="wfh" {{ (isset($emp->old_status) && $emp->old_status == 'wfh') ? 'selected' : '' }}>WFH</option>
                                         <option value="leave" {{ (isset($emp->old_status) && $emp->old_status == 'leave') ? 'selected' : '' }}>Leave</option>
                                         <option value="late" {{ (isset($emp->old_status) && $emp->old_status == 'late') ? 'selected' : '' }}>Late</option>
+                                        <option value="activity" {{ (isset($emp->old_status) && $emp->old_status == 'activity') ? 'selected' : '' }}>Activity</option>
+                                        <option value="early_leave" {{ (isset($emp->old_status) && $emp->old_status == 'early_leave') ? 'selected' : '' }}>Early Leave</option>
                                     </select>
                                 </td>
                             </tr>
@@ -224,6 +253,36 @@
             durationDisplay.textContent = '--';
             durationDisplay.style.color = '#999';
         }
+    }
+
+    function toggleAllCheckboxes(source) {
+        let checkboxes = document.querySelectorAll('.row_checkbox');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+
+    function applyBulkStatus() {
+        let selectedStatus = document.getElementById('bulk_status').value;
+
+        if (!selectedStatus) return;
+
+        let checkboxes = document.querySelectorAll('.row_checkbox:checked');
+
+        if (checkboxes.length === 0) {
+            alert("Please select at least one employee.");
+            return;
+        }
+
+        checkboxes.forEach(cb => {
+            let index = cb.getAttribute('data-index');
+            let statusDropdown = document.getElementById('status_' + index);
+
+            if (statusDropdown) {
+                statusDropdown.value = selectedStatus;
+            }
+        });
+
+        // Optional: reset dropdown after applying
+        document.getElementById('bulk_status').value = "";
     }
 </script>
 @endsection

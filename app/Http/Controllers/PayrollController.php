@@ -255,7 +255,7 @@ class PayrollController extends Controller
                 'check_in' => !empty($emp['check_in']) ? $emp['check_in'] : null,
                 'check_out' => !empty($emp['check_out']) ? $emp['check_out'] : null,
                 'total_hours' => $totalHours,
-                'status' => $emp['status'] ?? 'present',
+                'status' => $emp['status'],
             ]);
         }
 
