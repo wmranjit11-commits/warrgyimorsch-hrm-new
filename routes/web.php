@@ -61,9 +61,13 @@ Route::middleware(['auth'])->group(function () {
 
     // PROJECT MODULE
     Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/create', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{id}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
     Route::put('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
-    Route::patch('/projects/{id}/status', [\App\Http\Controllers\ProjectController::class, 'updateStatus'])->name('projects.update-status');
+    Route::patch('/projects/{id}/update-field', [\App\Http\Controllers\ProjectController::class, 'updateField'])->name('projects.update-field');
+    Route::post('/projects/bulk-delete', [\App\Http\Controllers\ProjectController::class, 'bulkDelete'])->name('projects.bulk-delete');
     Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
 
     // DAILY TASKS

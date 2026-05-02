@@ -19,20 +19,30 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
             --bs-body-font-family: 'Inter', sans-serif !important;
         }
-        body, html, input, button, select, textarea {
+
+        body,
+        html,
+        input,
+        button,
+        select,
+        textarea {
             font-family: 'Inter', sans-serif !important;
         }
+
         .btn-soft-danger {
             background: rgba(239, 68, 68, 0.08) !important;
             color: #ef4444 !important;
             border: 1.5px solid rgba(239, 68, 68, 0.2) !important;
         }
+
         .btn-soft-danger:hover {
             background: #ef4444 !important;
             color: #fff !important;
@@ -44,6 +54,7 @@
             color: #3858f9 !important;
             border: 1.5px solid rgba(56, 88, 249, 0.2) !important;
         }
+
         .btn-soft-primary:hover {
             background: #3858f9 !important;
             color: #fff !important;
@@ -55,6 +66,7 @@
             color: #22c55e !important;
             border: 1.5px solid rgba(34, 197, 94, 0.2) !important;
         }
+
         .btn-soft-success:hover {
             background: #22c55e !important;
             color: #fff !important;
@@ -66,6 +78,7 @@
             color: #64748b !important;
             border: 1.5px solid rgba(100, 116, 139, 0.2) !important;
         }
+
         .btn-soft-secondary:hover {
             background: #64748b !important;
             color: #fff !important;
@@ -74,7 +87,7 @@
 
         .dropdown-menu {
             z-index: 999999 !important;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
         }
     </style>
 </head>
