@@ -30,20 +30,39 @@
             @csrf
             @method('PUT')
 
-            <!-- Employee Name -->
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">
-                    Employee Name:
-                </label>
-
-                <input type="text"
-                       value="{{ $employee->name }}"
-                       readonly
-                       style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 300px; font-size: 14px; background: #f5f5f5;">
-
-                <small style="color: #d9534f; margin-left: 10px;">
-                    Employee name cannot be changed.
-                </small>
+            <div class="w-100 d-flex justify-content-between">
+                <!-- Employee Name -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">
+                        Employee Name:
+                    </label>
+    
+                    <input type="text"
+                           value="{{ $employee->name }}"
+                           readonly
+                           style="padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 300px; font-size: 14px; background: #f5f5f5;">
+    
+                    <small style="color: #d9534f; margin-left: 10px;">
+                        Employee name cannot be changed.
+                    </small>
+                </div>
+    
+                <!-- Right: Bulk Status Dropdown -->
+                <div>
+                    <select id="bulk_status"
+                            onchange="applyBulkStatus()"
+                            style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 150px; cursor: pointer; height: 40px; margin: 35px;">
+                        <option value="">Select</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="half_day">Half Day</option>
+                        <option value="wfh">WFH</option>
+                        <option value="leave">Leave</option>
+                        <option value="late">Late</option>
+                        <option value="activity">Activity</option>
+                        <option value="early_leave">Early Leave</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Table -->
@@ -51,6 +70,9 @@
                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                     <thead>
                         <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 15px; text-align: center; border-right: 1px solid #ddd;">
+                                <input type="checkbox" id="select_all" onclick="toggleAllCheckboxes(this)">
+                            </th>
                             <th style="padding: 15px; text-align: left; border-right: 1px solid #ddd; font-weight: bold;">
                                 Attendance Date
                             </th>
@@ -72,7 +94,10 @@
                     <tbody>
                         @foreach($attendance as $index => $record)
                         <tr style="border-bottom: 1px solid #ddd; background: {{ $loop->even ? '#fafafa' : 'white' }};">
-
+                            <!-- Checkbox -->
+                            <td style="padding: 15px; text-align: center; border-right: 1px solid #ddd;">
+                                <input type="checkbox" class="row_checkbox" data-index="{{ $index }}">
+                            </td>
                             <!-- Date -->
                             <td style="padding: 15px; border-right: 1px solid #ddd; font-weight: 500;">
                                 {{ \Carbon\Carbon::parse($record->attendance_date)->format('d-m-Y') }}
@@ -125,13 +150,14 @@
                                 <select name="status[{{ $record->id }}]"
                                         id="status_{{ $index }}"
                                         style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
-
-                                    <option value="present" {{ $record->status == 'present' ? 'selected' : '' }}>Present</option>
+                                    <option value="" {{ empty($record->status) ? 'selected' : '' }}>Select</option>                                    <option value="present" {{ $record->status == 'present' ? 'selected' : '' }}>Present</option>
                                     <option value="absent" {{ $record->status == 'absent' ? 'selected' : '' }}>Absent</option>
                                     <option value="half_day" {{ $record->status == 'half_day' ? 'selected' : '' }}>Half Day</option>
                                     <option value="wfh" {{ $record->status == 'wfh' ? 'selected' : '' }}>WFH</option>
                                     <option value="leave" {{ $record->status == 'leave' ? 'selected' : '' }}>Leave</option>
                                     <option value="late" {{ $record->status == 'late' ? 'selected' : '' }}>Late</option>
+                                    <option value="activity" {{ $record->status == 'activity' ? 'selected' : '' }}>Activity</option>
+                                    <option value="early_leave" {{ $record->status == 'early_leave' ? 'selected' : '' }}>Early Leave</option>
                                 </select>
                             </td>
                         </tr>
@@ -215,6 +241,36 @@
             durationDisplay.textContent = '--';
             durationDisplay.style.color = '#999';
         }
+    }
+
+    function toggleAllCheckboxes(source) {
+        let checkboxes = document.querySelectorAll('.row_checkbox');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+
+    function applyBulkStatus() {
+        let selectedStatus = document.getElementById('bulk_status').value;
+
+        if (!selectedStatus) return;
+
+        let checkboxes = document.querySelectorAll('.row_checkbox:checked');
+
+        if (checkboxes.length === 0) {
+            alert("Please select at least one employee.");
+            return;
+        }
+
+        checkboxes.forEach(cb => {
+            let index = cb.getAttribute('data-index');
+            let statusDropdown = document.getElementById('status_' + index);
+
+            if (statusDropdown) {
+                statusDropdown.value = selectedStatus;
+            }
+        });
+
+        // Optional: reset dropdown after applying
+        document.getElementById('bulk_status').value = "";
     }
 </script>
 

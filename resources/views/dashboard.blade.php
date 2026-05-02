@@ -255,9 +255,10 @@
                     </div>
                 </div>
                 <!-- [Total Employees] end -->
-                <!-- [Today Leave Records] start -->
+                
                 <div class="row">
 
+                    <!-- [Today Leave Records] start -->
                     <div class="col-md-4">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
@@ -289,10 +290,10 @@
                                                 </div>
                                                 <div>
                                                     <div class="fw-bold">
-                                                        {{ $todayLeave->employee->name ?? 'N/A' }}
+                                                        {{ $todayLeave->employee_name ?? 'N/A' }}
                                                     </div>
                                                     <div class="fs-11 text-muted">
-                                                        On Leave Today
+                                                        {{ $todayLeave->leave_type }} Today
                                                     </div>
                                                 </div>
                                             </div>
@@ -346,14 +347,15 @@
                                 </div>
                             </div>
                     </div>
+                    <!-- [Today Leave Records] end -->
 
-
+                    <!-- [Late Arrivals] start -->
                     <div class="col-md-4">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
                                 <h5 class="card-title">Late Arrivals</h5>
                                 <div class="card-header-action">
-                                    <div class="card-header-btn">
+                                    <!-- <div class="card-header-btn">
                                         <div data-bs-toggle="tooltip" title="Delete">
                                             <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"></a>
                                         </div>
@@ -362,7 +364,30 @@
                                         </div>
                                         <div data-bs-toggle="tooltip" title="Maximize/Minimize">
                                             <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"></a>
-                                        </div>
+                                        </div> -->
+                                        <!-- Filters (Below Heading, Above List) -->
+    <div class="d-flex gap-2" id="lateFilterContainerUnique">
+
+        <!-- Employee Filter -->
+        <select id="lateEmployeeFilter"
+                class="form-select form-select-sm"
+                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+            <option value="">All</option>
+            @foreach($employees as $emp)
+                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+            @endforeach
+        </select>
+
+        <!-- Time Filter -->
+        <select id="lateTimeFilter"
+                class="form-select form-select-sm"
+                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+            <option value="today" selected>Today</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="3months">3 Months</option>
+            <option value="year">Year</option>
+        </select>
                                     </div>
                                 </div>
                             </div>
@@ -376,24 +401,24 @@
                                             </div>
                                             <div>
                                                 <div class="fw-bold">
-                                                    {{ $lateEmp->employee->name ?? 'N/A' }}
+                                                    {{ $lateEmp['employee']->name ?? 'N/A' }}
                                                 </div>
                                                 <div class="fs-11 text-muted">
-                                                    Late by {{ $lateEmp->late_duration }}
+                                                    Late by {{ $lateEmp['late_duration'] }}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 @empty
                                     <div class="text-center py-4 text-muted">
-                                        No late arrivals today.
+                                        No late arrivals found.
                                     </div>
                                 @endforelse
                             </div>
                         </div>
                     </div>
-
-                    <!-- [Today Leave Records] end -->
+                    <!-- [Late Arrivals] end -->
+                    
                     <!--! BEGIN: [Upcoming Schedule] !-->
 
                     <div class="col-md-4">
@@ -1114,6 +1139,21 @@
         const box = event.target.closest('.dropdown-menu');
         box.querySelector('#customFilterBoxLeave').style.display = 'none';
         box.querySelector('#normalFiltersLeave').style.display = 'block';
+    }
+
+    document.getElementById('lateEmployeeFilter').addEventListener('change', applyLateFilters);
+    document.getElementById('lateTimeFilter').addEventListener('change', applyLateFilters);
+
+    function applyLateFilters() {
+        let employee = document.getElementById('lateEmployeeFilter').value;
+        let range = document.getElementById('lateTimeFilter').value;
+
+        let url = new URL(window.location.href);
+
+        url.searchParams.set('late_employee', employee);
+        url.searchParams.set('late_range', range);
+
+        window.location.href = url.toString();
     }
     </script>
 @endpush
