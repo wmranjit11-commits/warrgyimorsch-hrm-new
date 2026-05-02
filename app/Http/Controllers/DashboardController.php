@@ -26,7 +26,7 @@ class DashboardController extends Controller
         }
 
         return $query->selectRaw("
-            SUM(IF(status IN ('present', 'half_day', 'late') OR check_in IS NOT NULL, 1, 0)) as present_count,
+            SUM(IF(status IN ('present', 'half_day', 'late', 'wfh') OR check_in IS NOT NULL, 1, 0)) as present_count,
             SUM(IF(status = 'wfh', 1, 0)) as wfh_count,
             SUM(IF(status = 'half_day', 1, 0)) as halfDay_count,
             SUM(IF(status = 'leave', 1, 0)) as leave_count,
@@ -273,30 +273,31 @@ class DashboardController extends Controller
             ->get();
 
         // Late arrival on today
-        $todayLateEmployees = Attendance::with('employee')
-        ->whereDate('attendance_date', $today)
-        ->whereTime('check_in', '>', '09:30:00')
-        // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
-        ->get();
+        $todayLateEmployees = $this->getLateEmployeesData();
+        // $todayLateEmployees = Attendance::with('employee')
+        // ->whereDate('attendance_date', $today)
+        // ->whereTime('check_in', '>', '09:30:00')
+        // // ->when(!$isAdmin, fn($q) => $q->where('employee_id', $employeeId))
+        // ->get();
 
-        $officeTime = Carbon::createFromTime(9, 30, 0);
+        // $officeTime = Carbon::createFromTime(9, 30, 0);
 
-        $todayLateEmployees = $todayLateEmployees->map(function ($item) use ($officeTime) {
-            $checkIn = Carbon::parse($item->check_in);
+        // $todayLateEmployees = $todayLateEmployees->map(function ($item) use ($officeTime) {
+        //     $checkIn = Carbon::parse($item->check_in);
 
-            $lateMinutes = $officeTime->diffInMinutes($checkIn);
+        //     $lateMinutes = $officeTime->diffInMinutes($checkIn);
 
-            $hours = floor($lateMinutes / 60);
-            $minutes = $lateMinutes % 60;
+        //     $hours = floor($lateMinutes / 60);
+        //     $minutes = $lateMinutes % 60;
 
-            if ($hours > 0) {
-                $item->late_duration = $hours . ' hr ' . $minutes . ' min';
-            } else {
-                $item->late_duration = $minutes . ' min';
-            }
+        //     if ($hours > 0) {
+        //         $item->late_duration = $hours . ' hr ' . $minutes . ' min';
+        //     } else {
+        //         $item->late_duration = $minutes . ' min';
+        //     }
 
-            return $item;
-        });
+        //     return $item;
+        // });
 
         return view('dashboard', compact(
             'totalEmployees',
@@ -350,7 +351,7 @@ class DashboardController extends Controller
         //     ->where('leave_applications.status', 'approved');
 
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
-        ->where('leave_applications.status', 'approved');
+        ->whereIn('leave_applications.status', ['approved', 'unauthorised']);
 
         if ($request->employee_id) {
             $query->where('employees.id', $request->employee_id);
@@ -412,6 +413,153 @@ class DashboardController extends Controller
             ->havingRaw("leave_count > 0")
             ->orderByDesc('leave_count')
             ->get();
+    }
+
+    // private function getLateEmployeesData()
+    // {
+    //     $range = request('late_range', 'today');
+    //     $employeeFilter = request('late_employee');
+
+    //     [$startDate, $endDate] = $this->getLateDateRange($range);
+
+    //     $officeTime = Carbon::createFromTime(9, 30, 0);
+
+    //     $lateRecords = Attendance::with('employee')
+    //         ->whereBetween('attendance_date', [$startDate, $endDate])
+    //         ->whereTime('check_in', '>', '09:30:00')
+    //         ->when($employeeFilter, function ($q) use ($employeeFilter) {
+    //             $q->where('employee_id', $employeeFilter);
+    //         })
+    //         ->get();
+
+    //     return $lateRecords->groupBy('employee_id')->map(function ($records) use ($officeTime) {
+
+    //         $totalLateMinutes = 0;
+
+    //         foreach ($records as $item) {
+    //             $checkIn = Carbon::parse($item->check_in);
+    //             $totalLateMinutes += $officeTime->diffInMinutes($checkIn);
+    //         }
+
+    //         $employee = $records->first()->employee;
+
+    //         $hours = floor($totalLateMinutes / 60);
+    //         $minutes = $totalLateMinutes % 60;
+
+    //         return [
+    //             'employee' => $employee,
+    //             'late_duration' => $hours > 0
+    //                 ? $hours . ' hr ' . $minutes . ' min'
+    //                 : $minutes . ' min'
+    //         ];
+    //     });
+    // }
+
+    private function getLateEmployeesData()
+    {
+        $range = request('late_range', 'today');
+        $employeeFilter = request('late_employee');
+
+        // [$startDate, $endDate] = $this->getLateDateRange($range);
+        [$displayStart, $endDate] = $this->getLateDateRange($range);
+
+        // Always calculate from earlier date (carry forward)
+        $startDate = Carbon::parse($displayStart)->copy()->startOfMonth();
+
+        $officeStart = Carbon::createFromTime(9, 30, 0);
+        $requiredWorkMinutes = 8 * 60 + 30; // 8h 30m = 510 mins
+
+        $records = Attendance::with('employee')
+            ->whereBetween('attendance_date', [$startDate, $endDate])
+            ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
+            ->orderBy('attendance_date') // VERY IMPORTANT
+            ->get()
+            ->groupBy('employee_id');
+
+        return $records->map(function ($employeeRecords) use ($officeStart, $requiredWorkMinutes) {
+
+            $balanceMinutes = 0; // +ve = extra, -ve = late
+
+            foreach ($employeeRecords as $item) {
+
+                if (!$item->check_in || !$item->check_out) {
+                    continue;
+                }
+
+                $checkIn = Carbon::parse($item->check_in);
+                $checkOut = Carbon::parse($item->check_out);
+
+                // ⏱ Late minutes
+                $lateMinutes = $checkIn->gt($officeStart)
+                    ? $officeStart->diffInMinutes($checkIn)
+                    : 0;
+
+                // ⏱ Worked minutes
+                // $workedMinutes = $checkIn->diffInMinutes($checkOut);
+
+                // ⏱ Extra time
+                // $extraMinutes = max(0, $workedMinutes - $requiredWorkMinutes);
+
+                $officeEnd = Carbon::createFromTime(18, 0, 0); // 6:00 PM
+
+                // Late minutes
+                $lateMinutes = $checkIn->gt($officeStart)
+                    ? $officeStart->diffInMinutes($checkIn)
+                    : 0;
+
+                // Extra minutes (ONLY after office end time)
+                $extraMinutes = $checkOut->gt($officeEnd)
+                    ? $officeEnd->diffInMinutes($checkOut)
+                    : 0;
+
+                // 🔥 Apply logic:
+                $balanceMinutes += $extraMinutes;   // add extra
+                $balanceMinutes -= $lateMinutes;    // subtract late
+
+                // ❗ If balance goes negative → means real late
+            }
+
+            $employee = $employeeRecords->first()->employee;
+
+            // Final late after adjustment
+            $finalLate = abs(min(0, $balanceMinutes)); // only negative part
+
+            // Format
+            $hours = floor($finalLate / 60);
+            $minutes = $finalLate % 60;
+
+            $lateDuration = $finalLate > 0
+                ? ($hours > 0 ? "$hours hr $minutes min" : "$minutes min")
+                : '0 min';
+
+            return [
+                'employee' => $employee,
+                'late_duration' => $lateDuration
+            ];
+        })
+        ->filter(fn($emp) => $emp['late_duration'] !== '0 min'); // hide zero late
+    }
+
+    private function getLateDateRange($range)
+    {
+        $today = Carbon::today();
+
+        switch ($range) {
+            case 'week':
+                return [$today->copy()->startOfWeek(), $today];
+
+            case 'month':
+                return [$today->copy()->startOfMonth(), $today];
+
+            case '3months':
+                return [$today->copy()->subMonths(3)->startOfMonth(), $today];
+
+            case 'year':
+                return [$today->copy()->startOfYear(), $today];
+
+            default:
+                return [$today, $today];
+        }
     }
 
     /**

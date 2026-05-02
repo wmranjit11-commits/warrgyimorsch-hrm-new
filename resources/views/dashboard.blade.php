@@ -282,7 +282,7 @@
                             </div>
                             <div class="card-body">
                                 @forelse($todayLeaveEmployees as $todayLeave)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3">
+                                    <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
                                         <div class="d-flex justify-content-between">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
@@ -304,6 +304,17 @@
                                         No employees on leave today.
                                     </div>
                                 @endforelse
+
+                                @if(count($todayLeaveEmployees) > 4)
+                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                        <a href="javascript:void(0);" id="prev-leave" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                            <i class="feather-chevron-left fs-20"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" id="next-leave" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                            <i class="feather-chevron-right fs-20"></i>
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                             <div class="card-footer d-none">
                                 <div class="row g-4">
@@ -352,7 +363,7 @@
                     <!-- [Late Arrivals] start -->
                     <div class="col-md-4">
                         <div class="card stretch stretch-full">
-                            <div class="card-header">
+                            <div class="card-header" style="padding: 20px;">
                                 <h5 class="card-title">Late Arrivals</h5>
                                 <div class="card-header-action">
                                     <!-- <div class="card-header-btn">
@@ -366,35 +377,37 @@
                                             <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"></a>
                                         </div> -->
                                         <!-- Filters (Below Heading, Above List) -->
-    <div class="d-flex gap-2" id="lateFilterContainerUnique">
+                                    <div class="d-flex gap-2" id="lateFilterContainerUnique">
 
-        <!-- Employee Filter -->
-        <select id="lateEmployeeFilter"
-                class="form-select form-select-sm"
-                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
-            <option value="">All</option>
-            @foreach($employees as $emp)
-                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-            @endforeach
-        </select>
+                                        <!-- Employee Filter -->
+                                        <select id="lateEmployeeFilter"
+                                                class="form-select form-select-sm"
+                                                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+                                            <option value="">All</option>
+                                            @foreach($employees as $emp)
+                                                <option value="{{ $emp->id }}" {{ request('late_employee') == $emp->id ? 'selected' : '' }}>
+                                                    {{ $emp->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
 
-        <!-- Time Filter -->
-        <select id="lateTimeFilter"
-                class="form-select form-select-sm"
-                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
-            <option value="today" selected>Today</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="3months">3 Months</option>
-            <option value="year">Year</option>
-        </select>
+                                        <!-- Time Filter -->
+                                        <select id="lateTimeFilter"
+                                                class="form-select form-select-sm"
+                                                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+                                            <option value="today" {{ request('late_range', 'today') == 'today' ? 'selected' : '' }}>Today</option>
+                                            <option value="week" {{ request('late_range') == 'week' ? 'selected' : '' }}>Week</option>
+                                            <option value="month" {{ request('late_range') == 'month' ? 'selected' : '' }}>Current Month</option>
+                                            <option value="3months" {{ request('late_range') == '3months' ? 'selected' : '' }}>3 Months</option>
+                                            <option value="year" {{ request('late_range') == 'year' ? 'selected' : '' }}>Year</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="card-body">
                                 @forelse($todayLateEmployees as $lateEmp)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3">
+                                    <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
                                                 <i class="bi bi-clock"></i>
@@ -414,6 +427,17 @@
                                         No late arrivals found.
                                     </div>
                                 @endforelse
+
+                                @if(count($todayLateEmployees) > 4)
+                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                        <a href="javascript:void(0);" id="prev-late" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                            <i class="feather-chevron-left fs-20"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" id="next-late" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                            <i class="feather-chevron-right fs-20"></i>
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -1154,6 +1178,90 @@
         url.searchParams.set('late_range', range);
 
         window.location.href = url.toString();
+    }
+
+    // Today Leave Slider
+    initSlider({
+        itemsSelector: '.leave-slide-item',
+        prevBtnId: 'prev-leave',
+        nextBtnId: 'next-leave',
+        totalItems: {{ count($todayLeaveEmployees) }}
+    });
+
+    // Late Arrivals Slider
+    initSlider({
+        itemsSelector: '.late-slide-item',
+        prevBtnId: 'prev-late',
+        nextBtnId: 'next-late',
+        totalItems: {{ count($todayLateEmployees) }}
+    });
+
+    function initSlider({
+        itemsSelector,
+        prevBtnId,
+        nextBtnId,
+        totalItems,
+        itemsPerPage = 4
+    }) {
+        let currentPage = 0;
+        const items = document.querySelectorAll(itemsSelector);
+        const prevBtn = document.getElementById(prevBtnId);
+        const nextBtn = document.getElementById(nextBtnId);
+
+        function updateView() {
+            items.forEach((item, index) => {
+                const start = currentPage * itemsPerPage;
+                const end = start + itemsPerPage;
+
+                if (index >= start && index < end) {
+                    item.classList.remove('d-none');
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+
+            // Prev Button
+            if (prevBtn) {
+                if (currentPage === 0) {
+                    prevBtn.classList.add('disabled');
+                    prevBtn.style.opacity = '0.5';
+                } else {
+                    prevBtn.classList.remove('disabled');
+                    prevBtn.style.opacity = '1';
+                }
+            }
+
+            // Next Button
+            if (nextBtn) {
+                if ((currentPage + 1) * itemsPerPage >= totalItems) {
+                    nextBtn.classList.add('disabled');
+                    nextBtn.style.opacity = '0.5';
+                } else {
+                    nextBtn.classList.remove('disabled');
+                    nextBtn.style.opacity = '1';
+                }
+            }
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if ((currentPage + 1) * itemsPerPage < totalItems) {
+                    currentPage++;
+                    updateView();
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    updateView();
+                }
+            });
+        }
+
+        updateView();
     }
     </script>
 @endpush
