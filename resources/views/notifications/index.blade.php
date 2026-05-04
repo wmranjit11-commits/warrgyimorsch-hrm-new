@@ -3,8 +3,8 @@
 @section('title', 'All Notifications')
 
 @section('content')
-<div class="nxl-content px-4">
-    <div class="page-header d-flex align-items-center justify-content-between mb-4 mt-3">
+<div class="main-content pt-4">
+    <div class="page-header d-flex align-items-center justify-content-between mb-4 mt-1">
         <div class="page-header-left d-flex align-items-center">
             <div class="page-header-icon bg-soft-primary text-primary me-3" style="width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                 <i class="feather-bell fs-5"></i>
