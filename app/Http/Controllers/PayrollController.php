@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\LeaveApplication;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 // use App\Imports\AttendanceImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -94,8 +95,14 @@ class PayrollController extends Controller
      */
     public function getAttendance(Request $request)
     {
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+        $roleSlug = auth()->user()->role;
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        // $role = strtoupper(auth()->user()->role ?? 'USER');
+         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
 
         $query = Attendance::with('employee');
 
@@ -583,43 +590,48 @@ class PayrollController extends Controller
         }
     }
 
-public function import(Request $request)
-{
-    try {
-        $validator = Validator::make($request->all(), [
-            'import_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
-        ]);
+    public function import(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'import_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+            ]);
 
-        if ($validator->fails()) {
-            return back()->with('error', $validator->errors()->first());
+            if ($validator->fails()) {
+                return back()->with('error', $validator->errors()->first());
+            }
+
+            $file = $request->file('import_file');
+
+            if (!$file || $file->getSize() == 0) {
+                return back()->with('error', 'Uploaded file is empty.');
+            }
+
+            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\AttendanceImport, $file);
+
+            return back()->with('success', 'Attendance imported successfully!');
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Attendance Import Controller Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->with('error', $e->getMessage());
         }
-
-        $file = $request->file('import_file');
-
-        if (!$file || $file->getSize() == 0) {
-            return back()->with('error', 'Uploaded file is empty.');
-        }
-
-        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\AttendanceImport, $file);
-
-        return back()->with('success', 'Attendance imported successfully!');
-
-    } catch (\Throwable $e) {
-        \Illuminate\Support\Facades\Log::error('Attendance Import Controller Error: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString(),
-        ]);
-
-        return back()->with('error', $e->getMessage());
     }
-}
 
     /**
      * Display payroll list
      */
     public function index(Request $request)
     {
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+        $roleSlug = auth()->user()->role;
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
 
         $query = Payroll::with('employee');
 
@@ -1322,8 +1334,13 @@ public function import(Request $request)
     {
         $payroll = Payroll::findOrFail($id);
 
+        $isAdmin = DB::table('roles_master')
+            ->where('slug', auth()->user()->role)
+            ->whereIn('id', [1, 2, 3, 4])
+            ->exists();
+
         // backend protection
-        if (strtolower(auth()->user()->role) !== 'employee') {
+        if ($isAdmin) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

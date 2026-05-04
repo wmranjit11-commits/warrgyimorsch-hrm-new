@@ -392,7 +392,62 @@
                                         </select>
 
                                         <!-- Time Filter -->
-                                        <select id="lateTimeFilter"
+                                        <div class="dropdown">
+    
+                                            <!-- Trigger Button -->
+                                            <button class="btn btn-light btn-sm dropdown-toggle"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown"
+                                                    style="width: 120px; height: 32px;">
+                                                {{ request('late_range', 'Today') }}
+                                            </button>
+
+                                            <!-- Dropdown Menu -->
+                                            <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
+
+                                                <!-- Normal Filters -->
+                                                <div id="normalFiltersLate">
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('today')">Today</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('yesterday')">Yesterday</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('week')">1 Week</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('month')">Current Month</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('last_month')">Last Month</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('3months')">3 Months</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('year')">1 Year</button>
+
+                                                    <div class="dropdown-divider"></div>
+
+                                                    <a href="javascript:void(0);"
+                                                    class="dropdown-item text-primary fw-bold"
+                                                    onclick="event.stopPropagation(); showLateCustomFilter()">
+                                                        Custom Range →
+                                                    </a>
+                                                </div>
+
+                                                <!-- Custom Form -->
+                                                <div id="customFilterBoxLate" style="display:none;" onclick="event.stopPropagation();">
+                                                    <label class="form-label small mb-1">From</label>
+                                                    <input type="date" id="late_from"
+                                                        class="form-control form-control-sm mb-2"
+                                                        value="{{ request('late_custom_start') }}">
+
+                                                    <label class="form-label small mb-1">To</label>
+                                                    <input type="date" id="late_to"
+                                                        class="form-control form-control-sm mb-2"
+                                                        value="{{ request('late_custom_end') }}">
+
+                                                    <button type="button" class="btn btn-sm btn-primary w-100 mb-2"
+                                                            onclick="applyLateCustomFilter()">
+                                                        Apply
+                                                    </button>
+
+                                                    <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                    onclick="hideLateCustomFilter()">← Back</a>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <!-- <select id="lateTimeFilter"
                                                 class="form-select form-select-sm"
                                                 style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
                                             <option value="today" {{ request('late_range', 'today') == 'today' ? 'selected' : '' }}>Today</option>
@@ -400,7 +455,7 @@
                                             <option value="month" {{ request('late_range') == 'month' ? 'selected' : '' }}>Current Month</option>
                                             <option value="3months" {{ request('late_range') == '3months' ? 'selected' : '' }}>3 Months</option>
                                             <option value="year" {{ request('late_range') == 'year' ? 'selected' : '' }}>Year</option>
-                                        </select>
+                                        </select> -->
                                     </div>
                                 </div>
                             </div>
@@ -1257,6 +1312,44 @@
         }
 
         updateView();
+    }
+
+
+    document.getElementById('lateEmployeeFilter')?.addEventListener('change', function () {
+        applyLateRange(new URL(window.location.href).searchParams.get('late_range') || 'today');
+    });
+    function applyLateRange(range) {
+        let url = new URL(window.location.href);
+
+        url.searchParams.set('late_range', range);
+
+        const emp = document.getElementById('lateEmployeeFilter')?.value;
+        if (emp) url.searchParams.set('late_employee', emp);
+
+        window.location.href = url.toString();
+    }
+
+    function applyLateCustomFilter() {
+        let url = new URL(window.location.href);
+
+        url.searchParams.set('late_range', 'custom');
+        url.searchParams.set('late_custom_start', document.getElementById('late_from').value);
+        url.searchParams.set('late_custom_end', document.getElementById('late_to').value);
+
+        const emp = document.getElementById('lateEmployeeFilter')?.value;
+        if (emp) url.searchParams.set('late_employee', emp);
+
+        window.location.href = url.toString();
+    }
+
+    function showLateCustomFilter() {
+        document.getElementById('normalFiltersLate').style.display = 'none';
+        document.getElementById('customFilterBoxLate').style.display = 'block';
+    }
+
+    function hideLateCustomFilter() {
+        document.getElementById('normalFiltersLate').style.display = 'block';
+        document.getElementById('customFilterBoxLate').style.display = 'none';
     }
     </script>
 @endpush

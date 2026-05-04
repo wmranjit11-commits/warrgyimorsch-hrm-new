@@ -88,8 +88,6 @@
         .dropdown-menu {
             z-index: 9999999 !important;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
-            position: fixed !important;
-            /* Force popover behavior if boundary is set */
         }
 
         .table-responsive {

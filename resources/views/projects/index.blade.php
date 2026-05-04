@@ -242,12 +242,12 @@
                                                 <div class="hstack gap-4">
                                                     <div class="avatar-image border-0 position-relative">
                                                         <!-- Premium SVG Circular Progress - 1:1 Design Parity -->
-                                                        <!-- <div class="progress-ring-wrapper" style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                                        <div class="progress-ring-wrapper" style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
                                                             @php $progressVal = $project->progress; @endphp
                                                             <svg width="60" height="60" viewBox="0 0 100 100" style="position: absolute; transform: rotate(-90deg);">
-                                                                Background Track
+                                                                <!-- Background Track -->
                                                                 <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="10"></circle>
-                                                                Progress Bar
+                                                                <!-- Progress Bar -->
                                                                 <circle cx="50" cy="50" r="42" fill="none" stroke="#1d4ed8" stroke-width="10" 
                                                                     stroke-dasharray="263.89" 
                                                                     stroke-dashoffset="{{ 263.89 * (1 - $progressVal / 100) }}"
@@ -257,44 +257,6 @@
                                                             <div class="avatar-text bg-white text-primary rounded-circle shadow-sm" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; z-index: 1; border: 1px solid rgba(0,0,0,0.05);">
                                                                 <i class="feather-briefcase fs-18"></i>
                                                             </div>
-                                                        </div> -->
-                                                        <div class="progress-ring-wrapper"
-                                                            style="position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-
-                                                            @php
-        $radius = 35;
-        $stroke = 8;
-        $normalizedRadius = $radius;
-        $circumference = 2 * pi() * $normalizedRadius;
-        $progressVal = 65;
-        $offset = $circumference - ($progressVal / 100 * $circumference);
-    @endphp
-
-                                                            <svg width="80" height="80" viewBox="0 0 100 100"
-                                                                style="transform: rotate(-90deg);">
-
-                                                                <!-- Background -->
-                                                                <circle cx="50" cy="50" r="{{ $radius }}"
-                                                                        fill="none"
-                                                                        stroke="#e2e8f0"
-                                                                        stroke-width="8"/>
-
-                                                                <!-- Progress -->
-                                                                <circle cx="50" cy="50" r="{{ $radius }}"
-                                                                        fill="none"
-                                                                        stroke="#2563eb"
-                                                                        stroke-width="8"
-                                                                        stroke-dasharray="{{ $circumference }}"
-                                                                        stroke-dashoffset="{{ $offset }}"
-                                                                        stroke-linecap="round"/>
-                                                            </svg>
-
-                                                            <!-- Center Icon -->
-                                                            <div class="position-absolute d-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm"
-                                                                style="width: 45px; height: 45px;">
-                                                                <i class="feather-briefcase text-primary"></i>
-                                                            </div>
-
                                                         </div>
                                                     </div>
                                                     <div class="project-info-wrapper">

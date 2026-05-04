@@ -38,8 +38,15 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-         $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+        // $role = strtoupper(auth()->user()->role ?? 'USER');
+        //  $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
         $employeeId = auth()->user()->employee_id;
 
         $today = Carbon::today()->toDateString();
@@ -139,20 +146,45 @@ class DashboardController extends Controller
 
             $analytics = $this->getAttendanceAnalytics($from, $to);
 
-            $rangePresent = (int) ($analytics->present_count ?? 0);
-            $rangeWFH     = (int) ($analytics->wfh_count ?? 0);
-            $rangeLeave   = (int) ($analytics->leave_count ?? 0);
-            $rangeLate    = (int) ($analytics->late_count ?? 0);
-            $rangeEarly   = (int) ($analytics->early_count ?? 0);
-            $rangeAbsent  = (int) ($analytics->absent_count ?? 0);
-            $rangeHalfday = (int) ($analytics->halfDay_count ?? 0);
+            // $rangePresent = (int) ($analytics->present_count ?? 0);
+            // $rangeWFH     = (int) ($analytics->wfh_count ?? 0);
+            // $rangeLeave   = (int) ($analytics->leave_count ?? 0);
+            // $rangeLate    = (int) ($analytics->late_count ?? 0);
+            // $rangeEarly   = (int) ($analytics->early_count ?? 0);
+            // $rangeAbsent  = (int) ($analytics->absent_count ?? 0);
+            // $rangeHalfday = (int) ($analytics->halfDay_count ?? 0);
 
-            $rangeCheckedIn = $rangePresent;
+            // $rangeCheckedIn = $rangePresent;
+            // $days = Carbon::parse($from)->diffInDays(Carbon::parse($to)) + 1;
+            // $denominator = $totalEmployees * $days;
+
+            // $rangeAttendanceRate = ($denominator > 0)
+            //     ? number_format(($rangeCheckedIn / $denominator) * 100, 2)
+            //     : 0;
+
             $days = Carbon::parse($from)->diffInDays(Carbon::parse($to)) + 1;
-            $denominator = $totalEmployees * $days;
 
-            $rangeAttendanceRate = ($denominator > 0)
-                ? number_format(($rangeCheckedIn / $denominator) * 100, 2)
+            // Raw totals
+            $totalPresent = (int) ($analytics->present_count ?? 0);
+            $totalWFH     = (int) ($analytics->wfh_count ?? 0);
+            $totalLeave   = (int) ($analytics->leave_count ?? 0);
+            $totalLate    = (int) ($analytics->late_count ?? 0);
+            $totalEarly   = (int) ($analytics->early_count ?? 0);
+            $totalAbsent  = (int) ($analytics->absent_count ?? 0);
+            $totalHalfday = (int) ($analytics->halfDay_count ?? 0);
+
+            // Convert to average per day
+            $rangePresent = $days > 0 ? round($totalPresent / $days) : 0;
+            $rangeWFH     = $days > 0 ? round($totalWFH / $days) : 0;
+            $rangeLeave   = $days > 0 ? round($totalLeave / $days) : 0;
+            $rangeLate    = $days > 0 ? round($totalLate / $days) : 0;
+            $rangeEarly   = $days > 0 ? round($totalEarly / $days) : 0;
+            $rangeAbsent  = $days > 0 ? round($totalAbsent / $days) : 0;
+            $rangeHalfday = $days > 0 ? round($totalHalfday / $days) : 0;
+
+            // Attendance rate (average based)
+            $rangeAttendanceRate = ($totalEmployees > 0)
+                ? number_format(($rangePresent / $totalEmployees) * 100, 2)
                 : 0;
         } else {
             $rangePresent = 0;
@@ -464,7 +496,8 @@ class DashboardController extends Controller
         [$displayStart, $endDate] = $this->getLateDateRange($range);
 
         // Always calculate from earlier date (carry forward)
-        $startDate = Carbon::parse($displayStart)->copy()->startOfMonth();
+        // $startDate = Carbon::parse($displayStart)->copy()->startOfMonth();
+        $startDate = $displayStart;
 
         $officeStart = Carbon::createFromTime(9, 30, 0);
         $requiredWorkMinutes = 8 * 60 + 30; // 8h 30m = 510 mins
@@ -489,34 +522,25 @@ class DashboardController extends Controller
                 $checkIn = Carbon::parse($item->check_in);
                 $checkOut = Carbon::parse($item->check_out);
 
-                // ⏱ Late minutes
-                $lateMinutes = $checkIn->gt($officeStart)
-                    ? $officeStart->diffInMinutes($checkIn)
-                    : 0;
+                $officeEnd = Carbon::createFromTime(18, 0, 0);
 
-                // ⏱ Worked minutes
-                // $workedMinutes = $checkIn->diffInMinutes($checkOut);
+                // Total worked minutes
+                $workedMinutes = $checkIn->diffInMinutes($checkOut);
 
-                // ⏱ Extra time
-                // $extraMinutes = max(0, $workedMinutes - $requiredWorkMinutes);
+                // Required (8h 30m)
+                $requiredWorkMinutes = 510;
 
-                $officeEnd = Carbon::createFromTime(18, 0, 0); // 6:00 PM
-
-                // Late minutes
-                $lateMinutes = $checkIn->gt($officeStart)
-                    ? $officeStart->diffInMinutes($checkIn)
-                    : 0;
-
-                // Extra minutes (ONLY after office end time)
+                // Extra minutes (only after 6 PM)
                 $extraMinutes = $checkOut->gt($officeEnd)
                     ? $officeEnd->diffInMinutes($checkOut)
                     : 0;
 
-                // 🔥 Apply logic:
-                $balanceMinutes += $extraMinutes;   // add extra
-                $balanceMinutes -= $lateMinutes;    // subtract late
+                // Final deficit
+                $deficitMinutes = max(0, $requiredWorkMinutes - $workedMinutes);
 
-                // ❗ If balance goes negative → means real late
+                // FINAL LOGIC
+                $balanceMinutes += $extraMinutes;
+                $balanceMinutes -= $deficitMinutes;
             }
 
             $employee = $employeeRecords->first()->employee;
@@ -545,17 +569,37 @@ class DashboardController extends Controller
         $today = Carbon::today();
 
         switch ($range) {
+            case 'yesterday':
+                return [
+                    $today->copy()->subDay(),
+                    $today->copy()->subDay()
+                ];
             case 'week':
                 return [$today->copy()->startOfWeek(), $today];
 
             case 'month':
                 return [$today->copy()->startOfMonth(), $today];
 
+            case 'last_month':
+                return [
+                    $today->copy()->subMonth()->startOfMonth(),
+                    $today->copy()->subMonth()->endOfMonth()
+                ];
+
             case '3months':
                 return [$today->copy()->subMonths(3)->startOfMonth(), $today];
 
             case 'year':
                 return [$today->copy()->startOfYear(), $today];
+
+            case 'custom':
+                $start = request('late_custom_start');
+                $end = request('late_custom_end');
+
+                return [
+                    $start ? Carbon::parse($start) : $today,
+                    $end ? Carbon::parse($end) : $today
+                ];
 
             default:
                 return [$today, $today];
