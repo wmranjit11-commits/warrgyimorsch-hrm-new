@@ -60,7 +60,6 @@
                             style="border-radius: 12px; background: white; overflow: hidden;">
                             <div class="card-header bg-white border-bottom px-4 py-3">
                                 <h6 class="fw-bold mb-0 text-dark">Salary Components</h6>
-                               <div id="overtime_box" style="color: #3554ea;font-weight: 600;}"></div>
                             </div>
                             <div class="card-body p-4">
                                 <div class="row g-4">
@@ -150,6 +149,8 @@
                                                 </tbody>
                                             </table>
                                         </div>
+                                        <div id="overtime_box" style="color: #3554ea;font-weight: 600;"></div>
+
                                     </div>
                                 </div>
                             </div>
@@ -340,6 +341,7 @@
         .then(data => {
             if (data.success) {
                 currentPayrollData = data.payroll;
+                // console.log(data.payroll);
                 displayPayrollData(data.payroll);
 
                 noCalc.style.display = 'none';
@@ -362,12 +364,15 @@
     // DISPLAY DATA
     // =========================
     function displayPayrollData(p) {
-
         const formattedMonth = new Date(p.month + '-01').toLocaleString('en-IN', {
             month: 'short',
             year: 'numeric'
         });
 
+        console.log('PAYROLL RESPONSE:', p);
+        console.log('OT Hours:', p.overtime_hours);
+        console.log('OT Days:', p.overtime_days);
+        
         document.getElementById('resultMonth').textContent = formattedMonth;
 
         // ✅ Only set if NOT manually edited
@@ -391,10 +396,31 @@
         document.getElementById('inputPF').value = p.pf_deduction;
         document.getElementById('inputESI').value = p.esi_deduction;
         document.getElementById('inputOther').value = p.other_deduction || 0;
-        document.getElementById('overtime_box').innerHTML =
-        p.emp_name + " worked " +
-        p.overtime_hours + " hrs (" +
-        p.overtime_days + " days) extra this month";
+        
+        const overtimeBox = document.getElementById('overtime_box');
+
+        if (overtimeBox) {
+            const otHours = Number(p.overtime_hours || 0);
+            const otDays = Number(p.overtime_days || 0);
+
+            overtimeBox.style.display = 'block';
+
+            if (otHours > 0) {
+                overtimeBox.innerHTML = `
+                    <div class="alert alert-info mb-3">
+                        <strong>${p.emp_name}</strong> worked 
+                        <strong>${otHours}</strong> hrs 
+                        (<strong>${otDays}</strong> days) extra this month
+                    </div>
+                `;
+            } else {
+                overtimeBox.innerHTML = `
+                    <div class="alert alert-secondary mb-3">
+                        No overtime this month
+                    </div>
+                `;
+            }
+        }
       
         recalculate();
     }

@@ -45,10 +45,12 @@
                         <i class="feather-filter"></i>
                     </a>
 
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportAttendance()" title="Export Data">
-                        <i class="feather-download"></i>
-                    </a>
-
+                    <a href="javascript:void(0);" 
+                        class="avatar-text avatar-md bg-soft-info text-info" 
+                        onclick="exportAttendance()" 
+                        title="Export Data">
+                            <i class="feather-download"></i>
+                        </a>
                     <a href="{{ route('payroll.attendance.add') }}" class="avatar-text avatar-md bg-primary text-white" title="Add Attendance">
                         <i class="feather-plus"></i>
                     </a>
@@ -429,7 +431,15 @@
     function exportAttendance() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
-        window.location.href = '{{ route("payroll.attendance.export") }}?start_date=' + start + '&end_date=' + end;
+
+        if (!start || !end) {
+            alert('Please select both dates');
+            return;
+        }
+
+        window.location.href = "{{ route('payroll.attendance.export') }}" 
+            + "?start_date=" + start 
+            + "&end_date=" + end;
     }
 </script>
 
