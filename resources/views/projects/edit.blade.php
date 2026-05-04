@@ -22,7 +22,7 @@
         <div class="col-lg-12">
             <div class="card border-top-0">
                 <div class="card-body p-0">
-                    <form id="project-edit-form" action="{{ route('projects.update', $project->id) }}" method="POST">
+                    <form id="project-edit-form" action="{{ route('projects.update', $project) }}" method="POST">
                         @csrf
                         @method('PUT')
                         
@@ -101,42 +101,43 @@
                                 <div class="mb-5"><h2 class="fs-16 fw-bold">Project details</h2></div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Project Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="name" value="{{ $project->name }}" style="border-radius: 8px; height: 46px;" required>
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control premium-input" name="name" value="{{ $project->name }}" placeholder="Enter project name..." required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                         <label class="form-label">Technology</label>
-                                         <input type="text" class="form-control" name="technology" value="{{ $project->technology }}" style="border-radius: 8px; height: 46px;">
+                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Technology</label>
+                                         <input type="text" class="form-control premium-input" name="technology" value="{{ $project->technology }}" placeholder="e.g. PHP, Laravel, React">
                                      </div>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold fs-12 text-muted text-uppercase">Description</label>
                                     <textarea name="description" id="projectDescriptionEditor" style="display:none;">{!! $project->description !!}</textarea>
                                     <textarea id="summernote-main" class="form-control" style="min-height: 250px;">{!! $project->description !!}</textarea>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Start Date <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" name="start_date" value="{{ $project->start_date ? $project->start_date->format('Y-m-d') : '' }}" required>
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Start Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control premium-input" name="start_date" value="{{ $project->start_date ? $project->start_date->format('Y-m-d') : '' }}" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">End Date</label>
-                                        <input type="date" class="form-control" name="end_date" value="{{ $project->end_date ? $project->end_date->format('Y-m-d') : '' }}">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">End Date</label>
+                                        <input type="date" class="form-control premium-input" name="end_date" value="{{ $project->end_date ? $project->end_date->format('Y-m-d') : '' }}" onclick="this.showPicker()">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                         <label class="form-label">Department <span class="text-danger">*</span></label>
-                                         <select class="form-select" name="department" required>
-                                             <option value="">Select Department</option>
+                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Department <span class="text-danger">*</span></label>
+                                         <select class="form-select premium-select" name="department" data-placeholder="Select Department" required>
+                                             <option value=""></option>
                                              @foreach($departments as $dept)
                                                  <option value="{{ $dept->name }}" {{ $project->department == $dept->name ? 'selected' : '' }}>{{ $dept->name }}</option>
                                              @endforeach
                                          </select>
                                      </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select" name="status">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Status</label>
+                                        <select class="form-select premium-select" name="status" data-placeholder="Select Status">
+                                            <option value=""></option>
                                             @php
                                                 $statusMap = [
                                                     'Not Started' => 'Pending',
@@ -166,21 +167,21 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-bold">Project Leads</label>
-                                        <select class="form-select select2-multiple" name="leaders[]" multiple="multiple" style="width: 100%;">
-                                            @foreach($employees as $emp)
-                                                <option value="{{ $emp->id }}" {{ is_array($project->leaders) && in_array($emp->id, $project->leaders) ? 'selected' : '' }}>{{ $emp->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-bold">Team Members</label>
-                                        <select class="form-select select2-multiple" name="members[]" multiple="multiple" style="width: 100%;">
-                                            @foreach($employees as $emp)
-                                                <option value="{{ $emp->id }}" {{ is_array($project->members) && in_array($emp->id, $project->members) ? 'selected' : '' }}>{{ $emp->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Leads <span class="text-danger">*</span></label>
+                                         <select class="form-select premium-select" name="leaders[]" multiple="multiple" data-placeholder="Select Project Leads..." required>
+                                             @foreach($employees as $emp)
+                                                 <option value="{{ $emp->id }}" {{ is_array($project->leaders) && in_array($emp->id, $project->leaders) ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                             @endforeach
+                                         </select>
+                                     </div>
+                                     <div class="col-md-6 mb-4">
+                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Team Members</label>
+                                         <select class="form-select premium-select" name="members[]" multiple="multiple" data-placeholder="Select Team Members...">
+                                             @foreach($employees as $emp)
+                                                 <option value="{{ $emp->id }}" {{ is_array($project->members) && in_array($emp->id, $project->members) ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                             @endforeach
+                                         </select>
+                                     </div>
                                 </div>
                             </section>
 
@@ -218,11 +219,73 @@
     .wizard > .actions { padding: 20px 50px !important; background: #fff !important; border-top: 1px solid #e2e8f0 !important; }
     .wizard > .actions ul { display: flex !important; justify-content: flex-end !important; gap: 10px !important; list-style: none !important; }
     .wizard > .actions a { display: block !important; padding: 10px 25px !important; background: #3454d1 !important; color: #fff !important; border-radius: 4px !important; text-decoration: none !important; }
-    /* Card Input Radio styling */
-    .card-input-element { display: none; }
-    .card-input-element:checked + .card { border-color: #3454d1 !important; background-color: rgba(52, 84, 209, 0.05) !important; border-width: 2px !important; }
-    /* Select2 */
-    .select2-container--default .select2-selection--multiple { border: 1px solid #e2e8f0 !important; border-radius: 8px !important; padding: 8px !important; min-height: 48px !important; }
+    /* Premium Input Styling */
+    .premium-input, .premium-select {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        height: 48px !important;
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease !important;
+    }
+    .premium-input:focus {
+        background-color: #fff !important;
+        border-color: #3454d1 !important;
+        box-shadow: 0 0 0 4px rgba(52, 84, 209, 0.1) !important;
+    }
+
+    /* Select2 Premium Overrides */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        min-height: 48px !important;
+        padding: 6px 12px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .select2-container--default .select2-selection--multiple {
+        padding: 4px 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1e293b !important;
+        font-weight: 500 !important;
+        padding-left: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        background-color: #fff !important;
+        border-color: #3454d1 !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background-color: #3454d1 !important;
+        border: none !important;
+        color: #fff !important;
+        border-radius: 6px !important;
+        padding: 4px 10px !important;
+        margin-top: 2px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin-right: 8px !important;
+        border: none !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #fff !important;
+        background: transparent !important;
+    }
+    
+    .select2-search__field::placeholder { color: #94a3b8 !important; }
 </style>
 @endsection
 
@@ -252,12 +315,13 @@
 
                 // Initialize Select2
                 if ($.fn.select2) {
-                    $('.select2-multiple').select2({
-                        width: '100%',
-                        placeholder: "Select...",
-                        closeOnSelect: false,
-                        allowClear: true,
-                        dropdownParent: $('#project-edit-wizard')
+                    $('.premium-select').each(function() {
+                        $(this).select2({
+                            width: '100%',
+                            placeholder: $(this).data('placeholder'),
+                            allowClear: true,
+                            dropdownParent: $(this).parent()
+                        });
                     });
                 }
             },
@@ -271,11 +335,11 @@
                     var startDate = $('input[name="start_date"]').val();
                     var desc = $('#summernote-main').summernote('code');
 
-                    if (!name || !dept || !startDate || desc === '<p><br></p>' || desc === '') {
+                    if (!name || !dept || !startDate) {
                         if (typeof Toast !== 'undefined') {
-                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Department and Start Date.' });
+                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Name, Department and Start Date.' });
                         } else {
-                            alert('Please fill all mandatory fields including Department and Start Date.');
+                            alert('Please fill all mandatory fields including Name, Department and Start Date.');
                         }
                         return false;
                     }

@@ -830,18 +830,41 @@
         });
 
         function deleteApplication(id) {
-            if (confirm('Sure?')) {
-                fetch(`/leave/application/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        window.location.reload();
-                    });
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3858f9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-primary px-4',
+                    cancelButton: 'btn btn-light-brand px-4 me-3'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/leave/application/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (typeof Toast !== 'undefined') {
+                                Toast.fire({
+                                    icon: 'success',
+                                    title: 'Application deleted'
+                                });
+                            }
+                            setTimeout(() => window.location.reload(), 1000);
+                        });
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {

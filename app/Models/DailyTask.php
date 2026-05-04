@@ -56,4 +56,17 @@ class DailyTask extends Model
             return $total;
         }, 0);
     }
+
+    public function getStatusColorAttribute()
+    {
+        return match ($this->status) {
+            'Pending' => 'bg-soft-pending text-pending',
+            'In Process' => 'bg-soft-process text-process',
+            'Completed' => 'bg-soft-completed text-completed',
+            'On Hold' => 'bg-soft-hold text-hold',
+            'Review' => 'bg-soft-review text-review',
+            'Rework' => 'bg-soft-rework text-rework',
+            default => 'bg-soft-secondary text-secondary',
+        };
+    }
 }

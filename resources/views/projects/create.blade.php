@@ -107,43 +107,44 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Project Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control shadow-none" id="projectName"
-                                            placeholder="e.g. Website development" style="border-radius: 8px; height: 46px;" required>
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control premium-input shadow-none" id="projectName"
+                                            placeholder="e.g. Website development" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Technology</label>
-                                        <input type="text" class="form-control shadow-none" id="projectTechnology"
-                                            placeholder="e.g. PHP, Laravel, React" style="border-radius: 8px; height: 46px;">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Technology</label>
+                                        <input type="text" class="form-control premium-input shadow-none" id="projectTechnology"
+                                            placeholder="e.g. PHP, Laravel, React">
                                     </div>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="form-label">Project Description <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Description</label>
                                     <textarea id="summernote-main" class="form-control" style="min-height: 200px; border-radius: 8px;"></textarea>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Start Date <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control shadow-none" id="projectStartDate" style="border-radius: 8px; height: 46px;" required>
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Start Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control premium-input shadow-none" id="projectStartDate" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">End Date</label>
-                                        <input type="date" class="form-control shadow-none" id="projectEndDate" style="border-radius: 8px; height: 46px;">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">End Date</label>
+                                        <input type="date" class="form-control premium-input shadow-none" id="projectEndDate" onclick="this.showPicker()">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Department <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="projectDepartment" required>
-                                            <option value="">Select Department</option>
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select premium-select" id="projectDepartment" data-placeholder="Select Department" required>
+                                            <option value=""></option>
                                             @foreach($departments as $dept)
                                                 <option value="{{ $dept->name }}">{{ $dept->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select" id="projectStatus">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Status</label>
+                                        <select class="form-select premium-select" id="projectStatus" data-placeholder="Select Status">
+                                            <option value=""></option>
                                             <option value="Pending">Pending</option>
                                             <option value="In Process">In Process</option>
                                             <option value="Completed">Completed</option>
@@ -164,16 +165,16 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-bold">Project Leads</label>
-                                        <select class="form-select select2-multiple" id="projectLeaders" multiple="multiple" data-placeholder="Select Leads...">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Leads <span class="text-danger">*</span></label>
+                                        <select class="form-select premium-select" id="projectLeaders" multiple="multiple" data-placeholder="Select Leads..." required>
                                             @foreach($employees as $emp)
                                                 <option value="{{ $emp->id }}">{{ $emp->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label fw-bold">Team Members</label>
-                                        <select class="form-select select2-multiple" id="projectMembers" multiple="multiple" data-placeholder="Select Members...">
+                                        <label class="form-label fw-bold fs-12 text-muted text-uppercase">Team Members</label>
+                                        <select class="form-select premium-select" id="projectMembers" multiple="multiple" data-placeholder="Select Members...">
                                             @foreach($employees as $emp)
                                                 <option value="{{ $emp->id }}">{{ $emp->name }}</option>
                                             @endforeach
@@ -307,17 +308,85 @@
             border-width: 2px !important;
         }
 
-        .avatar-text {
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-            border-radius: 10px;
-            color: #3454d1;
-        }
-    </style>
+    /* Premium Input Styling */
+    .premium-input, .premium-select {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        height: 48px !important;
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        transition: all 0.2s ease !important;
+    }
+    .premium-input:focus {
+        background-color: #fff !important;
+        border-color: #3454d1 !important;
+        box-shadow: 0 0 0 4px rgba(52, 84, 209, 0.1) !important;
+    }
+
+    /* Select2 Premium Overrides */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        min-height: 48px !important;
+        padding: 6px 12px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .select2-container--default .select2-selection--multiple {
+        padding: 4px 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1e293b !important;
+        font-weight: 500 !important;
+        padding-left: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 12px !important;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        background-color: #fff !important;
+        border-color: #3454d1 !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background-color: #3454d1 !important;
+        border: none !important;
+        color: #fff !important;
+        border-radius: 6px !important;
+        padding: 4px 10px !important;
+        margin-top: 2px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin-right: 8px !important;
+        border: none !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #fff !important;
+        background: transparent !important;
+    }
+    
+    .select2-search__field::placeholder { color: #94a3b8 !important; }
+
+    .avatar-text {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border-radius: 10px;
+        color: #3454d1;
+    }
+</style>
 @endsection
 
 @push('scripts')
@@ -355,11 +424,13 @@
 
                     // Initialize Select2
                     if ($.fn.select2) {
-                        $('.select2-multiple').select2({
-                            width: '100%',
-                            placeholder: $(this).data('placeholder'),
-                            closeOnSelect: false,
-                            allowClear: true
+                        $('.premium-select').each(function() {
+                            $(this).select2({
+                                width: '100%',
+                                placeholder: $(this).data('placeholder'),
+                                allowClear: true,
+                                dropdownParent: $(this).parent()
+                            });
                         });
                     }
                 },
@@ -367,14 +438,26 @@
                     // Always allow going back
                     if (currentIndex > newIndex) return true;
 
+                    // Clear previous errors
+                    $('.form-control, .form-select, .note-editor').removeClass('is-invalid');
+                    $('.invalid-feedback').remove();
+
                     // Validation for Step 1: Type & Manage
                     if (currentIndex === 0) {
                         var type = $('input[name="type"]:checked').val();
                         var manage = $('input[name="manage"]:checked').val();
-                        if (!type || !manage) {
-                            Toast.fire({ icon: 'error', title: 'Please select project type and management access.' });
-                            return false;
+                        var hasError = false;
+
+                        if (!type) {
+                            $('[for="project_personal"]').parent().after('<div class="invalid-feedback d-block fw-bold mt-2" style="font-size: 11px; margin-left: 5px;">Please select project type.</div>');
+                            hasError = true;
                         }
+                        if (!manage) {
+                            $('[for="project_everyone"]').parent().after('<div class="invalid-feedback d-block fw-bold mt-2" style="font-size: 11px; margin-left: 5px;">Please select management access.</div>');
+                            hasError = true;
+                        }
+                        
+                        if (hasError) return false;
                     }
 
                     // Validation for Step 2: Details
@@ -383,18 +466,30 @@
                         var dept = $('#projectDepartment').val();
                         var desc = $('#summernote-main').summernote('code');
                         var startDate = $('#projectStartDate').val();
+                        var hasError = false;
 
-                        if (!name || !dept || !startDate || desc === '<p><br></p>' || desc === '') {
-                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Department and Start Date.' });
-                            return false;
+                        if (!name) {
+                            $('#projectName').addClass('is-invalid').after('<div class="invalid-feedback fw-bold" style="font-size: 11px;">Project name is required.</div>');
+                            hasError = true;
                         }
+                        if (!startDate) {
+                            $('#projectStartDate').addClass('is-invalid').after('<div class="invalid-feedback fw-bold" style="font-size: 11px;">Start date is required.</div>');
+                            hasError = true;
+                        }
+                        if (!dept) {
+                            $('#projectDepartment').addClass('is-invalid');
+                            $('#projectDepartment').parent().append('<div class="invalid-feedback d-block fw-bold" style="font-size: 11px;">Department is required.</div>');
+                            hasError = true;
+                        }
+
+                        if (hasError) return false;
                     }
 
                     // Validation for Step 3: Assigned
                     if (currentIndex === 2) {
                         var leaders = $('#projectLeaders').val();
                         if (!leaders || leaders.length === 0) {
-                            Toast.fire({ icon: 'error', title: 'Please select at least one Project Lead.' });
+                            $('#projectLeaders').parent().append('<div class="invalid-feedback d-block fw-bold" style="font-size: 11px;">Please select at least one Project Lead.</div>');
                             return false;
                         }
                     }

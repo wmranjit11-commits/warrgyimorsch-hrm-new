@@ -18,7 +18,7 @@
         <div class="page-header-right ms-auto">
             <div class="page-header-right-items">
                 <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
-                    <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-primary">
+                    <a href="{{ route('projects.edit', $project) }}" class="btn btn-primary">
                         <i class="feather-edit-3 me-2"></i>
                         <span>Edit Project</span>
                     </a>
@@ -94,7 +94,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-4 mt-md-0 d-flex gap-2">
-                                        <a href="{{ route('projects.edit', $project->id) }}"
+                                        <a href="{{ route('projects.edit', $project) }}"
                                             class="btn btn-light-brand border shadow-sm px-4">
                                             <i class="feather-edit-3 me-2"></i><span>Edit</span>
                                         </a>
@@ -108,28 +108,7 @@
                     </div>
 
                     @php
-                        $startDate = $project->start_date;
-                        $endDate = $project->end_date;
-                        $today = now();
-                        $progress = 0;
-
-                        if ($startDate && $endDate) {
-                            $totalDuration = $startDate->diffInDays($endDate);
-                            $elapsedDuration = $startDate->diffInDays($today);
-
-                            if ($today < $startDate) {
-                                $progress = 0;
-                            } elseif ($today > $endDate) {
-                                $progress = 100;
-                            } else {
-                                $progress = $totalDuration > 0 ? round(($elapsedDuration / $totalDuration) * 100) : 0;
-                            }
-                        } elseif ($startDate && !$endDate) {
-                            $progress = 50; // Default if no end date
-                        }
-
-                        if ($project->status == 'Finished' || $project->status == 'Completed')
-                            $progress = 100;
+                        $progress = $project->progress;
                     @endphp
 
                     <div class="col-xl-12">
@@ -250,73 +229,162 @@
                 <style>
                     .activity-description ul {
                         list-style-type: disc !important;
-                        padding-left: 25px !important;
+                        padding-left: 20px !important;
                         margin-bottom: 10px !important;
                         display: block !important;
                     }
 
                     .activity-description ol {
                         list-style-type: decimal !important;
-                        padding-left: 25px !important;
+                        padding-left: 20px !important;
                         margin-bottom: 10px !important;
                         display: block !important;
                     }
 
                     .activity-description li {
-                        display: list-item !important;
-                        margin-bottom: 5px !important;
-                        list-style-type: inherit !important;
+                        margin-bottom: 6px !important;
+                        list-style-position: inside !important;
+                    }
+
+                    .activity-description ol, .activity-description ul {
+                        padding-left: 15px !important;
+                        margin-bottom: 10px !important;
                     }
 
                     .activity-description p {
-                        margin-bottom: 10px !important;
+                        margin-bottom: 8px !important;
+                        line-height: 1.6;
+                    }
+
+                    .activity-description .main-task-header {
+                        font-weight: 700 !important;
+                        color: #334155 !important;
+                        font-size: 14px !important;
+                        margin-bottom: 8px !important;
+                        display: block !important;
+                    }
+
+                    .activity-description .sub-task-point {
+                        display: flex !important;
+                        align-items: start !important;
+                        gap: 10px !important;
+                        margin-bottom: 6px !important;
+                        padding-left: 18px !important;
+                        color: #64748b !important;
+                        font-size: 13px !important;
                     }
                 </style>
                 <div class="activity-feed">
-                    @forelse($activities as $activity)
-                        <div class="card mb-3 border shadow-none" style="border-radius: 12px; background: #fff;">
-                            <div class="card-body p-3">
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle fw-bold"
-                                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 14px;">
+                    @php
+                        $groupedActivities = $activities->groupBy(function($item) {
+                            return $item->created_at->format('d M Y');
+                        });
+                    @endphp
+
+                    @forelse($groupedActivities as $date => $dateActivities)
+                        <div class="date-header d-flex align-items-center justify-content-between mb-3 mt-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle" style="width: 28px; height: 28px;">
+                                    <i class="feather-calendar" style="font-size: 12px;"></i>
+                                </div>
+                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 14px;">{{ $date }}</h6>
+                            </div>
+                            <span class="badge bg-soft-secondary text-secondary fw-bold" style="font-size: 10px; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 6px;">TOTAL DAY WORK: {{ number_format($dateActivities->sum(function($a) { return (float) preg_replace('/[^0-9.]/', '', $a->time_taken); }), 1) }} HOURS</span>
+                        </div>
+
+                        @foreach($dateActivities as $activity)
+                            <div class="card mb-3 border shadow-none" style="border-radius: 12px; background: #fff;">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle fw-bold"
+                                            style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(56, 88, 249, 0.1);">
                                             {{ substr($activity->dailyTask->employee->name ?? 'U', 0, 1) }}
                                         </div>
-                                        <h6 class="mb-0 fw-bold text-dark" style="font-size: 14px;">
-                                            {{ $activity->dailyTask->employee->name ?? 'Unknown' }}</h6>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2 text-end">
-                                        <span class="fw-bold text-primary"
-                                            style="font-size: 13px;">{{ $activity->created_at->format('h:i A') }}</span>
-                                        <span class="text-muted small"
-                                            style="font-size: 11px;">{{ $activity->created_at->format('d M, Y') }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="ps-1">
-                                    <div class="text-muted fs-13 mb-2 activity-description" style="line-height: 1.6;">
-                                        @php
-                                            // First decode in case it's escaped, then strip tags but keep lists
-                                            $desc = html_entity_decode($activity->work_description);
-                                            $desc = strip_tags($desc, '<ul><li><ol><p><br><b><strong>');
-
-                                            // Improved regex: only match if it's not already inside a tag or looks like a tag attribute
-                                            // We'll also use a simpler replacement to avoid conflicts
-                                            $desc = preg_replace('/(?<![="])(\d+)\s*(Hours|Hour|hrs|hr)(?![^<]*>)/i', '<span class="badge bg-soft-warning text-warning fw-bold px-2 py-1 ms-1"><i class="feather-clock me-1" style="font-size: 10px;"></i>$1 $2</span>', $desc);
-                                        @endphp
-                                        {!! $desc !!}
-                                    </div>
-                                    @if($activity->photo)
-                                        <div class="mt-2">
-                                            <img src="{{ asset('storage/' . $activity->photo) }}" class="img-fluid rounded border"
-                                                style="max-height: 110px; cursor: pointer; transition: opacity 0.2s;"
-                                                onclick="window.open(this.src)" onmouseover="this.style.opacity='0.9'"
-                                                onmouseout="this.style.opacity='1'">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 16px; letter-spacing: -0.3px;">
+                                                    {{ $activity->dailyTask->task_title ?? 'General Task' }}
+                                                    @if(isset($activity->dailyTask->status))
+                                                        @php
+                                                            $s = $activity->dailyTask->status;
+                                                            $statusSlug = strtolower(str_replace(' ', '-', $s));
+                                                            $statusClass = 'status-' . $statusSlug;
+                                                        @endphp
+                                                        <span class="badge {{ $statusClass }} ms-2"
+                                                            style="font-size: 10px; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">{{ $s }}</span>
+                                                    @endif
+                                                    <span class="badge bg-soft-primary text-primary ms-2"
+                                                        style="font-size: 11px; padding: 5px 10px; border-radius: 6px;">{{ $activity->time_taken ?? '0' }}
+                                                        HRS</span>
+                                                </h6>
+                                                <div class="text-end">
+                                                    <span class="fw-bold text-primary d-block" style="font-size: 13px;">{{ $activity->created_at->format('h:i A') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 12px;">
+                                                <span class="text-uppercase fw-bold text-primary" style="font-size: 9px; letter-spacing: 0.8px;">PERFORMED BY:</span>
+                                                <span class="ms-1 fw-bold text-dark">{{ $activity->dailyTask->employee->name ?? 'Unknown' }}</span>
+                                            </div>
                                         </div>
-                                    @endif
+                                    </div>
+
+                                    <div class="mt-3" style="padding-left: 58px; word-break: break-word;">
+                                        <div class="text-muted activity-description" style="line-height: 1.6;">
+                                            @php
+                                                $rawDesc = html_entity_decode($activity->work_description);
+                                                $cleanDesc = strip_tags($rawDesc, '<b><strong>');
+                                                
+                                                // Pre-format badges to keep them during splitting
+                                                $cleanDesc = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $cleanDesc);
+                                                
+                                                $lines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>'], ["\n", "\n", "\n", "\n", "\n"], $rawDesc));
+                                                $processedLines = [];
+                                                $isFirstLine = true;
+
+                                                foreach($lines as $line) {
+                                                    $line = trim(strip_tags(html_entity_decode($line), '<span>'));
+                                                    if(empty($line)) continue;
+
+                                                    // Re-apply badge if it was lost in stripping
+                                                    $line = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $line);
+
+                                                    if ($isFirstLine) {
+                                                        // First line is always the Main Task Header
+                                                        // Remove any leading bullet from header for a cleaner look
+                                                        $headerText = preg_replace('/^[•\*\-\·\s]+/u', '', $line);
+                                                        $processedLines[] = '<div class="main-task-header">• ' . $headerText . '</div>';
+                                                        $isFirstLine = false;
+                                                    } else {
+                                                        // Subsequent lines are sub-tasks
+                                                        // Detect bullets: •, *, -, or middot
+                                                        if (preg_match('/^[•\*\-\·]/u', $line)) {
+                                                            $text = trim(preg_replace('/^[•\*\-\·\s]+/u', '', $line));
+                                                            $processedLines[] = '<div class="sub-task-point"><i class="feather-check-circle text-success mt-1" style="font-size: 12px;"></i><span>' . $text . '</span></div>';
+                                                        } elseif (preg_match('/^(\d+)\.\s+(.*)/', $line, $matches)) {
+                                                            // Numbered lists
+                                                            $processedLines[] = '<div class="sub-task-point"><span class="fw-bold text-primary" style="min-width: 18px;">' . $matches[1] . '.</span><span>' . $matches[2] . '</span></div>';
+                                                        } else {
+                                                            // Default sub-point
+                                                            $processedLines[] = '<div class="sub-task-point"><i class="feather-circle text-muted mt-2" style="font-size: 6px;"></i><span>' . $line . '</span></div>';
+                                                        }
+                                                    }
+                                                }
+                                                $finalDesc = implode('', $processedLines);
+                                            @endphp
+                                            {!! $finalDesc !!}
+                                        </div>
+                                        @if($activity->photo)
+                                            <div class="mt-2">
+                                                <img src="{{ asset('storage/' . $activity->photo) }}" class="img-fluid rounded border"
+                                                    style="max-height: 110px; cursor: pointer; transition: opacity 0.2s;"
+                                                    onclick="window.open(this.src)" onmouseover="this.style.opacity='0.9'"
+                                                    onmouseout="this.style.opacity='1'">
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endforeach
                     @empty
                         <div class="text-center py-5">
                             <div class="avatar-text avatar-xl bg-soft-secondary text-secondary mx-auto mb-3 rounded-circle">
@@ -395,22 +463,7 @@
             var chart = new ApexCharts(document.querySelector("#project-progress-chart"), options);
             chart.render();
 
-            // --- Persist Active Tab on Refresh (Using localStorage) ---
-            var storageKey = 'activeProjectTab_' + '{{ $project->id }}';
-            var activeTab = localStorage.getItem(storageKey);
 
-            if (activeTab) {
-                var tabTrigger = $('.nav-tabs button[data-bs-target="' + activeTab + '"]');
-                if (tabTrigger.length) {
-                    tabTrigger.tab('show');
-                }
-            }
-
-            // Update localStorage on tab click
-            $('.nav-tabs button').on('shown.bs.tab', function (e) {
-                var target = $(e.target).attr('data-bs-target');
-                localStorage.setItem(storageKey, target);
-            });
         });
     </script>
 @endpush
