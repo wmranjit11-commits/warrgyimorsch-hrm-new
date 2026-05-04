@@ -14,7 +14,7 @@ class DailyTaskController extends Controller
     public function index(Request $request)
     {
         $query = DailyTask::with(['project', 'employee', 'creator', 'followUps']);
-        
+
         // Data Restriction Logic
         $role = strtoupper(auth()->user()->role);
         if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
@@ -62,7 +62,7 @@ class DailyTaskController extends Controller
         ]);
 
         $validated['assigned_by'] = Auth::id();
-        
+
         // Force employee_id for non-admins
         $role = strtoupper(auth()->user()->role ?? 'USER');
         if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
@@ -163,5 +163,16 @@ class DailyTaskController extends Controller
         $dailyTask->update(['status' => $validated['status']]);
 
         return response()->json(['success' => 'Task status updated successfully!']);
+    }
+
+    public function updatePriority(Request $request, DailyTask $dailyTask)
+    {
+        $validated = $request->validate([
+            'priority' => 'required|string|in:Hard,Medium,Low,Normal',
+        ]);
+
+        $dailyTask->update(['priority' => $validated['priority']]);
+
+        return response()->json(['success' => 'Task priority updated successfully!']);
     }
 }

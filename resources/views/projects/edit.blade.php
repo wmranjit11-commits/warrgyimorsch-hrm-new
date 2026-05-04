@@ -105,9 +105,9 @@
                                         <input type="text" class="form-control" name="name" value="{{ $project->name }}" style="border-radius: 8px; height: 46px;" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Technology <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="technology" value="{{ $project->technology }}" style="border-radius: 8px; height: 46px;" required>
-                                    </div>
+                                         <label class="form-label">Technology</label>
+                                         <input type="text" class="form-control" name="technology" value="{{ $project->technology }}" style="border-radius: 8px; height: 46px;">
+                                     </div>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description <span class="text-danger">*</span></label>
@@ -116,8 +116,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Start Date</label>
-                                        <input type="date" class="form-control" name="start_date" value="{{ $project->start_date ? $project->start_date->format('Y-m-d') : '' }}">
+                                        <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" name="start_date" value="{{ $project->start_date ? $project->start_date->format('Y-m-d') : '' }}" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">End Date</label>
@@ -126,21 +126,32 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Department</label>
-                                        <select class="form-select" name="department">
-                                            @foreach($departments as $dept)
-                                                <option value="{{ $dept->name }}" {{ $project->department == $dept->name ? 'selected' : '' }}>{{ $dept->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                         <label class="form-label">Department <span class="text-danger">*</span></label>
+                                         <select class="form-select" name="department" required>
+                                             <option value="">Select Department</option>
+                                             @foreach($departments as $dept)
+                                                 <option value="{{ $dept->name }}" {{ $project->department == $dept->name ? 'selected' : '' }}>{{ $dept->name }}</option>
+                                             @endforeach
+                                         </select>
+                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">Status</label>
                                         <select class="form-select" name="status">
-                                            <option value="Not Started" {{ $project->status == 'Not Started' ? 'selected' : '' }}>Not Started</option>
-                                            <option value="In Progress" {{ $project->status == 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                                            <option value="On Hold" {{ $project->status == 'On Hold' ? 'selected' : '' }}>On Hold</option>
-                                            <option value="Declined" {{ $project->status == 'Declined' ? 'selected' : '' }}>Declined</option>
-                                            <option value="Finished" {{ $project->status == 'Finished' ? 'selected' : '' }}>Finished</option>
+                                            @php
+                                                $statusMap = [
+                                                    'Not Started' => 'Pending',
+                                                    'In Progress' => 'In Process',
+                                                    'Finished' => 'Completed',
+                                                    'Declined' => 'Rework'
+                                                ];
+                                                $displayStatus = $statusMap[$project->status] ?? $project->status;
+                                            @endphp
+                                            <option value="Pending" {{ $displayStatus == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="In Process" {{ $displayStatus == 'In Process' ? 'selected' : '' }}>In Process</option>
+                                            <option value="Completed" {{ $displayStatus == 'Completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="On Hold" {{ $displayStatus == 'On Hold' ? 'selected' : '' }}>On Hold</option>
+                                            <option value="Review" {{ $displayStatus == 'Review' ? 'selected' : '' }}>Review</option>
+                                            <option value="Rework" {{ $displayStatus == 'Rework' ? 'selected' : '' }}>Rework</option>
                                         </select>
                                     </div>
                                 </div>
@@ -251,6 +262,38 @@
                 }
             },
             onStepChanging: function (event, currentIndex, newIndex) {
+                if (currentIndex > newIndex) return true;
+
+                // Validation for Step 2: Details
+                if (currentIndex === 1) {
+                    var name = $('input[name="name"]').val();
+                    var dept = $('select[name="department"]').val();
+                    var startDate = $('input[name="start_date"]').val();
+                    var desc = $('#summernote-main').summernote('code');
+
+                    if (!name || !dept || !startDate || desc === '<p><br></p>' || desc === '') {
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Department and Start Date.' });
+                        } else {
+                            alert('Please fill all mandatory fields including Department and Start Date.');
+                        }
+                        return false;
+                    }
+                }
+
+                // Validation for Step 3: Members (Team Lead check)
+                if (currentIndex === 2) {
+                    var leaders = $('select[name="leaders[]"]').val();
+                    if (!leaders || leaders.length === 0) {
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({ icon: 'error', title: 'Please select at least one Project Lead.' });
+                        } else {
+                            alert('Please select at least one Project Lead.');
+                        }
+                        return false;
+                    }
+                }
+
                 $('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
                 return true;
             },

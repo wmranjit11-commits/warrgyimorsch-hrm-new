@@ -86,8 +86,172 @@
         }
 
         .dropdown-menu {
-            z-index: 999999 !important;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+            z-index: 9999999 !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
+            position: fixed !important;
+            /* Force popover behavior if boundary is set */
+        }
+
+        .table-responsive {
+            overflow: visible !important;
+            /* Allow dropdowns to pop out */
+        }
+
+        /* Premium Status & Priority UI */
+        .premium-status-dropdown .btn-status,
+        .priority-badge,
+        .lead-select-btn {
+            position: relative;
+        }
+
+        .premium-status-dropdown .btn-status.dropdown-toggle::after,
+        .priority-badge.dropdown-toggle::after,
+        .lead-select-btn.dropdown-toggle::after {
+            display: none !important;
+            /* Hide default Bootstrap caret */
+        }
+
+        .premium-status-dropdown .btn-status {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+        }
+
+        /* Status Colors */
+        .status-pending {
+            background: rgba(100, 116, 139, 0.1) !important;
+            color: #64748b !important;
+        }
+
+        .status-in-process {
+            background: rgba(56, 88, 249, 0.1) !important;
+            color: #3858f9 !important;
+        }
+
+        .status-completed {
+            background: rgba(34, 197, 94, 0.1) !important;
+            color: #22c55e !important;
+        }
+
+        .status-on-hold {
+            background: rgba(245, 158, 11, 0.1) !important;
+            color: #f59e0b !important;
+        }
+
+        .status-review {
+            background: rgba(6, 182, 212, 0.1) !important;
+            color: #06b6d4 !important;
+        }
+
+        .status-rework {
+            background: rgba(239, 68, 68, 0.1) !important;
+            color: #ef4444 !important;
+        }
+
+        /* Priority UI */
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .priority-badge.dropdown-toggle::after {
+            display: none;
+            /* We will use custom arrow if needed or none as per image */
+        }
+
+        .priority-hard {
+            background: rgba(239, 68, 68, 0.1) !important;
+            color: #ef4444 !important;
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.1) !important;
+            color: #f59e0b !important;
+        }
+
+        .priority-low {
+            background: rgba(34, 197, 94, 0.1) !important;
+            color: #22c55e !important;
+        }
+
+        .priority-normal {
+            background: rgba(56, 88, 249, 0.1) !important;
+            color: #3858f9 !important;
+        }
+
+        /* Lead Select UI */
+        .lead-select-btn {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #334155;
+            cursor: pointer;
+            width: 120px;
+            /* Reduced fixed width */
+            justify-content: space-between;
+        }
+
+        .lead-select-btn span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            max-width: 85px;
+            /* Reduced max-width */
+            text-align: left;
+        }
+
+        .lead-select-btn:hover {
+            border-color: #3858f9;
+            background: #f8fafc;
+        }
+
+        .premium-attachment-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 12px;
+            background: rgba(56, 88, 249, 0.08);
+            color: #3858f9;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            text-decoration: none !important;
+            border: 1px solid rgba(56, 88, 249, 0.15);
+        }
+
+        .premium-attachment-link:hover {
+            background: #3858f9;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(56, 88, 249, 0.25);
+            transform: translateY(-1px);
         }
     </style>
 </head>

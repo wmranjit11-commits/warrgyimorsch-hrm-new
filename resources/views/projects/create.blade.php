@@ -112,9 +112,9 @@
                                             placeholder="e.g. Website development" style="border-radius: 8px; height: 46px;" required>
                                     </div>
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Technology <span class="text-danger">*</span></label>
+                                        <label class="form-label">Technology</label>
                                         <input type="text" class="form-control shadow-none" id="projectTechnology"
-                                            placeholder="e.g. PHP, Laravel, React" style="border-radius: 8px; height: 46px;" required>
+                                            placeholder="e.g. PHP, Laravel, React" style="border-radius: 8px; height: 46px;">
                                     </div>
                                 </div>
                                 <div class="mb-4">
@@ -133,8 +133,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
-                                        <label class="form-label">Department</label>
-                                        <select class="form-select" id="projectDepartment">
+                                        <label class="form-label">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="projectDepartment" required>
+                                            <option value="">Select Department</option>
                                             @foreach($departments as $dept)
                                                 <option value="{{ $dept->name }}">{{ $dept->name }}</option>
                                             @endforeach
@@ -143,11 +144,12 @@
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">Status</label>
                                         <select class="form-select" id="projectStatus">
-                                            <option value="Not Started">Not Started</option>
-                                            <option value="In Progress">In Progress</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="In Process">In Process</option>
+                                            <option value="Completed">Completed</option>
                                             <option value="On Hold">On Hold</option>
-                                            <option value="Declined">Declined</option>
-                                            <option value="Finished">Finished</option>
+                                            <option value="Review">Review</option>
+                                            <option value="Rework">Rework</option>
                                         </select>
                                     </div>
                                 </div>
@@ -378,12 +380,12 @@
                     // Validation for Step 2: Details
                     if (currentIndex === 1) {
                         var name = $('#projectName').val();
-                        var tech = $('#projectTechnology').val();
+                        var dept = $('#projectDepartment').val();
                         var desc = $('#summernote-main').summernote('code');
                         var startDate = $('#projectStartDate').val();
 
-                        if (!name || !tech || !startDate || desc === '<p><br></p>' || desc === '') {
-                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Start Date and Description.' });
+                        if (!name || !dept || !startDate || desc === '<p><br></p>' || desc === '') {
+                            Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Department and Start Date.' });
                             return false;
                         }
                     }

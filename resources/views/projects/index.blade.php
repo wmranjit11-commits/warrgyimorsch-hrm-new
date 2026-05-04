@@ -30,8 +30,7 @@
                         </button>
                     </div>
                     <div class="dropdown">
-                        <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" data-bs-toggle="collapse"
-                            data-bs-target="#filterSection">
+                        <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter">
                             <i class="feather-filter"></i>
                         </a>
                     </div>
@@ -51,23 +50,24 @@
 
     <div class="page-header-collapse">
         <div class="accordion-body pb-2">
-            <div class="row">
+            <div class="row g-3">
                 @php
-                    $notStartedCount = $projects->filter(fn($p) => strtolower($p->status) == 'not started')->count();
-                    $inProgressCount = $projects->filter(fn($p) => strtolower($p->status) == 'in progress')->count();
+                    $pendingCount = $projects->filter(fn($p) => in_array(strtolower($p->status), ['pending', 'not started']))->count();
+                    $inProgressCount = $projects->filter(fn($p) => in_array(strtolower($p->status), ['in process', 'in progress']))->count();
                     $onHoldCount = $projects->filter(fn($p) => strtolower($p->status) == 'on hold')->count();
-                    $declinedCount = $projects->filter(fn($p) => in_array(strtolower($p->status), ['declined', 'cancelled']))->count();
-                    $finishedCount = $projects->filter(fn($p) => in_array(strtolower($p->status), ['finished', 'completed']))->count();
+                    $reviewCount = $projects->filter(fn($p) => strtolower($p->status) == 'review')->count();
+                    $reworkCount = $projects->filter(fn($p) => strtolower($p->status) == 'rework')->count();
+                    $completedCount = $projects->filter(fn($p) => in_array(strtolower($p->status), ['completed', 'finished']))->count();
                 @endphp
                 <div class="col-xxl col-md-4">
-                    <div class="card stretch stretch-full border-start border-4 border-warning">
+                    <div class="card stretch stretch-full border-start border-4 border-secondary">
                         <div class="card-body p-3">
                             <div class="hstack justify-content-between">
                                 <div>
-                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Not Started</span>
-                                    <span class="fs-20 fw-bolder d-block">{{ $notStartedCount }}</span>
+                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Pending</span>
+                                    <span class="fs-20 fw-bolder d-block">{{ $pendingCount }}</span>
                                 </div>
-                                <div class="avatar-text avatar-md bg-soft-warning text-warning">
+                                <div class="avatar-text avatar-md bg-soft-secondary text-secondary">
                                     <i class="feather-pause-circle"></i>
                                 </div>
                             </div>
@@ -79,7 +79,7 @@
                         <div class="card-body p-3">
                             <div class="hstack justify-content-between">
                                 <div>
-                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">In Progress</span>
+                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">In Process</span>
                                     <span class="fs-20 fw-bolder d-block">{{ $inProgressCount }}</span>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-primary text-primary">
@@ -90,42 +90,57 @@
                     </div>
                 </div>
                 <div class="col-xxl col-md-4">
-                    <div class="card stretch stretch-full border-start border-4 border-info">
+                    <div class="card stretch stretch-full border-start border-4 border-warning">
                         <div class="card-body p-3">
                             <div class="hstack justify-content-between">
                                 <div>
                                     <span class="fs-10 fw-bold text-uppercase d-block mb-1">On Hold</span>
                                     <span class="fs-20 fw-bolder d-block">{{ $onHoldCount }}</span>
                                 </div>
-                                <div class="avatar-text avatar-md bg-soft-info text-info">
+                                <div class="avatar-text avatar-md bg-soft-warning text-warning">
                                     <i class="feather-minus-circle"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl col-md-6">
-                    <div class="card stretch stretch-full border-start border-4 border-danger">
+                <div class="col-xxl col-md-4">
+                    <div class="card stretch stretch-full border-start border-4 border-info">
                         <div class="card-body p-3">
                             <div class="hstack justify-content-between">
                                 <div>
-                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Declined</span>
-                                    <span class="fs-20 fw-bolder d-block">{{ $declinedCount }}</span>
+                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Review</span>
+                                    <span class="fs-20 fw-bolder d-block">{{ $reviewCount }}</span>
                                 </div>
-                                <div class="avatar-text avatar-md bg-soft-danger text-danger">
-                                    <i class="feather-x-circle"></i>
+                                <div class="avatar-text avatar-md bg-soft-info text-info">
+                                    <i class="feather-eye"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl col-md-6">
+                <div class="col-xxl col-md-4">
+                    <div class="card stretch stretch-full border-start border-4 border-danger">
+                        <div class="card-body p-3">
+                            <div class="hstack justify-content-between">
+                                <div>
+                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Rework</span>
+                                    <span class="fs-20 fw-bolder d-block">{{ $reworkCount }}</span>
+                                </div>
+                                <div class="avatar-text avatar-md bg-soft-danger text-danger">
+                                    <i class="feather-refresh-ccw"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl col-md-4">
                     <div class="card stretch stretch-full border-start border-4 border-success">
                         <div class="card-body p-3">
                             <div class="hstack justify-content-between">
                                 <div>
-                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Finished</span>
-                                    <span class="fs-20 fw-bolder d-block">{{ $finishedCount }}</span>
+                                    <span class="fs-10 fw-bold text-uppercase d-block mb-1">Completed</span>
+                                    <span class="fs-20 fw-bolder d-block">{{ $completedCount }}</span>
                                 </div>
                                 <div class="avatar-text avatar-md bg-soft-success text-success">
                                     <i class="feather-check-circle"></i>
@@ -139,7 +154,7 @@
     </div>
     <!-- [ page-header ] end -->
 
-    <div class="collapse" id="filterSection">
+    <div class="filter-wrapper" id="filterSection" style="display: none;">
         <div class="card stretch stretch-full border-bottom bg-light bg-opacity-10 p-4 mb-4">
             <div class="row g-3">
                 <div class="col-md-4">
@@ -152,11 +167,12 @@
                     <select id="filterStatus" class="form-select border-0 shadow-sm" onchange="applyFilters()"
                         style="border-radius: 8px; height: 44px;">
                         <option value="">All Status</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Not Started">Not Started</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Process">In Process</option>
                         <option value="On Hold">On Hold</option>
-                        <option value="Declined">Declined/Cancelled</option>
-                        <option value="Finished">Finished</option>
+                        <option value="Review">Review</option>
+                        <option value="Rework">Rework</option>
+                        <option value="Completed">Completed</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -224,9 +240,23 @@
                                             </td>
                                             <td class="project-name-td" style="max-width: 300px;">
                                                 <div class="hstack gap-4">
-                                                    <div class="avatar-image border-0">
-                                                        <div class="avatar-text bg-soft-primary text-primary rounded">
-                                                            <i class="feather-briefcase"></i>
+                                                    <div class="avatar-image border-0 position-relative">
+                                                        <!-- Premium SVG Circular Progress - 1:1 Design Parity -->
+                                                        <div class="progress-ring-wrapper" style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                                            @php $progressVal = $project->progress; @endphp
+                                                            <svg width="60" height="60" viewBox="0 0 100 100" style="position: absolute; transform: rotate(-90deg);">
+                                                                <!-- Background Track -->
+                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="10"></circle>
+                                                                <!-- Progress Bar -->
+                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#1d4ed8" stroke-width="10" 
+                                                                    stroke-dasharray="263.89" 
+                                                                    stroke-dashoffset="{{ 263.89 * (1 - $progressVal / 100) }}"
+                                                                    stroke-linecap="round"
+                                                                    style="transition: stroke-dashoffset 0.8s ease-in-out;"></circle>
+                                                            </svg>
+                                                            <div class="avatar-text bg-white text-primary rounded-circle shadow-sm" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; z-index: 1; border: 1px solid rgba(0,0,0,0.05);">
+                                                                <i class="feather-briefcase fs-18"></i>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="project-info-wrapper">
@@ -269,41 +299,70 @@
                                             <td>{{ $project->start_date ? $project->start_date->format('Y-m-d') : '-' }}</td>
                                             <td>{{ $project->end_date ? $project->end_date->format('Y-m-d') : '-' }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center py-2" style="min-width: 240px;">
-                                                    <div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle me-2"
-                                                        title="Project Lead"><i class="feather-user-check"
-                                                            style="font-size: 11px;"></i></div>
-                                                    <select
-                                                        class="form-select select2-lead-mini border bg-white fs-13 fw-bold text-dark shadow-none"
-                                                        data-select2-selector="lead" data-project-id="{{ $project->id }}"
-                                                        style="width: 220px; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
-                                                        <option value="">Select Lead...</option>
+                                                <div class="dropdown" style="min-width: 120px;">
+                                                    @php
+                                                        $leaders = is_array($project->leaders) ? $project->leaders : [];
+                                                        $currentLead = "Select Lead...";
+                                                        foreach($employees as $emp) {
+                                                            if(in_array($emp->id, $leaders)) {
+                                                                $currentLead = $emp->name;
+                                                                break;
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <button class="lead-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                        <span class="text-truncate">{{ $currentLead }}</span>
+                                                        <i class="feather-chevron-down fs-10 ms-1"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px; max-height: 300px; overflow-y: auto;">
+                                                        <li><a class="dropdown-item fw-bold text-muted small py-2" href="javascript:void(0);" onclick="updateProjectLead({{ $project->id }}, '')">No Lead</a></li>
                                                         @foreach($employees as $emp)
-                                                            @php
-                                                                $leaders = is_array($project->leaders) ? $project->leaders : [];
-                                                                $isSelected = in_array($emp->id, $leaders);
-                                                             @endphp
-                                                            <option value="{{ $emp->id }}" {{ $isSelected ? 'selected' : '' }}>
-                                                                {{ $emp->name }}</option>
+                                                            <li><a class="dropdown-item fw-bold small py-2 {{ in_array($emp->id, $leaders) ? 'active' : '' }}" href="javascript:void(0);" onclick="updateProjectLead({{ $project->id }}, {{ $emp->id }})">{{ $emp->name }}</a></li>
                                                         @endforeach
-                                                    </select>
+                                                    </ul>
                                                 </div>
                                             </td>
                                             <td>
-                                                <select class="form-select select2-status shadow-none"
-                                                    data-select2-selector="status" data-project-id="{{ $project->id }}"
-                                                    style="min-width: 140px; padding: 8px 12px; height: 38px;">
-                                                    <option value="In Progress" data-bg="bg-primary" {{ $project->status == 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                                                    <option value="Not Started" data-bg="bg-warning" {{ $project->status == 'Not Started' ? 'selected' : '' }}>Not Started</option>
-                                                    <option value="On Hold" data-bg="bg-success" {{ $project->status == 'On Hold' ? 'selected' : '' }}>On Hold</option>
-                                                    <option value="Declined" data-bg="bg-danger" {{ $project->status == 'Declined' ? 'selected' : '' }}>Declined</option>
-                                                    <option value="Finished" data-bg="bg-teal" {{ $project->status == 'Finished' ? 'selected' : '' }}>Finished</option>
-                                                </select>
+                                                @php
+                                                    $currentStatus = $project->status;
+                                                    if ($currentStatus == 'Not Started') $currentStatus = 'Pending';
+                                                    if ($currentStatus == 'In Progress') $currentStatus = 'In Process';
+                                                    if ($currentStatus == 'Finished') $currentStatus = 'Completed';
+                                                    
+                                                    $statusSlug = strtolower(str_replace(' ', '-', $currentStatus));
+                                                    $statusClass = 'status-' . $statusSlug;
+                                                @endphp
+                                                <div class="dropdown premium-status-dropdown" style="min-width: 110px;">
+                                                    <button class="btn-status {{ $statusClass }} dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                        {{ $currentStatus }} <i class="feather-chevron-down fs-10 ms-1"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px;">
+                                                        <li><a class="dropdown-item fw-bold status-pending py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Pending')">Pending</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-in-process py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'In Process')">In Process</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-completed py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Completed')">Completed</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-on-hold py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'On Hold')">On Hold</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-review py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Review')">Review</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-rework py-2 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Rework')">Rework</a></li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td>
                                                 <div class="hstack gap-2 justify-content-end">
+                                                    <a href="javascript:void(0);"
+                                                        onclick="showQuickView({{ json_encode($project) }})"
+                                                        class="avatar-text avatar-md bg-soft-warning text-warning"
+                                                        title="Quick View Info">
+                                                        <i class="feather feather-info"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0);"
+                                                        onclick="showTaskProgress({{ $project->id }})"
+                                                        class="avatar-text avatar-md bg-soft-success text-success"
+                                                        title="Task Progress Analysis">
+                                                        <i class="feather feather-clipboard"></i>
+                                                    </a>
                                                     <a href="{{ route('projects.show', $project->id) }}"
-                                                        class="avatar-text avatar-md bg-soft-primary text-primary">
+                                                        class="avatar-text avatar-md bg-soft-primary text-primary"
+                                                        title="Full View">
                                                         <i class="feather feather-eye"></i>
                                                     </a>
                                                     <a href="{{ route('projects.edit', $project->id) }}"
@@ -333,19 +392,32 @@
     </div>
 
     <style>
+        /* Progress Circle */
+        .progress-circle {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .progress-circle:hover {
+            transform: scale(1.05);
+        }
+
         /* 1:1 Select2 Parity */
         .select2-container--default .select2-selection--single {
             border: 1px solid #e2e8f0 !important;
-            border-radius: 4px !important;
-            height: 38px !important;
+            border-radius: 8px !important;
+            height: 40px !important;
+            background-color: #fff !important;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
+            line-height: 38px !important;
+            padding-left: 12px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
+            height: 38px !important;
         }
 
         .project-list-actions a:hover {
@@ -376,7 +448,7 @@
                 $('#projectList tbody tr.single-item').each(function () {
                     var rowName = $(this).find('.project-name-td a').text().toLowerCase();
                     var rowStatus = $(this).find('[data-select2-selector="status"]').val();
-                    var rowDept = $(this).find('td:nth-child(4) span').text().trim(); // Department is 4th column
+                    var rowDept = $(this).find('td:nth-child(4) span').text().trim();
 
                     var matchName = name === "" || rowName.includes(name);
                     var matchStatus = status === "" || rowStatus === status;
@@ -389,7 +461,13 @@
                     }
                 });
             };
-            // Check All Functionality
+
+            // Smooth Filter Toggle
+            $('#toggleFilter').on('click', function() {
+                $('#filterSection').slideToggle(400);
+            });
+
+            // Handle Check All Functionality
             $('#checkAllProject').on('change', function () {
                 $('.checkbox').prop('checked', $(this).prop('checked'));
                 toggleBulkAction();
@@ -431,71 +509,269 @@
                 }
             });
 
-            // Status Select2 Template
-            function formatStatus(state) {
-                if (!state.id) return state.text;
-                var bg = $(state.element).data('bg');
-                return $('<span class="badge ' + bg + ' rounded-pill px-3" style="padding-top: 6px; padding-bottom: 6px; display: inline-block;">' + state.text + '</span>');
-            }
+            // Premium Status Update
+            window.updateProjectStatus = function(id, status) {
+                updateProjectField(id, { status: status }, 'Status Updated');
+                setTimeout(() => location.reload(), 500); // Reload to update styles easily
+            };
 
-            $('[data-select2-selector="status"]').select2({
-                width: '140px',
-                templateResult: formatStatus,
-                templateSelection: formatStatus,
-                minimumResultsForSearch: Infinity
-            }).on('change', function () {
-                var id = $(this).data('project-id');
-                var status = $(this).val();
+            // Premium Lead Update
+            window.updateProjectLead = function(id, leadId) {
+                var leaders = leadId ? [leadId] : [];
+                updateProjectField(id, { leaders: leaders }, 'Lead Updated');
+                setTimeout(() => location.reload(), 500);
+            };
+
+            // Generic Update Function
+            function updateProjectField(id, data, successTitle) {
+                var url = '{{ route("projects.update-field", ["id" => ":id"]) }}'.replace(':id', id);
+                
                 $.ajax({
-                    url: '/projects/' + id + '/update-field',
+                    url: url,
                     type: 'PATCH',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    data: { status: status },
+                    data: data,
                     success: function (response) {
                         if (typeof Toast !== 'undefined') {
-                            Toast.fire({ icon: 'success', title: 'Status Updated Successfully' });
+                            Toast.fire({ icon: 'success', title: successTitle });
                         }
                     },
                     error: function (xhr) {
-                        alert('Error updating status. Please try again.');
-                        console.log(xhr.responseText);
+                        console.error('Update failed:', xhr.responseText);
                     }
                 });
-            });
-
-            // User formatting for Select2
-            function formatUser(state) {
-                if (!state.id) return state.text;
-                return $('<div class="d-flex align-items-center gap-2"><div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle" style="width:20px; height:20px; font-size:9px;">' + state.text.charAt(0) + '</div><span class="fs-12 fw-bold text-dark">' + state.text + '</span></div>');
             }
-
-            $('[data-select2-selector="lead"]').select2({
-                width: '100%',
-                templateResult: formatUser,
-                templateSelection: formatUser,
-                dropdownCssClass: 'fs-12 shadow-sm',
-                dropdownAutoWidth: true
-            }).on('change', function () {
-                var id = $(this).data('project-id');
-                var leaders = [$(this).val()];
-                var $this = $(this);
-
-                $.ajax({
-                    url: '/projects/' + id + '/update-field',
-                    type: 'PATCH',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    data: { leaders: leaders },
-                    success: function (response) {
-                        if (typeof Toast !== 'undefined') {
-                            Toast.fire({ icon: 'success', title: 'Lead Updated Successfully' });
+            // Quick View Logic
+            window.showQuickView = function(project) {
+                const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+                document.getElementById('qvProjectName').innerText = project.name;
+                document.getElementById('qvDescription').innerHTML = project.description || '<p class="text-muted">No description available.</p>';
+                
+                // Fetch Team Details (Leads & Members)
+                const leaders = project.leaders || [];
+                const members = project.members || [];
+                const allEmps = @json($employees);
+                
+                let teamHtml = '';
+                
+                // Show Leaders
+                if (leaders.length > 0) {
+                    teamHtml += '<h6 class="fw-bold text-primary mb-3">Project Leads</h6><div class="row g-3 mb-4">';
+                    allEmps.forEach(emp => {
+                        if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
+                            teamHtml += `<div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                    <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
+                                    <div class="fw-bold small text-dark">${emp.name}</div>
+                                </div>
+                            </div>`;
                         }
-                    },
-                    error: function (xhr) {
-                        alert('Error updating lead. Please try again.');
-                        console.log(xhr.responseText);
-                    }
-                });
-            });
+                    });
+                    teamHtml += '</div>';
+                }
+                
+                // Show Members
+                if (members.length > 0) {
+                    teamHtml += '<h6 class="fw-bold text-info mb-3">Team Members</h6><div class="row g-3">';
+                    allEmps.forEach(emp => {
+                        if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
+                            teamHtml += `<div class="col-md-4">
+                                <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                                    <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
+                                    <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
+                                </div>
+                            </div>`;
+                        }
+                    });
+                    teamHtml += '</div>';
+                }
+                
+                if (teamHtml === '') teamHtml = '<div class="alert alert-soft-secondary text-center">No team members assigned.</div>';
+                
+                document.getElementById('qvTeamList').innerHTML = teamHtml;
+                modal.show();
+            };
+
+            // Task Progress Analysis Logic
+            window.showTaskProgress = function(projectId) {
+                const modalEl = document.getElementById('taskProgressModal');
+                const listContainer = document.getElementById('tpList');
+                
+                listContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Analyzing tasks...</p></div>';
+                
+                // Show Modal
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+                } else if (window.jQuery && jQuery.fn.modal) {
+                    jQuery(modalEl).modal('show');
+                } else {
+                    modalEl.style.display = 'block';
+                    modalEl.classList.add('show');
+                    modalEl.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                }
+                
+                fetch(`/projects/${projectId}/tasks-summary`)
+                    .then(res => {
+                        if (!res.ok) throw new Error('Network response was not ok');
+                        return res.json();
+                    })
+                    .then(data => {
+                        document.getElementById('tpProjectName').innerText = data.project_name;
+                        
+                        if (!data.tasks || data.tasks.length === 0) {
+                            listContainer.innerHTML = '<div class="alert alert-soft-secondary text-center">No tasks found for this project.</div>';
+                            return;
+                        }
+                        
+                        let html = '';
+                        // Group work by employee and then by date
+                        const employeeWork = {};
+                        
+                        data.tasks.forEach(task => {
+                            const empName = task.employee ? task.employee.name : 'Unassigned';
+                            if (!employeeWork[empName]) employeeWork[empName] = {};
+                            
+                            // Process each follow-up as an individual work entry
+                            if (task.follow_ups && task.follow_ups.length > 0) {
+                                task.follow_ups.forEach(fu => {
+                                    const date = new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                                    if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
+                                    
+                                    // Parse time from "5 hours" etc.
+                                    let time = 0;
+                                    const matches = (fu.time_taken || "").match(/[+-]?([0-9]*[.])?[0-9]+/);
+                                    if (matches) time = parseFloat(matches[0]);
+                                    
+                                    employeeWork[empName][date].entries.push({
+                                        title: task.task_title,
+                                        description: fu.work_description,
+                                        time: time,
+                                        status: task.status,
+                                        timestamp: new Date(fu.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                    });
+                                    employeeWork[empName][date].dailyTotal += time;
+                                });
+                            } else {
+                                // Task with no follow-ups yet
+                                const date = 'No Activity';
+                                if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
+                                employeeWork[empName][date].entries.push({
+                                    title: task.task_title,
+                                    description: 'No progress updates provided yet.',
+                                    time: 0,
+                                    status: task.status,
+                                    timestamp: ''
+                                });
+                            }
+                        });
+                        
+                        for (const [empName, dates] of Object.entries(employeeWork)) {
+                            html += `<div class="mb-4">
+                                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                    <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
+                                    <h5 class="fw-bold text-dark mb-0">${empName}</h5>
+                                </div>`;
+                            
+                            // Sort dates descending
+                            const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
+                            
+                            sortedDates.forEach(date => {
+                                const dayData = dates[date];
+                                html += `<div class="ms-4 mb-4 position-relative">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
+                                        <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
+                                        <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
+                                    </div>
+                                    <div class="ms-3">`;
+                                
+                                dayData.entries.forEach(entry => {
+                                    html += `<div class="mb-3 p-3 bg-white rounded-3 border position-relative">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="pe-5">
+                                                <div class="fw-bold text-dark fs-14">${entry.title}</div>
+                                                <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
+                                                    ${entry.time} Hrs
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
+                                            ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
+                                        </div>
+                                    </div>`;
+                                });
+                                
+                                html += `</div></div>`;
+                            });
+                            
+                            html += `</div>`;
+                        }
+                        listContainer.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error('Error fetching task summary:', err);
+                        listContainer.innerHTML = `<div class="alert alert-soft-danger text-center">
+                            <strong>Oops!</strong> Something went wrong while loading the data.<br>
+                            <small class="text-muted">${err.message}</small>
+                        </div>`;
+                    });
+            };
         });
     </script>
+
+    <!-- Quick View Modal -->
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0 ps-4 pt-4">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="feather-info text-primary"></i>
+                        <span id="qvProjectName">Project Name</span>
+                    </h5>
+                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-2 d-block">Description</label>
+                        <div id="qvDescription" class="p-3 bg-light rounded-3 text-dark fs-14" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0;">
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4" style="border-style: dashed;">
+                    
+                    <div id="qvTeamList">
+                        <!-- Team details injected here -->
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">CLOSE QUICK VIEW</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Progress Analysis Modal -->
+    <div class="modal fade" id="taskProgressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0 ps-4 pt-4">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="feather-clipboard text-success"></i>
+                        <span id="tpProjectName">Project Task Progress</span>
+                    </h5>
+                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="tpList" style="max-height: 65vh; overflow-y: auto;">
+                        <!-- Content will be injected here -->
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">CLOSE ANALYSIS</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endpush

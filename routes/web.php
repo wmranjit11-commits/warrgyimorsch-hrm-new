@@ -69,12 +69,14 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/projects/{id}/update-field', [\App\Http\Controllers\ProjectController::class, 'updateField'])->name('projects.update-field');
     Route::post('/projects/bulk-delete', [\App\Http\Controllers\ProjectController::class, 'bulkDelete'])->name('projects.bulk-delete');
     Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/projects/{id}/tasks-summary', [\App\Http\Controllers\ProjectController::class, 'tasksSummary'])->name('projects.tasks-summary');
 
     // DAILY TASKS
     Route::get('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'index'])->name('daily-tasks.index');
     Route::post('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'store'])->name('daily-tasks.store');
     Route::put('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'update'])->name('daily-tasks.update');
     Route::patch('/daily-tasks/{dailyTask}/status', [\App\Http\Controllers\DailyTaskController::class, 'updateStatus'])->name('daily-tasks.update-status');
+    Route::patch('/daily-tasks/{dailyTask}/priority', [\App\Http\Controllers\DailyTaskController::class, 'updatePriority'])->name('daily-tasks.update-priority');
     Route::delete('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'destroy'])->name('daily-tasks.destroy');
     Route::post('/daily-tasks/bulk-delete', [\App\Http\Controllers\DailyTaskController::class, 'bulkDestroy'])->name('daily-tasks.bulk-delete');
     Route::post('/daily-tasks/follow-up', [\App\Http\Controllers\DailyTaskController::class, 'storeFollowUp'])->name('daily-tasks.follow-up.store');

@@ -26,6 +26,15 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+            'department' => 'required|string',
+            'description' => 'required',
+            'type' => 'required',
+            'manage' => 'required',
+        ]);
+
         $project = Project::create([
             'name' => $request->name,
             'start_date' => $request->start_date,
@@ -37,6 +46,7 @@ class ProjectController extends Controller
             'leaders' => $request->leaders,
             'members' => $request->members,
             'type' => $request->type,
+            'manage' => $request->manage,
         ]);
 
         return redirect()->route('projects.index')->with('success', 'Project created successfully');
@@ -49,10 +59,10 @@ class ProjectController extends Controller
         $departments = \App\Models\Department::all();
 
         // Fetch activities (TaskFollowUps) for this project
-        $activities = TaskFollowUp::whereHas('dailyTask', function($q) use ($id) {
+        $activities = TaskFollowUp::whereHas('dailyTask', function ($q) use ($id) {
             $q->where('project_id', $id);
         })->with('dailyTask.employee')->latest()->get();
-        
+
         return view('projects.show', compact('project', 'employees', 'departments', 'activities'));
     }
 
@@ -61,14 +71,22 @@ class ProjectController extends Controller
         $project = Project::findOrFail($id);
         $employees = \App\Models\Employee::all();
         $departments = \App\Models\Department::all();
-        
+
         return view('projects.edit', compact('project', 'employees', 'departments'));
     }
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+            'department' => 'required|string',
+            'description' => 'required',
+            'type' => 'required',
+        ]);
+
         $project = Project::findOrFail($id);
-        
+
         $project->update([
             'name' => $request->name,
             'start_date' => $request->start_date,
@@ -88,7 +106,7 @@ class ProjectController extends Controller
     public function updateField(Request $request, $id)
     {
         $project = Project::findOrFail($id);
-        
+
         $fields = ['status', 'members', 'leaders'];
         foreach ($fields as $field) {
             if ($request->has($field)) {
@@ -97,7 +115,7 @@ class ProjectController extends Controller
         }
 
         $project->save();
-        
+
         return response()->json(['success' => true]);
     }
 
@@ -115,5 +133,30 @@ class ProjectController extends Controller
             Project::whereIn('id', $ids)->delete();
         }
         return response()->json(['success' => true]);
+    }
+
+    public function tasksSummary($id)
+    {
+        $project = Project::with(['tasks.employee', 'tasks.followUps' => function($q) {
+            $q->latest();
+        }])->findOrFail($id);
+
+        $tasks = $project->tasks->map(function($task) {
+            $latestFU = $task->followUps->first();
+            return [
+                'id' => $task->id,
+                'task_title' => $task->task_title,
+                'status' => $task->status,
+                'employee' => $task->employee,
+                'follow_ups' => $task->followUps,
+                'total_time_calc' => $task->total_time,
+                'latest_activity_date' => $latestFU ? $latestFU->created_at->format('d M, h:i A') : 'No updates'
+            ];
+        });
+
+        return response()->json([
+            'project_name' => $project->name,
+            'tasks' => $tasks
+        ]);
     }
 }
