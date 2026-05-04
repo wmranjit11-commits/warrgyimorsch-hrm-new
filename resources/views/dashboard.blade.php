@@ -568,8 +568,9 @@
 
                                 </form>
                                 <form method="GET">
+                                    <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                             @php
                                             $label = 'Current Month';
 
@@ -593,7 +594,7 @@
                                         {{ $label }}
                                         </button>
 
-                                        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
+                                        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
 
                                             <!-- Normal Filters -->
                                             <div id="normalFiltersLeave">
@@ -615,11 +616,6 @@
 
                                             <!-- Custom Form -->
                                             <div id="customFilterBoxLeave" style="display:none;" onclick="event.stopPropagation();">
-                                                <form method="GET">
-
-                                                    <!-- keep employee selection -->
-                                                    <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
-
                                                     <label class="form-label small mb-1">From</label>
                                                     <input type="date" name="leave_from" class="form-control form-control-sm mb-2"
                                                         value="{{ request('leave_from') }}">
@@ -634,7 +630,6 @@
 
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
                                                     onclick="hideLeaveCustomFilter()">← Back</a>
-                                                </form>
                                             </div>
 
                                         </div>
@@ -747,11 +742,11 @@
                                         </a>
                                     </div> -->
                                 <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown">
+                                    <button type="button" class="avatar-text avatar-sm border-0 bg-transparent" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                         <i class="feather-more-vertical"></i>
-                                    </a>
+                                    </button>
 
-                                    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
+                                    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
 
                                         <!-- Normal Filters -->
                                         <div id="normalFilters">
