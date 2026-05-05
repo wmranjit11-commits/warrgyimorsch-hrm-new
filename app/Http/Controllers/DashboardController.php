@@ -492,24 +492,18 @@ class DashboardController extends Controller
         $range = request('late_range', 'today');
         $employeeFilter = request('late_employee');
 
-        // [$startDate, $endDate] = $this->getLateDateRange($range);
-        [$displayStart, $endDate] = $this->getLateDateRange($range);
+        [$startDate, $endDate] = $this->getLateDateRange($range);
 
-        // Always calculate from earlier date (carry forward)
-        // $startDate = Carbon::parse($displayStart)->copy()->startOfMonth();
-        $startDate = $displayStart;
-
-        $officeStart = Carbon::createFromTime(9, 30, 0);
-        $requiredWorkMinutes = 8 * 60 + 30; // 8h 30m = 510 mins
+        $requiredWorkMinutes = 510; // 8h 30m
 
         $records = Attendance::with('employee')
             ->whereBetween('attendance_date', [$startDate, $endDate])
             ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
-            ->orderBy('attendance_date') // VERY IMPORTANT
+            ->orderBy('attendance_date')
             ->get()
             ->groupBy('employee_id');
 
-        return $records->map(function ($employeeRecords) use ($officeStart, $requiredWorkMinutes) {
+        return $records->map(function ($employeeRecords) use ($requiredWorkMinutes) {
 
             $balanceMinutes = 0; // +ve = extra, -ve = late
 
@@ -522,31 +516,17 @@ class DashboardController extends Controller
                 $checkIn = Carbon::parse($item->check_in);
                 $checkOut = Carbon::parse($item->check_out);
 
-                $officeEnd = Carbon::createFromTime(18, 0, 0);
-
                 // Total worked minutes
                 $workedMinutes = $checkIn->diffInMinutes($checkOut);
 
-                // Required (8h 30m)
-                $requiredWorkMinutes = 510;
-
-                // Extra minutes (only after 6 PM)
-                $extraMinutes = $checkOut->gt($officeEnd)
-                    ? $officeEnd->diffInMinutes($checkOut)
-                    : 0;
-
-                // Final deficit
-                $deficitMinutes = max(0, $requiredWorkMinutes - $workedMinutes);
-
-                // FINAL LOGIC
-                $balanceMinutes += $extraMinutes;
-                $balanceMinutes -= $deficitMinutes;
+                // CORE LOGIC (IMPORTANT)
+                $balanceMinutes += ($workedMinutes - $requiredWorkMinutes);
             }
 
             $employee = $employeeRecords->first()->employee;
 
-            // Final late after adjustment
-            $finalLate = abs(min(0, $balanceMinutes)); // only negative part
+            // Only negative = late
+            $finalLate = abs(min(0, $balanceMinutes));
 
             // Format
             $hours = floor($finalLate / 60);
@@ -561,7 +541,7 @@ class DashboardController extends Controller
                 'late_duration' => $lateDuration
             ];
         })
-        ->filter(fn($emp) => $emp['late_duration'] !== '0 min'); // hide zero late
+        ->filter(fn($emp) => $emp['late_duration'] !== '0 min');
     }
 
     private function getLateDateRange($range)

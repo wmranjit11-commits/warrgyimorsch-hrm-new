@@ -1349,10 +1349,28 @@ class PayrollController extends Controller
         }
 
         $payroll->remarks = $request->remarks;
+        $payroll->is_read = false;
         if ($payroll->save()) {
             return response()->json(['success' => true]);
         }
 
         return response()->json(['success' => false, 'error' => 'Failed to save'], 500);
+    }
+
+    public function markAsRead($id)
+    {
+        $payroll = Payroll::findOrFail($id);
+
+        $isAdmin = DB::table('roles_master')
+            ->where('slug', auth()->user()->role)
+            ->whereIn('id', [1, 2, 3, 4])
+            ->exists();
+
+        if ($isAdmin) {
+            $payroll->is_read = true;
+            $payroll->save();
+        }
+
+        return response()->json(['success' => true]);
     }
 }
