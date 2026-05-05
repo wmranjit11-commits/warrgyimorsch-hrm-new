@@ -333,9 +333,39 @@
         }
 
         function removeRow(btn) {
-            if (confirm('Remove this employee from this month\'s allotment?')) {
-                btn.closest('tr').remove();
-            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Remove this employee from this month's allotment?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3858f9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-primary px-4',
+                    cancelButton: 'btn btn-light-brand px-4 me-3'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const row = btn.closest('tr');
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    
+                    setTimeout(() => {
+                        row.remove();
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Employee removed'
+                            });
+                        }
+                    }, 300);
+                }
+            });
         }
 
         function saveAllotments() {

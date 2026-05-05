@@ -130,21 +130,21 @@
                         style="border-radius: 12px 12px 0 0;">
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-muted small fw-bold text-uppercase" style="font-size: 11px;">Show</span>
-                            <select id="entriesLimit" class="form-select border-0 bg-light shadow-none fw-bold"
+                            <select id="entriesLimit" class="form-select select-small border-0 bg-light shadow-none fw-bold"
                                 onchange="paginateTable()"
-                                style="width: 90px; height: 44px; border-radius: 10px; font-size: 14px; color: #1e293b; padding: 0 12px; line-height: 44px;">
+                                style="width: 110px; height: 44px; border-radius: 10px; font-size: 14px; color: #1e293b; padding: 0 12px; line-height: 44px;">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                             </select>
                             <span class="text-muted small fw-bold text-uppercase" style="font-size: 11px;">entries</span>
                         </div>
-                        <div class="input-group" style="width: 250px;">
-                            <span class="input-group-text bg-light border-0"><i
+                        <div class="input-group bg-light" style="width: 250px; border-radius: 10px; overflow: hidden;">
+                            <span class="input-group-text bg-transparent border-0"><i
                                     class="feather-search text-muted"></i></span>
-                            <input type="text" id="taskSearch" class="form-control border-0 bg-light shadow-none fw-bold"
-                                onkeyup="filterTasks()" placeholder="Search..."
-                                style="height: 44px; font-size: 14px; border-radius: 0 10px 10px 0;">
+                            <input type="text" id="taskSearch"
+                                class="form-control border-0 bg-transparent shadow-none fw-bold" onkeyup="filterTasks()"
+                                placeholder="Search..." style="height: 44px; font-size: 14px;">
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -219,7 +219,18 @@
                                             </td>
                                             <td
                                                 style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">
-                                                <div class="fw-bold text-dark">{{ $task->task_title }}</div>
+                                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                                    <div class="fw-bold text-dark">{{ $task->task_title }}</div>
+                                                    @php
+                                                        $s = $task->status;
+                                                        $statusSlug = strtolower(str_replace(' ', '-', $s));
+                                                        $statusClass = 'status-' . $statusSlug;
+                                                    @endphp
+                                                    <span class="badge {{ $statusClass }} px-2 py-1"
+                                                        style="font-size: 9px; border-radius: 6px; letter-spacing: 0.3px; text-transform: uppercase;">
+                                                        {{ $s }}
+                                                    </span>
+                                                </div>
                                                 @if($task->followUps->where('photo', '!=', null)->count() > 0)
                                                     @php
                                                         $latestPhoto = $task->followUps->where('photo', '!=', null)->sortByDesc('created_at')->first()->photo;
@@ -427,19 +438,25 @@
                                                             <i class="feather-trash-2"></i>
                                                         </button>
                                                     </form>
-                                                    <a href="javascript:void(0);"
-                                                        class="avatar-text avatar-md bg-soft-info text-info rounded"
-                                                        title="Add Work Progress" data-bs-toggle="modal"
-                                                        data-bs-target="#followUpModal"
-                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add')">
-                                                        <i class="feather-plus-circle"></i>
-                                                    </a>
+                                                    @php
+                                                        $canAddProgress = (strtoupper(auth()->user()->role) === 'ADMIN' || strtoupper(auth()->user()->role) === 'SUPER ADMIN' || auth()->user()->employee_id == $task->employee_id);
+                                                    @endphp
+
+                                                    @if($canAddProgress)
+                                                        <a href="javascript:void(0);"
+                                                            class="avatar-text avatar-md bg-soft-info text-info rounded"
+                                                            title="Add Work Progress" data-bs-toggle="modal"
+                                                            data-bs-target="#followUpModal"
+                                                            onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add', '{{ addslashes($task->task_title) }}', {{ $task->employee_id }}, '{{ addslashes($task->employee->name ?? '') }}')">
+                                                            <i class="feather-plus-circle"></i>
+                                                        </a>
+                                                    @endif
 
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-dark text-dark rounded"
                                                         title="View Work History" data-bs-toggle="modal"
                                                         data-bs-target="#followUpModal"
-                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'history')">
+                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'history', '{{ addslashes($task->task_title) }}')">
                                                         <i class="feather-clock"></i>
                                                     </a>
                                                 </div>
@@ -500,11 +517,10 @@
 
                 <div class="row g-4">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Project <span
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Project <span
                                 class="text-danger">*</span></label>
                         <select name="project_id" id="taskProjectId"
-                            class="form-select border-0 bg-light shadow-none fw-bold"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                            class="form-select premium-select" data-placeholder="Select Project..." required>
                             <option value="">Select Project...</option>
                             @foreach($projects as $project)
                                 <option value="{{ $project->id }}">{{ $project->name }}</option>
@@ -512,31 +528,26 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Task Title <span
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Task Title <span
                                 class="text-danger">*</span></label>
                         <input type="text" name="task_title" id="taskTitle"
-                            class="form-control border-0 bg-light shadow-none fw-bold" placeholder="Enter Task Title"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                            class="form-control premium-input" placeholder="Enter Task Title..." required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Start Date <span
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Start Date <span
                                 class="text-danger">*</span></label>
                         <input type="date" name="start_date" id="taskStartDate"
-                            class="form-control border-0 bg-light shadow-none fw-bold" onclick="this.showPicker()"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                            class="form-control premium-input" onclick="this.showPicker()" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">End Date <span
-                                class="text-danger">*</span></label>
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">End Date</label>
                         <input type="date" name="end_date" id="taskEndDate"
-                            class="form-control border-0 bg-light shadow-none fw-bold" onclick="this.showPicker()"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                            class="form-control premium-input" onclick="this.showPicker()">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Priority <span
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Priority <span
                                 class="text-danger">*</span></label>
-                        <select name="priority" id="taskPriority" class="form-select border-0 bg-light shadow-none fw-bold"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                        <select name="priority" id="taskPriority" class="form-select premium-select" data-placeholder="Select Priority..." required>
                             <option value="">Select priority...</option>
                             <option value="Hard">Hard</option>
                             <option value="Medium">Medium</option>
@@ -544,9 +555,8 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Status</label>
-                        <select name="status" id="taskStatus" class="form-select border-0 bg-light shadow-none fw-bold"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Status</label>
+                        <select name="status" id="taskStatus" class="form-select premium-select" data-placeholder="Select Status..." required>
                             <option value="Pending">Pending</option>
                             <option value="In Process">In Process</option>
                             <option value="Completed">Completed</option>
@@ -556,11 +566,10 @@
                         </select>
                     </div>
                     <div class="col-md-12">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Assign To <span
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Assign To <span
                                 class="text-danger">*</span></label>
                         <select name="employee_id" id="taskEmployeeId"
-                            class="form-select border-0 bg-light shadow-none fw-bold"
-                            style="height: 48px; border-radius: 10px; font-size: 14px;" required>
+                            class="form-select premium-select" data-placeholder="Select Employee..." required>
                             @if(count($employees) > 1)
                                 <option value="">Employee name</option>
                             @endif
@@ -572,10 +581,10 @@
                         </select>
                     </div>
                     <div class="col-md-12">
-                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Task Description</label>
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Task Description</label>
                         <textarea name="description" id="taskDesc"
-                            class="form-control border-0 bg-light shadow-none fw-bold" rows="3"
-                            placeholder="Enter task description" style="border-radius: 10px; font-size: 14px;"></textarea>
+                            class="form-control premium-input" rows="3"
+                            placeholder="Enter detailed task description..."></textarea>
                     </div>
                 </div>
 
@@ -616,33 +625,31 @@
 
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Performed
-                                                By <span class="text-danger">*</span></label>
-                                            <select name="reference_name" id="followUpEmployee"
-                                                class="form-select border-0 bg-light shadow-none fw-bold"
-                                                style="height: 40px; border-radius: 10px; font-size: 13px;" required>
-                                                <option value="">Select Employee...</option>
-                                                @foreach($employees as $employee)
-                                                    <option value="{{ $employee->name }}" {{ Auth::user()->name == $employee->name ? 'selected' : '' }}>{{ $employee->name }}</option>
-                                                @endforeach
-                                            </select>
+                                                By</label>
+                                            <div class="p-3 rounded-3 bg-soft-primary border border-primary border-opacity-10 d-flex align-items-center">
+                                                <div class="avatar-text avatar-sm bg-primary text-white rounded-circle me-3" id="followUpEmpInitial">M</div>
+                                                <div>
+                                                    <div class="fw-bold text-dark fs-14" id="followUpEmpNameDisplay">...</div>
+                                                    <div class="text-muted small" style="font-size: 11px;">Assigned Task Owner</div>
+                                                </div>
+                                                <input type="hidden" name="reference_name" id="followUpEmployee">
+                                            </div>
                                         </div>
 
                                         <!-- QUICK TASK ADDER -->
                                         <div class="row g-2 mb-3 p-2 rounded"
                                             style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
                                             <div class="col-6">
-                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1"
-                                                    style="font-size: 10px;">Sub-Task</label>
+                                                <label class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Sub-Task</label>
                                                 <input type="text" id="quickTaskTitle"
-                                                    class="form-control border-0 shadow-none fw-bold" placeholder="Title"
-                                                    style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                                    class="form-control premium-input shadow-none" placeholder="Task Title..."
+                                                    style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
                                             </div>
                                             <div class="col-3">
-                                                <label class="form-label fw-bold small text-muted text-uppercase mb-1"
-                                                    style="font-size: 10px;">Hrs</label>
+                                                <label class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Hrs</label>
                                                 <input type="text" id="quickTaskHours"
-                                                    class="form-control border-0 shadow-none fw-bold" placeholder="2.5"
-                                                    style="height: 35px; border-radius: 8px; font-size: 12px;">
+                                                    class="form-control premium-input shadow-none" placeholder="Hrs"
+                                                    style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
                                             </div>
                                             <div class="col-3 d-flex align-items-end">
                                                 <button type="button" class="btn btn-primary w-100 p-0 fw-bold"
@@ -654,21 +661,19 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Work
+                                            <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Work
                                                 Description <span class="text-danger">*</span></label>
                                             <textarea name="work_description" id="workDesc"
-                                                class="form-control border-0 bg-light shadow-none fw-bold" rows="3"
-                                                placeholder="Details..." required
-                                                style="border-radius: 10px; font-size: 13px;"></textarea>
+                                                class="form-control premium-input" rows="3"
+                                                placeholder="Enter detailed work progress description..." required></textarea>
                                         </div>
 
                                         <div class="mb-4">
-                                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Upload
+                                            <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Upload
                                                 Attachment (Image/PDF/Doc)</label>
                                             <input type="file" name="photo" id="photoInput"
-                                                class="form-control border-0 bg-light shadow-none fw-bold"
+                                                class="form-control premium-input"
                                                 onchange="previewImage(this)"
-                                                style="border-radius: 10px; padding: 10px; font-size: 14px;"
                                                 accept=".jpeg,.jpg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
                                             <!-- REAL-TIME PREVIEW AREA -->
                                             <div id="previewContainer" class="mt-3 d-none"
@@ -706,9 +711,9 @@
                                             <span class="text-muted small fw-bold text-uppercase"
                                                 style="font-size: 10px; letter-spacing: 0.5px;">Show</span>
                                             <select id="modalEntriesLimit"
-                                                class="form-select border-0 bg-light shadow-none fw-bold"
+                                                class="form-select select-small border-0 bg-light shadow-none fw-bold"
                                                 onchange="changeModalEntries()"
-                                                style="width: 75px; height: 36px; font-size: 13px; border-radius: 8px; padding: 0 10px; cursor: pointer;">
+                                                style="width: 95px; height: 36px; font-size: 13px; border-radius: 8px; padding: 0 10px; cursor: pointer;">
                                                 <option value="5">5</option>
                                                 <option value="10">10</option>
                                                 <option value="25">25</option>
@@ -716,13 +721,14 @@
                                             <span class="text-muted small fw-bold text-uppercase"
                                                 style="font-size: 10px; letter-spacing: 0.5px;">entries</span>
                                         </div>
-                                        <div class="input-group" style="width: 180px;">
-                                            <span class="input-group-text bg-light border-0 py-0"><i
+                                        <div class="input-group bg-light"
+                                            style="width: 180px; border-radius: 8px; overflow: hidden;">
+                                            <span class="input-group-text bg-transparent border-0 py-0"><i
                                                     class="feather-search text-muted"></i></span>
                                             <input type="text" id="modalSearch"
-                                                class="form-control border-0 bg-light shadow-none fw-bold"
+                                                class="form-control border-0 bg-transparent shadow-none fw-bold"
                                                 placeholder="Search..." onkeyup="filterModalHistory()"
-                                                style="height: 38px; font-size: 13px; border-radius: 0 8px 8px 0;">
+                                                style="height: 38px; font-size: 13px;">
                                         </div>
                                     </div>
                                 </div>
@@ -829,6 +835,26 @@
             .form-select:focus {
                 border: 1.5px solid #3858f9 !important;
                 box-shadow: 0 0 0 0.2rem rgba(56, 88, 249, 0.1) !important;
+                background-color: #ffffff !important;
+            }
+
+            .form-select {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%233858f9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+                background-size: 12px 12px !important;
+                background-position: right 1rem center !important;
+                cursor: pointer;
+            }
+
+            .form-control,
+            .form-select {
+                transition: all 0.2s ease-in-out !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+
+            .form-control:hover,
+            .form-select:hover {
+                border-color: #cbd5e1 !important;
+                background-color: #f1f5f9 !important;
             }
 
             .modal {
@@ -998,6 +1024,90 @@
             }
         </style>
 
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        <style>
+            /* Premium Select2 Theme */
+            .select2-container--default .select2-selection--single {
+                background-color: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                height: 48px !important;
+                display: flex !important;
+                align-items: center !important;
+                padding: 0 12px !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                color: #1e293b !important;
+                font-weight: 700 !important;
+                font-size: 14px !important;
+                padding-left: 0 !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                height: 48px !important;
+                right: 12px !important;
+            }
+
+            .select2-container--default .select2-selection--single .select2-selection__arrow b {
+                border-color: #3858f9 transparent transparent transparent !important;
+                border-width: 6px 4px 0 4px !important;
+            }
+
+            .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+                border-color: transparent transparent #3858f9 transparent !important;
+                border-width: 0 4px 6px 4px !important;
+            }
+
+            .select2-dropdown {
+                border: none !important;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 12px !important;
+                padding: 8px !important;
+                background: #ffffff !important;
+                z-index: 1070 !important;
+            }
+
+            .select2-results__option {
+                padding: 10px 15px !important;
+                border-radius: 8px !important;
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                color: #475569 !important;
+                margin-bottom: 2px !important;
+            }
+
+            .select2-results__option--highlighted[aria-selected] {
+                background-color: #3858f9 !important;
+                color: #ffffff !important;
+            }
+
+            .select2-results__option[aria-selected=true] {
+                background-color: #f1f5f9 !important;
+                color: #3858f9 !important;
+            }
+
+            .select2-search--dropdown {
+                padding: 10px !important;
+            }
+
+            .select2-search--dropdown .select2-search__field {
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                padding: 8px 12px !important;
+                background: #f8fafc !important;
+                font-weight: 600 !important;
+            }
+
+            /* Remove global z-index to prevent backdrop overlap */
+            .select2-container {
+                z-index: auto !important;
+            }
+        </style>
+
         <script>
             let globalFollowUps = [];
             let modalCurrentPage = 1;
@@ -1007,6 +1117,29 @@
 
             document.addEventListener('DOMContentLoaded', function () {
                 myFollowUpModal = new bootstrap.Modal(document.getElementById('followUpModal'));
+
+                // Initialize Select2 with Premium Styling
+                if (window.jQuery && $.fn.select2) {
+                    $('.form-select:not(.select-small)').select2({
+                        width: '100%',
+                        placeholder: function () { return $(this).attr('placeholder') || 'Select Option'; },
+                        dropdownParent: $('body')
+                    });
+
+                    $('.select-small').select2({
+                        width: 'element',
+                        minimumResultsForSearch: Infinity,
+                        dropdownParent: $('body')
+                    });
+
+                    // Re-init for specific containers if needed
+                    $('#taskOffcanvas, #followUpModal').on('shown.bs.modal shown.bs.offcanvas', function () {
+                        $(this).find('.form-select').select2({
+                            width: '100%',
+                            dropdownParent: $(this)
+                        });
+                    });
+                }
 
                 // Robust Backdrop Cleanup
                 document.getElementById('followUpModal').addEventListener('hidden.bs.modal', function () {
@@ -1050,9 +1183,9 @@
                         preview.style.display = 'none';
                         docPreview.style.display = 'block';
                         docPreview.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center p-3">
-                                        <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
-                                        <span class="text-dark small">${file.name}</span>
-                                    </div>`;
+                                                <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
+                                                <span class="text-dark small">${file.name}</span>
+                                            </div>`;
                     }
                 }
             }
@@ -1092,27 +1225,17 @@
                 document.getElementById('taskStatus').value = task.status || 'In Process';
 
                 // Set Select fields (Project & Employee)
-                const pId = task.project_id || '';
-                const eId = task.employee_id || '';
+                if (window.jQuery && $.fn.select2) {
+                    $('#taskProjectId').val(task.project_id).trigger('change');
+                    $('#taskEmployeeId').val(task.employee_id).trigger('change');
+                    $('#taskPriority').val(task.priority).trigger('change');
+                    $('#taskStatus').val(task.status).trigger('change');
+                } else {
+                    const projSelect = document.getElementById('taskProjectId');
+                    if (projSelect) projSelect.value = task.project_id || '';
 
-                // Try both native and jQuery to be absolutely sure
-                const projSelect = document.getElementById('taskProjectId');
-                if (projSelect) {
-                    projSelect.value = pId;
-                    if (projSelect.value !== pId.toString()) {
-                        // Fallback search if value doesn't match directly
-                        for (let i = 0; i < projSelect.options.length; i++) {
-                            if (projSelect.options[i].value == pId) {
-                                projSelect.selectedIndex = i;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                const empSelect = document.getElementById('taskEmployeeId');
-                if (empSelect) {
-                    empSelect.value = eId;
+                    const empSelect = document.getElementById('taskEmployeeId');
+                    if (empSelect) empSelect.value = task.employee_id || '';
                 }
 
                 // Summernote description
@@ -1157,12 +1280,21 @@
                     } else {
                         document.getElementById('taskDesc').value = '';
                     }
+                    if (window.jQuery && $.fn.select2) {
+                        $('.form-select').val('').trigger('change');
+                    }
                 } catch (e) { }
             }
 
-            function openFollowUpModal(taskId, taskProjectName, mode = 'history') {
+            function openFollowUpModal(taskId, taskProjectName, mode = 'history', taskTitle = '', assignedEmpId = null, assignedEmpName = '') {
                 document.getElementById('followUpTaskId').value = taskId;
-                document.getElementById('followUpTaskTitle').innerText = taskProjectName;
+
+                // Display both Project and Task Title in header
+                let headerTitle = taskProjectName;
+                if (taskTitle) {
+                    headerTitle += ` | Task: ${taskTitle}`;
+                }
+                document.getElementById('followUpTaskTitle').innerText = headerTitle;
                 document.getElementById('followUpForm').reset();
                 document.getElementById('totalFollowUpHours').value = 0;
                 try { $('#workDesc').summernote('code', ''); } catch (e) { }
@@ -1180,6 +1312,17 @@
                     historyCol.classList.add('col-lg-7');
                     modalDialog.classList.add('modal-xl');
                     document.getElementById('followUpModalLabel').innerText = 'Add Work Progress';
+
+                    // Display assigned employee name and lock it
+                    if (assignedEmpName) {
+                        const empDisplay = document.getElementById('followUpEmpNameDisplay');
+                        const empInitial = document.getElementById('followUpEmpInitial');
+                        const empHidden = document.getElementById('followUpEmployee');
+                        
+                        if (empDisplay) empDisplay.innerText = assignedEmpName;
+                        if (empInitial) empInitial.innerText = assignedEmpName.charAt(0).toUpperCase();
+                        if (empHidden) empHidden.value = assignedEmpName;
+                    }
                 } else {
                     formCol.classList.add('d-none');
                     historyCol.classList.remove('col-lg-7');
@@ -1215,12 +1358,11 @@
                 // 2. Format HTML - Prepend to the TOP using Real Bullets and Numbered List for details
                 const timeStr = hours ? ` — <b style="color: #3858f9;">${hours} ${isNaN(hours) ? '' : 'Hours'}</b>` : '';
                 const html = `<div class="mb-4" style="border-left: 4px solid #3858f9; padding-left: 20px;">
-                                            <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
-                                            <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
-                                                <li><em>First point about this task...</em></li>
-                                                <li><em>Second point about this task...</em></li>
-                                            </ol>
-                                          </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
+                                                    <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
+                                                    <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
+                                                        <li>&nbsp;</li>
+                                                    </ol>
+                                                  </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
 
                 if ($('#workDesc').length && typeof $.fn.summernote === 'function') {
                     const currentContent = $('#workDesc').summernote('code');
@@ -1265,42 +1407,42 @@
                     let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                     body.innerHTML += `
-                                                    <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
-                                                        <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
-                                                        <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                            ${nameHtml}
-                                                        </td>
-                                                        <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                            ${timeDisplay}
-                                                        </td>
-                                                        <td style="font-size: 13px; white-space: nowrap;">
-                                                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                                                        </td>
-                                                        <td class="pe-3 text-center">
-                                                            <div class="d-flex align-items-center justify-content-center">
-                                                                ${viewBtn}
-                                                                ${delBtn}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
-                                                        <td colspan="5" class="p-0">
-                                                            <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                                                <div style="padding: 20px 25px;">
-                                                                    <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
-                                                                        ${fu.work_description}
+                                                            <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
+                                                                <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
+                                                                <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                    ${nameHtml}
+                                                                </td>
+                                                                <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                    ${timeDisplay}
+                                                                </td>
+                                                                <td style="font-size: 13px; white-space: nowrap;">
+                                                                    <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                                                                </td>
+                                                                <td class="pe-3 text-center">
+                                                                    <div class="d-flex align-items-center justify-content-center">
+                                                                        ${viewBtn}
+                                                                        ${delBtn}
                                                                     </div>
-                                                                    ${fu.photo ? `
-                                                                    <div class="mt-3">
-                                                                        <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
-                                                                            <i class="feather-image me-1"></i> View Attached File
-                                                                        </a>
-                                                                    </div>` : ''}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                `;
+                                                                </td>
+                                                            </tr>
+                                                            <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
+                                                                <td colspan="5" class="p-0">
+                                                                    <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                                                        <div style="padding: 20px 25px;">
+                                                                            <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
+                                                                                ${fu.work_description}
+                                                                            </div>
+                                                                            ${fu.photo ? `
+                                                                            <div class="mt-3">
+                                                                                <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
+                                                                                    <i class="feather-image me-1"></i> View Attached File
+                                                                                </a>
+                                                                            </div>` : ''}
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        `;
                 });
                 if (totalItems === 0) body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
 
@@ -1413,10 +1555,10 @@
                         const secs = Math.floor(diff / 1000);
 
                         timer.innerHTML = `
-                                                            <span class="text-primary">${days}d</span> 
-                                                            <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
-                                                            <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
-                                                        `;
+                                                                    <span class="text-primary">${days}d</span> 
+                                                                    <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
+                                                                    <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
+                                                                `;
                     } else {
                         let diff = now - end;
 
@@ -1429,10 +1571,10 @@
                         const secs = Math.floor(diff / 1000);
 
                         timer.innerHTML = `
-                                                            <span class="text-danger">${days}d</span> 
-                                                            <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
-                                                            <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
-                                                        `;
+                                                                    <span class="text-danger">${days}d</span> 
+                                                                    <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
+                                                                    <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
+                                                                `;
                     }
                 });
             }
@@ -1523,112 +1665,112 @@
             });
 
             function deleteFollowUp(id) {
-                Swal.fire({
-                    title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
-                    showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch(`/daily-tasks/follow-up/${id}`, {
-                            method: 'DELETE',
-                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-                        }).then(res => res.json()).then(data => {
+                    Swal.fire({
+                        title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
+                        showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/daily-tasks/follow-up/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                            }).then(res => res.json()).then(data => {
+                                if (data.success) {
+                                    Toast.fire({ icon: 'success', title: data.success });
+                                    loadFollowUpHistory(document.getElementById('followUpTaskId').value);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                function deleteRecord(e, form) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
+                        showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+
+                function updateTaskStatus(id, status) {
+                    fetch(`/daily-tasks/${id}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: status })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
                             if (data.success) {
-                                Toast.fire({ icon: 'success', title: data.success });
-                                loadFollowUpHistory(document.getElementById('followUpTaskId').value);
+                                Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+                            } else {
+                                Toast.fire({ icon: 'error', title: 'Update failed' });
                             }
                         });
-                    }
-                });
-            }
-
-            function deleteRecord(e, form) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
-                    showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            }
-
-            function updateTaskStatus(id, status) {
-                fetch(`/daily-tasks/${id}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ status: status })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
-                        } else {
-                            Toast.fire({ icon: 'error', title: 'Update failed' });
-                        }
-                    });
-            }
-
-            function updateTaskPriority(id, priority) {
-                fetch(`/daily-tasks/${id}/priority`, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ priority: priority })
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
-                        } else {
-                            Toast.fire({ icon: 'error', title: 'Update failed' });
-                        }
-                    });
-            }
-
-            function showTaskDesc(id) {
-                const html = document.getElementById('task_desc_' + id).innerHTML;
-                Swal.fire({
-                    title: 'Task Details & Progress',
-                    html: `<div class="custom-html-content" style="max-height: 75vh; overflow-y: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left;">${html}</div>`,
-                    width: '800px',
-                    showConfirmButton: true,
-                    confirmButtonColor: '#3858f9'
-                });
-            }
-
-            function viewAttachmentPopup(url) {
-                const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
-                let htmlContent = '';
-                
-                if (isImage) {
-                    htmlContent = `<img src="${url}" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">`;
-                } else {
-                    htmlContent = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none; border-radius: 8px;"></iframe>`;
                 }
-                
-                Swal.fire({
-                    title: 'Attachment Preview',
-                    html: htmlContent,
-                    width: '900px',
-                    showCloseButton: true,
-                    showConfirmButton: false
-                });
-            }
-        </script>
 
-        @if(session('success'))
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
-                });
+                function updateTaskPriority(id, priority) {
+                    fetch(`/daily-tasks/${id}/priority`, {
+                        method: 'PATCH',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ priority: priority })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+                            } else {
+                                Toast.fire({ icon: 'error', title: 'Update failed' });
+                            }
+                        });
+                }
+
+                function showTaskDesc(id) {
+                    const html = document.getElementById('task_desc_' + id).innerHTML;
+                    Swal.fire({
+                        title: 'Task Details & Progress',
+                        html: `<div class="custom-html-content" style="max-height: 75vh; overflow-y: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left;">${html}</div>`,
+                        width: '800px',
+                        showConfirmButton: true,
+                        confirmButtonColor: '#3858f9'
+                    });
+                }
+
+                function viewAttachmentPopup(url) {
+                    const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
+                    let htmlContent = '';
+
+                    if (isImage) {
+                        htmlContent = `<img src="${url}" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">`;
+                    } else {
+                        htmlContent = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none; border-radius: 8px;"></iframe>`;
+                    }
+
+                    Swal.fire({
+                        title: 'Attachment Preview',
+                        html: htmlContent,
+                        width: '900px',
+                        showCloseButton: true,
+                        showConfirmButton: false
+                    });
+                }
             </script>
-        @endif
+
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+                    });
+                </script>
+            @endif
     @endpush

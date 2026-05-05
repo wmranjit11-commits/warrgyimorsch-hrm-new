@@ -97,6 +97,72 @@
             /* Allow dropdowns to pop out */
         }
 
+        /* Global Premium Input Styling */
+        .form-control, .form-select, .premium-input, .premium-select {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            height: 48px !important;
+            padding: 10px 16px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: #1e293b !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #fff !important;
+            border-color: #3858f9 !important;
+            box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.1) !important;
+        }
+        textarea.form-control { height: auto !important; }
+
+        /* Global Select2 Premium Overrides */
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            min-height: 48px !important;
+            padding: 6px 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all 0.2s ease !important;
+        }
+        .select2-container--default .select2-selection--multiple {
+            padding: 4px 8px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #1e293b !important;
+            font-weight: 500 !important;
+            padding-left: 4px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+            right: 12px !important;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            background-color: #fff !important;
+            border-color: #3858f9 !important;
+        }
+        .select2-container .select2-selection--multiple .select2-selection__choice {
+            background-color: #3858f9 !important;
+            border: none !important;
+            color: #fff !important;
+            border-radius: 6px !important;
+            padding: 4px 10px !important;
+            margin-top: 2px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+        }
+        .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+            color: rgba(255, 255, 255, 0.8) !important;
+            margin-right: 8px !important;
+            border: none !important;
+        }
+        .select2-search__field::placeholder { color: #94a3b8 !important; }
+
         /* Premium Status & Priority UI */
         .premium-status-dropdown .btn-status,
         .priority-badge,
@@ -343,6 +409,33 @@
                 title: "{{ Session::get('info') }}"
             });
         @endif
+
+        // Global Delete Confirmation
+        function deleteData(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3858f9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-primary px-4',
+                    cancelButton: 'btn btn-light-brand px-4 me-3'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+            return false;
+        }
     </script>
     @yield('modals')
     @stack('modals')

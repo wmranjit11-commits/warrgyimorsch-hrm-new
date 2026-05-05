@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\DailyTask;
 use App\Models\TaskFollowUp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
@@ -29,6 +30,7 @@ class ProjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'department' => 'required|string',
             'description' => 'required',
             'type' => 'required',
@@ -37,6 +39,7 @@ class ProjectController extends Controller
 
         $project = Project::create([
             'name' => $request->name,
+            'slug' => Str::slug($request->name),
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'status' => $request->status,
@@ -52,43 +55,41 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Project created successfully');
     }
 
-    public function show($id)
+    public function show(Project $project)
     {
-        $project = Project::with(['tasks.employee', 'tasks.followUps'])->findOrFail($id);
         $employees = \App\Models\Employee::all();
         $departments = \App\Models\Department::all();
 
         // Fetch activities (TaskFollowUps) for this project
-        $activities = TaskFollowUp::whereHas('dailyTask', function ($q) use ($id) {
-            $q->where('project_id', $id);
+        $activities = TaskFollowUp::whereHas('dailyTask', function ($q) use ($project) {
+            $q->where('project_id', $project->id);
         })->with('dailyTask.employee')->latest()->get();
 
         return view('projects.show', compact('project', 'employees', 'departments', 'activities'));
     }
 
-    public function edit($id)
+    public function edit(Project $project)
     {
-        $project = Project::findOrFail($id);
         $employees = \App\Models\Employee::all();
         $departments = \App\Models\Department::all();
 
         return view('projects.edit', compact('project', 'employees', 'departments'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Project $project)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'department' => 'required|string',
             'description' => 'required',
             'type' => 'required',
         ]);
 
-        $project = Project::findOrFail($id);
-
         $project->update([
             'name' => $request->name,
+            'slug' => Str::slug($request->name),
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'status' => $request->status,
@@ -103,13 +104,21 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Project updated successfully');
     }
 
-    public function updateField(Request $request, $id)
+    public function updateField(Request $request, Project $project)
     {
-        $project = Project::findOrFail($id);
-
         $fields = ['status', 'members', 'leaders'];
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $isLead = false;
+        if (is_array($project->leaders)) {
+            $isLead = in_array(auth()->user()->employee_id, $project->leaders);
+        }
+
         foreach ($fields as $field) {
             if ($request->has($field)) {
+                // Only Admin or Lead can change status
+                if ($field === 'status' && $role !== 'ADMIN' && $role !== 'SUPER ADMIN' && !$isLead) {
+                    continue;
+                }
                 $project->$field = $request->$field;
             }
         }
@@ -119,9 +128,8 @@ class ProjectController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function destroy($id)
+    public function destroy(Project $project)
     {
-        $project = Project::findOrFail($id);
         $project->delete();
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
     }
@@ -135,12 +143,8 @@ class ProjectController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function tasksSummary($id)
+    public function tasksSummary(Project $project)
     {
-        $project = Project::with(['tasks.employee', 'tasks.followUps' => function($q) {
-            $q->latest();
-        }])->findOrFail($id);
-
         $tasks = $project->tasks->map(function($task) {
             $latestFU = $task->followUps->first();
             return [

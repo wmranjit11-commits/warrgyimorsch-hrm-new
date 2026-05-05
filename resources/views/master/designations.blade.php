@@ -107,7 +107,7 @@
                                                         <i class="feather-edit-3"></i>
                                                     </button>
                                                     <form action="{{ route('master.designation.destroy', $desg->id) }}"
-                                                        method="POST" onsubmit="return confirm('Are you sure?');">
+                                                        method="POST" onsubmit="return deleteData(event);">
                                                         @csrf @method('DELETE')
                                                         <button type="submit"
                                                             class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0"
