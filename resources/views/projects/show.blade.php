@@ -89,6 +89,14 @@
                                                 <span><i class="feather-calendar me-1"></i>
                                                     {{ $project->start_date ? $project->start_date->format('M d, Y') : 'N/A' }}</span>
                                                 <span class="vr"></span>
+                                                @if($project->status != 'Completed')
+                                                    @if($project->end_date)
+                                                        <span class="task-timer fw-bold text-primary" data-end="{{ $project->end_date->toIso8601String() }}">Calculating...</span>
+                                                    @else
+                                                        <span class="task-timer fw-bold text-info" data-start="{{ $project->start_date->toIso8601String() }}">Calculating...</span>
+                                                    @endif
+                                                @endif
+                                                <span class="vr"></span>
                                                 <span><i class="feather-tag me-1"></i> {{ $project->technology }}</span>
                                             </div>
                                         </div>
@@ -137,15 +145,40 @@
                                         <div class="p-3 border rounded-3 bg-light bg-opacity-10">
                                             <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Due
                                                 Date</span>
-                                            <span
-                                                class="fw-bold text-dark">{{ $project->end_date ? $project->end_date->format('M d, Y') : 'N/A' }}</span>
+                                            @if($project->end_date)
+                                                <span class="fw-bold text-dark">{{ $project->end_date->format('M d, Y') }}</span>
+                                            @else
+                                                <span class="fw-bold text-info">Ongoing</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-4 mb-5">
+                                    <div class="col-sm-6">
+                                        <div class="p-3 border rounded-3 bg-light bg-opacity-10">
+                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Project Type</span>
+                                            <span class="fw-bold text-dark"><i class="feather-{{ strtolower($project->type) == 'personal' ? 'user' : 'users' }} me-2 text-primary"></i>{{ $project->type ?? 'Standard' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="p-3 border rounded-3 bg-light bg-opacity-10">
+                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Manage Access</span>
+                                            <span class="fw-bold text-dark"><i class="feather-{{ strtolower($project->manage) == 'everyone' ? 'globe' : 'shield' }} me-2 text-primary"></i>{{ $project->manage ?? 'Everyone' }}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <h6 class="fw-bold text-dark mb-3">Project Description</h6>
                                 <div class="text-muted lh-lg fs-14">
-                                    {!! $project->description !!}
+                                    @php
+                                        // Clean up description to remove empty bullet points or paragraphs added by editor
+                                        $cleanDescription = $project->description;
+                                        // Remove empty tags like <p><br></p> or <li><br></li> or <li>&nbsp;</li>
+                                        $cleanDescription = preg_replace('/<(p|li|div|span)[^>]*>\s*(<br\/?>|&nbsp;|\s)*<\/\1>/i', '', $cleanDescription);
+                                        // Remove trailing empty tags
+                                        $cleanDescription = preg_replace('/(<br\/?>|&nbsp;|\s)+$/i', '', $cleanDescription);
+                                    @endphp
+                                    {!! $cleanDescription !!}
                                 </div>
                             </div>
                         </div>
@@ -462,6 +495,61 @@
 
             var chart = new ApexCharts(document.querySelector("#project-progress-chart"), options);
             chart.render();
+
+            // Project Timer Logic
+            function updateProjectTimers() {
+                const now = new Date();
+                const timers = document.querySelectorAll('.task-timer');
+
+                timers.forEach(timer => {
+                    const dataEnd = timer.getAttribute('data-end');
+                    const dataStart = timer.getAttribute('data-start');
+
+                    if (dataEnd) {
+                        const end = new Date(dataEnd);
+                        if (now < end) {
+                            let diff = end - now;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            diff -= days * (1000 * 60 * 60 * 24);
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            diff -= hours * (1000 * 60 * 60);
+                            const mins = Math.floor(diff / (1000 * 60));
+                            diff -= mins * (1000 * 60);
+                            const secs = Math.floor(diff / 1000);
+
+                            timer.innerHTML = `<span class="text-primary">${days}d</span> <span class="text-secondary">${hours}h ${mins}m ${secs}s</span> <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>`;
+                        } else {
+                            let diff = now - end;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            diff -= days * (1000 * 60 * 60 * 24);
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            diff -= hours * (1000 * 60 * 60);
+                            const mins = Math.floor(diff / (1000 * 60));
+                            diff -= mins * (1000 * 60);
+                            const secs = Math.floor(diff / 1000);
+
+                            timer.innerHTML = `<span class="text-danger">${days}d</span> <span class="text-danger small">${hours}h ${mins}m ${secs}s</span> <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>`;
+                        }
+                    } else if (dataStart && dataStart !== '') {
+                        const start = new Date(dataStart);
+                        let diff = now - start;
+                        if (diff < 0) diff = 0;
+
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        diff -= days * (1000 * 60 * 60 * 24);
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        diff -= hours * (1000 * 60 * 60);
+                        const mins = Math.floor(diff / (1000 * 60));
+                        diff -= mins * (1000 * 60);
+                        const secs = Math.floor(diff / 1000);
+
+                        timer.innerHTML = `<span class="text-info">${days}d</span> <span class="text-info small">${hours}h ${mins}m ${secs}s</span> <span class="text-info fw-bold ms-1" style="font-size:9px;">ELAPSED</span>`;
+                    }
+                });
+            }
+
+            setInterval(updateProjectTimers, 1000);
+            updateProjectTimers();
 
 
         });

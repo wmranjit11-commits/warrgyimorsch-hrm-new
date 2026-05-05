@@ -41,11 +41,9 @@ class EmployeesExport extends DefaultValueBinder implements FromCollection, With
             'GENDER',
             'DATE OF BIRTH',
             'DATE OF JOINING',
-            'EMPLOYEE TYPE',
             'ROLE',
             'DEPARTMENT',
             'DESIGNATION',
-            'USERNAME',
             'AADHAAR NUMBER',
             'PAN NUMBER',
             'RESIDENTIAL ADDRESS',
@@ -79,18 +77,16 @@ class EmployeesExport extends DefaultValueBinder implements FromCollection, With
 
         return [
             $counter,
-            'EC' . str_pad($emp->id, 4, '0', STR_PAD_LEFT),
+            $emp->employee_code ?? ('EC' . str_pad($emp->id, 4, '0', STR_PAD_LEFT)),
             $emp->name,
             $emp->email ?? '-',
             $emp->mobile_number ?? '-',
             $emp->gender ? ucfirst($emp->gender) : '-',
             $emp->date_of_birth ?? '-',
             $emp->date_of_joining ?? '-',
-            $emp->employee_type ? ucfirst(str_replace('_', ' ', $emp->employee_type)) : '-',
             $emp->role ? ucfirst(str_replace('_', ' ', $emp->role)) : '-',
             $emp->department ? ucfirst(str_replace('_', ' ', $emp->department)) : '-',
             $emp->designation ?? '-',
-            $emp->username ?? '-',
             $emp->aadhaar_number ?? '-',
             $emp->pan_number ?? '-',
             $emp->address ?? '-',
@@ -119,8 +115,8 @@ class EmployeesExport extends DefaultValueBinder implements FromCollection, With
     {
         $column = $cell->getColumn();
         
-        // Force strings for columns with long numbers to prevent scientific notation
-        if (in_array($column, ['E', 'N', 'AA'])) {
+        // Force strings for columns with long numbers (Mobile, Aadhaar, Account Number)
+        if (in_array($column, ['E', 'L', 'Y'])) {
             $cell->setValueExplicit($value, DataType::TYPE_STRING);
             return true;
         }
@@ -145,8 +141,9 @@ class EmployeesExport extends DefaultValueBinder implements FromCollection, With
     public function columnFormats(): array
     {
         return [
-            'AA' => NumberFormat::FORMAT_TEXT, // Account Number as Text
-            'N' => NumberFormat::FORMAT_TEXT,  // Aadhaar as Text
+            'E' => NumberFormat::FORMAT_TEXT,  // Mobile as Text
+            'L' => NumberFormat::FORMAT_TEXT,  // Aadhaar as Text
+            'Y' => NumberFormat::FORMAT_TEXT,  // Account Number as Text
         ];
     }
 
@@ -161,32 +158,30 @@ class EmployeesExport extends DefaultValueBinder implements FromCollection, With
             'F' => 12,   // GENDER
             'G' => 16,   // DOB
             'H' => 16,   // DOJ
-            'I' => 18,   // TYPE
-            'J' => 20,   // ROLE
-            'K' => 25,   // DEPARTMENT
-            'L' => 25,   // DESIGNATION
-            'M' => 18,   // USERNAME
-            'N' => 22,   // AADHAAR
-            'O' => 18,   // PAN
-            'P' => 45,   // ADDRESS
-            'Q' => 12,   // TIME IN
-            'R' => 12,   // TIME OUT
-            'S' => 8,    // PF
-            'T' => 20,   // PF NUMBER
-            'U' => 8,    // ESI
-            'V' => 20,   // ESI NUMBER
-            'W' => 12,   // INSURANCE
-            'X' => 25,   // INSURANCE PROVIDER
-            'Y' => 25,   // INSURANCE POLICY
-            'Z' => 25,   // BANK NAME
-            'AA' => 25,  // ACCOUNT NUMBER (Increased)
-            'AB' => 18,  // IFSC
-            'AC' => 20,  // BASIC
-            'AD' => 20,  // HRA
-            'AE' => 25,  // CONVEYANCE
-            'AF' => 25,  // MEDICAL
-            'AG' => 22,  // OTHER
-            'AH' => 22,  // TOTAL
+            'I' => 20,   // ROLE
+            'J' => 25,   // DEPARTMENT
+            'K' => 25,   // DESIGNATION
+            'L' => 22,   // AADHAAR
+            'M' => 18,   // PAN
+            'N' => 45,   // ADDRESS
+            'O' => 12,   // TIME IN
+            'P' => 12,   // TIME OUT
+            'Q' => 8,    // PF
+            'R' => 20,   // PF NUMBER
+            'S' => 8,    // ESI
+            'T' => 20,   // ESI NUMBER
+            'U' => 12,   // INSURANCE
+            'V' => 25,   // INSURANCE PROVIDER
+            'W' => 25,   // INSURANCE POLICY
+            'X' => 25,   // BANK NAME
+            'Y' => 25,   // ACCOUNT NUMBER
+            'Z' => 18,   // IFSC
+            'AA' => 20,  // BASIC
+            'AB' => 20,  // HRA
+            'AC' => 25,  // CONVEYANCE
+            'AD' => 25,  // MEDICAL
+            'AE' => 22,  // OTHER
+            'AF' => 22,  // TOTAL
         ];
     }
 }

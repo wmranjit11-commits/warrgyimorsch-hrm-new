@@ -17,7 +17,6 @@ class Employee extends Model
         'date_of_joining',
         'date_of_birth',
         'gender',
-        'employee_type',
         'password',
         'aadhaar_number',
         'pan_number',

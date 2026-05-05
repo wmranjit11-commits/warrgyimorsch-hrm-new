@@ -19,6 +19,7 @@ class Project extends Model
         'description',
         'technology',
         'type',
+        'manage',
         'leaders',
         'members',
     ];

@@ -20,10 +20,11 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <!-- Right Aligned Search & Actions -->
-                    <div class="input-group d-none d-md-flex" style="width: 250px;">
-                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control bg-light border-0 shadow-none"
-                            placeholder="Search..." onkeyup="applyFilters()">
+                    <div class="d-none d-md-flex align-items-center"
+                        style="width: 280px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
+                        <i class="feather-search text-muted" style="font-size: 14px;"></i>
+                        <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Search employees..."
+                            style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
                     </div>
 
                     <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
@@ -72,7 +73,7 @@
                                 style="border-radius: 8px; height: 44px;">
                                 <option value="">All Roles</option>
                                 @foreach (\App\Models\RoleMaster::all() as $role)
-                                    <option value="{{ strtolower($role->name) }}">{{ $role->name }}</option>
+                                    <option value="{{ $role->slug }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -136,9 +137,8 @@
                         <tbody>
                             @forelse($employees as $key => $emp)
                                 <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
-                                    data-employee-id="{{ $emp->id }}" data-employee-type="{{ $emp->employee_type }}"
-                                    data-employee-dept="{{ strtolower($emp->department) }}"
-                                    data-employee-role="{{ strtolower($emp->role) }}">
+                                    data-employee-id="{{ $emp->id }}"
+                                    data-employee-dept="{{ $emp->department }}" data-employee-role="{{ $emp->role }}">
 
                                     <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox"
                                             data-id="{{ $emp->id }}"></td>
@@ -220,7 +220,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-4 text-muted">No employees found. <a
+                                    <td colspan="7" class="text-center py-4 text-muted">No employees found. <a
                                             href="{{ route('employees.create') }}">Add one</a></td>
                                 </tr>
                             @endforelse
@@ -876,226 +876,226 @@
                     let photoHtml = emp.photo
                         ? `<img src="/storage/${emp.photo}" class="employee-photo-premium">`
                         : `<div class="employee-photo-premium bg-light d-flex align-items-center justify-content-center text-muted">
-                                                        <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
-                                                       </div>`;
+                                                            <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
+                                                           </div>`;
 
                     const html = `
-                                                    <div class="employee-details-container">
-                                                        <div class="employee-premium-header">
-                                                            <div class="d-flex align-items-center gap-4">
-                                                                <div class="header-photo-wrapper">
-                                                                    ${emp.photo ?
+                                                        <div class="employee-details-container">
+                                                            <div class="employee-premium-header">
+                                                                <div class="d-flex align-items-center gap-4">
+                                                                    <div class="header-photo-wrapper">
+                                                                        ${emp.photo ?
                             `<img src="{{ asset('storage') }}/${emp.photo}" alt="${emp.name}" style="width:100px; height:100px; border-radius: 20px; object-fit: cover; border: 3px solid rgba(255,255,255,0.2);">` :
                             `<div class="employee-photo-premium d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.2); width:100px; height:100px; border-radius: 20px; border: 3px solid rgba(255,255,255,0.1); font-size: 42px; font-weight: 800; color: white;">
-                                                                            ${emp.name.charAt(0)}
-                                                                        </div>`
+                                                                                ${emp.name.charAt(0)}
+                                                                            </div>`
                         }
-                                                                </div>
-                                                                <div>
-                                                                    <h3 class="mb-1 fw-bold text-white">${emp.name}</h3>
-                                                                    <div class="d-flex align-items-center gap-2 opacity-75">
-                                                                        <i class="bi bi-briefcase small"></i>
-                                                                        <span class="small fw-bold text-uppercase" style="letter-spacing: 1px;">${emp.designation || 'EMPLOYEE'}</span>
                                                                     </div>
-                                                                    <div class="d-flex align-items-center gap-2 mt-2">
-                                                                        <span class="badge bg-primary px-3 rounded-pill" style="font-size: 10px;">${emp.department || 'N/A'}</span>
+                                                                    <div>
+                                                                        <h3 class="mb-1 fw-bold text-white">${emp.name}</h3>
+                                                                        <div class="d-flex align-items-center gap-2 opacity-75">
+                                                                            <i class="bi bi-briefcase small"></i>
+                                                                            <span class="small fw-bold text-uppercase" style="letter-spacing: 1px;">${emp.designation || 'EMPLOYEE'}</span>
+                                                                        </div>
+                                                                        <div class="d-flex align-items-center gap-2 mt-2">
+                                                                            <span class="badge bg-primary px-3 rounded-pill" style="font-size: 10px;">${emp.department || 'N/A'}</span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
 
-                                                        <div class="nav-tabs-custom">
-                                                            <button class="nav-tab active" id="tabPersonal" onclick="showTab('personal')"><i class="bi bi-person"></i>PERSONAL</button>
-                                                            <button class="nav-tab" id="tabBank" onclick="showTab('bank')"><i class="bi bi-bank"></i>BANK</button>
-                                                            <button class="nav-tab" id="tabSalary" onclick="showTab('salary')"><i class="bi bi-cash-coin"></i>SALARY</button>
-                                                        </div>
+                                                            <div class="nav-tabs-custom">
+                                                                <button class="nav-tab active" id="tabPersonal" onclick="showTab('personal')"><i class="bi bi-person"></i>PERSONAL</button>
+                                                                <button class="nav-tab" id="tabBank" onclick="showTab('bank')"><i class="bi bi-bank"></i>BANK</button>
+                                                                <button class="nav-tab" id="tabSalary" onclick="showTab('salary')"><i class="bi bi-cash-coin"></i>SALARY</button>
+                                                            </div>
 
-                                                        <div class="tab-content" id="modalTabContent">
-                                                            <!-- PERSONAL TAB -->
-                                                            <div id="employeeTabPersonal" class="tab-pane active">
-                                                                <div class="details-grid">
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-person-fill"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Name</label>
-                                                                            <p class="detail-value">${emp.name}</p>
+                                                            <div class="tab-content" id="modalTabContent">
+                                                                <!-- PERSONAL TAB -->
+                                                                <div id="employeeTabPersonal" class="tab-pane active">
+                                                                    <div class="details-grid">
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-person-fill"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Name</label>
+                                                                                <p class="detail-value">${emp.name}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-phone"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Mobile</label>
-                                                                            <p class="detail-value">${emp.mobile_number || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-phone"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Mobile</label>
+                                                                                <p class="detail-value">${emp.mobile_number || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card full-width">
-                                                                        <div class="detail-icon"><i class="bi bi-envelope"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Email Address</label>
-                                                                            <p class="detail-value">${emp.email || 'N/A'}</p>
+                                                                        <div class="detail-card full-width">
+                                                                            <div class="detail-icon"><i class="bi bi-envelope"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Email Address</label>
+                                                                                <p class="detail-value">${emp.email || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Date of Birth</label>
-                                                                            <p class="detail-value">${emp.date_of_birth || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Date of Birth</label>
+                                                                                <p class="detail-value">${emp.date_of_birth || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-gender-ambiguous"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Gender</label>
-                                                                            <p class="detail-value">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1) : 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-gender-ambiguous"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Gender</label>
+                                                                                <p class="detail-value">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1) : 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-card-heading"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Aadhaar Number</label>
-                                                                            <p class="detail-value">${emp.aadhaar_number || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-card-heading"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Aadhaar Number</label>
+                                                                                <p class="detail-value">${emp.aadhaar_number || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-credit-card-2-back"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">PAN Number</label>
-                                                                            <p class="detail-value">${emp.pan_number || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-credit-card-2-back"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">PAN Number</label>
+                                                                                <p class="detail-value">${emp.pan_number || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card full-width">
-                                                                        <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Residential Address</label>
-                                                                            <p class="detail-value">${emp.address || 'N/A'}</p>
+                                                                        <div class="detail-card full-width">
+                                                                            <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Residential Address</label>
+                                                                                <p class="detail-value">${emp.address || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
 
-                                                                    <!-- WORK & JOB DETAILS (Merged into Personal) -->
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-shield-lock"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Role</label>
-                                                                            <p class="detail-value">${emp.role ? emp.role.replace(/_/g, ' ').toUpperCase() : 'N/A'}</p>
+                                                                        <!-- WORK & JOB DETAILS (Merged into Personal) -->
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-shield-lock"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Role</label>
+                                                                                <p class="detail-value">${emp.role ? emp.role.replace(/_/g, ' ').toUpperCase() : 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-calendar-check"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Joining Date</label>
-                                                                            <p class="detail-value">${emp.date_of_joining || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-calendar-check"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Joining Date</label>
+                                                                                <p class="detail-value">${emp.date_of_joining || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-clock"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Shift Hours</label>
-                                                                            <p class="detail-value">${formatTime12h(emp.time_in)} - ${formatTime12h(emp.time_out)}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-clock"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Shift Hours</label>
+                                                                                <p class="detail-value">${formatTime12h(emp.time_in)} - ${formatTime12h(emp.time_out)}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-calendar-x"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Leave Balance</label>
-                                                                            <p class="detail-value text-primary">${emp.leave || '0'} Days</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-calendar-x"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Leave Balance</label>
+                                                                                <p class="detail-value text-primary">${emp.leave || '0'} Days</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <!-- Statutory details will follow -->
+                                                                        <!-- Statutory details will follow -->
 
-                                                                    <!-- STATUTORY DETAILS (Merged into Personal) -->
-                                                                    <div class="detail-card full-width" style="border-left: 4px solid #6366f1;">
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label text-primary">Statutory Enrollment</label>
-                                                                            <div class="d-flex flex-column gap-3 mt-2">
-                                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                                    <span class="small fw-bold text-dark">PF Number</span>
-                                                                                    <span class="status-badge ${emp.pf ? 'status-enrolled' : 'status-not-enrolled'}">${emp.pf ? emp.pf_number : 'Not Enrolled'}</span>
-                                                                                </div>
-                                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                                    <span class="small fw-bold text-dark">ESI Number</span>
-                                                                                    <span class="status-badge ${emp.esi ? 'status-enrolled' : 'status-not-enrolled'}">${emp.esi ? emp.esi_number : 'Not Enrolled'}</span>
-                                                                                </div>
-                                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                                    <span class="small fw-bold text-dark">Insurance</span>
-                                                                                    <span class="status-badge ${emp.insurance ? 'status-enrolled' : 'status-not-enrolled'}">${emp.insurance ? emp.insurance_provider : 'Not Enrolled'}</span>
+                                                                        <!-- STATUTORY DETAILS (Merged into Personal) -->
+                                                                        <div class="detail-card full-width" style="border-left: 4px solid #6366f1;">
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label text-primary">Statutory Enrollment</label>
+                                                                                <div class="d-flex flex-column gap-3 mt-2">
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <span class="small fw-bold text-dark">PF Number</span>
+                                                                                        <span class="status-badge ${emp.pf ? 'status-enrolled' : 'status-not-enrolled'}">${emp.pf ? emp.pf_number : 'Not Enrolled'}</span>
+                                                                                    </div>
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <span class="small fw-bold text-dark">ESI Number</span>
+                                                                                        <span class="status-badge ${emp.esi ? 'status-enrolled' : 'status-not-enrolled'}">${emp.esi ? emp.esi_number : 'Not Enrolled'}</span>
+                                                                                    </div>
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <span class="small fw-bold text-dark">Insurance</span>
+                                                                                        <span class="status-badge ${emp.insurance ? 'status-enrolled' : 'status-not-enrolled'}">${emp.insurance ? emp.insurance_provider : 'Not Enrolled'}</span>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
 
-                                                            <!-- BANK TAB -->
-                                                            <div id="employeeTabBank" class="tab-pane">
-                                                                <div class="details-grid">
-                                                                    <div class="detail-card full-width">
-                                                                        <div class="detail-icon"><i class="bi bi-bank"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Bank Name</label>
-                                                                            <p class="detail-value">${emp.bank_name || 'N/A'}</p>
+                                                                <!-- BANK TAB -->
+                                                                <div id="employeeTabBank" class="tab-pane">
+                                                                    <div class="details-grid">
+                                                                        <div class="detail-card full-width">
+                                                                            <div class="detail-icon"><i class="bi bi-bank"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Bank Name</label>
+                                                                                <p class="detail-value">${emp.bank_name || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-hash"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">Account Number</label>
-                                                                            <p class="detail-value">${emp.account_number || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-hash"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">Account Number</label>
+                                                                                <p class="detail-value">${emp.account_number || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    <div class="detail-card">
-                                                                        <div class="detail-icon"><i class="bi bi-upc-scan"></i></div>
-                                                                        <div class="detail-content">
-                                                                            <label class="detail-label">IFSC Code</label>
-                                                                            <p class="detail-value text-primary">${emp.ifsc_code || 'N/A'}</p>
+                                                                        <div class="detail-card">
+                                                                            <div class="detail-icon"><i class="bi bi-upc-scan"></i></div>
+                                                                            <div class="detail-content">
+                                                                                <label class="detail-label">IFSC Code</label>
+                                                                                <p class="detail-value text-primary">${emp.ifsc_code || 'N/A'}</p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
 
-                                                            <!-- SALARY TAB -->
-                                                            <div id="employeeTabSalary" class="tab-pane">
-                                                                <div class="salary-container">
-                                                                    <div class="salary-breakdown full-width">
-                                                                        <div class="salary-item">
-                                                                            <div class="salary-label"><i class="bi bi-cash"></i>Basic Salary</div>
-                                                                            <div class="salary-amount">₹ ${parseFloat(emp.basic_salary || 0).toLocaleString('en-IN')}</div>
-                                                                        </div>
-                                                                        <div class="salary-item">
-                                                                            <div class="salary-label"><i class="bi bi-house"></i>HRA</div>
-                                                                            <div class="salary-amount">₹ ${parseFloat(emp.hra || 0).toLocaleString('en-IN')}</div>
-                                                                        </div>
-                                                                        <div class="salary-item">
-                                                                            <div class="salary-label"><i class="bi bi-truck"></i>Conveyance</div>
-                                                                            <div class="salary-amount">₹ ${parseFloat(emp.conveyance_allowance || 0).toLocaleString('en-IN')}</div>
-                                                                        </div>
-                                                                        <div class="salary-item">
-                                                                            <div class="salary-label"><i class="bi bi-activity"></i>Medical</div>
-                                                                            <div class="salary-amount">₹ ${parseFloat(emp.medical_allowance || 0).toLocaleString('en-IN')}</div>
-                                                                        </div>
-                                                                        <div class="salary-item">
-                                                                            <div class="salary-label"><i class="bi bi-gift"></i>Other Allowance</div>
-                                                                            <div class="salary-amount">₹ ${parseFloat(emp.other_allowance || 0).toLocaleString('en-IN')}</div>
-                                                                        </div>
-                                                                        <div class="salary-total">
-                                                                            <div class="salary-label"><strong>Total Salary</strong></div>
-                                                                            <div class="salary-amount total">₹ ${(parseFloat(emp.basic_salary || 0) + parseFloat(emp.hra || 0) + parseFloat(emp.conveyance_allowance || 0) + parseFloat(emp.medical_allowance || 0) + parseFloat(emp.other_allowance || 0)).toLocaleString('en-IN')}</div>
+                                                                <!-- SALARY TAB -->
+                                                                <div id="employeeTabSalary" class="tab-pane">
+                                                                    <div class="salary-container">
+                                                                        <div class="salary-breakdown full-width">
+                                                                            <div class="salary-item">
+                                                                                <div class="salary-label"><i class="bi bi-cash"></i>Basic Salary</div>
+                                                                                <div class="salary-amount">₹ ${parseFloat(emp.basic_salary || 0).toLocaleString('en-IN')}</div>
+                                                                            </div>
+                                                                            <div class="salary-item">
+                                                                                <div class="salary-label"><i class="bi bi-house"></i>HRA</div>
+                                                                                <div class="salary-amount">₹ ${parseFloat(emp.hra || 0).toLocaleString('en-IN')}</div>
+                                                                            </div>
+                                                                            <div class="salary-item">
+                                                                                <div class="salary-label"><i class="bi bi-truck"></i>Conveyance</div>
+                                                                                <div class="salary-amount">₹ ${parseFloat(emp.conveyance_allowance || 0).toLocaleString('en-IN')}</div>
+                                                                            </div>
+                                                                            <div class="salary-item">
+                                                                                <div class="salary-label"><i class="bi bi-activity"></i>Medical</div>
+                                                                                <div class="salary-amount">₹ ${parseFloat(emp.medical_allowance || 0).toLocaleString('en-IN')}</div>
+                                                                            </div>
+                                                                            <div class="salary-item">
+                                                                                <div class="salary-label"><i class="bi bi-gift"></i>Other Allowance</div>
+                                                                                <div class="salary-amount">₹ ${parseFloat(emp.other_allowance || 0).toLocaleString('en-IN')}</div>
+                                                                            </div>
+                                                                            <div class="salary-total">
+                                                                                <div class="salary-label"><strong>Total Salary</strong></div>
+                                                                                <div class="salary-amount total">₹ ${(parseFloat(emp.basic_salary || 0) + parseFloat(emp.hra || 0) + parseFloat(emp.conveyance_allowance || 0) + parseFloat(emp.medical_allowance || 0) + parseFloat(emp.other_allowance || 0)).toLocaleString('en-IN')}</div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
 
-                                                            <!-- ATTENDANCE TAB -->
-                                                            <div id="employeeTabAttendance" class="tab-pane">
-                                                                <div id="attendanceHistoryContent" class="attendance-history-list">
-                                                                    <div class="text-center py-5 text-muted">
-                                                                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                                                                        <p class="small fw-bold">Loading Attendance History...</p>
+                                                                <!-- ATTENDANCE TAB -->
+                                                                <div id="employeeTabAttendance" class="tab-pane">
+                                                                    <div id="attendanceHistoryContent" class="attendance-history-list">
+                                                                        <div class="text-center py-5 text-muted">
+                                                                            <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                                                            <p class="small fw-bold">Loading Attendance History...</p>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>      </div>
-                                                    </div>
-                                                `;
+                                                            </div>      </div>
+                                                        </div>
+                                                    `;
 
                     document.getElementById('employeeDetails').innerHTML = html;
                     new bootstrap.Offcanvas(document.getElementById('employeeModal')).show();
@@ -1272,11 +1272,11 @@
             const container = document.getElementById('attendancePortalContent');
 
             container.innerHTML = `
-                                            <div class="text-center py-5 text-muted">
-                                                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                                                <p class="small fw-bold">Loading Records...</p>
-                                            </div>
-                                        `;
+                                                <div class="text-center py-5 text-muted">
+                                                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                                    <p class="small fw-bold">Loading Records...</p>
+                                                </div>
+                                            `;
 
             fetch(`/api/employees/${empId}/attendance?month=${month}`)
                 .then(res => res.json())
@@ -1287,18 +1287,18 @@
                     }
 
                     let html = `
-                                                    <table class="att-sheet-table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="ps-4">Date</th>
-                                                                <th>Check In</th>
-                                                                <th>Check Out</th>
-                                                                <th>Duration</th>
-                                                                <th class="text-center">Status</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                `;
+                                                        <table class="att-sheet-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="ps-4">Date</th>
+                                                                    <th>Check In</th>
+                                                                    <th>Check Out</th>
+                                                                    <th>Duration</th>
+                                                                    <th class="text-center">Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                    `;
 
                     data.forEach(record => {
                         const dateObj = new Date(record.attendance_date);
@@ -1316,17 +1316,17 @@
                         }[record.status] || 'bg-light';
 
                         html += `
-                                                        <tr>
-                                                            <td class="ps-4">
-                                                                <div class="fw-bold text-dark">${fullDate}</div>
-                                                                <div class="small text-muted text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">${day}</div>
-                                                            </td>
-                                                            <td class="fw-bold text-dark">${formatTime12h(record.check_in)}</td>
-                                                            <td class="fw-bold text-dark">${formatTime12h(record.check_out)}</td>
-                                                            <td>
-                                                                <span class="text-primary fw-bold" style="font-size: 12px;">
-                                                                    <i class="bi bi-clock-history me-1"></i>
-                                                                    ${(function () {
+                                                            <tr>
+                                                                <td class="ps-4">
+                                                                    <div class="fw-bold text-dark">${fullDate}</div>
+                                                                    <div class="small text-muted text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">${day}</div>
+                                                                </td>
+                                                                <td class="fw-bold text-dark">${formatTime12h(record.check_in)}</td>
+                                                                <td class="fw-bold text-dark">${formatTime12h(record.check_out)}</td>
+                                                                <td>
+                                                                    <span class="text-primary fw-bold" style="font-size: 12px;">
+                                                                        <i class="bi bi-clock-history me-1"></i>
+                                                                        ${(function () {
                                 let hrs = parseFloat(record.total_hours || 0);
                                 if (hrs <= 0) {
                                     const inStr = formatTime12h(record.check_in);
@@ -1335,15 +1335,15 @@
                                 }
                                 return Math.max(0, hrs).toFixed(1);
                             })()} hrs
-                                                                </span>
-                                                            </td>
-                                                            <td class="text-center">
-                                                                <span class="badge ${statusClass} rounded-pill px-3 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">
-                                                                    ${record.status ? record.status.replace(/_/g, ' ') : 'N/A'}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    `;
+                                                                    </span>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <span class="badge ${statusClass} rounded-pill px-3 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">
+                                                                        ${record.status ? record.status.replace(/_/g, ' ') : 'N/A'}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        `;
                     });
                     html += '</tbody></table>';
                     container.innerHTML = html;

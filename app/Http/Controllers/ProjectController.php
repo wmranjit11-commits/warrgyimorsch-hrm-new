@@ -85,6 +85,7 @@ class ProjectController extends Controller
             'department' => 'required|string',
             'description' => 'required',
             'type' => 'required',
+            'manage' => 'required',
         ]);
 
         $project->update([
@@ -99,6 +100,7 @@ class ProjectController extends Controller
             'leaders' => $request->leaders,
             'members' => $request->members,
             'type' => $request->type,
+            'manage' => $request->manage,
         ]);
 
         return redirect()->route('projects.index')->with('success', 'Project updated successfully');

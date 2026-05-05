@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\TaskFollowUp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DailyTaskController extends Controller
 {
@@ -16,14 +17,10 @@ class DailyTaskController extends Controller
         $query = DailyTask::with(['project', 'employee', 'creator', 'followUps']);
 
         // Data Restriction Logic
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
-
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-        // $role = strtoupper(auth()->user()->role);
         if (!$isAdmin) {
             $query->where('employee_id', auth()->user()->employee_id);
             $employees = Employee::where('id', auth()->user()->employee_id)->get();
@@ -70,15 +67,10 @@ class DailyTaskController extends Controller
 
         $validated['assigned_by'] = Auth::id();
 
-        // Force employee_id for non-admins
-        // $role = strtoupper(auth()->user()->role ?? 'USER');
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
-
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
         if (!$isAdmin) {
             $validated['employee_id'] = auth()->user()->employee_id;
         }
@@ -101,15 +93,10 @@ class DailyTaskController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Force employee_id for non-admins
-        // $role = strtoupper(auth()->user()->role ?? 'USER');
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
-
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
         if (!$isAdmin) {
             $validated['employee_id'] = auth()->user()->employee_id;
         }
@@ -145,21 +132,16 @@ class DailyTaskController extends Controller
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
         ]);
 
-        // $role = strtoupper(auth()->user()->role ?? 'USER');
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
-
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-        // if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
         if (!$isAdmin) {
             $validated['reference_name'] = auth()->user()->name;
         }
 
-        // FORCE: Always record progress under the assigned employee's name
-        $validated['reference_name'] = $task->employee->name ?? 'Unknown';
+        $task = DailyTask::with('employee')->find($validated['daily_task_id']);
+        $validated['reference_name'] = $task->employee->name ?? auth()->user()->name ?? 'Employee';
 
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('task_followups', 'public');
@@ -192,14 +174,17 @@ class DailyTaskController extends Controller
             'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework',
         ]);
 
-        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
+
         $project = $dailyTask->project;
         $isLead = false;
         if ($project && is_array($project->leaders)) {
             $isLead = in_array(auth()->user()->employee_id, $project->leaders);
         }
 
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN' && !$isLead) {
+        if (!$isAdmin && !$isLead) {
             return response()->json(['error' => 'Only Admin or Project Lead can change status.'], 403);
         }
 
