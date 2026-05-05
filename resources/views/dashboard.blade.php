@@ -382,7 +382,7 @@
                                         <!-- Employee Filter -->
                                         <select id="lateEmployeeFilter"
                                                 class="form-select form-select-sm"
-                                                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+                                                style="width: 100px; height: 32px !important; padding: 0 0 0 10px !important;">
                                             <option value="">All</option>
                                             @foreach($employees as $emp)
                                                 <option value="{{ $emp->id }}" {{ request('late_employee') == $emp->id ? 'selected' : '' }}>
@@ -409,7 +409,7 @@
                                                 <div id="normalFiltersLate">
                                                     <button type="button" class="dropdown-item" onclick="applyLateRange('today')">Today</button>
                                                     <button type="button" class="dropdown-item" onclick="applyLateRange('yesterday')">Yesterday</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('week')">1 Week</button>
+                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('week')">Last Week</button>
                                                     <button type="button" class="dropdown-item" onclick="applyLateRange('month')">Current Month</button>
                                                     <button type="button" class="dropdown-item" onclick="applyLateRange('last_month')">Last Month</button>
                                                     <button type="button" class="dropdown-item" onclick="applyLateRange('3months')">3 Months</button>
@@ -608,7 +608,7 @@
 
                                 <form method="GET" class="d-flex gap-2">
                                     <!-- Employee Dropdown -->
-                                    <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()" style="height: 32px !important; padding: 0 0 0 10px !important">
                                         <option value="">All Employees</option>
                                         @foreach($employees as $emp)
                                             <option value="{{ $emp->id }}"

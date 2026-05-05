@@ -14,6 +14,7 @@ class AttendanceImport implements ToCollection
     public function collection(Collection $rows)
     {
         $data = [];
+        $allDates = [];
 
         foreach ($rows as $index => $row) {
 
@@ -36,7 +37,7 @@ class AttendanceImport implements ToCollection
             try {
                 if (is_numeric($dateTimeRaw)) {
                     $dateTime = Carbon::instance(
-                        Date::excelToDateTimeObject($dateTimeRaw)
+                        \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateTimeRaw)
                     );
                 } else {
                     $dateTime = Carbon::parse($dateTimeRaw);
@@ -46,10 +47,8 @@ class AttendanceImport implements ToCollection
                 continue;
             }
 
-            // Change this according to your employee table column
             $shiftStart = $employee->time_in ?? '09:30:00';
-           // If punch time is after midnight and before 05:00 AM,
-            // treat it as previous day OUT punch
+
             if (
                 $dateTime->format('H:i:s') < $shiftStart &&
                 $dateTime->format('H:i:s') <= '05:00:00'
@@ -59,7 +58,9 @@ class AttendanceImport implements ToCollection
                 $attendanceDate = $dateTime->format('Y-m-d');
             }
 
-           $key = $employee->id . '_' . $attendanceDate;
+            $allDates[] = $attendanceDate;
+
+            $key = $employee->id . '_' . $attendanceDate;
 
             $data[$key]['employee_id'] = $employee->id;
             $data[$key]['attendance_date'] = $attendanceDate;
@@ -71,11 +72,11 @@ class AttendanceImport implements ToCollection
             $employeeId = $entry['employee_id'];
             $punches = $entry['punches'];
 
-           usort($punches, function ($a, $b) {
+            usort($punches, function ($a, $b) {
                 return $a->timestamp <=> $b->timestamp;
             });
 
-           $first = $punches[0];
+            $first = $punches[0];
             $last  = count($punches) > 1 ? $punches[count($punches) - 1] : null;
 
             if (!$last) {
@@ -84,7 +85,7 @@ class AttendanceImport implements ToCollection
             } else {
                 $hours = $first->diffInMinutes($last) / 60;
 
-                if ($hours >= 8.25) {
+                if ($hours >= 8) {
                     $status = 'present';
                 } elseif ($hours >= 3.90) {
                     $status = 'half_day';
@@ -105,6 +106,38 @@ class AttendanceImport implements ToCollection
                     'status'      => $status,
                 ]
             );
+        }
+
+        // Mark absent for employees who have no punch on imported dates
+        $allDates = array_unique($allDates);
+
+        $employees = Employee::all();
+
+        foreach ($employees as $employee) {
+            foreach ($allDates as $date) {
+
+                $alreadyExists = Attendance::where('employee_id', $employee->id)
+                    ->where('attendance_date', $date)
+                    ->exists();
+
+                $carbonDate = \Carbon\Carbon::parse($date);
+
+                // Skip Sunday
+                if ($carbonDate->isSunday()) {
+                    continue;
+                }
+
+                if (!$alreadyExists) {
+                    Attendance::create([
+                        'employee_id'      => $employee->id,
+                        'attendance_date'  => $date,
+                        'check_in'         => null,
+                        'check_out'        => null,
+                        'total_hours'      => 0,
+                        'status'           => 'absent',
+                    ]);
+                }
+            }
         }
     }
 

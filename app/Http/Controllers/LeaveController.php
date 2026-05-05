@@ -9,6 +9,7 @@ use App\Exports\LeaveBalancesExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {

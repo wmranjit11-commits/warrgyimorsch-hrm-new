@@ -159,6 +159,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Payroll remarks
     Route::post('/payroll/{id}/remarks', [PayrollController::class, 'saveRemarks']);
+    Route::post('/payroll/{id}/mark-read', [PayrollController::class, 'markAsRead']);
 });
 
 // LEAVE MODULE ROUTES
