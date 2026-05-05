@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveApplication;
 use Illuminate\Http\Request;
 use App\Models\Payroll;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {

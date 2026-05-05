@@ -20,8 +20,16 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-       $role = strtoupper(auth()->user()->role ?? 'employee');
-        $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+    //    $role = strtoupper(auth()->user()->role ?? 'employee');
+    //     $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
+            $roleSlug = auth()->user()->role;
+
+            $roleId = DB::table('roles_master')
+                ->where('slug', $roleSlug)
+                ->value('id');
+
+            $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+
         if ($isAdmin) {
             $employees = Employee::orderBy('name')->paginate(30);
         } else {

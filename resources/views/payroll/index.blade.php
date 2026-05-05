@@ -219,8 +219,16 @@
                                                 onclick="deletePayroll({{ $payroll->id }})" title="Delete">
                                                 <i class="feather-trash-2"></i>
                                             </a>
+                                            @php
+                                                $roleSlug = auth()->user()->role;
+                                                $roleId = DB::table('roles_master')
+                                                    ->where('slug', $roleSlug)
+                                                    ->value('id');
+
+                                                $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+                                            @endphp
                                             <a href="javascript:void(0);"
-                                                class="avatar-text avatar-md bg-soft-secondary text-secondary comment-btn"
+                                                class="avatar-text avatar-md bg-soft-secondary text-secondary comment-btn {{ (!$payroll->is_read && $isAdmin) ? 'blink' : '' }}"
                                                 data-id="{{ $payroll->id }}"
                                                 data-remark="{{ $payroll->remarks ?? '' }}"
                                                 data-role="{{ auth()->user()->role }}"
@@ -363,7 +371,20 @@
                 field.style.display = 'block'; // keep visible
                 title.innerText = 'Remarks';
                 saveBtn.style.display = 'none';
+
+                document.querySelector(`[data-id="${id}"]`)?.classList.remove('blink');
+
+                markAsRead(id);
             }
+        }
+
+        function markAsRead(id) {
+            fetch(`/payroll/${id}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).catch(err => console.error(err));
         }
 
         function saveComment() {
@@ -564,6 +585,16 @@
             letter-spacing: 0.3px;
             padding-top: 5px;
             padding-bottom: 5px;
+        }
+
+        .blink {
+            animation: blink-animation 1s infinite;
+        }
+
+        @keyframes blink-animation {
+            50% {
+                opacity: 0.3;
+            }
         }
     </style>
 @endpush
