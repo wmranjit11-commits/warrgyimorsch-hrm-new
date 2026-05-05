@@ -24,10 +24,10 @@
                 </div>
                 <div class="d-flex align-items-center gap-2 page-header-right-items-wrapper">
                     <div id="bulk-action-wrapper" style="display: none;">
-                        <button type="button" id="btn-bulk-delete" class="btn btn-danger">
-                            <i class="feather-trash-2 me-2"></i>
-                            <span>Delete Selected</span>
-                        </button>
+                        <a href="javascript:void(0);" id="btn-bulk-delete" class="btn btn-icon btn-soft-danger"
+                            style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="feather-trash-2 fs-18"></i>
+                        </a>
                     </div>
                     <div class="filter-toggle-wrapper">
                         <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter"
@@ -206,11 +206,10 @@
                                 <thead>
                                     <tr>
                                         <th class="wd-30">
-                                            <div class="btn-group mb-1">
-                                                <div class="custom-control custom-checkbox ms-1">
-                                                    <input type="checkbox" class="custom-control-input"
-                                                        id="checkAllProject">
-                                                    <label class="custom-control-label" for="checkAllProject"></label>
+                                            <div class="ms-1">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input shadow-none"
+                                                        id="checkAllProject" style="cursor: pointer;">
                                                 </div>
                                             </div>
                                         </th>
@@ -239,11 +238,9 @@
                                             data-status="{{ $normalizedStatus }}" data-department="{{ $project->department }}">
                                             <td>
                                                 <div class="item-checkbox ms-1">
-                                                    <div class="custom-control custom-checkbox">
-                                                        <input type="checkbox" class="custom-control-input checkbox"
-                                                            id="checkBox_{{ $project->id }}">
-                                                        <label class="custom-control-label"
-                                                            for="checkBox_{{ $project->id }}"></label>
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input checkbox shadow-none"
+                                                            id="checkBox_{{ $project->id }}" style="cursor: pointer;">
                                                     </div>
                                                 </div>
                                             </td>
@@ -251,14 +248,17 @@
                                                 <div class="hstack gap-4">
                                                     <div class="avatar-image border-0 position-relative">
                                                         <!-- Premium SVG Circular Progress - 1:1 Design Parity -->
-                                                        <div class="progress-ring-wrapper" style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                                        <div class="progress-ring-wrapper"
+                                                            style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
                                                             @php $progressVal = $project->progress; @endphp
-                                                            <svg width="60" height="60" viewBox="0 0 100 100" style="position: absolute; transform: rotate(-90deg);">
+                                                            <svg width="60" height="60" viewBox="0 0 100 100"
+                                                                style="position: absolute; transform: rotate(-90deg);">
                                                                 <!-- Background Track -->
-                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" stroke-width="10"></circle>
+                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9"
+                                                                    stroke-width="10"></circle>
                                                                 <!-- Progress Bar -->
-                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#1d4ed8" stroke-width="10" 
-                                                                    stroke-dasharray="263.89" 
+                                                                <circle cx="50" cy="50" r="42" fill="none" stroke="#1d4ed8"
+                                                                    stroke-width="10" stroke-dasharray="263.89"
                                                                     stroke-dashoffset="{{ 263.89 * (1 - $progressVal / 100) }}"
                                                                     stroke-linecap="round"
                                                                     style="transition: stroke-dashoffset 0.8s ease-in-out;">
@@ -308,7 +308,28 @@
                                                 </a>
                                             </td>
                                             <td>{{ $project->start_date ? $project->start_date->format('Y-m-d') : '-' }}</td>
-                                            <td>{{ $project->end_date ? $project->end_date->format('Y-m-d') : '-' }}</td>
+                                            <td>
+                                                @if($project->end_date)
+                                                    {{ $project->end_date->format('Y-m-d') }}
+                                                @else
+                                                    <div class="ongoing-timer"
+                                                        data-start="{{ $project->start_date ? $project->start_date->toISOString() : '' }}">
+                                                        <div class="hstack gap-1 text-info mb-1"
+                                                            style="font-size: 12px; font-weight: 700;">
+                                                            <i class="feather-play-circle fs-13"></i>
+                                                            <span>Ongoing</span>
+                                                        </div>
+                                                        @if($project->start_date)
+                                                            <div class="hstack gap-1 align-items-center">
+                                                                <span class="timer-display fw-bold text-info"
+                                                                    style="font-size: 11px; white-space: nowrap;">0d 0h 0m 0s</span>
+                                                                <span class="text-info opacity-75 fw-bold"
+                                                                    style="font-size: 9px; letter-spacing: 0.5px;">ELAPSED</span>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <div class="dropdown" style="min-width: 120px;">
                                                     @php
@@ -321,20 +342,35 @@
                                                             }
                                                         }
                                                     @endphp
-                                                    <button class="lead-select-btn dropdown-toggle" type="button"
+                                                    <button class="lead-select-btn dropdown-toggle shadow-none" type="button"
                                                         data-bs-toggle="dropdown" aria-expanded="false"
                                                         data-bs-boundary="viewport">
                                                         <span class="text-truncate">{{ $currentLead }}</span>
                                                         <i class="feather-chevron-down fs-10 ms-1"></i>
                                                     </button>
                                                     <ul class="dropdown-menu shadow-lg border-0"
-                                                        style="border-radius: 12px; max-height: 300px; overflow-y: auto;">
-                                                        <li><a class="dropdown-item fw-bold text-muted small py-2"
+                                                        style="border-radius: 12px; max-height: 350px; overflow-y: auto; min-width: 200px;">
+                                                        <li class="sticky-top bg-white" style="z-index: 10;">
+                                                            <div class="p-3 border-bottom mb-2">
+                                                                <div class="input-group bg-light border"
+                                                                    style="border-radius: 8px; overflow: hidden;">
+                                                                    <span
+                                                                        class="input-group-text bg-transparent border-0 pe-1"><i
+                                                                            class="feather-search fs-12 text-muted"></i></span>
+                                                                    <input type="text"
+                                                                        class="form-control border-0 bg-transparent shadow-none fw-bold lead-search"
+                                                                        oninput="window.filterLeadList(this)"
+                                                                        placeholder="Search team member..."
+                                                                        style="font-size: 13px; height: 38px;">
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold lead-item py-2 mb-1 rounded mx-2"
                                                                 href="javascript:void(0);"
                                                                 onclick="updateProjectLead('{{ $project->slug }}', '')">No
                                                                 Lead</a></li>
                                                         @foreach($employees as $emp)
-                                                            <li><a class="dropdown-item fw-bold small py-2 {{ in_array($emp->id, $leaders) ? 'active' : '' }}"
+                                                            <li><a class="dropdown-item fw-bold lead-item py-2 mb-1 rounded mx-2 {{ in_array($emp->id, $leaders) ? 'active' : '' }}"
                                                                     href="javascript:void(0);"
                                                                     onclick="updateProjectLead('{{ $project->slug }}', {{ $emp->id }})">{{ $emp->name }}</a>
                                                             </li>
@@ -356,8 +392,8 @@
                                                     $statusClass = 'status-' . $statusSlug;
                                                 @endphp
                                                 <div class="dropdown premium-status-dropdown" style="min-width: 110px;">
-                                                    <button class="btn-status {{ $statusClass }} dropdown-toggle" type="button"
-                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                    <button class="btn-status {{ $statusClass }} dropdown-toggle shadow-none"
+                                                        type="button" data-bs-toggle="dropdown" aria-expanded="false"
                                                         data-bs-boundary="viewport">
                                                         {{ $currentStatus }} <i class="feather-chevron-down fs-10 ms-1"></i>
                                                     </button>
@@ -448,6 +484,29 @@
 
 
 
+        /* Premium Custom Scrollbar for Dropdowns */
+        .dropdown-menu {
+            scroll-behavior: smooth;
+        }
+
+        .dropdown-menu::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(56, 88, 249, 0.15);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 88, 249, 0.4);
+        }
+
         .badge {
             font-size: 10px !important;
             text-transform: uppercase;
@@ -457,12 +516,179 @@
         .card-body.p-3 {
             padding: 1.25rem 1.5rem !important;
         }
+
+        /* Dropdown Z-Index & Clipping Fixes */
+        .dropdown-menu {
+            border-radius: 12px !important;
+            z-index: 99999 !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .dropdown-item {
+            transition: all 0.2s ease !important;
+            border-radius: 8px !important;
+            margin: 0 10px 5px 10px !important;
+            width: auto !important;
+        }
+
+        .dropdown-item.status-pending:hover {
+            background-color: rgba(100, 116, 139, 0.2) !important;
+        }
+
+        .dropdown-item.status-in-process:hover {
+            background-color: rgba(56, 88, 249, 0.2) !important;
+        }
+
+        .dropdown-item.status-completed:hover {
+            background-color: rgba(34, 197, 94, 0.2) !important;
+        }
+
+        .dropdown-item.status-on-hold:hover {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+        }
+
+        .dropdown-item.status-review:hover {
+            background-color: rgba(6, 182, 212, 0.2) !important;
+        }
+
+        .dropdown-item.status-rework:hover {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+        }
+
+        .lead-item {
+            background: rgba(56, 88, 249, 0.05) !important;
+            color: #334155 !important;
+            font-size: 13px !important;
+        }
+
+        .lead-item:hover,
+        .lead-item.active {
+            background: rgba(56, 88, 249, 0.15) !important;
+            color: #3858f9 !important;
+        }
+
+        .table-responsive,
+        .card,
+        .card-body {
+            overflow: visible !important;
+        }
+
+        /* Row active state for clarity - Stabilized to prevent shifting */
+        tr.single-item {
+            border-left: 4px solid transparent !important;
+            transition: background-color 0.2s ease, border-left-color 0.2s ease !important;
+        }
+
+        tr.single-item.row-active {
+            background-color: rgba(56, 88, 249, 0.05) !important;
+            border-left-color: #3858f9 !important;
+        }
+
+        /* Select2 Premium Styling */
+        .select2-container--default .select2-selection--single {
+            height: 48px !important;
+            border-radius: 12px !important;
+            border: 1px solid #ebf0f5 !important;
+            display: flex !important;
+            align-items: center !important;
+            background-color: #fcfdfe !important;
+            transition: all 0.2s ease;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #1a202c !important;
+            font-weight: 600 !important;
+            padding-left: 15px !important;
+            font-size: 13px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+            right: 10px !important;
+        }
+
+        .select2-dropdown {
+            border: 0 !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 15px !important;
+            overflow: hidden !important;
+            margin-top: 8px !important;
+            padding: 8px 0 !important;
+        }
+
+        .select2-search--dropdown {
+            padding: 12px 15px !important;
+        }
+
+        .select2-search--dropdown .select2-search__field {
+            border-radius: 10px !important;
+            border: 1px solid #ebf0f5 !important;
+            padding: 10px 15px !important;
+            background-color: #f8fafc !important;
+            font-size: 13px !important;
+        }
+
+        .select2-results__option {
+            padding: 10px 15px !important;
+            margin: 2px 10px !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            color: #4a5568 !important;
+            transition: all 0.2s ease;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: rgba(56, 88, 249, 0.08) !important;
+            color: #3858f9 !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected="true"] {
+            background-color: rgba(56, 88, 249, 0.1) !important;
+            color: #3858f9 !important;
+        }
     </style>
 @endsection
 
 @push('scripts')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        // Lead Search Filter & Prioritize Matching Logic - Global Failsafe
+        window.filterLeadList = function (input) {
+            var value = input.value.toLowerCase().trim();
+            var dropdown = input.closest('.dropdown-menu');
+            if (!dropdown) return;
+
+            var items = dropdown.querySelectorAll('li:not(.sticky-top)');
+            var header = dropdown.querySelector('.sticky-top');
+
+            for (var i = 0; i < items.length; i++) {
+                var li = items[i];
+                var text = (li.innerText || li.textContent).toLowerCase();
+
+                if (text.indexOf(value) > -1) {
+                    li.style.setProperty('display', 'block', 'important');
+                    // Move matching item to the top (right after the search header)
+                    if (value !== "" && header) {
+                        header.parentNode.insertBefore(li, header.nextSibling);
+                    }
+                } else {
+                    li.style.setProperty('display', 'none', 'important');
+                }
+            }
+        };
+
         $(document).ready(function () {
+            // Force fixed strategy for all dropdowns to prevent clipping
+            $('.dropdown-toggle').each(function () {
+                new bootstrap.Dropdown(this, {
+                    popperConfig: {
+                        strategy: 'fixed'
+                    }
+                });
+            });
+
             // Filter Functionality
             window.applyFilters = function () {
                 var name = $('#filterProjectName').val().toLowerCase();
@@ -492,29 +718,70 @@
                 $('#filterSection').slideToggle(400);
             });
 
-            // Initialize Select2 for all selects
-            $('.form-select').select2({
-                width: '100%',
-                minimumResultsForSearch: 10
-            });
-
             // Handle Check All Functionality
             $('#checkAllProject').on('change', function () {
                 $('.checkbox').prop('checked', $(this).prop('checked'));
                 toggleBulkAction();
             });
 
-            $('.checkbox').on('change', function () {
+            $(document).on('change', '.checkbox', function () {
                 toggleBulkAction();
             });
 
             function toggleBulkAction() {
-                if ($('.checkbox:checked').length > 0) {
-                    $('#bulk-action-wrapper').fadeIn();
+                var checkedCount = $('.checkbox:checked').length;
+                if (checkedCount > 0) {
+                    $('#bulk-action-wrapper').fadeIn(300);
                 } else {
-                    $('#bulk-action-wrapper').fadeOut();
+                    $('#bulk-action-wrapper').fadeOut(300);
                 }
             }
+
+            // Live Ongoing Timer Logic
+            function updateOngoingTimers() {
+                $('.ongoing-timer').each(function () {
+                    var startISO = $(this).data('start');
+                    if (!startISO) return;
+
+                    var start = new Date(startISO);
+                    var now = new Date();
+                    var diff = now - start;
+
+                    if (diff < 0) {
+                        $(this).find('.timer-display').text('0d 0h 0m 0s');
+                        return;
+                    }
+
+                    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    $(this).find('.timer-display').text(days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's');
+                });
+            }
+            setInterval(updateOngoingTimers, 1000);
+            updateOngoingTimers();
+
+            // Initialize Select2 for all selects with permanent search enabled
+            $('.form-select').select2({
+                width: '100%',
+                minimumResultsForSearch: 0,
+                placeholder: "Select an option",
+                allowClear: true
+            });
+
+            // Highlighting active row for dropdown clarity
+            $(document).on('show.bs.dropdown', '.dropdown', function () {
+                $(this).closest('tr').addClass('row-active');
+            }).on('hide.bs.dropdown', function () {
+                $(this).closest('tr').removeClass('row-active');
+            });
+
+            // Prevent dropdown from closing when clicking inside search input or its container
+            $(document).on('click', '.lead-search, .sticky-top', function (e) {
+                e.stopPropagation();
+            });
         });
 
         window.bulkDeleteProject = function () {
@@ -539,8 +806,8 @@
                 confirmButtonText: 'Yes, delete them!',
                 cancelButtonText: 'Cancel',
                 customClass: {
-                    confirmButton: 'btn btn-primary px-4 py-2',
-                    cancelButton: 'btn btn-secondary px-4 py-2'
+                    confirmButton: 'btn btn-primary px-4 py-2 me-2',
+                    cancelButton: 'btn btn-secondary px-4 py-2 ms-2'
                 },
                 buttonsStyling: false
             }).then((result) => {
@@ -642,11 +909,11 @@
                 allEmps.forEach(emp => {
                     if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
                         teamHtml += `<div class="col-md-6">
-                                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                                            <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
-                                            <div class="fw-bold small text-dark">${emp.name}</div>
-                                        </div>
-                                    </div>`;
+                                                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                                            <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
+                                                            <div class="fw-bold small text-dark">${emp.name}</div>
+                                                        </div>
+                                                    </div>`;
                     }
                 });
                 teamHtml += '</div>';
@@ -658,11 +925,11 @@
                 allEmps.forEach(emp => {
                     if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
                         teamHtml += `<div class="col-md-4">
-                                        <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
-                                            <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
-                                            <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
-                                        </div>
-                                    </div>`;
+                                                        <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                                                            <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
+                                                            <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
+                                                        </div>
+                                                    </div>`;
                     }
                 });
                 teamHtml += '</div>';
@@ -749,10 +1016,10 @@
 
                     for (const [empName, dates] of Object.entries(employeeWork)) {
                         html += `<div class="mb-4">
-                                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
-                                            <h5 class="fw-bold text-dark mb-0">${empName}</h5>
-                                        </div>`;
+                                                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
+                                                            <h5 class="fw-bold text-dark mb-0">${empName}</h5>
+                                                        </div>`;
 
                         // Sort dates descending
                         const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
@@ -760,29 +1027,29 @@
                         sortedDates.forEach(date => {
                             const dayData = dates[date];
                             html += `<div class="ms-4 mb-4 position-relative">
-                                            <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
-                                                <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
-                                                <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
-                                            </div>
-                                            <div class="ms-3">`;
+                                                            <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
+                                                                <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
+                                                                <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
+                                                            </div>
+                                                            <div class="ms-3">`;
 
                             dayData.entries.forEach(entry => {
                                 html += `<div class="mb-3 p-3 bg-white rounded-3 border position-relative">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <div class="pe-5">
-                                                        <div class="fw-bold text-dark fs-14">${entry.title}</div>
-                                                        <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
-                                                            ${entry.time} Hrs
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
-                                                    ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
-                                                </div>
-                                            </div>`;
+                                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                    <div class="pe-5">
+                                                                        <div class="fw-bold text-dark fs-14">${entry.title}</div>
+                                                                        <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
+                                                                    </div>
+                                                                    <div class="text-end">
+                                                                        <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
+                                                                            ${entry.time} Hrs
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
+                                                                    ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
+                                                                </div>
+                                                            </div>`;
                             });
 
                             html += `</div></div>`;
@@ -795,9 +1062,9 @@
                 .catch(err => {
                     console.error('Error fetching task summary:', err);
                     listContainer.innerHTML = `<div class="alert alert-soft-danger text-center">
-                                    <strong>Oops!</strong> Something went wrong while loading the data.<br>
-                                    <small class="text-muted">${err.message}</small>
-                                </div>`;
+                                                    <strong>Oops!</strong> Something went wrong while loading the data.<br>
+                                                    <small class="text-muted">${err.message}</small>
+                                                </div>`;
                 });
         };
     </script>

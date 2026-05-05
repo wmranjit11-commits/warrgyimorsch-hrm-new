@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        /* Custom Dropdown Arrow Color to match Field Text */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23334155' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+            background-size: 12px 12px !important;
+        }
+    </style>
     <!-- [ page-header ] start -->
     <div class="page-header">
         <div class="page-header-left d-flex align-items-center">
@@ -31,8 +38,10 @@
                             style="border-radius: 10px;" onclick="location.reload()" title="Refresh">
                             <i class="feather-refresh-cw"></i>
                         </a>
-                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger shadow-sm"
-                            style="border-radius: 10px;" onclick="bulkDelete()" title="Delete Bulk">
+                        <a href="javascript:void(0);" id="btn-bulk-delete-tasks"
+                            class="avatar-text avatar-md bg-soft-danger text-danger shadow-sm"
+                            style="border-radius: 10px; display: none;" onclick="bulkDelete()"
+                            title="Delete Selected Tasks">
                             <i class="feather-trash-2"></i>
                         </a>
                     </div>
@@ -129,22 +138,24 @@
                     <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
                         style="border-radius: 12px 12px 0 0;">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="text-muted small fw-bold text-uppercase" style="font-size: 11px;">Show</span>
-                            <select id="entriesLimit" class="form-select select-small border-0 bg-light shadow-none fw-bold"
+                            <span class="text-muted fw-bold text-uppercase"
+                                style="font-size: 10px; letter-spacing: 0.5px;">Show</span>
+                            <select id="entriesLimit" class="form-select border-0 shadow-none fw-bold"
                                 onchange="paginateTable()"
-                                style="width: 110px; height: 44px; border-radius: 10px; font-size: 14px; color: #1e293b; padding: 0 12px; line-height: 44px;">
+                                style="width: 80px; height: 38px; border-radius: 8px; font-size: 13px; color: #334155; background-color: #f1f5f9; padding: 0 10px; cursor: pointer; transition: all 0.2s ease;">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                             </select>
-                            <span class="text-muted small fw-bold text-uppercase" style="font-size: 11px;">entries</span>
+                            <span class="text-muted fw-bold text-uppercase"
+                                style="font-size: 10px; letter-spacing: 0.5px;">Entries</span>
                         </div>
-                        <div class="input-group bg-light" style="width: 250px; border-radius: 10px; overflow: hidden;">
-                            <span class="input-group-text bg-transparent border-0"><i
-                                    class="feather-search text-muted"></i></span>
+                        <div class="input-group" style="width: 250px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
+                            <span class="input-group-text bg-transparent border-0 pe-1"><i
+                                     class="feather-search text-muted" style="font-size: 13px;"></i></span>
                             <input type="text" id="taskSearch"
                                 class="form-control border-0 bg-transparent shadow-none fw-bold" onkeyup="filterTasks()"
-                                placeholder="Search..." style="height: 44px; font-size: 14px;">
+                                placeholder="Search tasks..." style="height: 38px; font-size: 13px; color: #334155;">
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -221,15 +232,6 @@
                                                 style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">
                                                 <div class="d-flex align-items-center flex-wrap gap-2">
                                                     <div class="fw-bold text-dark">{{ $task->task_title }}</div>
-                                                    @php
-                                                        $s = $task->status;
-                                                        $statusSlug = strtolower(str_replace(' ', '-', $s));
-                                                        $statusClass = 'status-' . $statusSlug;
-                                                    @endphp
-                                                    <span class="badge {{ $statusClass }} px-2 py-1"
-                                                        style="font-size: 9px; border-radius: 6px; letter-spacing: 0.3px; text-transform: uppercase;">
-                                                        {{ $s }}
-                                                    </span>
                                                 </div>
                                                 @if($task->followUps->where('photo', '!=', null)->count() > 0)
                                                     @php
@@ -252,11 +254,24 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column">
-                                                    @if($task->status != 'Completed' && $task->end_date)
-                                                        <div class="task-timer fw-bold text-primary mb-1" style="font-size: 13px;"
-                                                            data-end="{{ $task->end_date->toIso8601String() }}">
-                                                            Calculating...
-                                                        </div>
+                                                    @if($task->status != 'Completed')
+                                                        @if($task->end_date)
+                                                            <div class="task-timer fw-bold text-primary mb-1" style="font-size: 13px;"
+                                                                data-end="{{ $task->end_date->toIso8601String() }}">
+                                                                Calculating...
+                                                            </div>
+                                                        @else
+                                                            <div class="fw-bold text-info mb-1 d-flex flex-column"
+                                                                style="font-size: 13px;">
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <i class="feather-play-circle fs-11"></i> Ongoing
+                                                                </div>
+                                                                <div class="task-timer text-primary fs-11"
+                                                                    data-start="{{ $task->start_date->toIso8601String() }}">
+                                                                    Calculating...
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                     @else
                                                         <div class="fw-bold text-success mb-1" style="font-size: 13px;">
                                                             <i class="feather-check-circle me-1"></i> Completed
@@ -447,7 +462,7 @@
                                                             class="avatar-text avatar-md bg-soft-info text-info rounded"
                                                             title="Add Work Progress" data-bs-toggle="modal"
                                                             data-bs-target="#followUpModal"
-                                                            onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add', '{{ addslashes($task->task_title) }}', {{ $task->employee_id }}, '{{ addslashes($task->employee->name ?? '') }}')">
+                                                            onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add', '{{ addslashes($task->task_title) }}', {{ $task->employee_id ?? 'null' }}, '{{ addslashes($task->employee->name ?? auth()->user()->name ?? 'Employee') }}')">
                                                             <i class="feather-plus-circle"></i>
                                                         </a>
                                                     @endif
@@ -519,8 +534,8 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Project <span
                                 class="text-danger">*</span></label>
-                        <select name="project_id" id="taskProjectId"
-                            class="form-select premium-select" data-placeholder="Select Project..." required>
+                        <select name="project_id" id="taskProjectId" class="form-select premium-select"
+                            data-placeholder="Select Project..." required>
                             <option value="">Select Project...</option>
                             @foreach($projects as $project)
                                 <option value="{{ $project->id }}">{{ $project->name }}</option>
@@ -530,24 +545,25 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Task Title <span
                                 class="text-danger">*</span></label>
-                        <input type="text" name="task_title" id="taskTitle"
-                            class="form-control premium-input" placeholder="Enter Task Title..." required>
+                        <input type="text" name="task_title" id="taskTitle" class="form-control premium-input"
+                            placeholder="Enter Task Title..." required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Start Date <span
                                 class="text-danger">*</span></label>
-                        <input type="date" name="start_date" id="taskStartDate"
-                            class="form-control premium-input" onclick="this.showPicker()" required>
+                        <input type="date" name="start_date" id="taskStartDate" class="form-control premium-input"
+                            onclick="this.showPicker()" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">End Date</label>
-                        <input type="date" name="end_date" id="taskEndDate"
-                            class="form-control premium-input" onclick="this.showPicker()">
+                        <input type="date" name="end_date" id="taskEndDate" class="form-control premium-input"
+                            onclick="this.showPicker()">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Priority <span
                                 class="text-danger">*</span></label>
-                        <select name="priority" id="taskPriority" class="form-select premium-select" data-placeholder="Select Priority..." required>
+                        <select name="priority" id="taskPriority" class="form-select premium-select"
+                            data-placeholder="Select Priority..." required>
                             <option value="">Select priority...</option>
                             <option value="Hard">Hard</option>
                             <option value="Medium">Medium</option>
@@ -556,7 +572,8 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Status</label>
-                        <select name="status" id="taskStatus" class="form-select premium-select" data-placeholder="Select Status..." required>
+                        <select name="status" id="taskStatus" class="form-select premium-select"
+                            data-placeholder="Select Status..." required>
                             <option value="Pending">Pending</option>
                             <option value="In Process">In Process</option>
                             <option value="Completed">Completed</option>
@@ -568,8 +585,8 @@
                     <div class="col-md-12">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Assign To <span
                                 class="text-danger">*</span></label>
-                        <select name="employee_id" id="taskEmployeeId"
-                            class="form-select premium-select" data-placeholder="Select Employee..." required>
+                        <select name="employee_id" id="taskEmployeeId" class="form-select premium-select"
+                            data-placeholder="Select Employee..." required>
                             @if(count($employees) > 1)
                                 <option value="">Employee name</option>
                             @endif
@@ -582,8 +599,7 @@
                     </div>
                     <div class="col-md-12">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Task Description</label>
-                        <textarea name="description" id="taskDesc"
-                            class="form-control premium-input" rows="3"
+                        <textarea name="description" id="taskDesc" class="form-control premium-input" rows="3"
                             placeholder="Enter detailed task description..."></textarea>
                     </div>
                 </div>
@@ -626,11 +642,15 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Performed
                                                 By</label>
-                                            <div class="p-3 rounded-3 bg-soft-primary border border-primary border-opacity-10 d-flex align-items-center">
-                                                <div class="avatar-text avatar-sm bg-primary text-white rounded-circle me-3" id="followUpEmpInitial">M</div>
+                                            <div
+                                                class="p-3 rounded-3 bg-soft-primary border border-primary border-opacity-10 d-flex align-items-center">
+                                                <div class="avatar-text avatar-sm bg-primary text-white rounded-circle me-3"
+                                                    id="followUpEmpInitial">M</div>
                                                 <div>
-                                                    <div class="fw-bold text-dark fs-14" id="followUpEmpNameDisplay">...</div>
-                                                    <div class="text-muted small" style="font-size: 11px;">Assigned Task Owner</div>
+                                                    <div class="fw-bold text-dark fs-14" id="followUpEmpNameDisplay">...
+                                                    </div>
+                                                    <div class="text-muted small" style="font-size: 11px;">Assigned Task
+                                                        Owner</div>
                                                 </div>
                                                 <input type="hidden" name="reference_name" id="followUpEmployee">
                                             </div>
@@ -640,13 +660,16 @@
                                         <div class="row g-2 mb-3 p-2 rounded"
                                             style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
                                             <div class="col-6">
-                                                <label class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Sub-Task</label>
+                                                <label
+                                                    class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Sub-Task</label>
                                                 <input type="text" id="quickTaskTitle"
-                                                    class="form-control premium-input shadow-none" placeholder="Task Title..."
+                                                    class="form-control premium-input shadow-none"
+                                                    placeholder="Task Title..."
                                                     style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
                                             </div>
                                             <div class="col-3">
-                                                <label class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Hrs</label>
+                                                <label
+                                                    class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Hrs</label>
                                                 <input type="text" id="quickTaskHours"
                                                     class="form-control premium-input shadow-none" placeholder="Hrs"
                                                     style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
@@ -665,15 +688,15 @@
                                                 Description <span class="text-danger">*</span></label>
                                             <textarea name="work_description" id="workDesc"
                                                 class="form-control premium-input" rows="3"
-                                                placeholder="Enter detailed work progress description..." required></textarea>
+                                                placeholder="Enter detailed work progress description..."
+                                                required></textarea>
                                         </div>
 
                                         <div class="mb-4">
                                             <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Upload
                                                 Attachment (Image/PDF/Doc)</label>
                                             <input type="file" name="photo" id="photoInput"
-                                                class="form-control premium-input"
-                                                onchange="previewImage(this)"
+                                                class="form-control premium-input" onchange="previewImage(this)"
                                                 accept=".jpeg,.jpg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar">
                                             <!-- REAL-TIME PREVIEW AREA -->
                                             <div id="previewContainer" class="mt-3 d-none"
@@ -1160,6 +1183,26 @@
                         popperConfig: { strategy: 'fixed' }
                     });
                 });
+
+                // Handle Check All Functionality for Tasks
+                $(document).on('change', '#selectAllTasks', function () {
+                    $('.task-checkbox').prop('checked', $(this).prop('checked'));
+                    toggleTaskBulkAction();
+                });
+
+                $(document).on('change', '.task-checkbox', function () {
+                    toggleTaskBulkAction();
+                });
+
+                function toggleTaskBulkAction() {
+                    const checkedCount = $('.task-checkbox:checked').length;
+                    if (checkedCount > 0) {
+                        $('#btn-bulk-delete-tasks').fadeIn();
+                    } else {
+                        $('#btn-bulk-delete-tasks').fadeOut();
+                        $('#selectAllTasks').prop('checked', false);
+                    }
+                }
             });
 
             function previewImage(input) {
@@ -1183,9 +1226,9 @@
                         preview.style.display = 'none';
                         docPreview.style.display = 'block';
                         docPreview.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center p-3">
-                                                <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
-                                                <span class="text-dark small">${file.name}</span>
-                                            </div>`;
+                                                        <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
+                                                        <span class="text-dark small">${file.name}</span>
+                                                    </div>`;
                     }
                 }
             }
@@ -1318,7 +1361,7 @@
                         const empDisplay = document.getElementById('followUpEmpNameDisplay');
                         const empInitial = document.getElementById('followUpEmpInitial');
                         const empHidden = document.getElementById('followUpEmployee');
-                        
+
                         if (empDisplay) empDisplay.innerText = assignedEmpName;
                         if (empInitial) empInitial.innerText = assignedEmpName.charAt(0).toUpperCase();
                         if (empHidden) empHidden.value = assignedEmpName;
@@ -1358,11 +1401,11 @@
                 // 2. Format HTML - Prepend to the TOP using Real Bullets and Numbered List for details
                 const timeStr = hours ? ` — <b style="color: #3858f9;">${hours} ${isNaN(hours) ? '' : 'Hours'}</b>` : '';
                 const html = `<div class="mb-4" style="border-left: 4px solid #3858f9; padding-left: 20px;">
-                                                    <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
-                                                    <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
-                                                        <li>&nbsp;</li>
-                                                    </ol>
-                                                  </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
+                                                            <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
+                                                            <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
+                                                                <li>&nbsp;</li>
+                                                            </ol>
+                                                          </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
 
                 if ($('#workDesc').length && typeof $.fn.summernote === 'function') {
                     const currentContent = $('#workDesc').summernote('code');
@@ -1407,42 +1450,42 @@
                     let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                     body.innerHTML += `
-                                                            <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
-                                                                <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
-                                                                <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                                    ${nameHtml}
-                                                                </td>
-                                                                <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                                    ${timeDisplay}
-                                                                </td>
-                                                                <td style="font-size: 13px; white-space: nowrap;">
-                                                                    <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                                                                </td>
-                                                                <td class="pe-3 text-center">
-                                                                    <div class="d-flex align-items-center justify-content-center">
-                                                                        ${viewBtn}
-                                                                        ${delBtn}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
-                                                                <td colspan="5" class="p-0">
-                                                                    <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                                                        <div style="padding: 20px 25px;">
-                                                                            <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
-                                                                                ${fu.work_description}
+                                                                    <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
+                                                                        <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
+                                                                        <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                            ${nameHtml}
+                                                                        </td>
+                                                                        <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                                            ${timeDisplay}
+                                                                        </td>
+                                                                        <td style="font-size: 13px; white-space: nowrap;">
+                                                                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                                                                        </td>
+                                                                        <td class="pe-3 text-center">
+                                                                            <div class="d-flex align-items-center justify-content-center">
+                                                                                ${viewBtn}
+                                                                                ${delBtn}
                                                                             </div>
-                                                                            ${fu.photo ? `
-                                                                            <div class="mt-3">
-                                                                                <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
-                                                                                    <i class="feather-image me-1"></i> View Attached File
-                                                                                </a>
-                                                                            </div>` : ''}
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        `;
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
+                                                                        <td colspan="5" class="p-0">
+                                                                            <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                                                                <div style="padding: 20px 25px;">
+                                                                                    <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
+                                                                                        ${fu.work_description}
+                                                                                    </div>
+                                                                                    ${fu.photo ? `
+                                                                                    <div class="mt-3">
+                                                                                        <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
+                                                                                            <i class="feather-image me-1"></i> View Attached File
+                                                                                        </a>
+                                                                                    </div>` : ''}
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                `;
                 });
                 if (totalItems === 0) body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
 
@@ -1541,10 +1584,46 @@
                 const timers = document.querySelectorAll('.task-timer');
 
                 timers.forEach(timer => {
-                    const end = new Date(timer.getAttribute('data-end'));
+                    const dataEnd = timer.getAttribute('data-end');
+                    const dataStart = timer.getAttribute('data-start');
 
-                    if (now < end) {
-                        let diff = end - now;
+                    if (dataEnd) {
+                        const end = new Date(dataEnd);
+                        if (now < end) {
+                            let diff = end - now;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            diff -= days * (1000 * 60 * 60 * 24);
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            diff -= hours * (1000 * 60 * 60);
+                            const mins = Math.floor(diff / (1000 * 60));
+                            diff -= mins * (1000 * 60);
+                            const secs = Math.floor(diff / 1000);
+
+                            timer.innerHTML = `
+                                        <span class="text-primary">${days}d</span> 
+                                        <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
+                                        <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
+                                    `;
+                        } else {
+                            let diff = now - end;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            diff -= days * (1000 * 60 * 60 * 24);
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            diff -= hours * (1000 * 60 * 60);
+                            const mins = Math.floor(diff / (1000 * 60));
+                            diff -= mins * (1000 * 60);
+                            const secs = Math.floor(diff / 1000);
+
+                            timer.innerHTML = `
+                                        <span class="text-danger">${days}d</span> 
+                                        <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
+                                        <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
+                                    `;
+                        }
+                    } else if (dataStart) {
+                        const start = new Date(dataStart);
+                        let diff = now - start;
+                        if (diff < 0) diff = 0;
 
                         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                         diff -= days * (1000 * 60 * 60 * 24);
@@ -1555,26 +1634,10 @@
                         const secs = Math.floor(diff / 1000);
 
                         timer.innerHTML = `
-                                                                    <span class="text-primary">${days}d</span> 
-                                                                    <span class="text-secondary">${hours}h ${mins}m ${secs}s</span>
-                                                                    <span class="text-muted small ms-1" style="font-size:9px;">LEFT</span>
-                                                                `;
-                    } else {
-                        let diff = now - end;
-
-                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                        diff -= days * (1000 * 60 * 60 * 24);
-                        const hours = Math.floor(diff / (1000 * 60 * 60));
-                        diff -= hours * (1000 * 60 * 60);
-                        const mins = Math.floor(diff / (1000 * 60));
-                        diff -= mins * (1000 * 60);
-                        const secs = Math.floor(diff / 1000);
-
-                        timer.innerHTML = `
-                                                                    <span class="text-danger">${days}d</span> 
-                                                                    <span class="text-danger small">${hours}h ${mins}m ${secs}s</span>
-                                                                    <span class="text-danger fw-bold ms-1" style="font-size:9px;">OVERDUE</span>
-                                                                `;
+                                    <span class="text-info">${days}d</span> 
+                                    <span class="text-info small">${hours}h ${mins}m ${secs}s</span>
+                                    <span class="text-info fw-bold ms-1" style="font-size:9px;">ELAPSED</span>
+                                `;
                     }
                 });
             }
@@ -1665,112 +1728,112 @@
             });
 
             function deleteFollowUp(id) {
-                    Swal.fire({
-                        title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
-                        showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(`/daily-tasks/follow-up/${id}`, {
-                                method: 'DELETE',
-                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-                            }).then(res => res.json()).then(data => {
-                                if (data.success) {
-                                    Toast.fire({ icon: 'success', title: data.success });
-                                    loadFollowUpHistory(document.getElementById('followUpTaskId').value);
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function deleteRecord(e, form) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
-                        showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                }
-
-                function updateTaskStatus(id, status) {
-                    fetch(`/daily-tasks/${id}/status`, {
-                        method: 'PATCH',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ status: status })
-                    })
-                        .then(res => res.json())
-                        .then(data => {
+                Swal.fire({
+                    title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
+                    showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/daily-tasks/follow-up/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                        }).then(res => res.json()).then(data => {
                             if (data.success) {
-                                Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
-                            } else {
-                                Toast.fire({ icon: 'error', title: 'Update failed' });
+                                Toast.fire({ icon: 'success', title: data.success });
+                                loadFollowUpHistory(document.getElementById('followUpTaskId').value);
                             }
                         });
-                }
-
-                function updateTaskPriority(id, priority) {
-                    fetch(`/daily-tasks/${id}/priority`, {
-                        method: 'PATCH',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ priority: priority })
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
-                            } else {
-                                Toast.fire({ icon: 'error', title: 'Update failed' });
-                            }
-                        });
-                }
-
-                function showTaskDesc(id) {
-                    const html = document.getElementById('task_desc_' + id).innerHTML;
-                    Swal.fire({
-                        title: 'Task Details & Progress',
-                        html: `<div class="custom-html-content" style="max-height: 75vh; overflow-y: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left;">${html}</div>`,
-                        width: '800px',
-                        showConfirmButton: true,
-                        confirmButtonColor: '#3858f9'
-                    });
-                }
-
-                function viewAttachmentPopup(url) {
-                    const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
-                    let htmlContent = '';
-
-                    if (isImage) {
-                        htmlContent = `<img src="${url}" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">`;
-                    } else {
-                        htmlContent = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none; border-radius: 8px;"></iframe>`;
                     }
+                });
+            }
 
-                    Swal.fire({
-                        title: 'Attachment Preview',
-                        html: htmlContent,
-                        width: '900px',
-                        showCloseButton: true,
-                        showConfirmButton: false
+            function deleteRecord(e, form) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure?', text: "You won't be able to revert this action!", icon: 'warning',
+                    showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            }
+
+            function updateTaskStatus(id, status) {
+                fetch(`/daily-tasks/${id}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: status })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+                        } else {
+                            Toast.fire({ icon: 'error', title: 'Update failed' });
+                        }
                     });
+            }
+
+            function updateTaskPriority(id, priority) {
+                fetch(`/daily-tasks/${id}/priority`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ priority: priority })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+                        } else {
+                            Toast.fire({ icon: 'error', title: 'Update failed' });
+                        }
+                    });
+            }
+
+            function showTaskDesc(id) {
+                const html = document.getElementById('task_desc_' + id).innerHTML;
+                Swal.fire({
+                    title: 'Task Details & Progress',
+                    html: `<div class="custom-html-content" style="max-height: 75vh; overflow-y: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; text-align: left;">${html}</div>`,
+                    width: '800px',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3858f9'
+                });
+            }
+
+            function viewAttachmentPopup(url) {
+                const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
+                let htmlContent = '';
+
+                if (isImage) {
+                    htmlContent = `<img src="${url}" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">`;
+                } else {
+                    htmlContent = `<iframe src="${url}" style="width: 100%; height: 70vh; border: none; border-radius: 8px;"></iframe>`;
                 }
-            </script>
 
-            @if(session('success'))
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
-                    });
-                </script>
-            @endif
+                Swal.fire({
+                    title: 'Attachment Preview',
+                    html: htmlContent,
+                    width: '900px',
+                    showCloseButton: true,
+                    showConfirmButton: false
+                });
+            }
+        </script>
+
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+                });
+            </script>
+        @endif
     @endpush

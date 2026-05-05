@@ -91,27 +91,26 @@
         @endif
 
         <div class="card stretch stretch-full">
-            <form method="POST" action="{{ route('employees.update', $employee->id) }}" enctype="multipart/form-data" autocomplete="off">
+            <form method="POST" action="{{ route('employees.update', $employee->id) }}" enctype="multipart/form-data" autocomplete="off" class="employee-premium-form">
                 @csrf
                 @method('PUT')
                 <!-- Tab Navigation -->
-                <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row custom-tabs" id="employeeTab" role="tablist"
+                <ul class="nav nav-tabs nav-justified mb-0 flex-column flex-sm-row" id="employeeTab" role="tablist"
                     style="background: #f1f5f9; border-radius: 12px 12px 0 0; padding: 8px 8px 0 8px; border: none;">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold active w-100" id="personal-tab" data-bs-toggle="tab"
-                            data-bs-target="#personal" type="button" role="tab" aria-controls="personal"
-                            aria-selected="true"
+                        <button class="nav-link active w-100" id="personal-tab" data-bs-toggle="tab"
+                            data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true"
                             style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                             <i class="bi bi-person-circle me-2"></i>Personal Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold w-100" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank"
-                            type="button" role="tab" aria-controls="bank" aria-selected="false"
+                        <button class="nav-link w-100" id="bank-tab" type="button" data-bs-toggle="tab"
+                            data-bs-target="#bank" role="tab" aria-controls="bank" aria-selected="false"
                             style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
-                            <i class="bi bi-bank2 me-2"></i>Bank Details</button>
+                            <i class="bi bi-bank me-2"></i>Bank Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
+                        <button class="nav-link w-100" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
                             type="button" role="tab" aria-controls="salary" aria-selected="false"
                             style="font-size: 15px; padding: 12px 0; border: none; border-radius: 10px 10px 0 0; transition: all 0.3s ease;">
                             <i class="bi bi-cash-coin me-2"></i>Salary Details</button>
@@ -119,45 +118,97 @@
                 </ul>
 
                 <style>
-                    .custom-tabs .nav-link {
+                    .employee-premium-form .tab-content {
+                        background: #fff;
+                        border-radius: 0 0 10px 10px;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                    }
+                    .employee-premium-form .form-group {
+                        margin-bottom: 20px;
+                    }
+                    .employee-premium-form label {
+                        display: block;
+                        font-weight: 700;
+                        color: #475569;
+                        font-size: 13px;
+                        margin-bottom: 8px;
+                        text-transform: none;
+                    }
+                    .employee-premium-form .input-group {
+                        border-radius: 10px;
+                        overflow: hidden;
+                        border: 1px solid #e2e8f0;
+                        transition: all 0.3s ease;
+                    }
+                    .employee-premium-form .input-group:focus-within {
+                        border-color: #3858f9;
+                        box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.1);
+                    }
+                    .employee-premium-form .input-group-text {
+                        background: #f1f5f9 !important;
+                        border: none !important;
                         color: #64748b;
-                        background: transparent !important;
+                        width: 48px;
+                        display: flex;
+                        justify-content: center;
+                        font-size: 16px;
                     }
-                    .custom-tabs .nav-link.active {
-                        color: #3858f9 !important;
-                        background: #fff !important;
-                        position: relative;
+                    .employee-premium-form .form-control, 
+                    .employee-premium-form .form-select {
+                        border: none !important;
+                        padding: 12px 15px !important;
+                        font-size: 14px !important;
+                        color: #1e293b !important;
+                        height: 48px !important;
                     }
-                    /* Smooth Animation for Tabs */
-                    .tab-pane {
-                        animation: fadeIn 0.4s ease-out;
+                    .employee-premium-form .form-control:focus, 
+                    .employee-premium-form .form-select:focus {
+                        box-shadow: none !important;
                     }
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(5px); }
-                        to { opacity: 1; transform: translateY(0); }
+                    .employee-premium-form .form-control::placeholder {
+                        color: #94a3b8 !important;
                     }
-                    .custom-tabs .nav-link:not(.active):hover {
-                        background: rgba(255,255,255,0.4) !important;
-                        color: #334155;
+                    .employee-premium-form .form-check-input:checked {
+                        background-color: #3858f9;
+                        border-color: #3858f9;
+                    }
+                    .employee-premium-form .btn-primary {
+                        background: #3858f9;
+                        border: none;
+                        padding: 12px 30px;
+                        border-radius: 10px;
+                        font-weight: 600;
+                        box-shadow: 0 4px 12px rgba(56, 88, 249, 0.2);
+                    }
+                    .employee-premium-form .btn-primary:hover {
+                        background: #2b46d1;
+                        transform: translateY(-1px);
+                    }
+                    .employee-premium-form .btn-light {
+                        background: #f1f5f9;
+                        border: none;
+                        color: #64748b;
+                        padding: 12px 30px;
+                        border-radius: 10px;
+                        font-weight: 600;
                     }
                 </style>
 
                 <div class="tab-content p-4" id="employeeTabContent" style="background: #fff; border-radius: 0 0 10px 10px;">
 
-                    <!-- Personal Details Tab -->
                     <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="fw-bold">Employee Code</label>
+                                <label>Employee Code</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-phone"></i></span>
                                     <input type="text" name="employee_code" class="form-control"
                                         placeholder="Enter employee code"
                                         value="{{ old('employee_code', $employee->employee_code) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Name <span class="text-danger">*</span></label>
+                                <label>Name <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <input type="text" name="name" class="form-control" placeholder="Enter employee name"
@@ -165,16 +216,16 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Email</label>
+                                <label>Email</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-mail"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                     <input type="email" name="email" class="form-control" placeholder="Enter email"
                                         value="{{ old('email', $employee->email) }}">
                                 </div>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="fw-bold">Role</label>
+                                <label>Role</label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                                     <select name="role" class="form-control" required>
@@ -186,18 +237,18 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Mobile Number <span class="text-danger">*</span></label>
+                                <label>Mobile Number <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-phone"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
                                     <input type="text" name="mobile_number" class="form-control"
                                         placeholder="Enter mobile number"
                                         value="{{ old('mobile_number', $employee->mobile_number) }}" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Department</label>
+                                <label>Department</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-users"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-people"></i></span>
                                     <select name="department" class="form-control" required>
                                         <option value="">Select department...</option>
                                         @foreach($departments as $dept)
@@ -207,9 +258,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Designation <span class="text-danger">*</span></label>
+                                <label>Designation <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-users"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <select name="designation" class="form-control" required>
                                         <option value="">Select designation...</option>
                                         @foreach($designations as $desg)
@@ -219,94 +270,89 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Date of Joining</label>
+                                <label>Date of Joining</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-calendar"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                                     <input type="date" name="date_of_joining" class="form-control"
                                         value="{{ old('date_of_joining', $employee->date_of_joining) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Date of Birth</label>
+                                <label>Date of Birth</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-calendar"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                                     <input type="date" name="date_of_birth" class="form-control"
                                         value="{{ old('date_of_birth', $employee->date_of_birth) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Gender</label><br>
-                                <div class="d-flex align-items-center mb-3">
-                                    <input class="form-check-input me-2" type="radio" name="gender" value="male" {{ old('gender', $employee->gender) == 'male' ? 'checked' : '' }}>
-                                    <span class="me-2 text-success"><i class=""></i></span>Male
-                                    <input class="form-check-input ms-4 me-2" type="radio" name="gender" value="female" {{ old('gender', $employee->gender) == 'female' ? 'checked' : '' }}>
-                                    <span class="me-2 text-danger"><i class=""></i></span>Female
+                                <label>Gender</label><br>
+                                <div class="d-flex align-items-center mb-3 mt-2">
+                                    <div class="form-check me-4">
+                                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male" {{ old('gender', $employee->gender) == 'male' ? 'checked' : '' }}>
+                                        <label class="form-check-label ms-1" for="genderMale">Male</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female" {{ old('gender', $employee->gender) == 'female' ? 'checked' : '' }}>
+                                        <label class="form-check-label ms-1" for="genderFemale">Female</label>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="fw-bold">Password</label>
+                                <label>Password</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-lock"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                     <input type="password" name="password" id="editEmpPassword" class="form-control" autocomplete="new-password" value="{{ old('password', $employee->password) }}">
-                                    <span class="input-group-text" onclick="togglePassword('editEmpPassword', this)" style="cursor:pointer; background:#fff; border-left:none; transition: color 0.2s;" onmouseover="this.style.color='#3858f9'" onmouseout="this.style.color='#94a3b8'">
-                                        <i class="feather-eye-off"></i>
+                                    <span class="input-group-text bg-white" onclick="togglePassword('editEmpPassword', this)" style="cursor:pointer; border-left:none;">
+                                        <i class="bi bi-eye-slash"></i>
                                     </span>
                                 </div>
                             </div>
-                            <script>
-                                function togglePassword(inputId, el) {
-                                    const input = document.getElementById(inputId);
-                                    const icon = el.querySelector('i');
-                                    if (input.type === 'password') { input.type = 'text'; icon.className = 'feather-eye'; }
-                                    else { input.type = 'password'; icon.className = 'feather-eye-off'; }
-                                }
-                            </script>
                             <div class="col-md-4">
-                                <label class="fw-bold">Aadhaar Number</label>
+                                <label>Aadhaar Number</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                                     <input type="text" name="aadhaar_number" class="form-control"
                                         placeholder="Enter Aadhaar Number"
                                         value="{{ old('aadhaar_number', $employee->aadhaar_number) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">PAN Number</label>
+                                <label>PAN Number</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-dollar-sign"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                                     <input type="text" name="pan_number" class="form-control" placeholder="E.G. ABCDE2548K"
                                         value="{{ old('pan_number', $employee->pan_number) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Address</label>
+                                <label>Address</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-map-pin"></i></span>
-                                    <textarea name="address" class="form-control"
-                                        placeholder="Enter Address">{{ old('address', $employee->address) }}</textarea>
+                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                    <textarea name="address" class="form-control" placeholder="Enter Address" style="height: 45px;">{{ old('address', $employee->address) }}</textarea>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Time In</label>
+                                <label>Time In</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-clock"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                     <input type="time" name="time_in" class="form-control"
                                         value="{{ old('time_in', $employee->time_in) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Time Out</label>
+                                <label>Time Out</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-clock"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
                                     <input type="time" name="time_out" class="form-control"
                                         value="{{ old('time_out', $employee->time_out) }}">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Leave</label>
+                                <label>Leave</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-calendar"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-calendar"></i></span>
                                     <input type="text" name="leave" class="form-control"
                                         value="{{ old('leave', $employee->leave) }}" placeholder="Enter Leave Allotment">
                                 </div>
@@ -317,98 +363,86 @@
                                 <div class="row g-3">
                                     <!-- PF Section -->
                                     <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ old('pf', $employee->pf) ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="pfToggle">Eligible For PF</label>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" name="pf" id="pfToggle" {{ old('pf', $employee->pf) ? 'checked' : '' }} style="width: 40px; height: 20px;">
+                                            <label class="form-check-label ms-2" for="pfToggle" style="margin-top: 2px;">Eligible For PF</label>
                                         </div>
-                                        <div id="pfField"
-                                            style="display: {{ old('pf', $employee->pf) ? 'block' : 'none' }};">
-                                            <label class="fw-bold small">PF No.</label>
+                                        <div id="pfField" style="display: {{ old('pf', $employee->pf) ? 'block' : 'none' }};">
+                                            <label class="small">PF No.</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                                <input type="text" name="pf_number" class="form-control"
-                                                    placeholder="PF No."
-                                                    value="{{ old('pf_number', $employee->pf_number) }}">
+                                                <input type="text" name="pf_number" class="form-control" placeholder="PF No." value="{{ old('pf_number', $employee->pf_number) }}">
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- ESI Section -->
                                     <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ old('esi', $employee->esi) ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="esiToggle">Eligible For ESI</label>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" name="esi" id="esiToggle" {{ old('esi', $employee->esi) ? 'checked' : '' }} style="width: 40px; height: 20px;">
+                                            <label class="form-check-label ms-2" for="esiToggle" style="margin-top: 2px;">Eligible For ESI</label>
                                         </div>
-                                        <div id="esiField"
-                                            style="display: {{ old('esi', $employee->esi) ? 'block' : 'none' }};">
-                                            <label class="fw-bold small">ESI No.</label>
+                                        <div id="esiField" style="display: {{ old('esi', $employee->esi) ? 'block' : 'none' }};">
+                                            <label class="small">ESI No.</label>
                                             <div class="input-group">
                                                 <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                                                <input type="text" name="esi_number" class="form-control"
-                                                    placeholder="ESI No."
-                                                    value="{{ old('esi_number', $employee->esi_number) }}">
+                                                <input type="text" name="esi_number" class="form-control" placeholder="ESI No." value="{{ old('esi_number', $employee->esi_number) }}">
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Insurance Section -->
                                     <div class="col-md-4">
-                                        <div class="form-check form-switch mb-2">
-                                            <input class="form-check-input" type="checkbox" name="insurance"
-                                                id="insuranceToggle" {{ old('insurance', $employee->insurance) ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-bold" for="insuranceToggle">Insurance</label>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" name="insurance" id="insuranceToggle" {{ old('insurance', $employee->insurance) ? 'checked' : '' }} style="width: 40px; height: 20px;">
+                                            <label class="form-check-label ms-2" for="insuranceToggle" style="margin-top: 2px;">Insurance</label>
                                         </div>
-                                        <div id="insuranceFields"
-                                            style="display: {{ old('insurance', $employee->insurance) ? 'block' : 'none' }};">
+                                        <div id="insuranceFields" style="display: {{ old('insurance', $employee->insurance) ? 'block' : 'none' }};">
                                             <div class="mb-2">
-                                                <label class="fw-bold small">Provider</label>
+                                                <label class="small">Provider</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-shield"></i></span>
+                                                    <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
                                                     <input type="text" name="insurance_provider" class="form-control"
-                                                        placeholder="Insurance Company"
-                                                        value="{{ old('insurance_provider', $employee->insurance_provider) }}">
+                                                        placeholder="Insurance Company" value="{{ old('insurance_provider', $employee->insurance_provider) }}">
                                                 </div>
                                             </div>
                                             <div>
-                                                <label class="fw-bold small">Policy Number</label>
+                                                <label class="small">Policy Number</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                                     <input type="text" name="insurance_policy_number" class="form-control"
-                                                        placeholder="Policy Number"
-                                                        value="{{ old('insurance_policy_number', $employee->insurance_policy_number) }}">
+                                                        placeholder="Policy Number" value="{{ old('insurance_policy_number', $employee->insurance_policy_number) }}">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- PHOTO UPLOAD -->
-                                    <!-- LEFT SIDE -->
-                                    <div class="col-md-4 d-flex align-items-center mt-3 mt:md-3">
+                                    <!-- Photo Upload Section -->
+                                    <div class="col-md-12 mt-4">
+                                        <div class="p-3 border rounded-3 bg-light d-inline-flex align-items-center" style="border-style: dashed !important; border-width: 2px !important;">
+                                            <!-- Hidden Input -->
+                                            <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
 
-                                        <!-- Hidden Input -->
-                                        <input type="file" id="photoInput" name="photo" accept="image/*" hidden>
+                                            <!-- Image Box -->
+                                            <div onclick="document.getElementById('photoInput').click()"
+                                                class="bg-white border d-flex align-items-center justify-content-center"
+                                                style="width:100px; height:100px; cursor:pointer; overflow:hidden; border-radius: 12px; border: 1px solid #e2e8f0 !important;">
 
-                                        <!-- Image Box -->
-                                        <div onclick="document.getElementById('photoInput').click()"
-                                            class="bg-light border d-flex align-items-center justify-content-center"
-                                            style="width:120px; height:120px; cursor:pointer; overflow:hidden; border-radius: 15px; border: 2px dashed #cbd5e1 !important;">
+                                                <img id="previewImg" src="{{ $employee->photo ? asset('storage/' . $employee->photo) : '' }}"
+                                                    style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
 
-                                            <img id="previewImg"
-                                                src="{{ $employee->photo ? asset('storage/' . $employee->photo) : '' }}"
-                                                style="width:100%; height:100%; object-fit:cover; display: {{ $employee->photo ? 'block' : 'none' }};">
+                                                <div id="placeholderText" class="text-center" style="display: {{ $employee->photo ? 'none' : 'block' }};">
+                                                    <i class="bi bi-camera text-muted" style="font-size: 24px;"></i>
+                                                    <div style="color:#64748b; font-weight: 600; font-size: 10px; text-transform: uppercase; margin-top: 4px;">SELECT PHOTO</div>
+                                                </div>
+                                            </div>
 
-                                            <span id="placeholderText"
-                                                style="color:#64748b; font-weight: 600; font-size: 12px; display: {{ $employee->photo ? 'none' : 'block' }}; text-transform: uppercase;">SELECT
-                                                PHOTO</span>
+                                            <!-- TEXT SIDE -->
+                                            <div class="ms-4">
+                                                <label class="d-block mb-1">Update Employee Photo</label>
+                                                <p class="text-muted small mb-0">Max size 2MB. Allowed: PNG, JPG, JPEG, WEBP</p>
+                                            </div>
                                         </div>
-
-                                        <!-- TEXT SIDE -->
-                                        <div class="ms-3">
-                                            <label class="fw-bold d-block">Upload Photo</label>
-                                            <small class="text-muted d-block"># Max upload size 2mb</small>
-                                            <small class="text-muted d-block"># Allowed: png, jpg, jpeg, webp</small>
-                                        </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -446,30 +480,29 @@
                         </div>
                     </div>
 
-                    <!-- Bank Details Tab -->
                     <div class="tab-pane fade" id="bank" role="tabpanel" aria-labelledby="bank-tab">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="fw-bold">Bank Name <span class="text-danger">*</span></label>
+                                <label>Bank Name <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-home"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-bank"></i></span>
                                     <input type="text" name="bank_name" class="form-control" placeholder="Bank Name"
                                         value="{{ old('bank_name', $employee->bank_name) }}" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Account Number <span class="text-danger">*</span></label>
+                                <label>Account Number <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-hash"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-hash"></i></span>
                                     <input type="text" name="account_number" class="form-control"
                                         placeholder="Account Number"
                                         value="{{ old('account_number', $employee->account_number) }}" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">IFSC Code <span class="text-danger">*</span></label>
+                                <label>IFSC Code <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-key"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-key"></i></span>
                                     <input type="text" name="ifsc_code" class="form-control" placeholder="IFSC Code"
                                         value="{{ old('ifsc_code', $employee->ifsc_code) }}" required>
                                 </div>
@@ -485,11 +518,10 @@
                         </div>
                     </div>
 
-                    <!-- Salary Details Tab -->
                     <div class="tab-pane fade" id="salary" role="tabpanel" aria-labelledby="salary-tab">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="fw-bold">Basic Salary <span class="text-danger">*</span></label>
+                                <label>Basic Salary <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
                                     <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
                                     <input type="number" name="basic_salary" id="basic_salary"
@@ -498,17 +530,17 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">HRA</label>
+                                <label>HRA</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-home"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-house"></i></span>
                                     <input type="number" name="hra" id="hra" class="form-control salary-input"
                                         value="{{ old('hra', $employee->hra) }}" placeholder="HRA">
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Conveyance Allowance</label>
+                                <label>Conveyance Allowance</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-truck"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-truck"></i></span>
                                     <input type="number" name="conveyance_allowance" id="conveyance_allowance"
                                         class="form-control salary-input"
                                         value="{{ old('conveyance_allowance', $employee->conveyance_allowance) }}"
@@ -516,9 +548,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Medical Allowance</label>
+                                <label>Medical Allowance</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-activity"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-activity"></i></span>
                                     <input type="number" name="medical_allowance" id="medical_allowance"
                                         class="form-control salary-input"
                                         value="{{ old('medical_allowance', $employee->medical_allowance) }}"
@@ -526,9 +558,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Other Allowance</label>
+                                <label>Other Allowance</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-gift"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-gift"></i></span>
                                     <input type="number" name="other_allowance" id="other_allowance"
                                         class="form-control salary-input"
                                         value="{{ old('other_allowance', $employee->other_allowance) }}"
@@ -536,9 +568,9 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="fw-bold">Total Salary</label>
+                                <label>Total Salary</label>
                                 <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="feather-credit-card"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
                                     <input type="number" id="total_salary" class="form-control bg-light" value="0.00"
                                         readonly>
                                 </div>
@@ -561,6 +593,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <script>
+        function togglePassword(inputId, iconElement) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = iconElement.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        }
+
         // Tab Navigation with Validation
         function nextTab(targetTabId) {
             const currentTab = document.querySelector('.tab-pane.show.active');
