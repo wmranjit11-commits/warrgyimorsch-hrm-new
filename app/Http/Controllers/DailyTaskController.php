@@ -8,6 +8,8 @@ use App\Models\Employee;
 use App\Models\TaskFollowUp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class DailyTaskController extends Controller
 {
