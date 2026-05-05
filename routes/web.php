@@ -63,13 +63,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/create', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
-    Route::get('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
-    Route::get('/projects/{id}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
-    Route::put('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
-    Route::patch('/projects/{id}/update-field', [\App\Http\Controllers\ProjectController::class, 'updateField'])->name('projects.update-field');
+    Route::get('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
+    Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
+    Route::patch('/projects/{project}/update-field', [\App\Http\Controllers\ProjectController::class, 'updateField'])->name('projects.update-field');
     Route::post('/projects/bulk-delete', [\App\Http\Controllers\ProjectController::class, 'bulkDelete'])->name('projects.bulk-delete');
-    Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
-    Route::get('/projects/{id}/tasks-summary', [\App\Http\Controllers\ProjectController::class, 'tasksSummary'])->name('projects.tasks-summary');
+    Route::delete('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/projects/{project}/tasks-summary', [\App\Http\Controllers\ProjectController::class, 'tasksSummary'])->name('projects.tasks-summary');
 
     // DAILY TASKS
     Route::get('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'index'])->name('daily-tasks.index');

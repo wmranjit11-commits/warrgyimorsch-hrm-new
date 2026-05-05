@@ -437,37 +437,76 @@
     //     }
     // }
 
-    function deleteSingleAttendance(id, date) {
-        if (confirm('Delete this record?')) {
-            fetch(`/payroll/attendance/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Record deleted successfully');
-
-                    // refresh eye tab data
-                    const employeeName = document.getElementById('offcanvasDate').innerText;
-                    const employeeId = lastFetchedData[0]?.employee_id;
-
-                    if (employeeId) {
-                        openAttendanceDetails(employeeId, employeeName);
+    function deleteSingleAttendance(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Delete this attendance record?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3858f9',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-primary px-4',
+                cancelButton: 'btn btn-light-brand px-4 me-3'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/payroll/attendance/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
-                }
-            });
-        }
+                }).then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Record deleted'
+                            });
+                        }
+
+                        // refresh eye tab data
+                        const employeeName = document.getElementById('offcanvasDate').innerText;
+                        const employeeId = lastFetchedData[0]?.employee_id;
+
+                        if (employeeId) {
+                            openAttendanceDetails(employeeId, employeeName);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     function editSingleAttendance(id, employeeId) {
         window.location.href = `/payroll/attendace/employee/${employeeId}/edit?attendance_id=${id}`;
     }
 
-    function exportAttendance() {
-        const start = document.getElementById('startDate').value;
-        const end = document.getElementById('endDate').value;
-        window.location.href = '{{ route("payroll.attendance.export") }}?start_date=' + start + '&end_date=' + end;
-    }
+   function exportAttendance() {
+    const params = new URLSearchParams(window.location.search);
+
+    const employee_id = params.get('employee_id');
+    const start = params.get('start_date');
+    const end = params.get('end_date');
+
+    if (!start || !end) {
+            alert('Date range missing');
+            return;
+        }
+    let url = "{{ route('payroll.attendance.export') }}";
+        url += "?start_date=" + start + "&end_date=" + end;
+
+        if (employee_id) {
+            url += "&employee_id=" + employee_id;
+        }
+
+        window.location.href = url;
+}
 </script>
 
 <style>

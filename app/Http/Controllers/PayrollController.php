@@ -324,6 +324,8 @@ class PayrollController extends Controller
 
             $attendanceDays = 0;
             $overtimeMinutes = 0;
+            $overtimeDays = 0;
+            $overtimeHours = 0;
             foreach ($records as $r) {
 
                 switch ($r->status) {
@@ -469,7 +471,7 @@ class PayrollController extends Controller
                 'status' => 'pending',
             ];
 
-            // dd($payrollData);
+            // echo "<pre>";print_r($payrollData);exit;
 
             return response()->json([
                 'success' => true,
@@ -863,17 +865,19 @@ class PayrollController extends Controller
     /**
      * Export attendance records (Professional Monthly Excel Grid)
      */
-    public function exportAttendance(Request $request)
+   public function exportAttendance(Request $request)
     {
-        $year = $request->year ?? now()->year;
-        $month = $request->month ?? now()->month;
-        
-        $monthName = Carbon::create($year, $month, 1)->format('F_Y');
-        $filename = 'attendance_sheet_' . $monthName . '.xlsx';
+        $start = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $end = $request->end_date ?? now()->endOfMonth()->toDateString();
+        $employeeId = $request->employee_id;
 
-        return Excel::download(new \App\Exports\AttendanceExport($year, $month), $filename);
+        $filename = 'attendance_' . $start . '_to_' . $end . '.xlsx';
+
+        return Excel::download(
+            new \App\Exports\AttendanceExport($start, $end, $employeeId),
+            $filename
+        );
     }
-
     /**
      * Update payroll status
      */

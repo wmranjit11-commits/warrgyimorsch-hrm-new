@@ -61,7 +61,7 @@ class DailyTaskController extends Controller
             'project_id' => 'required|exists:projects,id',
             'task_title' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'priority' => 'required|string',
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
@@ -94,7 +94,7 @@ class DailyTaskController extends Controller
             'project_id' => 'required|exists:projects,id',
             'task_title' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'priority' => 'required|string',
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
@@ -158,6 +158,9 @@ class DailyTaskController extends Controller
             $validated['reference_name'] = auth()->user()->name;
         }
 
+        // FORCE: Always record progress under the assigned employee's name
+        $validated['reference_name'] = $task->employee->name ?? 'Unknown';
+
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('task_followups', 'public');
             $validated['photo'] = $path;
@@ -188,6 +191,17 @@ class DailyTaskController extends Controller
         $validated = $request->validate([
             'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework',
         ]);
+
+        $role = strtoupper(auth()->user()->role ?? 'USER');
+        $project = $dailyTask->project;
+        $isLead = false;
+        if ($project && is_array($project->leaders)) {
+            $isLead = in_array(auth()->user()->employee_id, $project->leaders);
+        }
+
+        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN' && !$isLead) {
+            return response()->json(['error' => 'Only Admin or Project Lead can change status.'], 403);
+        }
 
         $dailyTask->update(['status' => $validated['status']]);
 

@@ -45,10 +45,12 @@
                         <i class="feather-filter"></i>
                     </a>
 
-                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info" onclick="exportAttendance()" title="Export Data">
-                        <i class="feather-download"></i>
-                    </a>
-
+                    <a href="javascript:void(0);" 
+                        class="avatar-text avatar-md bg-soft-info text-info" 
+                        onclick="exportAttendance()" 
+                        title="Export Data">
+                            <i class="feather-download"></i>
+                        </a>
                     <a href="{{ route('payroll.attendance.add') }}" class="avatar-text avatar-md bg-primary text-white" title="Add Attendance">
                         <i class="feather-plus"></i>
                     </a>
@@ -401,25 +403,79 @@
     }
 
     function deleteAttendanceByDate(date) {
-        if (confirm('Are you sure you want to delete all records for ' + date + '?')) {
-            fetch(`/payroll/attendance/date/${date}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(res => res.json()).then(data => {
-                if(data.success) window.location.reload();
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Delete all records for " + date + "? This cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3858f9',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete all!',
+            cancelButtonText: 'No, cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-primary px-4',
+                cancelButton: 'btn btn-light-brand px-4 me-3'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/payroll/attendance/date/${date}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Attendance records deleted'
+                            });
+                        }
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                });
+            }
+        });
     }
 
     function deleteSingleAttendance(id, date) {
-        if (confirm('Delete this record?')) {
-            fetch(`/payroll/attendance/${id}`, {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            }).then(res => res.json()).then(data => {
-                if(data.success) openAttendanceDetails(date);
-            });
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Delete this attendance record?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3858f9',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-primary px-4',
+                cancelButton: 'btn btn-light-brand px-4 me-3'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/payroll/attendance/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(res => res.json()).then(data => {
+                    if (data.success) {
+                        if (typeof Toast !== 'undefined') {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Record deleted'
+                            });
+                        }
+                        openAttendanceDetails(date);
+                    }
+                });
+            }
+        });
     }
 
     function editSingleAttendance(id) {
@@ -429,7 +485,15 @@
     function exportAttendance() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
-        window.location.href = '{{ route("payroll.attendance.export") }}?start_date=' + start + '&end_date=' + end;
+
+        if (!start || !end) {
+            alert('Please select both dates');
+            return;
+        }
+
+        window.location.href = "{{ route('payroll.attendance.export') }}" 
+            + "?start_date=" + start 
+            + "&end_date=" + end;
     }
 </script>
 

@@ -11,6 +11,7 @@ class Project extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'start_date',
         'end_date',
         'status',
@@ -29,6 +30,11 @@ class Project extends Model
         'members' => 'array',
     ];
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     public function tasks()
     {
         return $this->hasMany(DailyTask::class);
@@ -36,24 +42,47 @@ class Project extends Model
 
     public function getProgressAttribute()
     {
-        if ($this->status === 'Completed') {
+        // If explicitly set to completed status, it's 100%
+        if (in_array(strtolower($this->status), ['completed', 'finished'])) {
             return 100;
         }
 
-        if ($this->start_date && $this->end_date) {
-            $now = now();
-            $startDate = \Carbon\Carbon::parse($this->start_date);
-            $endDate = \Carbon\Carbon::parse($this->end_date);
+        $startDate = $this->start_date;
+        $endDate = $this->end_date;
+        $now = now();
 
-            if ($now < $startDate) return 0;
-            if ($now > $endDate) return 100;
+        if ($startDate) {
+            if ($now < $startDate) {
+                return 0;
+            }
 
-            $totalSeconds = $startDate->diffInSeconds($endDate);
-            $elapsedSeconds = $startDate->diffInSeconds($now);
-
-            return ($totalSeconds > 0) ? round(($elapsedSeconds / $totalSeconds) * 100) : 0;
+            if ($endDate) {
+                $totalDuration = $startDate->diffInSeconds($endDate);
+                if ($totalDuration <= 0) return 100; // Edge case
+                
+                $elapsed = $startDate->diffInSeconds($now);
+                $progress = ($elapsed / $totalDuration) * 100;
+                return min(100, round($progress));
+            } else {
+                $daysPassed = $startDate->diffInDays($now);
+                return min(100, round($daysPassed));
+            }
         }
 
         return 0;
     }
+
+    public function getStatusColorAttribute()
+    {
+        return match ($this->status) {
+            'Pending' => 'bg-soft-pending text-pending',
+            'In Process' => 'bg-soft-process text-process',
+            'Completed' => 'bg-soft-completed text-completed',
+            'On Hold' => 'bg-soft-hold text-hold',
+            'Review' => 'bg-soft-review text-review',
+            'Rework' => 'bg-soft-rework text-rework',
+            default => 'bg-soft-secondary text-secondary',
+        };
+    }
 }
+

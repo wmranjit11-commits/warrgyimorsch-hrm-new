@@ -29,8 +29,9 @@
                             <span>Delete Selected</span>
                         </button>
                     </div>
-                    <div class="dropdown">
-                        <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter">
+                    <div class="filter-toggle-wrapper">
+                        <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter"
+                            style="cursor: pointer;">
                             <i class="feather-filter"></i>
                         </a>
                     </div>
@@ -158,14 +159,13 @@
         <div class="card stretch stretch-full border-bottom bg-light bg-opacity-10 p-4 mb-4">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Project Name</label>
-                    <input type="text" id="filterProjectName" class="form-control border-0 shadow-sm"
-                        placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 44px;">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" id="filterProjectName" class="form-control" placeholder="Search..."
+                        onkeyup="applyFilters()">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
-                    <select id="filterStatus" class="form-select border-0 shadow-sm" onchange="applyFilters()"
-                        style="border-radius: 8px; height: 44px;">
+                    <label class="form-label">Status</label>
+                    <select id="filterStatus" class="form-select" onchange="applyFilters()">
                         <option value="">All Status</option>
                         <option value="Pending">Pending</option>
                         <option value="In Process">In Process</option>
@@ -176,9 +176,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
-                    <select id="filterDepartment" class="form-select border-0 shadow-sm" onchange="applyFilters()"
-                        style="border-radius: 8px; height: 44px;">
+                    <label class="form-label">Department</label>
+                    <select id="filterDepartment" class="form-select" onchange="applyFilters()">
                         <option value="">All Departments</option>
                         @foreach($departments as $dept)
                             <option value="{{ $dept->name }}">{{ $dept->name }}</option>
@@ -186,10 +185,10 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-flex gap-2 align-items-end">
-                    <button class="btn btn-primary flex-grow-1 fw-bold shadow-sm" onclick="applyFilters()"
-                        style="height: 44px; border-radius: 8px;">APPLY</button>
-                    <a href="{{ route('projects.index') }}" class="btn btn-light shadow-sm"
-                        style="height: 44px; border-radius: 8px; width: 60px; display: flex; align-items: center; justify-content: center;"><i
+                    <button class="btn btn-primary flex-grow-1 fw-bold" onclick="applyFilters()"
+                        style="height: 48px; border-radius: 12px;">APPLY</button>
+                    <a href="{{ route('projects.index') }}" class="btn btn-light"
+                        style="height: 48px; border-radius: 12px; width: 60px; display: flex; align-items: center; justify-content: center;"><i
                             class="feather-refresh-cw"></i></a>
                 </div>
             </div>
@@ -222,12 +221,22 @@
                                         <th>End Date</th>
                                         <th>Lead</th>
                                         <th>Status</th>
-                                        <th class="text-end">Actions</th>
+                                        <th class="text-end pe-4" style="width: 200px;">ACTIONS</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($projects as $project)
-                                        <tr class="single-item">
+                                        @php
+                                            $normalizedStatus = $project->status;
+                                            if ($normalizedStatus == 'Not Started')
+                                                $normalizedStatus = 'Pending';
+                                            if ($normalizedStatus == 'In Progress')
+                                                $normalizedStatus = 'In Process';
+                                            if ($normalizedStatus == 'Finished')
+                                                $normalizedStatus = 'Completed';
+                                        @endphp
+                                        <tr class="single-item" data-name="{{ strtolower($project->name) }}"
+                                            data-status="{{ $normalizedStatus }}" data-department="{{ $project->department }}">
                                             <td>
                                                 <div class="item-checkbox ms-1">
                                                     <div class="custom-control custom-checkbox">
@@ -252,32 +261,34 @@
                                                                     stroke-dasharray="263.89" 
                                                                     stroke-dashoffset="{{ 263.89 * (1 - $progressVal / 100) }}"
                                                                     stroke-linecap="round"
-                                                                    style="transition: stroke-dashoffset 0.8s ease-in-out;"></circle>
+                                                                    style="transition: stroke-dashoffset 0.8s ease-in-out;">
+                                                                </circle>
                                                             </svg>
-                                                            <div class="avatar-text bg-white text-primary rounded-circle shadow-sm" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; z-index: 1; border: 1px solid rgba(0,0,0,0.05);">
+                                                            <div class="avatar-text bg-white text-primary rounded-circle shadow-sm"
+                                                                style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; z-index: 1; border: 1px solid rgba(0,0,0,0.05);">
                                                                 <i class="feather-briefcase fs-18"></i>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="project-info-wrapper">
-                                                        <a href="{{ route('projects.show', $project->id) }}"
+                                                        <a href="{{ route('projects.show', $project) }}"
                                                             class="fw-bold text-dark fs-14 mb-1 d-block">{{ $project->name }}</a>
                                                         <div class="fs-12 text-muted text-truncate-1-line mb-1"
                                                             style="max-width: 250px;">
                                                             {!! strip_tags($project->description) !!}
                                                         </div>
                                                         <div class="project-list-actions mt-1" style="font-size: 10px;">
-                                                            <a href="{{ route('projects.show', $project->id) }}"
+                                                            <a href="{{ route('projects.show', $project) }}"
                                                                 class="text-primary fw-medium me-1">VIEW</a>
                                                             <span class="text-muted opacity-50 me-1">|</span>
-                                                            <a href="{{ route('projects.edit', $project->id) }}"
+                                                            <a href="{{ route('projects.edit', $project) }}"
                                                                 class="text-info fw-medium me-1">EDIT</a>
                                                             <span class="text-muted opacity-50 me-1">|</span>
-                                                            <form action="{{ route('projects.destroy', $project->id) }}"
+                                                            <form action="{{ route('projects.destroy', $project) }}"
                                                                 method="POST" class="d-inline">
                                                                 @csrf @method('DELETE')
                                                                 <a href="javascript:void(0);"
-                                                                    onclick="if(confirm('Are you sure?')) this.closest('form').submit();"
+                                                                    onclick="confirmDeleteProject(this.closest('form'), '{{ $project->name }}')"
                                                                     class="text-danger fw-medium">REMOVE</a>
                                                             </form>
                                                         </div>
@@ -289,7 +300,7 @@
                                                     class="badge bg-soft-secondary text-secondary">{{ $project->technology }}</span>
                                             </td>
                                             <td>
-                                                <a href="{{ route('projects.show', $project->id) }}" class="hstack gap-3">
+                                                <a href="{{ route('projects.show', $project) }}" class="hstack gap-3">
                                                     <div>
                                                         <span
                                                             class="text-truncate-1-line fw-semibold text-dark">{{ $project->department }}</span>
@@ -303,21 +314,30 @@
                                                     @php
                                                         $leaders = is_array($project->leaders) ? $project->leaders : [];
                                                         $currentLead = "Select Lead...";
-                                                        foreach($employees as $emp) {
-                                                            if(in_array($emp->id, $leaders)) {
+                                                        foreach ($employees as $emp) {
+                                                            if (in_array($emp->id, $leaders)) {
                                                                 $currentLead = $emp->name;
                                                                 break;
                                                             }
                                                         }
                                                     @endphp
-                                                    <button class="lead-select-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                    <button class="lead-select-btn dropdown-toggle" type="button"
+                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                        data-bs-boundary="viewport">
                                                         <span class="text-truncate">{{ $currentLead }}</span>
                                                         <i class="feather-chevron-down fs-10 ms-1"></i>
                                                     </button>
-                                                    <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px; max-height: 300px; overflow-y: auto;">
-                                                        <li><a class="dropdown-item fw-bold text-muted small py-2" href="javascript:void(0);" onclick="updateProjectLead({{ $project->id }}, '')">No Lead</a></li>
+                                                    <ul class="dropdown-menu shadow-lg border-0"
+                                                        style="border-radius: 12px; max-height: 300px; overflow-y: auto;">
+                                                        <li><a class="dropdown-item fw-bold text-muted small py-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectLead('{{ $project->slug }}', '')">No
+                                                                Lead</a></li>
                                                         @foreach($employees as $emp)
-                                                            <li><a class="dropdown-item fw-bold small py-2 {{ in_array($emp->id, $leaders) ? 'active' : '' }}" href="javascript:void(0);" onclick="updateProjectLead({{ $project->id }}, {{ $emp->id }})">{{ $emp->name }}</a></li>
+                                                            <li><a class="dropdown-item fw-bold small py-2 {{ in_array($emp->id, $leaders) ? 'active' : '' }}"
+                                                                    href="javascript:void(0);"
+                                                                    onclick="updateProjectLead('{{ $project->slug }}', {{ $emp->id }})">{{ $emp->name }}</a>
+                                                            </li>
                                                         @endforeach
                                                     </ul>
                                                 </div>
@@ -325,58 +345,82 @@
                                             <td>
                                                 @php
                                                     $currentStatus = $project->status;
-                                                    if ($currentStatus == 'Not Started') $currentStatus = 'Pending';
-                                                    if ($currentStatus == 'In Progress') $currentStatus = 'In Process';
-                                                    if ($currentStatus == 'Finished') $currentStatus = 'Completed';
-                                                    
+                                                    if ($currentStatus == 'Not Started')
+                                                        $currentStatus = 'Pending';
+                                                    if ($currentStatus == 'In Progress')
+                                                        $currentStatus = 'In Process';
+                                                    if ($currentStatus == 'Finished')
+                                                        $currentStatus = 'Completed';
+
                                                     $statusSlug = strtolower(str_replace(' ', '-', $currentStatus));
                                                     $statusClass = 'status-' . $statusSlug;
                                                 @endphp
                                                 <div class="dropdown premium-status-dropdown" style="min-width: 110px;">
-                                                    <button class="btn-status {{ $statusClass }} dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
+                                                    <button class="btn-status {{ $statusClass }} dropdown-toggle" type="button"
+                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                        data-bs-boundary="viewport">
                                                         {{ $currentStatus }} <i class="feather-chevron-down fs-10 ms-1"></i>
                                                     </button>
                                                     <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px;">
-                                                        <li><a class="dropdown-item fw-bold status-pending py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Pending')">Pending</a></li>
-                                                        <li><a class="dropdown-item fw-bold status-in-process py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'In Process')">In Process</a></li>
-                                                        <li><a class="dropdown-item fw-bold status-completed py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Completed')">Completed</a></li>
-                                                        <li><a class="dropdown-item fw-bold status-on-hold py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'On Hold')">On Hold</a></li>
-                                                        <li><a class="dropdown-item fw-bold status-review py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Review')">Review</a></li>
-                                                        <li><a class="dropdown-item fw-bold status-rework py-2 rounded mx-2" href="javascript:void(0);" onclick="updateProjectStatus({{ $project->id }}, 'Rework')">Rework</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-pending py-2 mb-1 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'Pending')">Pending</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold status-in-process py-2 mb-1 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'In Process')">In
+                                                                Process</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-completed py-2 mb-1 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'Completed')">Completed</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold status-on-hold py-2 mb-1 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'On Hold')">On
+                                                                Hold</a></li>
+                                                        <li><a class="dropdown-item fw-bold status-review py-2 mb-1 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'Review')">Review</a>
+                                                        </li>
+                                                        <li><a class="dropdown-item fw-bold status-rework py-2 rounded mx-2"
+                                                                href="javascript:void(0);"
+                                                                onclick="updateProjectStatus('{{ $project->slug }}', 'Rework')">Rework</a>
+                                                        </li>
                                                     </ul>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="hstack gap-2 justify-content-end">
-                                                    <a href="javascript:void(0);"
-                                                        onclick="showQuickView({{ json_encode($project) }})"
-                                                        class="avatar-text avatar-md bg-soft-warning text-warning"
-                                                        title="Quick View Info">
-                                                        <i class="feather feather-info"></i>
+                                                <div class="hstack gap-1 justify-content-end">
+                                                    <a href="javascript:void(0);" onclick='showQuickView(@json($project))'
+                                                        class="avatar-text avatar-md bg-soft-warning text-warning rounded-circle"
+                                                        title="Quick View">
+                                                        <i class="feather-info"></i>
                                                     </a>
                                                     <a href="javascript:void(0);"
-                                                        onclick="showTaskProgress({{ $project->id }})"
-                                                        class="avatar-text avatar-md bg-soft-success text-success"
-                                                        title="Task Progress Analysis">
-                                                        <i class="feather feather-clipboard"></i>
+                                                        onclick="showTaskProgress('{{ $project->slug }}')"
+                                                        class="avatar-text avatar-md bg-soft-success text-success rounded-circle"
+                                                        title="Task Analysis">
+                                                        <i class="feather-clipboard"></i>
                                                     </a>
-                                                    <a href="{{ route('projects.show', $project->id) }}"
-                                                        class="avatar-text avatar-md bg-soft-primary text-primary"
-                                                        title="Full View">
-                                                        <i class="feather feather-eye"></i>
+                                                    <a href="{{ route('projects.show', $project) }}"
+                                                        class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle"
+                                                        title="View Details">
+                                                        <i class="feather-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('projects.edit', $project->id) }}"
-                                                        class="avatar-text avatar-md bg-soft-info text-info">
-                                                        <i class="feather feather-edit-3"></i>
+                                                    <a href="{{ route('projects.edit', $project->slug) }}"
+                                                        class="avatar-text avatar-md bg-soft-info text-info rounded-circle"
+                                                        title="Edit">
+                                                        <i class="feather-edit-3"></i>
                                                     </a>
-                                                    <form action="{{ route('projects.destroy', $project->id) }}" method="POST"
+                                                    <form action="{{ route('projects.destroy', $project->slug) }}" method="POST"
                                                         class="d-inline">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit"
-                                                            class="avatar-text avatar-md bg-soft-danger text-danger border-0"
-                                                            onclick="return confirm('Are you sure?')">
-                                                            <i class="feather feather-trash-2"></i>
-                                                        </button>
+                                                        <a href="javascript:void(0);"
+                                                            class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle"
+                                                            onclick="confirmDeleteProject(this.closest('form'), '{{ $project->name }}')"
+                                                            title="Delete">
+                                                            <i class="feather-trash-2"></i>
+                                                        </a>
                                                     </form>
                                                 </div>
                                             </td>
@@ -394,35 +438,15 @@
     <style>
         /* Progress Circle */
         .progress-circle {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
         }
+
         .progress-circle:hover {
             transform: scale(1.05);
         }
 
-        /* 1:1 Select2 Parity */
-        .select2-container--default .select2-selection--single {
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 8px !important;
-            height: 40px !important;
-            background-color: #fff !important;
-        }
 
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 38px !important;
-            padding-left: 12px !important;
-            font-weight: 600 !important;
-            color: #334155 !important;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px !important;
-        }
-
-        .project-list-actions a:hover {
-            text-decoration: underline !important;
-        }
 
         .badge {
             font-size: 10px !important;
@@ -446,9 +470,9 @@
                 var department = $('#filterDepartment').val();
 
                 $('#projectList tbody tr.single-item').each(function () {
-                    var rowName = $(this).find('.project-name-td a').text().toLowerCase();
-                    var rowStatus = $(this).find('[data-select2-selector="status"]').val();
-                    var rowDept = $(this).find('td:nth-child(4) span').text().trim();
+                    var rowName = $(this).data('name') || '';
+                    var rowStatus = $(this).data('status') || '';
+                    var rowDept = $(this).data('department') || '';
 
                     var matchName = name === "" || rowName.includes(name);
                     var matchStatus = status === "" || rowStatus === status;
@@ -463,8 +487,15 @@
             };
 
             // Smooth Filter Toggle
-            $('#toggleFilter').on('click', function() {
+            $(document).on('click', '#toggleFilter', function (e) {
+                e.preventDefault();
                 $('#filterSection').slideToggle(400);
+            });
+
+            // Initialize Select2 for all selects
+            $('.form-select').select2({
+                width: '100%',
+                minimumResultsForSearch: 10
             });
 
             // Handle Check All Functionality
@@ -484,15 +515,36 @@
                     $('#bulk-action-wrapper').fadeOut();
                 }
             }
+        });
 
-            // Bulk Delete
-            $('#btn-bulk-delete').on('click', function () {
-                if (confirm('Are you sure you want to delete selected projects?')) {
-                    var ids = [];
-                    $('.checkbox:checked').each(function () {
-                        ids.push($(this).attr('id').split('_')[1]);
-                    });
+        window.bulkDeleteProject = function () {
+            var ids = [];
+            $('.checkbox:checked').each(function () {
+                const val = $(this).attr('id')?.split('_')[1];
+                if (val) ids.push(val);
+            });
 
+            if (ids.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Please select at least one project.' });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete ${ids.length} selected projects.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3858f9',
+                cancelButtonColor: '#a3a3a3',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    confirmButton: 'btn btn-primary px-4 py-2',
+                    cancelButton: 'btn btn-secondary px-4 py-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
                     $.ajax({
                         url: '{{ route("projects.bulk-delete") }}',
                         type: 'POST',
@@ -501,224 +553,253 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function (response) {
-                            if (response.success) {
-                                location.reload();
-                            }
+                            location.reload();
+                        },
+                        error: function (xhr) {
+                            Toast.fire({ icon: 'error', title: 'Error deleting projects.' });
                         }
                     });
                 }
             });
+        };
 
-            // Premium Status Update
-            window.updateProjectStatus = function(id, status) {
-                updateProjectField(id, { status: status }, 'Status Updated');
-                setTimeout(() => location.reload(), 500); // Reload to update styles easily
-            };
+        // Event listener for the bulk delete button
+        $('#btn-bulk-delete').on('click', function () {
+            bulkDeleteProject();
+        });
 
-            // Premium Lead Update
-            window.updateProjectLead = function(id, leadId) {
-                var leaders = leadId ? [leadId] : [];
-                updateProjectField(id, { leaders: leaders }, 'Lead Updated');
-                setTimeout(() => location.reload(), 500);
-            };
+        // Premium Status Update
+        window.updateProjectStatus = function (id, status) {
+            updateProjectField(id, { status: status }, 'Status Updated');
+            setTimeout(() => location.reload(), 500); // Reload to update styles easily
+        };
 
-            // Generic Update Function
-            function updateProjectField(id, data, successTitle) {
-                var url = '{{ route("projects.update-field", ["id" => ":id"]) }}'.replace(':id', id);
-                
-                $.ajax({
-                    url: url,
-                    type: 'PATCH',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    data: data,
-                    success: function (response) {
-                        if (typeof Toast !== 'undefined') {
-                            Toast.fire({ icon: 'success', title: successTitle });
-                        }
-                    },
-                    error: function (xhr) {
-                        console.error('Update failed:', xhr.responseText);
+        // Premium Lead Update
+        window.updateProjectLead = function (id, leadId) {
+            var leaders = leadId ? [leadId] : [];
+            updateProjectField(id, { leaders: leaders }, 'Lead Updated');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        // Generic Update Function
+        function updateProjectField(id, data, successTitle) {
+            var url = '{{ route("projects.update-field", ["project" => ":id"]) }}'.replace(':id', id);
+
+            $.ajax({
+                url: url,
+                type: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                data: data,
+                success: function (response) {
+                    if (typeof Toast !== 'undefined') {
+                        Toast.fire({ icon: 'success', title: successTitle });
                     }
-                });
-            }
-            // Quick View Logic
-            window.showQuickView = function(project) {
-                const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
-                document.getElementById('qvProjectName').innerText = project.name;
-                document.getElementById('qvDescription').innerHTML = project.description || '<p class="text-muted">No description available.</p>';
-                
-                // Fetch Team Details (Leads & Members)
-                const leaders = project.leaders || [];
-                const members = project.members || [];
-                const allEmps = @json($employees);
-                
-                let teamHtml = '';
-                
-                // Show Leaders
-                if (leaders.length > 0) {
-                    teamHtml += '<h6 class="fw-bold text-primary mb-3">Project Leads</h6><div class="row g-3 mb-4">';
-                    allEmps.forEach(emp => {
-                        if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
-                            teamHtml += `<div class="col-md-6">
-                                <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                                    <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
-                                    <div class="fw-bold small text-dark">${emp.name}</div>
-                                </div>
-                            </div>`;
-                        }
-                    });
-                    teamHtml += '</div>';
+                },
+                error: function (xhr) {
+                    console.error('Update failed:', xhr.responseText);
                 }
-                
-                // Show Members
-                if (members.length > 0) {
-                    teamHtml += '<h6 class="fw-bold text-info mb-3">Team Members</h6><div class="row g-3">';
-                    allEmps.forEach(emp => {
-                        if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
-                            teamHtml += `<div class="col-md-4">
-                                <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
-                                    <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
-                                    <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
-                                </div>
-                            </div>`;
-                        }
-                    });
-                    teamHtml += '</div>';
-                }
-                
-                if (teamHtml === '') teamHtml = '<div class="alert alert-soft-secondary text-center">No team members assigned.</div>';
-                
-                document.getElementById('qvTeamList').innerHTML = teamHtml;
-                modal.show();
-            };
+            });
+        }
 
-            // Task Progress Analysis Logic
-            window.showTaskProgress = function(projectId) {
-                const modalEl = document.getElementById('taskProgressModal');
-                const listContainer = document.getElementById('tpList');
-                
-                listContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Analyzing tasks...</p></div>';
-                
-                // Show Modal
-                if (window.bootstrap && window.bootstrap.Modal) {
-                    (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
-                } else if (window.jQuery && jQuery.fn.modal) {
-                    jQuery(modalEl).modal('show');
-                } else {
-                    modalEl.style.display = 'block';
-                    modalEl.classList.add('show');
-                    modalEl.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        // Premium Delete Confirmation
+        window.confirmDeleteProject = function (form, name) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to delete project: " + name,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3858f9',
+                cancelButtonColor: '#a3a3a3',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    confirmButton: 'btn btn-primary px-4 py-2 me-2',
+                    cancelButton: 'btn btn-secondary px-4 py-2 ms-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
                 }
-                
-                fetch(`/projects/${projectId}/tasks-summary`)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Network response was not ok');
-                        return res.json();
-                    })
-                    .then(data => {
-                        document.getElementById('tpProjectName').innerText = data.project_name;
-                        
-                        if (!data.tasks || data.tasks.length === 0) {
-                            listContainer.innerHTML = '<div class="alert alert-soft-secondary text-center">No tasks found for this project.</div>';
-                            return;
-                        }
-                        
-                        let html = '';
-                        // Group work by employee and then by date
-                        const employeeWork = {};
-                        
-                        data.tasks.forEach(task => {
-                            const empName = task.employee ? task.employee.name : 'Unassigned';
-                            if (!employeeWork[empName]) employeeWork[empName] = {};
-                            
-                            // Process each follow-up as an individual work entry
-                            if (task.follow_ups && task.follow_ups.length > 0) {
-                                task.follow_ups.forEach(fu => {
-                                    const date = new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                                    if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
-                                    
-                                    // Parse time from "5 hours" etc.
-                                    let time = 0;
-                                    const matches = (fu.time_taken || "").match(/[+-]?([0-9]*[.])?[0-9]+/);
-                                    if (matches) time = parseFloat(matches[0]);
-                                    
-                                    employeeWork[empName][date].entries.push({
-                                        title: task.task_title,
-                                        description: fu.work_description,
-                                        time: time,
-                                        status: task.status,
-                                        timestamp: new Date(fu.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                    });
-                                    employeeWork[empName][date].dailyTotal += time;
-                                });
-                            } else {
-                                // Task with no follow-ups yet
-                                const date = 'No Activity';
-                                if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
-                                employeeWork[empName][date].entries.push({
-                                    title: task.task_title,
-                                    description: 'No progress updates provided yet.',
-                                    time: 0,
-                                    status: task.status,
-                                    timestamp: ''
-                                });
-                            }
-                        });
-                        
-                        for (const [empName, dates] of Object.entries(employeeWork)) {
-                            html += `<div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                                    <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
-                                    <h5 class="fw-bold text-dark mb-0">${empName}</h5>
-                                </div>`;
-                            
-                            // Sort dates descending
-                            const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
-                            
-                            sortedDates.forEach(date => {
-                                const dayData = dates[date];
-                                html += `<div class="ms-4 mb-4 position-relative">
-                                    <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
-                                        <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
-                                        <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
-                                    </div>
-                                    <div class="ms-3">`;
-                                
-                                dayData.entries.forEach(entry => {
-                                    html += `<div class="mb-3 p-3 bg-white rounded-3 border position-relative">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div class="pe-5">
-                                                <div class="fw-bold text-dark fs-14">${entry.title}</div>
-                                                <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
-                                            </div>
-                                            <div class="text-end">
-                                                <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
-                                                    ${entry.time} Hrs
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
-                                            ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
+            });
+        };
+        // Quick View Logic
+        window.showQuickView = function (project) {
+            const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+            document.getElementById('qvProjectName').innerText = project.name;
+            document.getElementById('qvDescription').innerHTML = project.description || '<p class="text-muted">No description available.</p>';
+
+            // Fetch Team Details (Leads & Members)
+            const leaders = project.leaders || [];
+            const members = project.members || [];
+            const allEmps = @json($employees);
+
+            let teamHtml = '';
+
+            // Show Leaders
+            if (leaders.length > 0) {
+                teamHtml += '<h6 class="fw-bold text-primary mb-3">Project Leads</h6><div class="row g-3 mb-4">';
+                allEmps.forEach(emp => {
+                    if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
+                        teamHtml += `<div class="col-md-6">
+                                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                            <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
+                                            <div class="fw-bold small text-dark">${emp.name}</div>
                                         </div>
                                     </div>`;
+                    }
+                });
+                teamHtml += '</div>';
+            }
+
+            // Show Members
+            if (members.length > 0) {
+                teamHtml += '<h6 class="fw-bold text-info mb-3">Team Members</h6><div class="row g-3">';
+                allEmps.forEach(emp => {
+                    if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
+                        teamHtml += `<div class="col-md-4">
+                                        <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                                            <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
+                                            <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
+                                        </div>
+                                    </div>`;
+                    }
+                });
+                teamHtml += '</div>';
+            }
+
+            if (teamHtml === '') teamHtml = '<div class="alert alert-soft-secondary text-center">No team members assigned.</div>';
+
+            document.getElementById('qvTeamList').innerHTML = teamHtml;
+            modal.show();
+        };
+
+        // Task Progress Analysis Logic
+        window.showTaskProgress = function (projectId) {
+            const modalEl = document.getElementById('taskProgressModal');
+            const listContainer = document.getElementById('tpList');
+
+            listContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Analyzing tasks...</p></div>';
+
+            // Show Modal
+            if (window.bootstrap && window.bootstrap.Modal) {
+                (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
+            } else if (window.jQuery && jQuery.fn.modal) {
+                jQuery(modalEl).modal('show');
+            } else {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                modalEl.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            }
+
+            fetch(`/projects/${projectId}/tasks-summary`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Network response was not ok');
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('tpProjectName').innerText = data.project_name;
+
+                    if (!data.tasks || data.tasks.length === 0) {
+                        listContainer.innerHTML = '<div class="alert alert-soft-secondary text-center">No tasks found for this project.</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    // Group work by employee and then by date
+                    const employeeWork = {};
+
+                    data.tasks.forEach(task => {
+                        const empName = task.employee ? task.employee.name : 'Unassigned';
+                        if (!employeeWork[empName]) employeeWork[empName] = {};
+
+                        // Process each follow-up as an individual work entry
+                        if (task.follow_ups && task.follow_ups.length > 0) {
+                            task.follow_ups.forEach(fu => {
+                                const date = new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                                if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
+
+                                // Parse time from "5 hours" etc.
+                                let time = 0;
+                                const matches = (fu.time_taken || "").match(/[+-]?([0-9]*[.])?[0-9]+/);
+                                if (matches) time = parseFloat(matches[0]);
+
+                                employeeWork[empName][date].entries.push({
+                                    title: task.task_title,
+                                    description: fu.work_description,
+                                    time: time,
+                                    status: task.status,
+                                    timestamp: new Date(fu.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                 });
-                                
-                                html += `</div></div>`;
+                                employeeWork[empName][date].dailyTotal += time;
                             });
-                            
-                            html += `</div>`;
+                        } else {
+                            // Task with no follow-ups yet
+                            const date = 'No Activity';
+                            if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
+                            employeeWork[empName][date].entries.push({
+                                title: task.task_title,
+                                description: 'No progress updates provided yet.',
+                                time: 0,
+                                status: task.status,
+                                timestamp: ''
+                            });
                         }
-                        listContainer.innerHTML = html;
-                    })
-                    .catch(err => {
-                        console.error('Error fetching task summary:', err);
-                        listContainer.innerHTML = `<div class="alert alert-soft-danger text-center">
-                            <strong>Oops!</strong> Something went wrong while loading the data.<br>
-                            <small class="text-muted">${err.message}</small>
-                        </div>`;
                     });
-            };
-        });
+
+                    for (const [empName, dates] of Object.entries(employeeWork)) {
+                        html += `<div class="mb-4">
+                                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
+                                            <h5 class="fw-bold text-dark mb-0">${empName}</h5>
+                                        </div>`;
+
+                        // Sort dates descending
+                        const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
+
+                        sortedDates.forEach(date => {
+                            const dayData = dates[date];
+                            html += `<div class="ms-4 mb-4 position-relative">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
+                                                <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
+                                                <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
+                                            </div>
+                                            <div class="ms-3">`;
+
+                            dayData.entries.forEach(entry => {
+                                html += `<div class="mb-3 p-3 bg-white rounded-3 border position-relative">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div class="pe-5">
+                                                        <div class="fw-bold text-dark fs-14">${entry.title}</div>
+                                                        <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
+                                                            ${entry.time} Hrs
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
+                                                    ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
+                                                </div>
+                                            </div>`;
+                            });
+
+                            html += `</div></div>`;
+                        });
+
+                        html += `</div>`;
+                    }
+                    listContainer.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Error fetching task summary:', err);
+                    listContainer.innerHTML = `<div class="alert alert-soft-danger text-center">
+                                    <strong>Oops!</strong> Something went wrong while loading the data.<br>
+                                    <small class="text-muted">${err.message}</small>
+                                </div>`;
+                });
+        };
     </script>
 
     <!-- Quick View Modal -->
@@ -730,23 +811,26 @@
                         <i class="feather-info text-primary"></i>
                         <span id="qvProjectName">Project Name</span>
                     </h5>
-                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-4">
                         <label class="text-muted small text-uppercase fw-bold mb-2 d-block">Description</label>
-                        <div id="qvDescription" class="p-3 bg-light rounded-3 text-dark fs-14" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0;">
+                        <div id="qvDescription" class="p-3 bg-light rounded-3 text-dark fs-14"
+                            style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0;">
                         </div>
                     </div>
-                    
+
                     <hr class="my-4" style="border-style: dashed;">
-                    
+
                     <div id="qvTeamList">
                         <!-- Team details injected here -->
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">CLOSE QUICK VIEW</button>
+                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal"
+                        style="border-radius: 10px;">CLOSE QUICK VIEW</button>
                 </div>
             </div>
         </div>
@@ -761,7 +845,8 @@
                         <i class="feather-clipboard text-success"></i>
                         <span id="tpProjectName">Project Task Progress</span>
                     </h5>
-                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div id="tpList" style="max-height: 65vh; overflow-y: auto;">
@@ -769,7 +854,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal" style="border-radius: 10px;">CLOSE ANALYSIS</button>
+                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal"
+                        style="border-radius: 10px;">CLOSE ANALYSIS</button>
                 </div>
             </div>
         </div>

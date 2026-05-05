@@ -86,7 +86,7 @@
                                             <button type="button" onclick='editRole(@json($role))' class="avatar-text avatar-md bg-soft-info text-info rounded border-0" title="Edit">
                                                 <i class="feather-edit-3"></i>
                                             </button>
-                                            <form action="{{ route('master.role.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                            <form action="{{ route('master.role.destroy', $role->id) }}" method="POST" onsubmit="return deleteData(event);">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0" title="Delete">
                                                     <i class="feather-trash-2"></i>

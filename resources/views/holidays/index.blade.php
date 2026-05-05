@@ -176,13 +176,19 @@
     function confirmDelete(id) {
         Swal.fire({
             title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            text: "You won't be able to revert this holiday!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3858f9',
-            cancelButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
             confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel'
+            cancelButtonText: 'No, cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'btn btn-primary px-4',
+                cancelButton: 'btn btn-light-brand px-4 me-3'
+            },
+            buttonsStyling: false
         }).then((result) => {
             if (result.isConfirmed) {
                 deleteHoliday(id);

@@ -16,40 +16,62 @@ use Carbon\Carbon;
 
 class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithMapping
 {
-    protected $year;
-    protected $month;
-    protected $daysInMonth;
+    protected $startDate;
+    protected $endDate;
+    protected $dates = [];
     protected $attendanceMap;
+    protected $employeeId;
 
-    public function __construct($year, $month)
+
+    public function __construct($startDate, $endDate ,$employeeId)
     {
-        $this->year = $year;
-        $this->month = $month;
-        $this->daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+        $this->startDate = Carbon::parse($startDate)->startOfDay();
+        $this->endDate = Carbon::parse($endDate)->endOfDay();
+        $this->employeeId = $employeeId;
+        $period = Carbon::parse($this->startDate);
 
-        // Fetch records and build map
-        $attendances = Attendance::whereYear('attendance_date', $year)
-            ->whereMonth('attendance_date', $month)
-            ->get();
+        while ($period->lte($this->endDate)) {
+            $this->dates[] = $period->copy();
+            $period->addDay();
+        }
+
+        $attQuery = Attendance::whereBetween('attendance_date', [
+            $this->startDate->toDateString(),
+            $this->endDate->toDateString()
+        ]);
+
+        if (!empty($this->employeeId)) {
+            $attQuery->where('employee_id', $this->employeeId);
+        }
+
+        $attendances = $attQuery->get();
 
         $this->attendanceMap = [];
+
         foreach ($attendances as $att) {
-            $this->attendanceMap[$att->employee_id][Carbon::parse($att->attendance_date)->format('j')] = strtoupper(substr($att->status, 0, 1));
+            $dateKey = Carbon::parse($att->attendance_date)->format('Y-m-d');
+
+            $this->attendanceMap[$att->employee_id][$dateKey] = strtoupper(substr($att->status, 0, 1));
         }
     }
 
-    public function collection()
+  public function collection()
     {
-        return Employee::orderBy('name', 'asc')->get();
+        $query = Employee::orderBy('name', 'asc');
+
+        if (!empty($this->employeeId)) {
+            $query->where('id', $this->employeeId);
+        }
+
+        return $query->get();
     }
 
     public function headings(): array
     {
-        $monthName = Carbon::create($this->year, $this->month, 1)->format('M');
         $headers = ['SR. NO', 'EMPLOYEE NAME', 'DESIGNATION'];
 
-        for ($i = 1; $i <= $this->daysInMonth; $i++) {
-            $headers[] = $monthName . ' ' . $i;
+        foreach ($this->dates as $date) {
+            $headers[] = $date->format('d M');
         }
 
         $headers[] = 'PRESENT';
@@ -74,13 +96,20 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         $absent = 0;
         $others = 0;
 
-        for ($i = 1; $i <= $this->daysInMonth; $i++) {
-            $status = $this->attendanceMap[$emp->id][$i] ?? '-';
+        foreach ($this->dates as $date) {
+            $dateKey = $date->format('Y-m-d');
+
+            $status = $this->attendanceMap[$emp->id][$dateKey] ?? '-';
+
             $row[] = $status;
 
-            if ($status === 'P') $present++;
-            elseif ($status === 'A') $absent++;
-            elseif ($status !== '-') $others++;
+            if ($status === 'P') {
+                $present++;
+            } elseif ($status === 'A') {
+                $absent++;
+            } elseif ($status !== '-') {
+                $others++;
+            }
         }
 
         $row[] = $present;
@@ -92,28 +121,26 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
     public function styles(Worksheet $sheet)
     {
-        // Styling the header
         $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
-                'size' => 11
+                'size' => 11,
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '3858F9']
+                'startColor' => ['rgb' => '3858F9'],
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
-            ]
+            ],
         ]);
 
-        // Center all attendance statuses
         $sheet->getStyle('D2:' . $sheet->getHighestColumn() . $sheet->getHighestRow())
-            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Add borders to everything
         $sheet->getStyle('A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow())->applyFromArray([
             'borders' => [
                 'allBorders' => [

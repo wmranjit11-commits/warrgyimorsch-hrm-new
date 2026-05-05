@@ -76,7 +76,7 @@
                                                     <button class="avatar-text avatar-sm bg-soft-info text-info rounded border-0" onclick="editDept({{ $dept }})">
                                                         <i class="feather-edit-3"></i>
                                                     </button>
-                                                    <form action="{{ route('master.department.destroy', $dept->id) }}" method="POST" onsubmit="return confirm('Arre you sure?');">
+                                                    <form action="{{ route('master.department.destroy', $dept->id) }}" method="POST" onsubmit="return deleteData(event);">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="avatar-text avatar-sm bg-soft-danger text-danger rounded border-0">
                                                             <i class="feather-trash-2"></i>
@@ -124,7 +124,7 @@
                                                     <button class="avatar-text avatar-sm bg-soft-info text-info rounded border-0" onclick="editDesg({{ $desg }})">
                                                         <i class="feather-edit-3"></i>
                                                     </button>
-                                                    <form action="{{ route('master.designation.destroy', $desg->id) }}" method="POST" onsubmit="return confirm('Arre you sure?');">
+                                                    <form action="{{ route('master.designation.destroy', $desg->id) }}" method="POST" onsubmit="return deleteData(event);">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="avatar-text avatar-sm bg-soft-danger text-danger rounded border-0">
                                                             <i class="feather-trash-2"></i>
@@ -174,7 +174,7 @@
                                                     <button class="avatar-text avatar-sm bg-soft-info text-info rounded border-0" onclick="editRole({{ $role }})">
                                                         <i class="feather-edit-3"></i>
                                                     </button>
-                                                    <form action="{{ route('master.role.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Arre you sure?');">
+                                                    <form action="{{ route('master.role.destroy', $role->id) }}" method="POST" onsubmit="return deleteData(event);">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="avatar-text avatar-sm bg-soft-danger text-danger rounded border-0">
                                                             <i class="feather-trash-2"></i>
