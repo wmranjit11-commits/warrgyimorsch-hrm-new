@@ -120,6 +120,13 @@ class AttendanceImport implements ToCollection
                     ->where('attendance_date', $date)
                     ->exists();
 
+                $carbonDate = \Carbon\Carbon::parse($date);
+
+                // Skip Sunday
+                if ($carbonDate->isSunday()) {
+                    continue;
+                }
+
                 if (!$alreadyExists) {
                     Attendance::create([
                         'employee_id'      => $employee->id,
