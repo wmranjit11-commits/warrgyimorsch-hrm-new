@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-
 class LeaveApplicationController extends Controller
 {
     public function index(Request $request)
