@@ -10,10 +10,19 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $role = strtoupper(auth()->user()->role);
+        // $role = strtoupper(auth()->user()->role);
         $notifications = [];
 
-        if ($role == 'ADMIN' || $role == 'SUPER ADMIN') {
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+
+        // if ($role == 'ADMIN' || $role == 'SUPER ADMIN') {
+        if ($isAdmin) {
             // $notifications = LeaveApplication::with('employee')
             //     ->whereIn('status', ['pending', 'Pending'])
             //     ->latest()

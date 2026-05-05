@@ -16,8 +16,15 @@ class DailyTaskController extends Controller
         $query = DailyTask::with(['project', 'employee', 'creator', 'followUps']);
 
         // Data Restriction Logic
-        $role = strtoupper(auth()->user()->role);
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        // $role = strtoupper(auth()->user()->role);
+        if (!$isAdmin) {
             $query->where('employee_id', auth()->user()->employee_id);
             $employees = Employee::where('id', auth()->user()->employee_id)->get();
             $projects = Project::orderBy('name')->get();
@@ -64,8 +71,15 @@ class DailyTaskController extends Controller
         $validated['assigned_by'] = Auth::id();
 
         // Force employee_id for non-admins
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        // $role = strtoupper(auth()->user()->role ?? 'USER');
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             $validated['employee_id'] = auth()->user()->employee_id;
         }
 
@@ -88,8 +102,15 @@ class DailyTaskController extends Controller
         ]);
 
         // Force employee_id for non-admins
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        // $role = strtoupper(auth()->user()->role ?? 'USER');
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             $validated['employee_id'] = auth()->user()->employee_id;
         }
 
@@ -124,14 +145,17 @@ class DailyTaskController extends Controller
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
         ]);
 
-        $role = strtoupper(auth()->user()->role ?? 'USER');
-        $task = DailyTask::findOrFail($validated['daily_task_id']);
+        // $role = strtoupper(auth()->user()->role ?? 'USER');
+        $roleSlug = auth()->user()->role; // e.g. "manager"
 
-        // RESTRICTION: Only assigned employee or Admin can add progress
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
-            if ($task->employee_id != auth()->user()->employee_id) {
-                return response()->json(['error' => 'You can only add work progress to tasks assigned to you.'], 403);
-            }
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        // if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        if (!$isAdmin) {
+            $validated['reference_name'] = auth()->user()->name;
         }
 
         // FORCE: Always record progress under the assigned employee's name

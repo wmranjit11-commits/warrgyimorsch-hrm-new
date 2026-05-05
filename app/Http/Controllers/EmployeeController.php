@@ -143,7 +143,14 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
 
         // Security Check: Only Admin or the Employee themselves can see this data
-        if (auth()->user()->role !== 'admin' && auth()->user()->employee_id != $id) {
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             return response()->json(['success' => false, 'message' => 'Unauthorized Access'], 403);
         }
         

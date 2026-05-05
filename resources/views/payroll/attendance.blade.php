@@ -169,8 +169,8 @@
                 </table>
             </div>
             @if($attendance->hasPages())
-                <div class="card-footer bg-white border-0 py-3">
-                    {{ $attendance->appends(request()->query())->links() }}
+                <div class="card-footer bg-white border-0 py-3 attendance-pagination">
+                    {{ $attendance->appends(request()->query())->links('pagination::bootstrap-5') }}
                 </div>
             @endif
         </div>
@@ -557,6 +557,43 @@
         background: #f3e8ff;
         color: #7c3aed;
         border: 1px solid #ddd6fe;
+    }
+
+    .attendance-pagination .pagination {
+        margin-bottom: 0;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    .attendance-pagination .page-link {
+        min-width: 38px;
+        height: 38px;
+        padding: 0.5rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #475569;
+        font-weight: 600;
+        box-shadow: none;
+    }
+
+    .attendance-pagination .page-item.active .page-link {
+        background: #3858f9;
+        border-color: #3858f9;
+        color: #fff;
+    }
+
+    .attendance-pagination .page-item.disabled .page-link {
+        color: #94a3b8;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .attendance-pagination .page-link svg {
+        width: 14px;
+        height: 14px;
     }
 </style>
 @endpush

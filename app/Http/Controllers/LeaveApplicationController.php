@@ -36,8 +36,15 @@ class LeaveApplicationController extends Controller
             $query->whereDate('start_date', '<=', $request->to_date);
         }
 
-        $role = strtoupper(auth()->user()->role);
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        // $role = strtoupper(auth()->user()->role);
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             $query->where('employee_id', auth()->user()->employee_id);
             $employees = Employee::where('id', auth()->user()->employee_id)->get();
         } else {

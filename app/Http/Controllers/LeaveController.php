@@ -23,8 +23,15 @@ class LeaveController extends Controller
         $year = Carbon::now()->format('Y');
         $month = $selectedMonth;
 
-        $role = strtoupper(auth()->user()->role);
-        if ($role !== 'ADMIN' && $role !== 'SUPER ADMIN') {
+        // $role = strtoupper(auth()->user()->role);
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             $employee_id = auth()->user()->employee_id;
             $employees = Employee::where('id', $employee_id)->get();
             $allotments = LeaveAllotment::where('month', $month)
@@ -58,7 +65,14 @@ class LeaveController extends Controller
 
     public function storeAllotment(Request $request)
     {
-        if (auth()->user()->role !== 'admin') {
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        if (!$isAdmin) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $month = $request->input('month');
