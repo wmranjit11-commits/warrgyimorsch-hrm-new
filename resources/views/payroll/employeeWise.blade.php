@@ -487,11 +487,26 @@
         window.location.href = `/payroll/attendace/employee/${employeeId}/edit?attendance_id=${id}`;
     }
 
-    function exportAttendance() {
-        const start = document.getElementById('startDate').value;
-        const end = document.getElementById('endDate').value;
-        window.location.href = '{{ route("payroll.attendance.export") }}?start_date=' + start + '&end_date=' + end;
-    }
+   function exportAttendance() {
+    const params = new URLSearchParams(window.location.search);
+
+    const employee_id = params.get('employee_id');
+    const start = params.get('start_date');
+    const end = params.get('end_date');
+
+    if (!start || !end) {
+            alert('Date range missing');
+            return;
+        }
+    let url = "{{ route('payroll.attendance.export') }}";
+        url += "?start_date=" + start + "&end_date=" + end;
+
+        if (employee_id) {
+            url += "&employee_id=" + employee_id;
+        }
+
+        window.location.href = url;
+}
 </script>
 
 <style>
