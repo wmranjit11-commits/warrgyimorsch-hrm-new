@@ -244,24 +244,29 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
                         <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
-                            <div class="form-check d-flex align-items-center mb-0 ps-4">
+                            <div class="form-check d-flex align-items-center mb-0 ps-4 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Full Day"
                                     id="catFull" checked onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Half Day"
                                     id="catHalf" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
                                     id="catGate" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catGate">Early Leave</label>
+                            </div>
+                              <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
+                                <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
+                                    id="catGate" onchange="toggleCategoryFields()">
+                                <label class="form-check-label small fw-bold ms-1" for="catGate">WFH</label>
                             </div>
                         </div>
                     </div>

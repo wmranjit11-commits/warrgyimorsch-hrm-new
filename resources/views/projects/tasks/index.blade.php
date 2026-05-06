@@ -298,7 +298,7 @@
                                                     <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px;">
                                                         <li><a class="dropdown-item fw-bold priority-hard py-2 mb-1 rounded mx-2"
                                                                 href="javascript:void(0);"
-                                                                onclick="updateTaskPriority({{ $task->id }}, 'Hard')">Hard</a>
+                                                                onclick="updateTaskPriority({{ $task->id }}, 'High')">High</a>
                                                         </li>
                                                         <li><a class="dropdown-item fw-bold priority-medium py-2 mb-1 rounded mx-2"
                                                                 href="javascript:void(0);"
