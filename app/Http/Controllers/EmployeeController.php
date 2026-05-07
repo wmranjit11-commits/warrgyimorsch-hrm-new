@@ -146,27 +146,158 @@ class EmployeeController extends Controller
     /**
      * Get employee attendance for modal tab
      */
-    public function getAttendance(Request $request, $id)
+    // public function getAttendance(Request $request, $id)
+    // {
+    //     $employee = Employee::findOrFail($id);
+
+    //     // Security Check: Only Admin or the Employee themselves can see this data
+    //     $roleSlug = auth()->user()->role; // e.g. "manager"
+
+    //     $roleId = DB::table('roles_master')
+    //         ->where('slug', $roleSlug)
+    //         ->value('id');
+
+    //     $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+    //     if ($isAdmin) {
+    //         return response()->json(['success' => false, 'message' => 'Unauthorized Access'], 403);
+    //     }
+        
+    //     // Determine selected month and year
+    //     if ($request->filled('month')) {
+    //         $parts = explode('-', $request->month);
+    //         $year = $parts[0];
+    //         $month = $parts[1];
+    //     } else {
+    //         $year = date('Y');
+    //         $month = date('m');
+    //     }
+
+    //     $startDate = \Carbon\Carbon::create($year, $month, 1);
+    //     $endDate = $startDate->copy()->endOfMonth();
+        
+    //     // If current month, only show up to today
+    //     if ($year == date('Y') && $month == date('m')) {
+    //         $endDate = \Carbon\Carbon::today();
+    //     }
+        
+    //     // Fetch data once to avoid queries in loop
+    //     $attendances = \App\Models\Attendance::where('employee_id', $id)
+    //         ->whereBetween('attendance_date', [$startDate, $endDate])
+    //         ->get()
+    //         ->keyBy(function($item) { return $item->attendance_date->format('Y-m-d'); });
+
+    //     $holidays = \App\Models\Holiday::whereBetween('date', [$startDate, $endDate])
+    //         ->get()
+    //         ->keyBy(function($item) { return \Carbon\Carbon::parse($item->date)->format('Y-m-d'); });
+
+    //     $leaves = \App\Models\LeaveApplication::where('employee_id', $id)
+    //         ->where('status', 'approved')
+    //         ->where(function($q) use ($startDate, $endDate) {
+    //             $q->whereBetween('start_date', [$startDate, $endDate])
+    //               ->orWhereBetween('end_date', [$startDate, $endDate]);
+    //         })
+    //         ->get();
+
+    //     $history = [];
+    //     for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+    //         $dayStr = $date->format('Y-m-d');
+    //         $record = $attendances->get($dayStr);
+    //         $holiday = $holidays->get($dayStr);
+            
+    //         // Check if date falls within any approved leave
+    //         $onLeave = $leaves->first(function($l) use ($date) {
+    //             return $date->between($l->start_date, $l->end_date ?? $l->start_date);
+    //         });
+
+    //         $status = 'Absent';
+    //         $statusClass = 'bg-soft-danger text-danger';
+    //         $punch_in = '--:--';
+    //         $punch_out = '--:--';
+    //         $total_hours_val = 0;
+    //         $total_hours_str = '0.0 hrs';
+
+    //         if ($record) {
+    //             $status = $record->status;
+    //             $punch_in = $record->check_in ? \Carbon\Carbon::parse($record->check_in)->format('h:i A') : '--:--';
+    //             $punch_out = $record->check_out ? \Carbon\Carbon::parse($record->check_out)->format('h:i A') : '--:--';
+    //             $total_hours_val = (float) $record->total_hours;
+    //             $total_hours_str = number_format($total_hours_val, 1) . ' hrs';
+                
+    //             // Smarter status detection
+    //             if ($total_hours_val > 0 && $total_hours_val < 5) {
+    //                 $status = 'Half Day';
+    //             } elseif ($record->check_in && !$record->check_out) {
+    //                 $status = 'Present (Single Punch)';
+    //             } elseif ($record->check_in && $record->check_out) {
+    //                 $status = 'Present';
+    //             }
+    //         } elseif ($holiday) {
+    //             $status = 'Holiday (' . $holiday->title . ')';
+    //             $statusClass = 'bg-soft-primary text-primary';
+    //         } elseif ($onLeave) {
+    //             $status = 'Leave (' . $onLeave->leave_type . ')';
+    //             $statusClass = 'bg-soft-info text-info';
+    //         } elseif ($date->isSunday()) {
+    //             $status = 'Sunday (Weekly Off)';
+    //             $statusClass = 'bg-soft-secondary text-secondary';
+    //         }
+
+    //         if ($record) {
+    //             $statusClass = [
+    //                 'present' => 'bg-soft-success text-success',
+    //                 'present (single punch)' => 'bg-soft-success text-success',
+    //                 'absent' => 'bg-soft-danger text-danger',
+    //                 'leave' => 'bg-soft-info text-info',
+    //                 'half day' => 'bg-soft-warning text-warning',
+    //                 'half_day' => 'bg-soft-warning text-warning',
+    //                 'late' => 'bg-soft-warning text-warning',
+    //                 'wfh' => 'bg-soft-success text-success'
+    //             ][strtolower($status)] ?? 'bg-light';
+    //         }
+
+    //         $history[] = [
+    //             'date' => $date->format('d M, Y (D)'),
+    //             'status' => $status,
+    //             'statusClass' => $statusClass,
+    //             'punch_in' => $punch_in,
+    //             'punch_out' => $punch_out,
+    //             'total_hours' => $total_hours_str
+    //         ];
+    //     }
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'employee_name' => $employee->name,
+    //         'history' => array_reverse($history) // Latest first
+    //     ]);
+    // }
+
+    public function getAttendance(Request $request, $id = null)
     {
-        $employee = Employee::findOrFail($id);
+        $user = auth()->user();
+        $employeeId = $id ?? $user->employee_id;
 
-        // Security Check: Only Admin or the Employee themselves can see this data
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        if (!$employeeId) {
+            abort(403, 'No employee linked');
+        }
 
+        $employee = Employee::findOrFail($employeeId);
+
+        // FIXED AUTH LOGIC
+        $roleSlug = $user->role;
         $roleId = DB::table('roles_master')
             ->where('slug', $roleSlug)
             ->value('id');
 
         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-        if (!$isAdmin) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized Access'], 403);
+
+        if (!$isAdmin && $user->employee_id != $employeeId) {
+            abort(403, 'Unauthorized Access');
         }
-        
-        // Determine selected month and year
+
+        // Month filter
         if ($request->filled('month')) {
-            $parts = explode('-', $request->month);
-            $year = $parts[0];
-            $month = $parts[1];
+            [$year, $month] = explode('-', $request->month);
         } else {
             $year = date('Y');
             $month = date('m');
@@ -174,85 +305,72 @@ class EmployeeController extends Controller
 
         $startDate = \Carbon\Carbon::create($year, $month, 1);
         $endDate = $startDate->copy()->endOfMonth();
-        
-        // If current month, only show up to today
+
         if ($year == date('Y') && $month == date('m')) {
             $endDate = \Carbon\Carbon::today();
         }
-        
-        // Fetch data once to avoid queries in loop
-        $attendances = \App\Models\Attendance::where('employee_id', $id)
+
+        // Fetch data
+        $attendances = \App\Models\Attendance::where('employee_id', $employeeId)
             ->whereBetween('attendance_date', [$startDate, $endDate])
             ->get()
-            ->keyBy(function($item) { return $item->attendance_date->format('Y-m-d'); });
+            ->keyBy(fn($item) => $item->attendance_date->format('Y-m-d'));
 
         $holidays = \App\Models\Holiday::whereBetween('date', [$startDate, $endDate])
             ->get()
-            ->keyBy(function($item) { return \Carbon\Carbon::parse($item->date)->format('Y-m-d'); });
+            ->keyBy(fn($item) => \Carbon\Carbon::parse($item->date)->format('Y-m-d'));
 
-        $leaves = \App\Models\LeaveApplication::where('employee_id', $id)
-            ->where('status', 'approved')
-            ->where(function($q) use ($startDate, $endDate) {
+        $leaves = \App\Models\LeaveApplication::where('employee_id', $employeeId)
+            ->whereIn('status', ['approved', 'unauthorised'])
+            ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
-                  ->orWhereBetween('end_date', [$startDate, $endDate]);
+                ->orWhereBetween('end_date', [$startDate, $endDate]);
             })
             ->get();
 
         $history = [];
+
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+
             $dayStr = $date->format('Y-m-d');
             $record = $attendances->get($dayStr);
             $holiday = $holidays->get($dayStr);
-            
-            // Check if date falls within any approved leave
-            $onLeave = $leaves->first(function($l) use ($date) {
-                return $date->between($l->start_date, $l->end_date ?? $l->start_date);
-            });
+
+            $onLeave = $leaves->first(fn($l) =>
+                $date->between($l->start_date, $l->end_date ?? $l->start_date)
+            );
 
             $status = 'Absent';
-            $statusClass = 'bg-soft-danger text-danger';
+            $statusClass = 'danger';
             $punch_in = '--:--';
             $punch_out = '--:--';
-            $total_hours_val = 0;
-            $total_hours_str = '0.0 hrs';
+            $total_hours = '0.0 hrs';
 
             if ($record) {
-                $status = $record->status;
                 $punch_in = $record->check_in ? \Carbon\Carbon::parse($record->check_in)->format('h:i A') : '--:--';
                 $punch_out = $record->check_out ? \Carbon\Carbon::parse($record->check_out)->format('h:i A') : '--:--';
-                $total_hours_val = (float) $record->total_hours;
-                $total_hours_str = number_format($total_hours_val, 1) . ' hrs';
-                
-                // Smarter status detection
-                if ($total_hours_val > 0 && $total_hours_val < 5) {
+                $total_hours = number_format((float)$record->total_hours, 1) . ' hrs';
+
+                if ($record->total_hours < 5 && $record->total_hours > 3) {
                     $status = 'Half Day';
-                } elseif ($record->check_in && !$record->check_out) {
-                    $status = 'Present (Single Punch)';
-                } elseif ($record->check_in && $record->check_out) {
+                    $statusClass = 'warning';
+                } else if($record->total_hours < 3) {
+                    $status = 'Absent';
+                    $statusClass = 'danger';
+                }
+                else {
                     $status = 'Present';
+                    $statusClass = 'success';
                 }
             } elseif ($holiday) {
-                $status = 'Holiday (' . $holiday->title . ')';
-                $statusClass = 'bg-soft-primary text-primary';
+                $status = 'Holiday';
+                $statusClass = 'primary';
             } elseif ($onLeave) {
-                $status = 'Leave (' . $onLeave->leave_type . ')';
-                $statusClass = 'bg-soft-info text-info';
+                $status = 'Leave';
+                $statusClass = 'info';
             } elseif ($date->isSunday()) {
-                $status = 'Sunday (Weekly Off)';
-                $statusClass = 'bg-soft-secondary text-secondary';
-            }
-
-            if ($record) {
-                $statusClass = [
-                    'present' => 'bg-soft-success text-success',
-                    'present (single punch)' => 'bg-soft-success text-success',
-                    'absent' => 'bg-soft-danger text-danger',
-                    'leave' => 'bg-soft-info text-info',
-                    'half day' => 'bg-soft-warning text-warning',
-                    'half_day' => 'bg-soft-warning text-warning',
-                    'late' => 'bg-soft-warning text-warning',
-                    'wfh' => 'bg-soft-success text-success'
-                ][strtolower($status)] ?? 'bg-light';
+                $status = 'Sunday';
+                $statusClass = 'secondary';
             }
 
             $history[] = [
@@ -261,15 +379,20 @@ class EmployeeController extends Controller
                 'statusClass' => $statusClass,
                 'punch_in' => $punch_in,
                 'punch_out' => $punch_out,
-                'total_hours' => $total_hours_str
+                'total_hours' => $total_hours
             ];
         }
 
-        return response()->json([
-            'success' => true,
-            'employee_name' => $employee->name,
-            'history' => array_reverse($history) // Latest first
+        return view('payroll.attendance-history', [
+            'employee' => $employee,
+            'history' => array_reverse($history),
+            'selectedMonth' => "$year-$month"
         ]);
+    }
+
+    public function employeeDays() {
+        $employees = Employee::all();
+        return view('employees.employeeDay', compact('employees'));
     }
 
     /**

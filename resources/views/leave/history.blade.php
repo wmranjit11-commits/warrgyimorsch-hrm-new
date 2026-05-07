@@ -194,12 +194,10 @@
                                                     onclick="openViewModal({{ $leave->id }})" title="View Details">
                                                     <i data-feather="eye" style="width: 14px; height: 14px;"></i>
                                                 </button>
-                                                @if(in_array(strtoupper(auth()->user()->role), ['ADMIN', 'SUPER ADMIN']))
-                                                    <button class="btn btn-icon btn-soft-primary"
-                                                        onclick="openActionModal({{ $leave->id }})" title="Take Action">
-                                                        <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
-                                                    </button>
-                                                @endif
+                                                <button class="btn btn-icon btn-soft-primary"
+                                                    onclick="openActionModal({{ $leave->id }})" title="Take Action">
+                                                    <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
+                                                </button>
                                                 <button class="btn btn-icon btn-soft-danger"
                                                     onclick="deleteApplication({{ $leave->id }})" title="Delete">
                                                     <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
@@ -527,6 +525,13 @@
     </div>
 
     <script>
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.content-pane').forEach(p => p.classList.add('d-none'));
+            document.getElementById('tab-' + tabId).classList.remove('d-none');
+        }
+
         function toggleCategoryFields() {
             const category = document.querySelector('input[name="leave_category"]:checked').value;
             const endDateWrapper = document.getElementById('endDateWrapper');

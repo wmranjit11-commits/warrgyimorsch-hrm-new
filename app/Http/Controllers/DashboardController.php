@@ -333,6 +333,48 @@ class DashboardController extends Controller
         //     return $item;
         // });
 
+        if(!$isAdmin){
+            return view('userDashboard', compact(
+                'totalEmployees',
+                'todayPresent',
+                'todayLeave',
+                'attendanceRate',
+                'totalPaidAmount',
+                'totalPendingAmount',
+                'totalRejectedAmount',
+                'totalNetSalary',
+                'totalEmpPaid',
+                'totalEmpPending',
+                'chartMonths',
+                'chartTotal',
+                'chartPaid',
+                'chartPending',
+                'selectedMonth',
+                'selectedMonthLabel',
+                'recentPayrolls',
+                'upcomingHolidays',
+                'rangePresent',
+                'rangeWFH',
+                'rangeLeave',
+                'rangeLate',
+                'rangeEarly',
+                'rangeAttendanceRate',
+                'rangeAbsent',
+                'rangeHalfday',
+                'present',
+                'wfh',
+                'leave',
+                'late',
+                'early',
+                'absent',
+                'half_day',
+                'leaveReport',
+                'employees',
+                'todayLeaveEmployees',
+                'todayLateEmployees',
+            ));
+        }
+
         return view('dashboard', compact(
             'totalEmployees',
             'todayPresent',
@@ -384,11 +426,28 @@ class DashboardController extends Controller
         //     })
         //     ->where('leave_applications.status', 'approved');
 
+        $roleSlug = auth()->user()->role;
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $employeeId = auth()->user()->employee_id;
+
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
+            ->whereIn('leave_applications.status', ['approved', 'unauthorised']);
+
         ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
         ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
-        if ($request->employee_id) {
+        // USER → force own data
+        if (!$isAdmin) {
+            $query->where('employees.id', $employeeId);
+        }
+
+        // ADMIN → keep old filter
+        if ($isAdmin && $request->employee_id) {
             $query->where('employees.id', $request->employee_id);
         }
 
@@ -429,25 +488,166 @@ class DashboardController extends Controller
         }
 
         if ($from && $to) {
-            // $query->whereBetween('attendances.attendance_date', [$from, $to]);
-            $query->where(function($q) use ($from, $to) {
-                $q->whereBetween('leave_applications.start_date', [$from, $to])
-                ->orWhereBetween('leave_applications.end_date', [$from, $to]);
-            });
+
+            // ADMIN → OLD LOGIC (NO CHANGE)
+            if ($isAdmin) {
+                $query->where(function($q) use ($from, $to) {
+                    $q->whereBetween('leave_applications.start_date', [$from, $to])
+                    ->orWhereBetween('leave_applications.end_date', [$from, $to]);
+                });
+            }
+
+            // USER → INCLUDE attendance date also
+            if (!$isAdmin) {
+                $query->where(function($q) use ($from, $to) {
+                    $q->whereBetween('leave_applications.start_date', [$from, $to])
+                    ->orWhereBetween('leave_applications.end_date', [$from, $to]);
+                });
+            }
         }
 
-        // dd($request->leave_from, $request->leave_to);
+        // ADMIN → old count
+        if ($isAdmin) {
+            return $query->selectRaw("
+                    employees.id,
+                    employees.name,
+                    employees.designation,
+                    COUNT(DISTINCT leave_applications.id) as leave_count
+                ")
+                ->groupBy('employees.id', 'employees.name', 'employees.designation')
+                ->havingRaw("leave_count > 0")
+                ->orderByDesc('leave_count')
+                ->get();
+        }
 
-        return $query->selectRaw("
-                employees.id,
-                employees.name,
-                employees.designation,
-                COUNT(*) as leave_count
-            ")
-            ->groupBy('employees.id', 'employees.name', 'employees.designation')
-            ->havingRaw("leave_count > 0")
-            ->orderByDesc('leave_count')
-            ->get();
+        // USER → include attendance count
+
+        $leaveDates = LeaveApplication::where('employee_id', $employeeId)
+        ->whereIn('status', ['approved', 'unauthorised'])
+        ->when($from && $to, function ($q) use ($from, $to) {
+            $q->where(function ($sub) use ($from, $to) {
+                $sub->whereBetween('start_date', [$from, $to])
+                    ->orWhereBetween('end_date', [$from, $to]);
+            });
+        })
+        ->get()
+        ->flatMap(function ($leave) {
+            $dates = [];
+            $start = \Carbon\Carbon::parse($leave->start_date);
+            $end = \Carbon\Carbon::parse($leave->end_date);
+
+            while ($start->lte($end)) {
+                $dates[] = $start->toDateString();
+                $start->addDay();
+            }
+
+            return $dates;
+        });
+
+
+        // 2. Get attendance leave dates
+        $attendanceDates = Attendance::where('employee_id', $employeeId)
+            ->whereIn('status', ['leave', 'absent'])
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereBetween('attendance_date', [$from, $to]);
+            })
+            ->pluck('attendance_date')
+            ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString());
+
+
+        // 3. Merge + unique (THIS IS OR LOGIC)
+        $totalUniqueDates = $leaveDates
+            ->merge($attendanceDates)
+            ->unique()
+            ->count();
+
+
+        // 4. Return
+        if ($totalUniqueDates > 0) {
+            return collect([
+                (object)[
+                    'id' => $employeeId,
+                    'name' => auth()->user()->name,
+                    'designation' => '',
+                    'leave_count' => $totalUniqueDates
+                ]
+            ]);
+        }
+
+        return collect();
+
+    }
+
+    private function getLateEmployeesData()
+    {
+        $range = request('late_range', 'today');
+        $employeeFilter = request('late_employee');
+
+        [$startDate, $endDate] = $this->getLateDateRange($range);
+
+        $roleSlug = auth()->user()->role;
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $employeeId = auth()->user()->employee_id;
+
+        $lateRecords = Attendance::with('employee')
+            ->whereBetween('attendance_date', [$startDate, $endDate])
+
+            // For USER → force only logged-in employee
+            ->when(!$isAdmin, function ($q) use ($employeeId) {
+                $q->where('employee_id', $employeeId);
+            })
+
+            // For ADMIN → keep old filter behavior
+            ->when($isAdmin && $employeeFilter, function ($q) use ($employeeFilter) {
+                $q->where('employee_id', $employeeFilter);
+            })
+            ->get()
+            ->filter(function ($item) {
+                if (!$item->employee || !$item->check_in) {
+                    return false;
+                }
+
+                $checkIn = Carbon::parse($item->check_in);
+
+                $shiftStart = $item->employee->time_in
+                    ? Carbon::parse($item->employee->time_in)
+                    : Carbon::createFromTime(9, 30, 0); // fallback
+
+                return $checkIn->gt($shiftStart);
+            });
+
+        return $lateRecords->groupBy('employee_id')->map(function ($records) {
+
+            $totalLateMinutes = 0;
+
+            foreach ($records as $item) {
+                $checkIn = Carbon::parse($item->check_in);
+
+                $shiftStart = $item->employee->time_in
+                    ? Carbon::parse($item->employee->time_in)
+                    : Carbon::createFromTime(9, 30, 0);
+
+                $totalLateMinutes += $shiftStart->diffInMinutes($checkIn);
+            }
+
+            $employee = $records->first()->employee;
+
+            $hours = floor($totalLateMinutes / 60);
+            $minutes = $totalLateMinutes % 60;
+
+            return [
+                'employee' => $employee,
+                'late_duration' => $hours > 0
+                    ? $hours . ' hr ' . $minutes . ' min'
+                    : $minutes . ' min',
+                'late_days' => $records->count(), // ✅ optional but useful
+            ];
+        });
     }
 
     // private function getLateEmployeesData()
@@ -457,95 +657,55 @@ class DashboardController extends Controller
 
     //     [$startDate, $endDate] = $this->getLateDateRange($range);
 
-    //     $officeTime = Carbon::createFromTime(9, 30, 0);
+    //     $requiredWorkMinutes = 510; // 8h 30m
 
-    //     $lateRecords = Attendance::with('employee')
+    //     $records = Attendance::with('employee')
     //         ->whereBetween('attendance_date', [$startDate, $endDate])
-    //         ->whereTime('check_in', '>', '09:30:00')
-    //         ->when($employeeFilter, function ($q) use ($employeeFilter) {
-    //             $q->where('employee_id', $employeeFilter);
-    //         })
-    //         ->get();
+    //         ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
+    //         ->orderBy('attendance_date')
+    //         ->get()
+    //         ->groupBy('employee_id');
 
-    //     return $lateRecords->groupBy('employee_id')->map(function ($records) use ($officeTime) {
+    //     return $records->map(function ($employeeRecords) use ($requiredWorkMinutes) {
 
-    //         $totalLateMinutes = 0;
+    //         $balanceMinutes = 0; // +ve = extra, -ve = late
 
-    //         foreach ($records as $item) {
+    //         foreach ($employeeRecords as $item) {
+
+    //             if (!$item->check_in || !$item->check_out) {
+    //                 continue;
+    //             }
+
     //             $checkIn = Carbon::parse($item->check_in);
-    //             $totalLateMinutes += $officeTime->diffInMinutes($checkIn);
+    //             $checkOut = Carbon::parse($item->check_out);
+
+    //             // Total worked minutes
+    //             $workedMinutes = $checkIn->diffInMinutes($checkOut);
+
+    //             // CORE LOGIC (IMPORTANT)
+    //             $balanceMinutes += ($workedMinutes - $requiredWorkMinutes);
     //         }
 
-    //         $employee = $records->first()->employee;
+    //         $employee = $employeeRecords->first()->employee;
 
-    //         $hours = floor($totalLateMinutes / 60);
-    //         $minutes = $totalLateMinutes % 60;
+    //         // Only negative = late
+    //         $finalLate = abs(min(0, $balanceMinutes));
+
+    //         // Format
+    //         $hours = floor($finalLate / 60);
+    //         $minutes = $finalLate % 60;
+
+    //         $lateDuration = $finalLate > 0
+    //             ? ($hours > 0 ? "$hours hr $minutes min" : "$minutes min")
+    //             : '0 min';
 
     //         return [
     //             'employee' => $employee,
-    //             'late_duration' => $hours > 0
-    //                 ? $hours . ' hr ' . $minutes . ' min'
-    //                 : $minutes . ' min'
+    //             'late_duration' => $lateDuration
     //         ];
-    //     });
+    //     })
+    //     ->filter(fn($emp) => $emp['late_duration'] !== '0 min');
     // }
-
-    private function getLateEmployeesData()
-    {
-        $range = request('late_range', 'today');
-        $employeeFilter = request('late_employee');
-
-        [$startDate, $endDate] = $this->getLateDateRange($range);
-
-        $requiredWorkMinutes = 510; // 8h 30m
-
-        $records = Attendance::with('employee')
-            ->whereBetween('attendance_date', [$startDate, $endDate])
-            ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
-            ->orderBy('attendance_date')
-            ->get()
-            ->groupBy('employee_id');
-
-        return $records->map(function ($employeeRecords) use ($requiredWorkMinutes) {
-
-            $balanceMinutes = 0; // +ve = extra, -ve = late
-
-            foreach ($employeeRecords as $item) {
-
-                if (!$item->check_in || !$item->check_out) {
-                    continue;
-                }
-
-                $checkIn = Carbon::parse($item->check_in);
-                $checkOut = Carbon::parse($item->check_out);
-
-                // Total worked minutes
-                $workedMinutes = $checkIn->diffInMinutes($checkOut);
-
-                // CORE LOGIC (IMPORTANT)
-                $balanceMinutes += ($workedMinutes - $requiredWorkMinutes);
-            }
-
-            $employee = $employeeRecords->first()->employee;
-
-            // Only negative = late
-            $finalLate = abs(min(0, $balanceMinutes));
-
-            // Format
-            $hours = floor($finalLate / 60);
-            $minutes = $finalLate % 60;
-
-            $lateDuration = $finalLate > 0
-                ? ($hours > 0 ? "$hours hr $minutes min" : "$minutes min")
-                : '0 min';
-
-            return [
-                'employee' => $employee,
-                'late_duration' => $lateDuration
-            ];
-        })
-        ->filter(fn($emp) => $emp['late_duration'] !== '0 min');
-    }
 
     private function getLateDateRange($range)
     {
