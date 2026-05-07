@@ -302,6 +302,7 @@ class PayrollController extends Controller
 
             $leaves = LeaveApplication::where('employee_id', $employeeId)
                 ->where('status', 'approved')
+                ->where('leave_category', 'NOT LIKE', '%WFH%') // Exclude WFH from leave count
                 ->where(function ($q) use ($year, $monthNum) {
                     $q->whereMonth('start_date', $monthNum)
                     ->orWhereMonth('end_date', $monthNum);

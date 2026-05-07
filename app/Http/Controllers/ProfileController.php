@@ -92,6 +92,7 @@ class ProfileController extends Controller
             // Usage: Approved leaves that START in this month
             $total_used = LeaveApplication::where('employee_id', $employee->id)
                 ->where('status', 'approved')
+                ->where('leave_category', 'NOT LIKE', '%WFH%') // Exclude WFH from used leaves
                 ->whereYear('start_date', date('Y'))
                 ->whereMonth('start_date', date('m'))
                 ->sum('total_days');

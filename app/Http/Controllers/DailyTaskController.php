@@ -21,6 +21,19 @@ class DailyTaskController extends Controller
         $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
         $isAdmin = in_array($role, $adminRoles);
 
+        // Ensure "OTHER" project exists for general tasks
+        $otherProject = Project::where('name', 'OTHER')->first();
+        if (!$otherProject) {
+            $otherProject = Project::create([
+                'name' => 'OTHER',
+                'slug' => 'other',
+                'status' => 'Ongoing',
+                'description' => 'General tasks not related to a specific project',
+            ]);
+        }
+        // Sync all employees to OTHER project so they all appear in the list
+        $otherProject->update(['members' => Employee::pluck('id')->toArray()]);
+
         if (!$isAdmin) {
             $query->where('employee_id', auth()->user()->employee_id);
             $employees = Employee::where('id', auth()->user()->employee_id)->get();
@@ -49,7 +62,7 @@ class DailyTaskController extends Controller
 
         $tasks = $query->latest()->get();
 
-        return view('projects.tasks.index', compact('tasks', 'projects', 'employees'));
+        return view('projects.tasks.index', compact('tasks', 'projects', 'employees', 'isAdmin'));
     }
 
     public function store(Request $request)
@@ -63,6 +76,7 @@ class DailyTaskController extends Controller
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
             'description' => 'nullable|string',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
         ]);
 
         $validated['assigned_by'] = Auth::id();
@@ -72,7 +86,28 @@ class DailyTaskController extends Controller
         $isAdmin = in_array($role, $adminRoles);
 
         if (!$isAdmin) {
-            $validated['employee_id'] = auth()->user()->employee_id;
+            $project = Project::find($validated['project_id']);
+            $isLeader = $project && is_array($project->leaders) && in_array(auth()->user()->employee_id, $project->leaders);
+            
+            if (!$isLeader) {
+                // If not admin and not project leader, they can only assign task to themselves
+                $validated['employee_id'] = auth()->user()->employee_id;
+            } else {
+                // If leader, verify the assignee is in the project
+                $allowed = array_merge((array)($project->leaders ?? []), (array)($project->members ?? []));
+                if (!in_array($validated['employee_id'], $allowed)) {
+                    return response()->json(['error' => 'You can only assign tasks to project members.'], 403);
+                }
+            }
+        }
+
+        if (isset($validated['end_date']) && $validated['end_date']) {
+            $validated['end_date'] = \Carbon\Carbon::parse($validated['end_date'])->endOfDay();
+        }
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('daily_tasks', 'public');
+            $validated['photo'] = $path;
         }
 
         DailyTask::create($validated);
@@ -91,14 +126,31 @@ class DailyTaskController extends Controller
             'status' => 'required|string',
             'employee_id' => 'required|exists:employees,id',
             'description' => 'nullable|string',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
         ]);
 
         $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
         $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
         $isAdmin = in_array($role, $adminRoles);
 
-        if (!$isAdmin) {
-            $validated['employee_id'] = auth()->user()->employee_id;
+        $project = $dailyTask->project;
+        $isLead = ($project && is_array($project->leaders) && in_array(auth()->user()->employee_id, $project->leaders));
+        $isOwner = auth()->user()->employee_id == $dailyTask->employee_id;
+
+        if (!$isAdmin && !$isLead && !$isOwner) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
+
+        if ($request->hasFile('photo')) {
+            if ($dailyTask->photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($dailyTask->photo);
+            }
+            $path = $request->file('photo')->store('daily_tasks', 'public');
+            $validated['photo'] = $path;
+        }
+
+        if (isset($validated['end_date']) && $validated['end_date']) {
+            $validated['end_date'] = \Carbon\Carbon::parse($validated['end_date'])->endOfDay();
         }
 
         $dailyTask->update($validated);
@@ -108,6 +160,18 @@ class DailyTaskController extends Controller
 
     public function destroy(DailyTask $dailyTask)
     {
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
+
+        $project = $dailyTask->project;
+        $isLead = ($project && is_array($project->leaders) && in_array(auth()->user()->employee_id, $project->leaders));
+        $isOwner = auth()->user()->employee_id == $dailyTask->employee_id;
+
+        if (!$isAdmin && !$isLead && !$isOwner) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
         $dailyTask->delete();
         return back()->with('success', 'Task deleted successfully!');
     }
@@ -153,6 +217,29 @@ class DailyTaskController extends Controller
         return response()->json(['success' => 'Reply submitted successfully!']);
     }
 
+    public function updateFollowUp(Request $request, $id)
+    {
+        $followUp = TaskFollowUp::findOrFail($id);
+        
+        $validated = $request->validate([
+            'work_description' => 'required|string',
+            'time_taken' => 'nullable|string',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,bmp,pdf,doc,docx,xls,xlsx,csv,txt,zip,rar|max:10240',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($followUp->photo) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($followUp->photo);
+            }
+            $path = $request->file('photo')->store('task_followups', 'public');
+            $validated['photo'] = $path;
+        }
+
+        $followUp->update($validated);
+
+        return response()->json(['success' => 'Task history updated successfully!']);
+    }
+
     public function getFollowUps($taskId)
     {
         $followUps = TaskFollowUp::where('daily_task_id', $taskId)->latest()->get();
@@ -184,8 +271,10 @@ class DailyTaskController extends Controller
             $isLead = in_array(auth()->user()->employee_id, $project->leaders);
         }
 
-        if (!$isAdmin && !$isLead) {
-            return response()->json(['error' => 'Only Admin or Project Lead can change status.'], 403);
+        $isOwner = auth()->user()->employee_id == $dailyTask->employee_id;
+
+        if (!$isAdmin && !$isLead && !$isOwner) {
+            return response()->json(['error' => 'Only Admin, Project Lead or Task Owner can change status.'], 403);
         }
 
         $dailyTask->update(['status' => $validated['status']]);
@@ -198,6 +287,18 @@ class DailyTaskController extends Controller
         $validated = $request->validate([
             'priority' => 'required|string|in:Hard,Medium,Low,Normal',
         ]);
+
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $adminRoles = ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head', 'team_leader'];
+        $isAdmin = in_array($role, $adminRoles);
+
+        $project = $dailyTask->project;
+        $isLead = ($project && is_array($project->leaders) && in_array(auth()->user()->employee_id, $project->leaders));
+        $isOwner = auth()->user()->employee_id == $dailyTask->employee_id;
+
+        if (!$isAdmin && !$isLead && !$isOwner) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
 
         $dailyTask->update(['priority' => $validated['priority']]);
 

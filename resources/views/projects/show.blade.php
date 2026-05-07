@@ -308,13 +308,7 @@
                     }
                 </style>
                 <div class="activity-feed">
-                    @php
-                        $groupedActivities = $activities->groupBy(function($item) {
-                            return $item->created_at->format('d M Y');
-                        });
-                    @endphp
-
-                    @forelse($groupedActivities as $date => $dateActivities)
+                    @forelse($dayGroups as $date => $tasksInDay)
                         <div class="date-header d-flex align-items-center justify-content-between mb-3 mt-4">
                             <div class="d-flex align-items-center gap-2">
                                 <div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle" style="width: 28px; height: 28px;">
@@ -322,98 +316,150 @@
                                 </div>
                                 <h6 class="mb-0 fw-bold text-dark" style="font-size: 14px;">{{ $date }}</h6>
                             </div>
-                            <span class="badge bg-soft-secondary text-secondary fw-bold" style="font-size: 10px; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 6px;">TOTAL DAY WORK: {{ number_format($dateActivities->sum(function($a) { return (float) preg_replace('/[^0-9.]/', '', $a->time_taken); }), 1) }} HOURS</span>
+                            @php
+                                $totalDayTime = 0;
+                                foreach($tasksInDay as $tData) {
+                                    foreach($tData['events'] as $e) {
+                                        if($e->type == 'progress') {
+                                            $totalDayTime += (float) preg_replace('/[^0-9.]/', '', $e->time_taken);
+                                        }
+                                    }
+                                }
+                            @endphp
+                            <span class="badge bg-soft-secondary text-secondary fw-bold" style="font-size: 10px; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 6px;">TOTAL DAY WORK: {{ number_format($totalDayTime, 1) }} HOURS</span>
                         </div>
 
-                        @foreach($dateActivities as $activity)
-                            <div class="card mb-3 border shadow-none" style="border-radius: 12px; background: #fff;">
-                                <div class="card-body p-3">
+                        @foreach($tasksInDay as $taskId => $data)
+                            @php $task = $data['task']; @endphp
+                            <div class="card mb-4 border shadow-none" style="border-radius: 12px; background: #fff; overflow: hidden;">
+                                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between" style="border-top: 4px solid #3858f9;">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle fw-bold"
-                                            style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(56, 88, 249, 0.1);">
-                                            {{ substr($activity->dailyTask->employee->name ?? 'U', 0, 1) }}
+                                        <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle fw-bold shadow-sm"
+                                            style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fff;">
+                                            {{ substr($task->employee->name ?? 'U', 0, 1) }}
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                                <h6 class="mb-0 fw-bold text-dark" style="font-size: 16px; letter-spacing: -0.3px;">
-                                                    {{ $activity->dailyTask->task_title ?? 'General Task' }}
-                                                    @if(isset($activity->dailyTask->status))
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 16px;">
+                                                {{ $task->task_title }}
+                                                @php
+                                                    $s = $task->status;
+                                                    $statusSlug = strtolower(str_replace(' ', '-', $s));
+                                                    $statusClass = 'status-' . $statusSlug;
+                                                @endphp
+                                                <span class="badge {{ $statusClass }}" style="font-size: 9px; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">{{ $s }}</span>
+                                            </h6>
+                                            <div class="d-flex align-items-center gap-3 text-muted" style="font-size: 11.5px;">
+                                                <div><span class="text-uppercase fw-bold text-primary" style="font-size: 9.5px; letter-spacing: 0.5px;">ASSIGNED TO:</span> <span class="ms-1 fw-bold text-dark">{{ $task->employee->name ?? 'Unknown' }}</span></div>
+                                                <div class="d-flex align-items-center gap-1"><i class="feather-clock" style="font-size: 12px;"></i> <span class="fw-bold">{{ $task->created_at->format('h:i A') }}</span></div>
+                                            </div>
+                                            @if($task->description)
+                                                <div class="mt-2 text-muted small p-2 bg-light bg-opacity-50 rounded" style="font-size: 12px; border-left: 3px solid #3858f9;">
+                                                    <div class="main-task-description">
                                                         @php
-                                                            $s = $activity->dailyTask->status;
-                                                            $statusSlug = strtolower(str_replace(' ', '-', $s));
-                                                            $statusClass = 'status-' . $statusSlug;
+                                                            $desc = html_entity_decode($task->description);
+                                                            $descLines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>', '<li>', '</li>'], ["\n", "\n", "\n", "\n", "\n", "\n", "\n"], $desc));
+                                                            foreach($descLines as $dLine) {
+                                                                $dLine = trim(strip_tags(html_entity_decode($dLine), '<b><strong><i><u>'));
+                                                                if(empty($dLine)) continue;
+                                                                echo '<div class="d-flex align-items-start gap-1 mb-1">
+                                                                        <i class="feather-circle mt-1" style="font-size: 5px; color: #3858f9;"></i>
+                                                                        <span>' . $dLine . '</span>
+                                                                      </div>';
+                                                            }
                                                         @endphp
-                                                        <span class="badge {{ $statusClass }} ms-2"
-                                                            style="font-size: 10px; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">{{ $s }}</span>
-                                                    @endif
-                                                    <span class="badge bg-soft-primary text-primary ms-2"
-                                                        style="font-size: 11px; padding: 5px 10px; border-radius: 6px;">{{ $activity->time_taken ?? '0' }}
-                                                        HRS</span>
-                                                </h6>
-                                                <div class="text-end">
-                                                    <span class="fw-bold text-primary d-block" style="font-size: 13px;">{{ $activity->created_at->format('h:i A') }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="text-muted" style="font-size: 12px;">
-                                                <span class="text-uppercase fw-bold text-primary" style="font-size: 9px; letter-spacing: 0.8px;">PERFORMED BY:</span>
-                                                <span class="ms-1 fw-bold text-dark">{{ $activity->dailyTask->employee->name ?? 'Unknown' }}</span>
-                                            </div>
+                                            @endif
+                                            @if($task->photo)
+                                                <div class="mt-2">
+                                                    <button onclick="viewAttachmentPopup('{{ asset('storage/' . $task->photo) }}')" class="btn btn-sm btn-soft-primary fw-bold px-3 py-1" style="border-radius: 6px; font-size: 11px;">
+                                                        <i class="feather-paperclip me-1"></i> VIEW MAIN ATTACHMENT
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
-
-                                    <div class="mt-3" style="padding-left: 58px; word-break: break-word;">
-                                        <div class="text-muted activity-description" style="line-height: 1.6;">
-                                            @php
-                                                $rawDesc = html_entity_decode($activity->work_description);
-                                                $cleanDesc = strip_tags($rawDesc, '<b><strong>');
-                                                
-                                                // Pre-format badges to keep them during splitting
-                                                $cleanDesc = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $cleanDesc);
-                                                
-                                                $lines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>'], ["\n", "\n", "\n", "\n", "\n"], $rawDesc));
-                                                $processedLines = [];
-                                                $isFirstLine = true;
-
-                                                foreach($lines as $line) {
-                                                    $line = trim(strip_tags(html_entity_decode($line), '<span>'));
-                                                    if(empty($line)) continue;
-
-                                                    // Re-apply badge if it was lost in stripping
-                                                    $line = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $line);
-
-                                                    if ($isFirstLine) {
-                                                        // First line is always the Main Task Header
-                                                        // Remove any leading bullet from header for a cleaner look
-                                                        $headerText = preg_replace('/^[•\*\-\·\s]+/u', '', $line);
-                                                        $processedLines[] = '<div class="main-task-header">• ' . $headerText . '</div>';
-                                                        $isFirstLine = false;
-                                                    } else {
-                                                        // Subsequent lines are sub-tasks
-                                                        // Detect bullets: •, *, -, or middot
-                                                        if (preg_match('/^[•\*\-\·]/u', $line)) {
-                                                            $text = trim(preg_replace('/^[•\*\-\·\s]+/u', '', $line));
-                                                            $processedLines[] = '<div class="sub-task-point"><i class="feather-check-circle text-success mt-1" style="font-size: 12px;"></i><span>' . $text . '</span></div>';
-                                                        } elseif (preg_match('/^(\d+)\.\s+(.*)/', $line, $matches)) {
-                                                            // Numbered lists
-                                                            $processedLines[] = '<div class="sub-task-point"><span class="fw-bold text-primary" style="min-width: 18px;">' . $matches[1] . '.</span><span>' . $matches[2] . '</span></div>';
-                                                        } else {
-                                                            // Default sub-point
-                                                            $processedLines[] = '<div class="sub-task-point"><i class="feather-circle text-muted mt-2" style="font-size: 6px;"></i><span>' . $line . '</span></div>';
-                                                        }
-                                                    }
-                                                }
-                                                $finalDesc = implode('', $processedLines);
-                                            @endphp
-                                            {!! $finalDesc !!}
-                                        </div>
-                                        @if($activity->photo)
-                                            <div class="mt-2">
-                                                <img src="{{ asset('storage/' . $activity->photo) }}" class="img-fluid rounded border"
-                                                    style="max-height: 110px; cursor: pointer; transition: opacity 0.2s;"
-                                                    onclick="window.open(this.src)" onmouseover="this.style.opacity='0.9'"
-                                                    onmouseout="this.style.opacity='1'">
+                                    <div class="text-end d-flex flex-column align-items-end gap-2">
+                                        @if(isset($data['daily_total_time']) && $data['daily_total_time'] > 0)
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="text-muted fw-bold" style="font-size: 10px;">TOTAL WORK:</span>
+                                                <span class="badge bg-soft-info text-info border border-info border-opacity-25 px-3 py-2" style="font-size: 11px; border-radius: 8px;">
+                                                    @php
+                                                        $totalDecimal = $data['daily_total_time'];
+                                                        $h = floor($totalDecimal);
+                                                        $m = round(($totalDecimal - $h) * 60);
+                                                        $timeDisplay = "";
+                                                        if($h > 0) $timeDisplay .= $h . "h ";
+                                                        if($m > 0) $timeDisplay .= $m . "m";
+                                                        if($h == 0 && $m == 0) $timeDisplay = "0m";
+                                                    @endphp
+                                                    {{ trim($timeDisplay) }}
+                                                </span>
                                             </div>
                                         @endif
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-0">
+                                    <div class="timeline-activity px-4 py-2">
+                                        @foreach($data['events'] as $index => $event)
+                                            @if($event->type == 'creation') @continue @endif
+                                            <div class="activity-item py-4 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width: 24px; height: 24px;">
+                                                            <i class="feather-edit-2" style="font-size: 10px;"></i>
+                                                        </div>
+                                                        <span class="fw-bold text-dark small">Work Progress Updated</span>
+                                                        @if($event->time_taken)
+                                                            <span class="badge bg-soft-primary text-primary ms-2" style="font-size: 9px;">{{ $event->time_taken }} HRS</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-muted fw-bold small">
+                                                        <i class="feather-clock me-1" style="font-size: 11px;"></i> {{ $event->created_at->format('h:i A') }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="activity-description text-muted mb-3" style="font-size: 13.5px; line-height: 1.6; padding-left: 34px;">
+                                                    @php
+                                                        $rawDesc = html_entity_decode($event->description);
+                                                        
+                                                        // Split by lines and process
+                                                        $lines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>', '<li>', '</li>'], ["\n", "\n", "\n", "\n", "\n", "\n", "\n"], $rawDesc));
+                                                        $processedLines = [];
+                                                        $isFirstLine = true;
+
+                                                        foreach($lines as $line) {
+                                                            $line = trim(strip_tags(html_entity_decode($line), '<span><b><strong>'));
+                                                            if(empty($line)) continue;
+
+                                                            // Re-apply badge format for time mentions in text
+                                                            $line = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $line);
+
+                                                            // Remove leading bullets/points to re-format consistently
+                                                            $cleanLine = preg_replace('/^[•\*\-\·\d\.\s]+/u', '', $line);
+
+                                                            if ($isFirstLine) {
+                                                                $processedLines[] = '<div class="main-task-header">• ' . $cleanLine . '</div>';
+                                                                $isFirstLine = false;
+                                                            } else {
+                                                                $processedLines[] = '<div class="sub-task-point"><i class="feather-check text-success mt-1" style="font-size: 11px;"></i><span>' . $cleanLine . '</span></div>';
+                                                            }
+                                                        }
+                                                        $finalDesc = implode('', $processedLines);
+                                                    @endphp
+                                                    {!! $finalDesc !!}
+                                                </div>
+
+                                                @if($event->photo)
+                                                    <div class="mt-2" style="padding-left: 34px;">
+                                                        <button onclick="viewAttachmentPopup('{{ asset('storage/' . $event->photo) }}')" class="btn btn-sm btn-soft-primary fw-bold px-3 py-2" style="border-radius: 8px;">
+                                                            <i class="feather-paperclip me-1"></i> VIEW ATTACHMENT
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>
@@ -550,8 +596,12 @@
 
             setInterval(updateProjectTimers, 1000);
             updateProjectTimers();
-
-
         });
+
+        function viewAttachmentPopup(url) {
+            const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
+            let htmlContent = isImage ? `<img src="${url}" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">` : `<iframe src="${url}" style="width: 100%; height: 70vh; border: none; border-radius: 8px;"></iframe>`;
+            Swal.fire({ title: 'Attachment Preview', html: htmlContent, width: '900px', showCloseButton: true, showConfirmButton: false });
+        }
     </script>
 @endpush
