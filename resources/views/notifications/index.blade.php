@@ -28,12 +28,12 @@
                     @php
                         $isPayroll = isset($item->remarks);
                         // Hide other employees' payroll comments for non-admin
-                        if ($isPayroll && !in_array($role, ['ADMIN', 'SUPER ADMIN'])) {
+                        if ($isPayroll && !$isAdmin) {
                             if ($item->employee_id != auth()->user()->employee_id) {
                                 continue; // skip this item
                             }
                         }
-                        $emp = ($role == 'ADMIN' || $role == 'SUPER ADMIN') ? $item->employee : auth()->user()->employee;
+                        $emp = (!$isAdmin) ? $item->employee : auth()->user()->employee;
                         $photo = ($emp && $emp->photo) ? asset('storage/' . $emp->photo) : null;
                     @endphp
                     <div class="list-group-item p-4 border-bottom border-light">
@@ -51,7 +51,7 @@
                                         @if($isPayroll)
                                             Payroll Comment
                                         @else
-                                            @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
+                                            @if($isAdmin)
                                                 New Leave Application
                                             @else
                                                 Leave Status Updated
@@ -62,13 +62,15 @@
                                         <i class="feather-clock me-1"></i>
                                         {{ $item->updated_at->diffForHumans() }}
                                     </span> -->
-                                    @if($isPayroll)
-                                        <i class="feather-message-square me-1"></i>
-                                        {{ $item->updated_at->diffForHumans() }}
-                                    @else
-                                        <i class="feather-clock me-1"></i>
-                                        {{ $item->updated_at->diffForHumans() }}
-                                    @endif
+                                    <div>
+                                        @if($isPayroll)
+                                            <i class="feather-message-square me-1"></i>
+                                            {{ $item->updated_at->diffForHumans() }}
+                                        @else
+                                            <i class="feather-clock me-1"></i>
+                                            {{ $item->updated_at->diffForHumans() }}
+                                        @endif
+                                    </div>
                                 </div>
                                 <p class="text-muted mb-3" style="font-size: 14px; line-height: 1.6;">
                                     @if($isPayroll)
@@ -76,7 +78,7 @@
                                         commented:
                                         <span class="text-muted">"{{ $item->remarks }}"</span>
                                     @else
-                                        @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
+                                        @if($isAdmin)
                                             <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span> has applied for a 
                                             <span class="badge bg-soft-info text-info">{{ $item->leave_type }}</span> leave starting from 
                                             <span class="fw-bold text-dark">{{ \Carbon\Carbon::parse($item->start_date)->format('d M, Y') }}</span>. 
@@ -95,7 +97,7 @@
                                     style="font-size: 11px;">
                                         View Details
                                     </a>
-                                    @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
+                                    @if($isAdmin)
                                         <button class="btn btn-sm btn-soft-success border-0 rounded-pill px-3 fw-bold" style="font-size: 11px;">Quick Approve</button>
                                     @endif
                                 </div>

@@ -13,6 +13,40 @@ use Illuminate\Support\Facades\DB;
 
 class LeaveApplicationController extends Controller
 {
+    private function getAttendanceStatusFromLeaveCategory(string $leaveCategory): string
+    {
+        $normalizedCategory = strtolower($leaveCategory);
+
+        if (str_contains($normalizedCategory, 'half')) {
+            return 'half_day';
+        }
+
+        if (str_contains($normalizedCategory, 'wfh')) {
+            return 'wfh';
+        }
+
+        if (str_contains($normalizedCategory, 'gatepass')) {
+            return 'early_leave';
+        }
+
+        return 'leave';
+    }
+
+    private function getAttendanceHoursFromLeaveCategory(string $leaveCategory): int
+    {
+        $normalizedCategory = strtolower($leaveCategory);
+
+        if (str_contains($normalizedCategory, 'half')) {
+            return 4;
+        }
+
+        if (str_contains($normalizedCategory, 'wfh')) {
+            return 8;
+        }
+
+        return 0;
+    }
+
     public function index(Request $request)
     {
         // echo auth()->user()->role;exit;
@@ -168,8 +202,8 @@ class LeaveApplicationController extends Controller
                         'attendance_date' => $date->format('Y-m-d')
                     ],
                     [
-                        'status' => str_contains(strtolower($leave->leave_category), 'half') ? 'half_day' : (str_contains(strtolower($leave->leave_category), 'wfh') ? 'wfh' : 'leave'),
-                        'total_hours' => str_contains(strtolower($leave->leave_category), 'half') ? 4 : (str_contains(strtolower($leave->leave_category), 'wfh') ? 8 : 0),
+                        'status' => $this->getAttendanceStatusFromLeaveCategory($leave->leave_category),
+                        'total_hours' => $this->getAttendanceHoursFromLeaveCategory($leave->leave_category),
                         'check_in' => null,
                         'check_out' => null
                     ]
@@ -186,7 +220,7 @@ class LeaveApplicationController extends Controller
             Attendance::where('employee_id', $leave->employee_id)
                 ->where('attendance_date', '>=', $startDate->format('Y-m-d'))
                 ->where('attendance_date', '<', $endDate->format('Y-m-d'))
-                ->whereIn('status', ['leave', 'half_day'])
+                ->whereIn('status', ['leave', 'half_day', 'wfh', 'early_leave'])
                 ->delete();
         }
 

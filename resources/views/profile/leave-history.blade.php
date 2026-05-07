@@ -170,11 +170,16 @@
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
                                 class="text-danger">*</span></label>
-                        <select name="employee_id" class="form-select border-0 bg-white shadow-sm"
-                            style="height: 48px; border-radius: 10px;" required>
-                            <option value="">Select Employee</option>
-                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                        </select>
+                        <input type="text"
+                            class="form-control border-0 bg-light shadow-sm"
+                            value="{{ auth()->user()->name }}"
+                            readonly
+                            style="height: 48px; border-radius: 10px;">
+
+                        <!-- Hidden Employee ID -->
+                        <input type="hidden"
+                            name="employee_id"
+                            value="{{ auth()->user()->employee->id }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label>
@@ -182,24 +187,29 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
                         <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
-                            <div class="form-check d-flex align-items-center mb-0 ps-4">
+                            <div class="form-check d-flex align-items-center mb-0 ps-4 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Full Day"
                                     id="catFull" checked onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Half Day"
                                     id="catHalf" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
                                     id="catGate" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catGate">Early Leave</label>
+                            </div>
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
+                                <input class="form-check-input" type="radio" name="leave_category" value="WFH"
+                                    id="catWFH" onchange="toggleCategoryFields()">
+                                <label class="form-check-label small fw-bold ms-1" for="catWFH">WFH</label>
                             </div>
                         </div>
                     </div>
@@ -214,7 +224,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="leaveTypeWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Type <span
                                 class="text-danger">*</span></label>
                         <select name="leave_type" id="leaveType" class="form-select border-0 bg-white shadow-sm"
@@ -224,6 +234,7 @@
                             <option value="Sick Leave">Sick Leave</option>
                             <option value="Gatepass Leave">Early Leave</option>
                             <option value="Casual Leave">Casual Leave</option>
+                            <option value="WFH">WFH</option>
                         </select>
                     </div>
 

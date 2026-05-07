@@ -436,10 +436,8 @@ class DashboardController extends Controller
         $employeeId = auth()->user()->employee_id;
 
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
-            ->whereIn('leave_applications.status', ['approved', 'unauthorised']);
-
-        ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
-        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
+            ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
+            ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
         // USER → force own data
         if (!$isAdmin) {
@@ -524,6 +522,7 @@ class DashboardController extends Controller
 
         $leaveDates = LeaveApplication::where('employee_id', $employeeId)
         ->whereIn('status', ['approved', 'unauthorised'])
+        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%')
         ->when($from && $to, function ($q) use ($from, $to) {
             $q->where(function ($sub) use ($from, $to) {
                 $sub->whereBetween('start_date', [$from, $to])
