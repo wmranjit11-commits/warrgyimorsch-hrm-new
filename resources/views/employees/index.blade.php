@@ -37,7 +37,7 @@
                         <i class="feather-refresh-cw"></i>
                     </a>
 
-                    @if(in_array(strtolower(auth()->user()->role), ['admin', 'super admin']))
+                    @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
                         <a href="{{ route('employees.export') }}" class="avatar-text avatar-md bg-soft-success text-success"
                             title="Export All Employees">
                             <i class="feather-download"></i>
@@ -167,7 +167,7 @@
                                                         View Details
                                                     </a>
                                                 </li>
-                                                @if(in_array(strtolower(auth()->user()->role), ['admin', 'super admin']))
+                                                @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
                                                     <li>
                                                         <a class="dropdown-item d-flex align-items-center gap-2"
                                                             href="{{ route('employees.edit', $emp->id) }}"

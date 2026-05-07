@@ -129,19 +129,19 @@ class DashboardController extends Controller
         if ($request->has('from') || $request->has('filter')) {
             if ($request->filter == 'today') {
                 $from = Carbon::today()->toDateString();
-                $to   = Carbon::today()->toDateString();
+                $to = Carbon::today()->toDateString();
             } elseif ($request->filter == 'yesterday') {
                 $from = Carbon::yesterday()->toDateString();
-                $to   = Carbon::yesterday()->toDateString();
+                $to = Carbon::yesterday()->toDateString();
             } elseif ($request->filter == 'week') {
                 $from = Carbon::now()->subDays(6)->toDateString();
-                $to   = Carbon::today()->toDateString();
+                $to = Carbon::today()->toDateString();
             } elseif ($request->filter == 'month') {
                 $from = Carbon::now()->startOfMonth()->toDateString();
-                $to   = Carbon::today()->toDateString();
+                $to = Carbon::today()->toDateString();
             } else {
                 $from = $request->from ?? Carbon::today()->toDateString();
-                $to   = $request->to ?? Carbon::today()->toDateString();
+                $to = $request->to ?? Carbon::today()->toDateString();
             }
 
             $analytics = $this->getAttendanceAnalytics($from, $to);
@@ -166,20 +166,20 @@ class DashboardController extends Controller
 
             // Raw totals
             $totalPresent = (int) ($analytics->present_count ?? 0);
-            $totalWFH     = (int) ($analytics->wfh_count ?? 0);
-            $totalLeave   = (int) ($analytics->leave_count ?? 0);
-            $totalLate    = (int) ($analytics->late_count ?? 0);
-            $totalEarly   = (int) ($analytics->early_count ?? 0);
-            $totalAbsent  = (int) ($analytics->absent_count ?? 0);
+            $totalWFH = (int) ($analytics->wfh_count ?? 0);
+            $totalLeave = (int) ($analytics->leave_count ?? 0);
+            $totalLate = (int) ($analytics->late_count ?? 0);
+            $totalEarly = (int) ($analytics->early_count ?? 0);
+            $totalAbsent = (int) ($analytics->absent_count ?? 0);
             $totalHalfday = (int) ($analytics->halfDay_count ?? 0);
 
             // Convert to average per day
             $rangePresent = $days > 0 ? round($totalPresent / $days) : 0;
-            $rangeWFH     = $days > 0 ? round($totalWFH / $days) : 0;
-            $rangeLeave   = $days > 0 ? round($totalLeave / $days) : 0;
-            $rangeLate    = $days > 0 ? round($totalLate / $days) : 0;
-            $rangeEarly   = $days > 0 ? round($totalEarly / $days) : 0;
-            $rangeAbsent  = $days > 0 ? round($totalAbsent / $days) : 0;
+            $rangeWFH = $days > 0 ? round($totalWFH / $days) : 0;
+            $rangeLeave = $days > 0 ? round($totalLeave / $days) : 0;
+            $rangeLate = $days > 0 ? round($totalLate / $days) : 0;
+            $rangeEarly = $days > 0 ? round($totalEarly / $days) : 0;
+            $rangeAbsent = $days > 0 ? round($totalAbsent / $days) : 0;
             $rangeHalfday = $days > 0 ? round($totalHalfday / $days) : 0;
 
             // Attendance rate (average based)
@@ -188,11 +188,11 @@ class DashboardController extends Controller
                 : 0;
         } else {
             $rangePresent = 0;
-            $rangeWFH     = 0;
-            $rangeLeave   = 0;
-            $rangeLate    = 0;
-            $rangeEarly   = 0;
-            $rangeAbsent  = 0;
+            $rangeWFH = 0;
+            $rangeLeave = 0;
+            $rangeLate = 0;
+            $rangeEarly = 0;
+            $rangeAbsent = 0;
             $rangeHalfday = 0;
 
             $rangeAttendanceRate = 0;
@@ -210,9 +210,10 @@ class DashboardController extends Controller
             $mValue = $m->format('Y-m');
 
             $chartMonths[] = $mLabel;
-            
+
             $pQuery = Payroll::where('month', $mValue);
-            if (!$isAdmin) $pQuery->where('employee_id', $employeeId);
+            if (!$isAdmin)
+                $pQuery->where('employee_id', $employeeId);
 
             $chartTotal[] = (clone $pQuery)->sum('net_salary');
             $chartPaid[] = (clone $pQuery)->where('status', 'paid')->sum('net_salary');
@@ -221,7 +222,8 @@ class DashboardController extends Controller
 
         // Recent Activity
         $pRecent = Payroll::with('employee')->where('month', $selectedMonth);
-        if (!$isAdmin) $pRecent->where('employee_id', $employeeId);
+        if (!$isAdmin)
+            $pRecent->where('employee_id', $employeeId);
         $recentPayrolls = $pRecent->latest()->paginate(10);
 
         // Upcoming Holidays
@@ -263,10 +265,10 @@ class DashboardController extends Controller
             ->whereIn('attendances.status', ['leave', 'half_day', 'early_leave'])
             ->whereNotIn('attendances.employee_id', function ($q) use ($today) {
                 $q->select('employee_id')
-                ->from('leave_applications')
-                ->whereIn('status', ['approved', 'unauthorised'])
-                ->whereDate('start_date', '<=', $today)
-                ->whereDate('end_date', '>=', $today);
+                    ->from('leave_applications')
+                    ->whereIn('status', ['approved', 'unauthorised'])
+                    ->whereDate('start_date', '<=', $today)
+                    ->whereDate('end_date', '>=', $today);
             })
             ->select(
                 'employees.id as employee_id',
@@ -278,7 +280,7 @@ class DashboardController extends Controller
                         WHEN attendances.status = 'early_leave' THEN 'Early Leave'
                     END as leave_type
                 ")
-        );
+            );
 
         $absentEmployees = DB::table('attendances')
             ->join('employees', 'employees.id', '=', 'attendances.employee_id')
@@ -286,14 +288,14 @@ class DashboardController extends Controller
             ->where('attendances.status', 'absent')
             ->where(function ($q) {
                 $q->whereNull('attendances.check_in')
-                ->orWhereNull('attendances.check_out');
+                    ->orWhereNull('attendances.check_out');
             })
             ->whereNotIn('attendances.employee_id', function ($q) use ($today) {
                 $q->select('employee_id')
-                ->from('leave_applications')
-                ->where('status', 'approved')
-                ->whereDate('start_date', '<=', $today)
-                ->whereDate('end_date', '>=', $today);
+                    ->from('leave_applications')
+                    ->where('status', 'approved')
+                    ->whereDate('start_date', '<=', $today)
+                    ->whereDate('end_date', '>=', $today);
             })
             ->select(
                 'employees.id as employee_id',
@@ -333,7 +335,7 @@ class DashboardController extends Controller
         //     return $item;
         // });
 
-        if(!$isAdmin){
+        if (!$isAdmin) {
             return view('userDashboard', compact(
                 'totalEmployees',
                 'todayPresent',
@@ -436,10 +438,9 @@ class DashboardController extends Controller
         $employeeId = auth()->user()->employee_id;
 
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
-            ->whereIn('leave_applications.status', ['approved', 'unauthorised']);
+            ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
 
-        ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
-        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
+            ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
         // USER → force own data
         if (!$isAdmin) {
@@ -452,7 +453,7 @@ class DashboardController extends Controller
         }
 
         $from = null;
-        $to   = Carbon::today();
+        $to = Carbon::today();
 
         if ($request->leave_filter) {
             switch ($request->leave_filter) {
@@ -461,7 +462,7 @@ class DashboardController extends Controller
                     break;
                 case 'last_month':
                     $from = Carbon::now()->subMonth()->startOfMonth();
-                    $to   = Carbon::now()->subMonth()->endOfMonth();
+                    $to = Carbon::now()->subMonth()->endOfMonth();
                     break;
                 case '3month':
                     $from = Carbon::now()->subMonths(3);
@@ -478,30 +479,30 @@ class DashboardController extends Controller
         // Custom range
         if ($request->leave_from && $request->leave_to) {
             $from = Carbon::parse($request->leave_from);
-            $to   = Carbon::parse($request->leave_to);
+            $to = Carbon::parse($request->leave_to);
         }
 
         // Default = last month
         if (!$request->leave_filter && !$request->leave_from) {
             $from = Carbon::now()->startOfMonth();
-            $to   = Carbon::now();
+            $to = Carbon::now();
         }
 
         if ($from && $to) {
 
             // ADMIN → OLD LOGIC (NO CHANGE)
             if ($isAdmin) {
-                $query->where(function($q) use ($from, $to) {
+                $query->where(function ($q) use ($from, $to) {
                     $q->whereBetween('leave_applications.start_date', [$from, $to])
-                    ->orWhereBetween('leave_applications.end_date', [$from, $to]);
+                        ->orWhereBetween('leave_applications.end_date', [$from, $to]);
                 });
             }
 
             // USER → INCLUDE attendance date also
             if (!$isAdmin) {
-                $query->where(function($q) use ($from, $to) {
+                $query->where(function ($q) use ($from, $to) {
                     $q->whereBetween('leave_applications.start_date', [$from, $to])
-                    ->orWhereBetween('leave_applications.end_date', [$from, $to]);
+                        ->orWhereBetween('leave_applications.end_date', [$from, $to]);
                 });
             }
         }
@@ -523,26 +524,26 @@ class DashboardController extends Controller
         // USER → include attendance count
 
         $leaveDates = LeaveApplication::where('employee_id', $employeeId)
-        ->whereIn('status', ['approved', 'unauthorised'])
-        ->when($from && $to, function ($q) use ($from, $to) {
-            $q->where(function ($sub) use ($from, $to) {
-                $sub->whereBetween('start_date', [$from, $to])
-                    ->orWhereBetween('end_date', [$from, $to]);
+            ->whereIn('status', ['approved', 'unauthorised'])
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->where(function ($sub) use ($from, $to) {
+                    $sub->whereBetween('start_date', [$from, $to])
+                        ->orWhereBetween('end_date', [$from, $to]);
+                });
+            })
+            ->get()
+            ->flatMap(function ($leave) {
+                $dates = [];
+                $start = \Carbon\Carbon::parse($leave->start_date);
+                $end = \Carbon\Carbon::parse($leave->end_date);
+
+                while ($start->lte($end)) {
+                    $dates[] = $start->toDateString();
+                    $start->addDay();
+                }
+
+                return $dates;
             });
-        })
-        ->get()
-        ->flatMap(function ($leave) {
-            $dates = [];
-            $start = \Carbon\Carbon::parse($leave->start_date);
-            $end = \Carbon\Carbon::parse($leave->end_date);
-
-            while ($start->lte($end)) {
-                $dates[] = $start->toDateString();
-                $start->addDay();
-            }
-
-            return $dates;
-        });
 
 
         // 2. Get attendance leave dates
@@ -565,7 +566,7 @@ class DashboardController extends Controller
         // 4. Return
         if ($totalUniqueDates > 0) {
             return collect([
-                (object)[
+                (object) [
                     'id' => $employeeId,
                     'name' => auth()->user()->name,
                     'designation' => '',
@@ -617,7 +618,7 @@ class DashboardController extends Controller
                 $shiftStart = $item->employee->time_in
                     ? Carbon::parse($item->employee->time_in)
                     : Carbon::createFromTime(9, 30, 0); // fallback
-
+    
                 return $checkIn->gt($shiftStart);
             });
 
