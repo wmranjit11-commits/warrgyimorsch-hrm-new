@@ -205,7 +205,7 @@
                             <i class="feather-list"></i>
                             <span>Leave History</span>
                         </a>
-                        <a href="javascript:void(0);" class="dropdown-item" onclick="handleAttendanceClick()">
+                        <a href="{{ route('attendance-history') }}" class="dropdown-item">
                             <i class="feather-calendar"></i>
                             <span>Attendance History</span>
                         </a>
@@ -227,7 +227,7 @@
     </div>
 </header>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAttendanceHistory"
+<!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAttendanceHistory"
     aria-labelledby="offcanvasAttendanceHistoryLabel" style="width: 800px;">
     <div class="offcanvas-header border-bottom py-3">
         <div class="d-flex align-items-center justify-content-between w-100">
@@ -247,7 +247,6 @@
     </div>
     <div class="offcanvas-body p-0">
         <div id="attendance-history-content" class="h-100 overflow-auto">
-            <!-- Content will be loaded via AJAX -->
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -255,81 +254,81 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
     window.currentEmployeeId = null;
 
-    window.handleAttendanceClick = function () {
-        const eid = {{ auth()->user()->employee_id ?? 'null' }};
-        if (eid) {
-            window.openAttendanceHistory(eid);
-        } else {
-            alert('No employee record linked to your account. Please contact admin.');
-        }
-    };
+    // window.handleAttendanceClick = function () {
+    //     const eid = {{ auth()->user()->employee_id ?? 'null' }};
+    //     if (eid) {
+    //         window.openAttendanceHistory(eid);
+    //     } else {
+    //         alert('No employee record linked to your account. Please contact admin.');
+    //     }
+    // };
 
-    window.openAttendanceHistory = function (employeeId, month = null) {
-        window.currentEmployeeId = employeeId;
-        const offcanvasElement = document.getElementById('offcanvasAttendanceHistory');
-        if (!offcanvasElement) {
-            alert('Internal Error: Attendance panel not found.');
-            return;
-        }
+    // window.openAttendanceHistory = function (employeeId, month = null) {
+    //     window.currentEmployeeId = employeeId;
+    //     const offcanvasElement = document.getElementById('offcanvasAttendanceHistory');
+    //     if (!offcanvasElement) {
+    //         alert('Internal Error: Attendance panel not found.');
+    //         return;
+    //     }
 
-        // Force show using both Bootstrap and manual fallback
-        try {
-            const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
-            offcanvas.show();
-        } catch (e) {
-            offcanvasElement.classList.add('show');
-            offcanvasElement.style.display = 'block';
-            offcanvasElement.style.visibility = 'visible';
-        }
+    //     // Force show using both Bootstrap and manual fallback
+    //     try {
+    //         const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+    //         offcanvas.show();
+    //     } catch (e) {
+    //         offcanvasElement.classList.add('show');
+    //         offcanvasElement.style.display = 'block';
+    //         offcanvasElement.style.visibility = 'visible';
+    //     }
 
-        const contentDiv = document.getElementById('attendance-history-content');
-        const monthInput = document.getElementById('attendanceMonthFilter');
-        const targetMonth = month || (monthInput ? monthInput.value : '{{ date('Y-m') }}');
+    //     const contentDiv = document.getElementById('attendance-history-content');
+    //     const monthInput = document.getElementById('attendanceMonthFilter');
+    //     const targetMonth = month || (monthInput ? monthInput.value : '{{ date('Y-m') }}');
 
-        contentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    //     contentDiv.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
-        fetch(`/api/employees/${employeeId}/attendance?month=${targetMonth}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const label = document.getElementById('offcanvasAttendanceHistoryLabel');
-                    if (label && data.employee_name) label.innerText = `Record for ${data.employee_name}`;
+    //     fetch(`/api/employees/${employeeId}/attendance?month=${targetMonth}`)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 const label = document.getElementById('offcanvasAttendanceHistoryLabel');
+    //                 if (label && data.employee_name) label.innerText = `Record for ${data.employee_name}`;
 
-                    if (data.history && data.history.length > 0) {
-                        let html = '<div class="table-responsive"><table class="table align-middle table-hover mb-0" style="font-size: 13px;"><thead class="bg-light"><tr class="text-muted fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; height: 50px;"><th class="ps-3">SR. NO.</th><th>DATE</th><th>CHECK IN</th><th>CHECK OUT</th><th class="text-nowrap">WORKING HRS</th><th class="text-center">STATUS</th></tr></thead><tbody>';
-                        data.history.forEach((item, index) => {
-                            let icon = '<i class="feather-check-circle text-success me-2"></i>';
-                            if (item.status.includes('Absent')) icon = '<i class="feather-x-circle text-danger me-2"></i>';
-                            if (item.status.includes('Leave')) icon = '<i class="feather-info text-info me-2"></i>';
-                            if (item.status.includes('Half Day')) icon = '<i class="feather-clock text-warning me-2"></i>';
-                            if (item.status.includes('Sunday')) icon = '<i class="feather-calendar text-muted me-2"></i>';
-                            html += `<tr style="height: 60px;"><td class="ps-3 fw-bold text-muted">${index + 1}</td><td class="fw-bold text-dark text-nowrap">${item.date}</td><td>${item.punch_in}</td><td>${item.punch_out}</td><td class="fw-bold text-primary">${item.total_hours}</td><td class="text-center"><span class="badge ${item.statusClass} rounded-pill px-3 py-1 fw-bold text-uppercase d-inline-flex align-items-center" style="font-size: 10px;">${icon} ${item.status}</span></td></tr>`;
-                        });
-                        html += '</tbody></table></div>';
-                        contentDiv.innerHTML = html;
-                    } else {
-                        contentDiv.innerHTML = '<div class="text-center py-5 px-4"><i class="feather-info fs-1 text-muted mb-3 d-block"></i><h5>No Records Found</h5><p class="text-muted">We couldn\'t find any attendance records for your account.</p></div>';
-                    }
-                } else {
-                    contentDiv.innerHTML = `<div class="alert alert-warning m-3">${data.message || 'Failed to load data.'}</div>`;
-                }
-            })
-            .catch(err => {
-                contentDiv.innerHTML = '<div class="alert alert-danger m-3">Connection error. Please try again.</div>';
-            });
-    };
+    //                 if (data.history && data.history.length > 0) {
+    //                     let html = '<div class="table-responsive"><table class="table align-middle table-hover mb-0" style="font-size: 13px;"><thead class="bg-light"><tr class="text-muted fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; height: 50px;"><th class="ps-3">SR. NO.</th><th>DATE</th><th>CHECK IN</th><th>CHECK OUT</th><th class="text-nowrap">WORKING HRS</th><th class="text-center">STATUS</th></tr></thead><tbody>';
+    //                     data.history.forEach((item, index) => {
+    //                         let icon = '<i class="feather-check-circle text-success me-2"></i>';
+    //                         if (item.status.includes('Absent')) icon = '<i class="feather-x-circle text-danger me-2"></i>';
+    //                         if (item.status.includes('Leave')) icon = '<i class="feather-info text-info me-2"></i>';
+    //                         if (item.status.includes('Half Day')) icon = '<i class="feather-clock text-warning me-2"></i>';
+    //                         if (item.status.includes('Sunday')) icon = '<i class="feather-calendar text-muted me-2"></i>';
+    //                         html += `<tr style="height: 60px;"><td class="ps-3 fw-bold text-muted">${index + 1}</td><td class="fw-bold text-dark text-nowrap">${item.date}</td><td>${item.punch_in}</td><td>${item.punch_out}</td><td class="fw-bold text-primary">${item.total_hours}</td><td class="text-center"><span class="badge ${item.statusClass} rounded-pill px-3 py-1 fw-bold text-uppercase d-inline-flex align-items-center" style="font-size: 10px;">${icon} ${item.status}</span></td></tr>`;
+    //                     });
+    //                     html += '</tbody></table></div>';
+    //                     contentDiv.innerHTML = html;
+    //                 } else {
+    //                     contentDiv.innerHTML = '<div class="text-center py-5 px-4"><i class="feather-info fs-1 text-muted mb-3 d-block"></i><h5>No Records Found</h5><p class="text-muted">We couldn\'t find any attendance records for your account.</p></div>';
+    //                 }
+    //             } else {
+    //                 contentDiv.innerHTML = `<div class="alert alert-warning m-3">${data.message || 'Failed to load data.'}</div>`;
+    //             }
+    //         })
+    //         .catch(err => {
+    //             contentDiv.innerHTML = '<div class="alert alert-danger m-3">Connection error. Please try again.</div>';
+    //         });
+    // };
 
-    window.refreshAttendanceWithMonth = function () {
-        if (window.currentEmployeeId) {
-            const monthInput = document.getElementById('attendanceMonthFilter');
-            window.openAttendanceHistory(window.currentEmployeeId, monthInput.value);
-        }
-    };
+    // window.refreshAttendanceWithMonth = function () {
+    //     if (window.currentEmployeeId) {
+    //         const monthInput = document.getElementById('attendanceMonthFilter');
+    //         window.openAttendanceHistory(window.currentEmployeeId, monthInput.value);
+    //     }
+    // };
 
     // Password visibility toggle
     document.addEventListener('DOMContentLoaded', function () {

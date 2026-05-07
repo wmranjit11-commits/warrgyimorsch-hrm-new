@@ -55,6 +55,9 @@ Route::middleware(['auth'])->group(function () {
     // EXPORT EMPLOYEES
     Route::get('/employees-export', [EmployeeController::class, 'export'])->name('employees.export');
 
+    Route::get('/attendance-history', [EmployeeController::class, 'getAttendance'])->name('attendance-history');
+    Route::get('/celebrations', [EmployeeController::class, 'employeeDays'])->name('employee.day');
+
     // API - GET EMPLOYEE JSON
     Route::get('/api/employees/{id}', [EmployeeController::class, 'getJson']);
     Route::get('/api/employees/{id}/attendance', [EmployeeController::class, 'getAttendance']);

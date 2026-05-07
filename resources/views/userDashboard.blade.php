@@ -262,59 +262,112 @@
                     <div class="col-md-4">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
-                                <h5 class="card-title">Today Leave</h5>
-                                <div class="card-header-action">
-                                    <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete text-primary">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                                data-bs-toggle="remove"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                                data-bs-toggle="refresh"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                                data-bs-toggle="expand"> </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                @forelse($todayLeaveEmployees as $todayLeave)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
-                                        <div class="d-flex justify-content-between">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
-                                                    <i class="bi bi-person-fill"></i>
+                                <h5 class="card-title">Leave Report</h5>
+                                <form method="GET">
+                                        <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
+                                        <div class="dropdown">
+                                            <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                                @php
+                                                $label = 'Current Month';
+    
+                                                if (request('leave_from') && request('leave_to')) {
+                                                    $label = \Carbon\Carbon::parse(request('leave_from'))->format('d M Y')
+                                                            . ' → ' .
+                                                            \Carbon\Carbon::parse(request('leave_to'))->format('d M Y');
+                                                } elseif (request('leave_filter') == 'week') {
+                                                    $label = 'Last Week';
+                                                } elseif (request('leave_filter') == 'month') {
+                                                    $label = 'Last Month';
+                                                } elseif (request('leave_filter') == '3month') {
+                                                    $label = 'Last 3 Months';
+                                                } elseif (request('leave_filter') == '6month') {
+                                                    $label = 'Last 6 Months';
+                                                } elseif (request('leave_filter') == 'year') {
+                                                    $label = 'Last 1 Year';
+                                                }
+                                            @endphp
+    
+                                            {{ $label }}
+                                            </button>
+    
+                                            <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
+    
+                                                <!-- Normal Filters -->
+                                                <div id="normalFiltersLeave">
+                                                    <button type="submit" name="leave_filter" value="week" class="dropdown-item">Last Week</button>
+                                                    <button type="submit" name="leave_filter" value="month" class="dropdown-item">Last Month</button>
+                                                    <button type="submit" name="leave_filter" value="3month" class="dropdown-item">Last 3 Months</button>
+                                                    <button type="submit" name="leave_filter" value="6month" class="dropdown-item">Last 6 Months</button>
+                                                    <button type="submit" name="leave_filter" value="year" class="dropdown-item">Last 1 Year</button>
+    
+    
+                                                    <div class="dropdown-divider"></div>
+    
+                                                    <a href="javascript:void(0);"
+                                                    class="dropdown-item text-primary fw-bold"
+                                                    onclick="event.stopPropagation(); showLeaveCustomFilter()">
+                                                    Custom Range →
+                                                    </a>
                                                 </div>
-                                                <div>
-                                                    <div class="fw-bold">
-                                                        {{ $todayLeave->employee_name ?? 'N/A' }}
-                                                    </div>
-                                                    <div class="fs-11 text-muted">
-                                                        {{ $todayLeave->leave_type }} Today
-                                                    </div>
+    
+                                                <!-- Custom Form -->
+                                                <div id="customFilterBoxLeave" style="display:none;" onclick="event.stopPropagation();">
+                                                        <label class="form-label small mb-1">From</label>
+                                                        <input type="date" name="leave_from" class="form-control form-control-sm mb-2"
+                                                            value="{{ request('leave_from') }}">
+    
+                                                        <label class="form-label small mb-1">To</label>
+                                                        <input type="date" name="leave_to" class="form-control form-control-sm mb-2"
+                                                            value="{{ request('leave_to') }}">
+    
+                                                        <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                                            Apply
+                                                        </button>
+    
+                                                        <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                        onclick="hideLeaveCustomFilter()">← Back</a>
                                                 </div>
+    
                                             </div>
                                         </div>
-                                    </div>
-                                    @empty
-                                    <div class="text-center py-4 text-muted">
-                                        No employees on leave today.
-                                    </div>
-                                @endforelse
+                                </form>
+                            </div>
+                            <div class="card-body custom-card-action p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <tbody>
+                                            @forelse($leaveReport as $emp)
+                                                <div class="p-3 border border-dashed rounded-3 mt-4 leave-slide-item" style="width: 90%; margin:auto">
+                                                    <div class="d-flex justify-content-between align-items-center">
 
-                                @if(count($todayLeaveEmployees) > 4)
-                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                        <a href="javascript:void(0);" id="prev-leave" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                            <i class="feather-chevron-left fs-20"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" id="next-leave" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                            <i class="feather-chevron-right fs-20"></i>
-                                        </a>
-                                    </div>
-                                @endif
+                                                        <!-- Left side (employee info) -->
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <div class="avatar-text avatar-md bg-soft-primary text-primary">
+                                                                {{ substr($emp->name, 0, 1) }}
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-bold">{{ $emp->name }}</div>
+                                                                <div class="fs-11 text-muted">{{ $emp->designation }}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Right side (leave count) -->
+                                                        <div>
+                                                            <span class="badge bg-soft-danger text-danger">
+                                                                {{ $emp->leave_count }} Days
+                                                            </span>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-center py-4 text-muted">
+                                                    No leave data found.
+                                                </div>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="card-footer d-none">
                                 <div class="row g-4">
@@ -366,32 +419,7 @@
                             <div class="card-header" style="padding: 20px;">
                                 <h5 class="card-title">Late Arrivals</h5>
                                 <div class="card-header-action">
-                                    <!-- <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"></a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"></a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"></a>
-                                        </div> -->
-                                        <!-- Filters (Below Heading, Above List) -->
                                     <div class="d-flex gap-2" id="lateFilterContainerUnique">
-
-                                        <!-- Employee Filter -->
-                                        <select id="lateEmployeeFilter"
-                                                onchange="filterLateEmployee(this.value)"
-                                                class="form-select form-select-sm"
-                                                style="width: 100px; height: 32px !important; padding: 0 0 0 10px !important;">
-                                            <option value="">All</option>
-                                            @foreach($employees as $emp)
-                                                <option value="{{ $emp->id }}" {{ request('late_employee') == $emp->id ? 'selected' : '' }}>
-                                                    {{ $emp->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
                                         <!-- Time Filter -->
                                         <div class="dropdown">
     
@@ -448,15 +476,6 @@
 
                                             </div>
                                         </div>
-                                        <!-- <select id="lateTimeFilter"
-                                                class="form-select form-select-sm"
-                                                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
-                                            <option value="today" {{ request('late_range', 'today') == 'today' ? 'selected' : '' }}>Today</option>
-                                            <option value="week" {{ request('late_range') == 'week' ? 'selected' : '' }}>Week</option>
-                                            <option value="month" {{ request('late_range') == 'month' ? 'selected' : '' }}>Current Month</option>
-                                            <option value="3months" {{ request('late_range') == '3months' ? 'selected' : '' }}>3 Months</option>
-                                            <option value="year" {{ request('late_range') == 'year' ? 'selected' : '' }}>Year</option>
-                                        </select> -->
                                     </div>
                                 </div>
                             </div>
@@ -483,17 +502,6 @@
                                         No late arrivals found.
                                     </div>
                                 @endforelse
-
-                                @if(count($todayLateEmployees) > 4)
-                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                        <a href="javascript:void(0);" id="prev-late" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                            <i class="feather-chevron-left fs-20"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" id="next-late" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                            <i class="feather-chevron-right fs-20"></i>
-                                        </a>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
@@ -602,13 +610,13 @@
                 </div>
                 <div class="row">
                     <!-- [Latest leave report] start -->
-                    <div class="col-xxl-8">
+                    <!-- <div class="col-xxl-8">
                         <div class="card stretch stretch-full">
                             <div class="card-header">
                                 <h5 class="card-title">Latest Leave Report</h5>
 
                                 <form method="GET" class="d-flex gap-2">
-                                    <!-- Employee Dropdown -->
+                                    Employee Dropdown
                                     <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()" style="height: 32px !important; padding: 0 0 0 10px !important">
                                         <option value="">All Employees</option>
                                         @foreach($employees as $emp)
@@ -619,7 +627,7 @@
                                         @endforeach
                                     </select>
 
-                                    <!-- Keep filter value -->
+                                    Keep filter value
 
 
                                 </form>
@@ -652,7 +660,7 @@
 
                                         <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
 
-                                            <!-- Normal Filters -->
+                                            Normal Filters
                                             <div id="normalFiltersLeave">
                                                 <button type="submit" name="leave_filter" value="week" class="dropdown-item">Last Week</button>
                                                 <button type="submit" name="leave_filter" value="month" class="dropdown-item">Last Month</button>
@@ -670,7 +678,7 @@
                                                 </a>
                                             </div>
 
-                                            <!-- Custom Form -->
+                                            Custom Form
                                             <div id="customFilterBoxLeave" style="display:none;" onclick="event.stopPropagation();">
                                                     <label class="form-label small mb-1">From</label>
                                                     <input type="date" name="leave_from" class="form-control form-control-sm mb-2"
@@ -714,7 +722,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Employee</th>
-                                                <!-- <th>Month</th> -->
+                                                <th>Month</th>
                                                 <th>Leave Count</th>
                                             </tr>
                                         </thead>
@@ -733,11 +741,11 @@
                                                         </div>
                                                     </td>
 
-                                                    <!-- <td>
+                                                    <td>
                                                         <span class="badge bg-gray-200 text-dark">
                                                             {{ request('filter') ?? 'Last Month' }}
                                                         </span>
-                                                    </td> -->
+                                                    </td>
 
                                                     <td>
                                                         <span class="badge bg-soft-danger text-danger">
@@ -783,20 +791,20 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- [Latest leave report] end -->
 
                       <!--! BEGIN: [Attendance Analytics] !-->
-                    <div class="col-xxl-4">
+                    <!-- <div class="col-xxl-4">
                         <div class="card stretch stretch-full">
                             <div class="card-header border-bottom-0 pb-0">
                                 <h5 class="card-title">Attendance Analytics</h5>
-                                    <!-- <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-menu dropdown-menu-end">
                                         <a href="{{ route('payroll.attendance') }}" class="dropdown-item">
                                             <i class="feather-external-link me-2"></i>
                                             <span>Full Attendance List</span>
                                         </a>
-                                    </div> -->
+                                    </div>
                                 <div class="dropdown">
                                     <button type="button" class="avatar-text avatar-sm border-0 bg-transparent" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                                         <i class="feather-more-vertical"></i>
@@ -804,7 +812,7 @@
 
                                     <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
 
-                                        <!-- Normal Filters -->
+                                        Normal Filters
                                         <div id="normalFilters">
                                             <a href="?filter=today" class="dropdown-item">Today</a>
                                             <a href="?filter=yesterday" class="dropdown-item">Yesterday</a>
@@ -818,7 +826,7 @@
                                             </a>
                                         </div>
 
-                                        <!-- Custom Form (hidden initially) -->
+                                        Custom Form (hidden initially)
                                         <div id="customFilterBox" style="display:none;" onclick="event.stopPropagation();">
                                             <form method="GET">
                                                 <label class="form-label small mb-1">From</label>
@@ -911,7 +919,7 @@
                                 </div>
                             </div>
 
-                                <!-- <div class="row g-2 text-start">
+                                <div class="row g-2 text-start">
                                     <div class="col-6 border-end">
                                         <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
                                         <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
@@ -920,7 +928,7 @@
                                         <div class="fs-5 fw-bold text-success"></div>
                                         <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="card-footer border-top p-3 bg-light bg-opacity-10 text-center">
                                     <a href="{{ route('payroll.attendance.add') }}" class="fs-12 fw-bold text-primary text-uppercase">
                                         <i class="feather-plus-circle me-1"></i> Add Daily Records
@@ -928,7 +936,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <!--! END: [Attendance Analytics] !-->
                 </div><!-- row end -->
                 <div class="row pt-4">
