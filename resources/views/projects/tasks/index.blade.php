@@ -150,12 +150,14 @@
                             <span class="text-muted fw-bold text-uppercase"
                                 style="font-size: 10px; letter-spacing: 0.5px;">Entries</span>
                         </div>
-                        <div class="input-group" style="width: 250px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
-                            <span class="input-group-text bg-transparent border-0 pe-1"><i
-                                     class="feather-search text-muted" style="font-size: 13px;"></i></span>
-                            <input type="text" id="taskSearch"
-                                class="form-control border-0 bg-transparent shadow-none fw-bold" onkeyup="filterTasks()"
-                                placeholder="Search tasks..." style="height: 38px; font-size: 13px; color: #334155;">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="input-group" style="width: 250px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
+                                <span class="input-group-text bg-transparent border-0 pe-1"><i
+                                         class="feather-search text-muted" style="font-size: 13px;"></i></span>
+                                <input type="text" id="taskSearch"
+                                    class="form-control border-0 bg-transparent shadow-none fw-bold" onkeyup="filterTasks()"
+                                    placeholder="Search tasks..." style="height: 38px; font-size: 13px; color: #334155;">
+                            </div>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -230,26 +232,30 @@
                                             </td>
                                             <td
                                                 style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">
-                                                <div class="d-flex align-items-center flex-wrap gap-2">
-                                                    <div class="fw-bold text-dark">{{ $task->task_title }}</div>
-                                                </div>
-                                                @if($task->followUps->where('photo', '!=', null)->count() > 0)
-                                                    @php
-                                                        $latestPhoto = $task->followUps->where('photo', '!=', null)->sortByDesc('created_at')->first()->photo;
-                                                    @endphp
-                                                    <div class="mt-2 d-flex justify-content-center">
+                                                <div class="d-flex flex-column">
+                                                    <div class="fw-bold text-dark mb-1">{{ $task->task_title }}</div>
+                                                    @if($task->photo)
                                                         <a href="javascript:void(0);"
-                                                            onclick="viewAttachmentPopup('{{ asset('storage/' . $latestPhoto) }}')"
-                                                            class="premium-attachment-link">
-                                                            View Attachment
+                                                            onclick="viewAttachmentPopup('{{ asset('storage/' . $task->photo) }}')"
+                                                            class="badge bg-soft-info text-info border-0 text-decoration-none px-2 py-1 align-self-start"
+                                                            style="font-size: 10px; border-radius: 6px; width: fit-content;">
+                                                            <i class="feather-paperclip me-1"></i> VIEW TASK FILE
                                                         </a>
-                                                    </div>
-                                                @endif
+                                                    @endif
+                                                </div>
+                                                </div>
                                             </td>
                                             <td style="font-size: 14px; color: #475569;">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <i class="feather-calendar text-primary" style="font-size: 12px;"></i>
-                                                    <span class="fw-bold">{{ $task->start_date->format('d M Y') }}</span>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="feather-calendar text-primary" style="font-size: 11px;"></i>
+                                                        <span class="fw-bold">{{ $task->start_date->format('d M Y') }}</span>
+                                                    </div>
+                                                    @if($task->end_date)
+                                                        <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 11px; margin-left: 14px;">
+                                                            <span class="fw-bold">To: {{ $task->end_date->format('d M Y') }}</span>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td>
@@ -257,7 +263,8 @@
                                                     @if($task->status != 'Completed')
                                                         @if($task->end_date)
                                                             <div class="task-timer fw-bold text-primary mb-1" style="font-size: 13px;"
-                                                                data-end="{{ $task->end_date->toIso8601String() }}">
+                                                                data-end="{{ $task->end_date->endOfDay()->toIso8601String() }}"
+                                                                data-start="{{ $task->created_at->toIso8601String() }}">
                                                                 Calculating...
                                                             </div>
                                                         @else
@@ -267,7 +274,7 @@
                                                                     <i class="feather-play-circle fs-11"></i> Ongoing
                                                                 </div>
                                                                 <div class="task-timer text-primary fs-11"
-                                                                    data-start="{{ $task->start_date->toIso8601String() }}">
+                                                                    data-start="{{ $task->created_at->toIso8601String() }}">
                                                                     Calculating...
                                                                 </div>
                                                             </div>
@@ -280,7 +287,7 @@
                                                     <span class="text-muted d-flex align-items-center gap-1"
                                                         style="font-size: 11px; font-weight: 600;">
                                                         <i class="feather-clock" style="font-size: 10px;"></i>
-                                                        Spent: <span class="text-dark">{{ $task->total_time }} hrs</span>
+                                                        Spent: <span class="text-dark">{{ $task->formatted_total_time }}</span>
                                                     </span>
                                                 </div>
                                             </td>
@@ -298,7 +305,7 @@
                                                     <ul class="dropdown-menu shadow-lg border-0" style="border-radius: 12px;">
                                                         <li><a class="dropdown-item fw-bold priority-hard py-2 mb-1 rounded mx-2"
                                                                 href="javascript:void(0);"
-                                                                onclick="updateTaskPriority({{ $task->id }}, 'Hard')">Hard</a>
+                                                                onclick="updateTaskPriority({{ $task->id }}, 'High')">High</a>
                                                         </li>
                                                         <li><a class="dropdown-item fw-bold priority-medium py-2 mb-1 rounded mx-2"
                                                                 href="javascript:void(0);"
@@ -377,6 +384,15 @@
                                                                     style="font-size: 14px; min-height: 100px;">
                                                                     {!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}
                                                                 </div>
+                                                                @if($task->photo)
+                                                                    <div class="mt-3">
+                                                                        <a href="javascript:void(0);"
+                                                                            onclick="viewAttachmentPopup('{{ asset('storage/' . $task->photo) }}')"
+                                                                            class="btn btn-sm btn-soft-primary fw-bold px-3" style="border-radius: 8px;">
+                                                                            <i class="feather-paperclip me-1"></i> View Original Attachment
+                                                                        </a>
+                                                                    </div>
+                                                                @endif
                                                             </div>
 
                                                             <hr class="my-4">
@@ -413,7 +429,15 @@
                                                                                                 class="badge bg-soft-dark text-dark fw-bold"
                                                                                                 style="font-size: 10px;">
                                                                                                 <i class="feather-clock me-1"></i>
-                                                                                                {{ $fu->time_taken }} hrs
+                                                                                                @php
+                                                                                                    $totalHours = (float) $fu->time_taken;
+                                                                                                    $h = floor($totalHours);
+                                                                                                    $m = round(($totalHours - $h) * 60);
+                                                                                                    $display = [];
+                                                                                                    if ($h > 0) $display[] = $h . 'h';
+                                                                                                    if ($m > 0) $display[] = $m . 'm';
+                                                                                                    echo count($display) > 0 ? implode(' ', $display) : '0m';
+                                                                                                @endphp
                                                                                             </span>
                                                                                             @if($fu->photo)
                                                                                                 <a href="javascript:void(0);"
@@ -602,6 +626,15 @@
                         <textarea name="description" id="taskDesc" class="form-control premium-input" rows="3"
                             placeholder="Enter detailed task description..."></textarea>
                     </div>
+                    <div class="col-md-12 mt-3">
+                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Attachment (Optional)</label>
+                        <div class="p-3" style="border: 2px dashed #e2e8f0; border-radius: 12px; background: #f8fafc;">
+                            <input type="file" name="photo" id="mainTaskPhoto" class="form-control bg-transparent border-0 shadow-none">
+                            <div id="mainTaskFilePreview" class="mt-2 d-none">
+                                <span class="badge bg-soft-primary text-primary fw-bold" id="mainTaskFileName"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-5">
@@ -637,6 +670,7 @@
                                     <form id="followUpForm" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="daily_task_id" id="followUpTaskId">
+                                        <input type="hidden" name="follow_up_id" id="followUpId">
                                         <input type="hidden" name="time_taken" id="totalFollowUpHours" value="0">
 
                                         <div class="mb-3">
@@ -659,7 +693,7 @@
                                         <!-- QUICK TASK ADDER -->
                                         <div class="row g-2 mb-3 p-2 rounded"
                                             style="background: #f1f5f9; border: 1px dashed #cbd5e1;">
-                                            <div class="col-6">
+                                            <div class="col-4">
                                                 <label
                                                     class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Sub-Task</label>
                                                 <input type="text" id="quickTaskTitle"
@@ -667,18 +701,25 @@
                                                     placeholder="Task Title..."
                                                     style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
                                             </div>
-                                            <div class="col-3">
+                                            <div class="col-2">
                                                 <label
-                                                    class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">Hrs</label>
-                                                <input type="text" id="quickTaskHours"
-                                                    class="form-control premium-input shadow-none" placeholder="Hrs"
-                                                    style="height: 35px !important; border-radius: 8px !important; font-size: 12px !important;">
+                                                    class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">H</label>
+                                                <input type="number" id="quickTaskHours"
+                                                    class="form-control premium-input shadow-none text-center fw-bold" placeholder="0" min="0"
+                                                    style="height: 35px !important; border-radius: 8px !important; font-size: 13px !important; color: #1e293b !important; padding: 0 !important;">
                                             </div>
-                                            <div class="col-3 d-flex align-items-end">
+                                            <div class="col-2">
+                                                <label
+                                                    class="form-label fw-bold fs-10 text-muted text-uppercase mb-1">M</label>
+                                                <input type="number" id="quickTaskMins"
+                                                    class="form-control premium-input shadow-none text-center fw-bold" placeholder="0" min="0" max="59"
+                                                    style="height: 35px !important; border-radius: 8px !important; font-size: 13px !important; color: #1e293b !important; padding: 0 !important;">
+                                            </div>
+                                            <div class="col-4 d-flex align-items-end">
                                                 <button type="button" class="btn btn-primary w-100 p-0 fw-bold"
                                                     onclick="addQuickTaskToDesc()"
                                                     style="height: 35px; border-radius: 8px; font-size: 10px; background: #3858f9;">
-                                                    ADD
+                                                    ADD TASK
                                                 </button>
                                             </div>
                                         </div>
@@ -933,6 +974,17 @@
                 box-shadow: none !important;
             }
 
+            /* Hide Number Input Arrows */
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            input[type=number] {
+                -moz-appearance: textfield;
+            }
+
             .active>.page-link {
                 background-color: #3858f9 !important;
                 border-color: #3858f9 !important;
@@ -1141,6 +1193,50 @@
             document.addEventListener('DOMContentLoaded', function () {
                 myFollowUpModal = new bootstrap.Modal(document.getElementById('followUpModal'));
 
+                // Project-based Employee Filtering for Task Assignment
+                const projectEmployees = @json($projects->mapWithKeys(fn($p) => [$p->id => array_merge((array)($p->leaders ?? []), (array)($p->members ?? []))]));
+                const projectLeadersMap = @json($projects->mapWithKeys(fn($p) => [$p->id => (array)($p->leaders ?? [])]));
+                const allEmployeesMap = @json($employees->keyBy('id'));
+                const currentEmpId = {{ auth()->user()->employee_id ?? 0 }};
+                const isSysAdmin = {{ $isAdmin ? 'true' : 'false' }};
+
+                $('#taskProjectId').on('change', function() {
+                    const projectId = $(this).val();
+                    const $empSelect = $('#taskEmployeeId');
+                    
+                    if (!projectId) {
+                        $empSelect.empty().append('<option value="">Select Employee...</option>').trigger('change');
+                        return;
+                    }
+
+                    const allowedIds = projectEmployees[projectId] || [];
+                    const leaders = projectLeadersMap[projectId] || [];
+                    const isLeaderOfProject = leaders.includes(currentEmpId.toString()) || leaders.includes(currentEmpId);
+                    
+                    const currentSelectedVal = $empSelect.val();
+                    $empSelect.empty().append('<option value="">Select Employee...</option>');
+                    
+                    let count = 0;
+                    Object.entries(allEmployeesMap).forEach(([id, emp]) => {
+                        const isMember = allowedIds.includes(parseInt(id)) || allowedIds.includes(id.toString());
+                        
+                        if (isSysAdmin || isLeaderOfProject) {
+                            if (isMember) {
+                                $empSelect.append(`<option value="${id}">${emp.name}</option>`);
+                                count++;
+                            }
+                        } else {
+                            if (isMember && id == currentEmpId) {
+                                $empSelect.append(`<option value="${id}">${emp.name}</option>`);
+                                count++;
+                            }
+                        }
+                    });
+                    
+                    if (window.jQuery && $.fn.select2) { $empSelect.trigger('change'); }
+                    if (count === 1) { $empSelect.find('option').last().prop('selected', true).trigger('change'); }
+                });
+
                 // Initialize Select2 with Premium Styling
                 if (window.jQuery && $.fn.select2) {
                     $('.form-select:not(.select-small)').select2({
@@ -1267,6 +1363,19 @@
                 document.getElementById('taskPriority').value = task.priority || '';
                 document.getElementById('taskStatus').value = task.status || 'In Process';
 
+                // Handle existing attachment
+                const filePreview = document.getElementById('mainTaskFilePreview');
+                const fileName = document.getElementById('mainTaskFileName');
+                document.getElementById('mainTaskPhoto').value = '';
+
+                if (task.photo) {
+                    filePreview.classList.remove('d-none');
+                    const baseName = task.photo.split('/').pop();
+                    fileName.innerHTML = `<i class="feather-paperclip me-1"></i> Current File: <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${task.photo}')" class="text-primary text-decoration-underline">${baseName}</a>`;
+                } else {
+                    filePreview.classList.add('d-none');
+                }
+
                 // Set Select fields (Project & Employee)
                 if (window.jQuery && $.fn.select2) {
                     $('#taskProjectId').val(task.project_id).trigger('change');
@@ -1314,6 +1423,8 @@
                 document.getElementById('submitTaskBtn').innerText = 'SUBMIT TASK';
                 document.getElementById('taskId').value = '';
                 document.getElementById('methodField').innerHTML = '';
+                document.getElementById('mainTaskPhoto').value = '';
+                document.getElementById('mainTaskFilePreview').classList.add('d-none');
 
                 document.getElementById('taskForm').querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
                 document.getElementById('taskForm').querySelectorAll('.invalid-feedback').forEach(el => el.remove());
@@ -1339,7 +1450,9 @@
                 }
                 document.getElementById('followUpTaskTitle').innerText = headerTitle;
                 document.getElementById('followUpForm').reset();
+                document.getElementById('followUpId').value = '';
                 document.getElementById('totalFollowUpHours').value = 0;
+                document.getElementById('submitReplyBtn').innerText = 'SUBMIT PROGRESS';
                 try { $('#workDesc').summernote('code', ''); } catch (e) { }
                 removePreview();
                 modalCurrentPage = 1;
@@ -1387,25 +1500,42 @@
             function addQuickTaskToDesc() {
                 const titleInput = document.getElementById('quickTaskTitle');
                 const hoursInput = document.getElementById('quickTaskHours');
+                const minsInput = document.getElementById('quickTaskMins');
                 const title = titleInput.value;
-                const hours = hoursInput.value;
+                const hours = parseFloat(hoursInput.value) || 0;
+                const mins = parseFloat(minsInput.value) || 0;
 
-                if (!title) { Toast.fire({ icon: 'warning', title: 'Enter sub-task name' }); return; }
+                if (!title) {
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Enter sub-task name'
+                    });
+                    return;
+                }
+                if (hours === 0 && mins === 0) {
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Enter time'
+                    });
+                    return;
+                }
 
-                // 1. Calculate and Update Hidden Total Hours field
-                const hiddenHoursField = document.getElementById('totalFollowUpHours');
-                let currentTotal = parseFloat(hiddenHoursField.value) || 0;
-                let addedHours = parseFloat(hours) || 0;
-                hiddenHoursField.value = currentTotal + addedHours;
+                // 1. Calculate added decimal
+                let addedDecimal = hours + (mins / 60);
 
-                // 2. Format HTML - Prepend to the TOP using Real Bullets and Numbered List for details
-                const timeStr = hours ? ` — <b style="color: #3858f9;">${hours} ${isNaN(hours) ? '' : 'Hours'}</b>` : '';
-                const html = `<div class="mb-4" style="border-left: 4px solid #3858f9; padding-left: 20px;">
+                // 2. Format Display String
+                let timeStrParts = [];
+                if (hours > 0) timeStrParts.push(`${hours}h`);
+                if (mins > 0) timeStrParts.push(`${mins}m`);
+                let formattedTime = timeStrParts.join(' ');
+
+                const timeStr = formattedTime ? ` — <b style="color: #3858f9;">${formattedTime}</b>` : '';
+                const html = `<div class="sub-task-item mb-4" data-time="${addedDecimal}" style="border-left: 4px solid #3858f9; padding-left: 20px;">
                                                             <p class="mb-2" style="font-size: 16px; color: #1e293b;"><strong>• ${title.toUpperCase()}</strong>${timeStr}</p>
                                                             <ol class="text-muted" style="font-size: 14px; line-height: 1.7;">
                                                                 <li>&nbsp;</li>
                                                             </ol>
-                                                          </div><hr style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
+                                                          </div><hr class="sub-task-hr" style="border-top: 2px solid #f1f5f9; margin: 20px 0;">`;
 
                 if ($('#workDesc').length && typeof $.fn.summernote === 'function') {
                     const currentContent = $('#workDesc').summernote('code');
@@ -1419,8 +1549,51 @@
                 // Clear inputs
                 titleInput.value = '';
                 hoursInput.value = '';
+                minsInput.value = '';
 
-                Toast.fire({ icon: 'success', title: `Task added. Total: ${hiddenHoursField.value} hrs` });
+                // Recalculate based on ACTUAL content in editor (handles manual deletions)
+                const newTotal = recalculateTotalTime();
+                Toast.fire({ icon: 'success', title: `Task added. Total: ${newTotal.toFixed(2)} hrs` });
+            }
+
+            function recalculateTotalTime() {
+                if (!$('#workDesc').length) return 0;
+                const content = $('#workDesc').summernote('code');
+                const tempDiv = $('<div>').html(content);
+                let totalTime = 0;
+                
+                tempDiv.find('.sub-task-item').each(function() {
+                    let time = 0;
+                    let bTag = $(this).find('b');
+                    // Prefer parsing from text in <b> tag (respects manual edits)
+                    if (bTag.length && bTag.text().trim() !== "") {
+                        time = parseTimeFromText(bTag.text());
+                    }
+                    
+                    // Fallback to data-time only if text is not empty
+                    if (time === 0) {
+                        if ($(this).text().trim().length > 5) {
+                            time = parseFloat($(this).attr('data-time')) || 0;
+                        }
+                    }
+                    totalTime += time;
+                });
+                
+                const hiddenHoursField = document.getElementById('totalFollowUpHours');
+                if (hiddenHoursField) {
+                    hiddenHoursField.value = totalTime.toFixed(2);
+                }
+                return totalTime;
+            }
+
+            function parseTimeFromText(text) {
+                let hours = 0;
+                let mins = 0;
+                let hMatch = text.match(/(\d+)\s*h/i);
+                let mMatch = text.match(/(\d+)\s*m/i);
+                if (hMatch) hours = parseFloat(hMatch[1]);
+                if (mMatch) mins = parseFloat(mMatch[1]);
+                return hours + (mins / 60);
             }
 
             function renderModalTable() {
@@ -1442,11 +1615,19 @@
                 paginated.forEach((fu, index) => {
                     let timeDisplay = fu.time_taken || '-';
                     if (fu.time_taken && !isNaN(fu.time_taken)) {
-                        timeDisplay = fu.time_taken + ' Hours';
+                        let totalHours = parseFloat(fu.time_taken);
+                        let h = Math.floor(totalHours);
+                        let m = Math.round((totalHours - h) * 60);
+
+                        let display = [];
+                        if (h > 0) display.push(h + 'h');
+                        if (m > 0) display.push(m + 'm');
+                        timeDisplay = display.length > 0 ? display.join(' ') : '0m';
                     }
 
                     let nameHtml = `<span class="fw-bold text-dark" style="font-size: 14px;"><i class="feather-user me-1 text-primary"></i>${fu.reference_name || 'Anonymous'}</span>`;
                     let viewBtn = `<a href="javascript:void(0);" onclick="toggleFollowUpRow(${fu.id}, this)" class="avatar-text avatar-md bg-soft-info text-info rounded-circle shadow-none me-2" title="View Details" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-eye" style="font-size:14px;"></i></a>`;
+                    let editBtn = `<a href="javascript:void(0);" onclick="editFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle shadow-none me-2" title="Edit Entry" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-edit-3" style="font-size:14px;"></i></a>`;
                     let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                     body.innerHTML += `
@@ -1464,6 +1645,7 @@
                                                                         <td class="pe-3 text-center">
                                                                             <div class="d-flex align-items-center justify-content-center">
                                                                                 ${viewBtn}
+                                                                                ${editBtn}
                                                                                 ${delBtn}
                                                                             </div>
                                                                         </td>
@@ -1502,6 +1684,56 @@
             function changeModalEntries() { modalPageSize = parseInt(document.getElementById('modalEntriesLimit').value); modalCurrentPage = 1; renderModalTable(); }
             function filterModalHistory() { modalCurrentPage = 1; renderModalTable(); }
 
+            function editFollowUp(id) {
+                const fu = globalFollowUps.find(f => f.id == id);
+                if (!fu) return;
+
+                document.getElementById('followUpId').value = fu.id;
+                
+                // Prefill time inputs
+                const totalHours = parseFloat(fu.time_taken) || 0;
+                const h = Math.floor(totalHours);
+                const m = Math.round((totalHours - h) * 60);
+                document.getElementById('quickTaskHours').value = h > 0 ? h : '';
+                document.getElementById('quickTaskMins').value = m > 0 ? m : '';
+                document.getElementById('totalFollowUpHours').value = totalHours;
+
+                $('#workDesc').summernote('code', fu.work_description);
+                recalculateTotalTime();
+                
+                // Show existing file preview if any
+                if (fu.photo) {
+                    const preview = document.getElementById('photoPreview');
+                    const docPreview = document.getElementById('documentPreview');
+                    const container = document.getElementById('previewContainer');
+                    const isImage = fu.photo.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null;
+                    
+                    container.classList.remove('d-none');
+                    if (isImage) {
+                        preview.style.display = 'block';
+                        docPreview.style.display = 'none';
+                        preview.src = `/storage/${fu.photo}`;
+                    } else {
+                        preview.style.display = 'none';
+                        docPreview.style.display = 'block';
+                        docPreview.innerHTML = `<div class="d-flex flex-column align-items-center justify-content-center p-3">
+                                                        <i class="feather-file-text mb-2" style="font-size: 32px; color: #3858f9;"></i>
+                                                        <span class="text-dark small">Existing Attachment</span>
+                                                    </div>`;
+                    }
+                } else {
+                    removePreview();
+                }
+                
+                document.getElementById('submitReplyBtn').innerText = 'UPDATE PROGRESS';
+                
+                // Ensure form is visible
+                document.getElementById('followUpFormColumn').classList.remove('d-none');
+                document.getElementById('followUpHistoryColumn').classList.remove('col-lg-12');
+                document.getElementById('followUpHistoryColumn').classList.add('col-lg-7');
+                document.querySelector('#followUpModal .modal-dialog').classList.add('modal-xl');
+            }
+
             function filterTasks() {
                 const filter = document.getElementById('taskSearch').value.toLowerCase();
                 const rows = document.querySelectorAll('.task-row');
@@ -1515,22 +1747,29 @@
 
             document.getElementById('followUpForm').addEventListener('submit', function (e) {
                 e.preventDefault();
+
+                // Re-calculate total time from editor content markers
+                const totalTime = recalculateTotalTime();
+
                 const btn = document.getElementById('submitReplyBtn');
                 const origText = btn.innerText;
                 btn.innerText = 'SUBMITTING...'; btn.disabled = true;
 
-                // Clear previous errors
-                this.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-                this.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+                const followUpId = document.getElementById('followUpId').value;
+                const url = followUpId ? `/daily-tasks/follow-up/${followUpId}` : '{{ route("daily-tasks.follow-up.store") }}';
+                const formData = new FormData(this);
+                if (followUpId) {
+                    formData.append('_method', 'PUT');
+                }
 
-                fetch('{{ route("daily-tasks.follow-up.store") }}', { method: 'POST', body: new FormData(this), headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } })
+                fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } })
                     .then(res => res.json()).then(data => {
                         btn.innerText = origText; btn.disabled = false;
                         if (data.success) {
                             this.reset();
                             $('#workDesc').summernote('code', '');
                             removePreview();
-                            Toast.fire({ icon: 'success', title: data.success });
+                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
                             if (myFollowUpModal) myFollowUpModal.hide();
                         } else if (data.errors) {
                             for (const [key, value] of Object.entries(data.errors)) {
@@ -1557,7 +1796,17 @@
                 form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
 
                 const url = document.getElementById('methodField').innerHTML !== '' ? `/daily-tasks/${document.getElementById('taskId').value}` : '/daily-tasks';
-                fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) })
+                const formData = new FormData(form);
+                
+                // Add summernote content manually if needed, though FormData usually catches textarea
+                const descVal = $('#taskDesc').summernote('code');
+                formData.set('description', descVal);
+
+                fetch(url, { 
+                    method: 'POST', 
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }, 
+                    body: formData 
+                })
                     .then(res => res.json()).then(result => {
                         if (result.success) {
                             Toast.fire({ icon: 'success', title: result.success }).then(() => location.reload());

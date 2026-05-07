@@ -19,6 +19,7 @@ class DailyTask extends Model
         'employee_id',
         'assigned_by',
         'description',
+        'photo',
     ];
 
     protected $casts = [
@@ -55,6 +56,19 @@ class DailyTask extends Model
             }
             return $total;
         }, 0);
+    }
+
+    public function getFormattedTotalTimeAttribute()
+    {
+        $totalHours = $this->total_time;
+        $h = floor($totalHours);
+        $m = round(($totalHours - $h) * 60);
+
+        $display = [];
+        if ($h > 0) $display[] = $h . 'h';
+        if ($m > 0) $display[] = $m . 'm';
+
+        return count($display) > 0 ? implode(' ', $display) : '0m';
     }
 
     public function getStatusColorAttribute()

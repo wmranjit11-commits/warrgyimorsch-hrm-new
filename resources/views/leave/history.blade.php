@@ -59,6 +59,7 @@
                             </option>
                             <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Early Leave
                             </option>
+                            <option value="WFH" {{ request('category') == 'WFH' ? 'selected' : '' }}>WFH</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -159,6 +160,9 @@
                                                 } elseif (str_contains($catRaw, 'gatepass')) {
                                                     $catDisplay = 'Early Leave';
                                                     $catClass = 'bg-soft-info text-info';
+                                                } elseif (str_contains($catRaw, 'wfh')) {
+                                                    $catDisplay = 'WFH';
+                                                    $catClass = 'bg-soft-success text-success';
                                                 } else {
                                                     $catDisplay = strtoupper($catRaw);
                                                 }
@@ -167,7 +171,12 @@
                                                 style="font-size: 11px;">{{ $catDisplay }}</span>
                                         </td>
                                         <td class="small text-muted">
-                                            <div class="fw-bold text-dark">{{ $leave->start_date->format('d-M-Y') }}</div>
+                                            <div class="fw-bold text-dark">
+                                                {{ $leave->start_date->format('d-M-Y') }}
+                                                <span class="ms-1 text-muted fw-normal">
+                                                    ({{ $leave->total_days }} {{ str_contains(strtolower($leave->leave_category), 'wfh') ? 'Days (WFH)' : ($leave->total_days == 1 ? 'Day' : 'Days') }})
+                                                </span>
+                                            </div>
                                             @if(str_contains(strtolower($leave->leave_category), 'gatepass') && $leave->start_time)
                                                 <span class="badge bg-soft-info text-info p-1 px-2 mt-1" style="font-size: 9px;">
                                                     <i data-feather="clock" style="width: 10px; height: 10px;"></i>
@@ -242,24 +251,29 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
                         <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
-                            <div class="form-check d-flex align-items-center mb-0 ps-4">
+                            <div class="form-check d-flex align-items-center mb-0 ps-4 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Full Day"
                                     id="catFull" checked onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Half Day"
                                     id="catHalf" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
                             </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2">
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
                                 <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
                                     id="catGate" onchange="toggleCategoryFields()">
                                 <label class="form-check-label small fw-bold ms-1" for="catGate">Early Leave</label>
+                            </div>
+                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
+                                <input class="form-check-input" type="radio" name="leave_category" value="WFH"
+                                    id="catWFH" onchange="toggleCategoryFields()">
+                                <label class="form-check-label small fw-bold ms-1" for="catWFH">WFH</label>
                             </div>
                         </div>
                     </div>
@@ -274,7 +288,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6" id="leaveTypeWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Type <span
                                 class="text-danger">*</span></label>
                         <select name="leave_type" id="leaveType" class="form-select border-0 bg-white shadow-sm"
@@ -284,6 +298,7 @@
                             <option value="Sick Leave">Sick Leave</option>
                             <option value="Gatepass Leave">Early Leave</option>
                             <option value="Casual Leave">Casual Leave</option>
+                            <option value="WFH">WFH</option>
                         </select>
                     </div>
 
@@ -523,10 +538,12 @@
             const startTimeWrapper = document.getElementById('startTimeWrapper');
             const endTimeWrapper = document.getElementById('endTimeWrapper');
             const halfDayOptionWrapper = document.getElementById('halfDayOptionWrapper');
+            const leaveTypeWrapper = document.getElementById('leaveTypeWrapper');
             const leaveType = document.getElementById('leaveType');
 
             halfDayOptionWrapper.style.display = 'none';
             endTimeWrapper.style.display = 'none';
+            leaveTypeWrapper.style.display = 'block';
 
             if (category === 'Gatepass') {
                 endDateWrapper.style.display = 'none';
@@ -539,6 +556,13 @@
                 endDateWrapper.style.display = 'none';
                 startTimeWrapper.style.display = 'none';
                 halfDayOptionWrapper.style.display = 'block';
+                document.getElementById('endDate').required = false;
+                document.getElementById('startTime').required = false;
+            } else if (category === 'WFH') {
+                endDateWrapper.style.display = 'block';
+                startTimeWrapper.style.display = 'none';
+                leaveTypeWrapper.style.display = 'none';
+                leaveType.value = 'WFH';
                 document.getElementById('endDate').required = false;
                 document.getElementById('startTime').required = false;
             } else {
@@ -583,15 +607,25 @@
 
                 if (category === 'Half Day') {
                     diffDays = 0.5;
+                } else if (category === 'WFH') {
+                    diffDays = 0;
                 }
 
-                totalDaysInput.value = diffDays < 0 ? 0 : diffDays + ' Days';
+                totalDaysInput.value = diffDays < 0 ? 0 : diffDays + (category === 'WFH' ? ' Days (WFH)' : (diffDays === 1 ? ' Day' : ' Days'));
             } else if (start) {
-                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : '1 Days';
+                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : (category === 'WFH' ? '0 Days (WFH)' : '1 Days');
             } else {
-                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : '0 Days';
+                totalDaysInput.value = category === 'Half Day' ? '0.5 Days' : (category === 'WFH' ? '0 Days (WFH)' : '0 Days');
             }
         }
+
+        // Auto-select employee if only one is available
+        document.addEventListener('DOMContentLoaded', function() {
+            const empSelect = document.getElementById('employee_id');
+            if (empSelect && empSelect.options.length === 2) {
+                empSelect.selectedIndex = 1;
+            }
+        });
 
         document.getElementById('applyLeaveForm').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -600,7 +634,7 @@
             formData.forEach((value, key) => data[key] = value);
 
             // Clean total_days - extract numeric value only
-            let totalDaysRaw = data['total_days'] || '0';
+            let totalDaysRaw = String(data['total_days'] || '0');
             data['total_days'] = parseFloat(totalDaysRaw.replace(/[^0-9.]/g, '')) || 0;
 
             if (data['leave_category'] === 'Half Day' && data['half_day_type']) {
@@ -628,11 +662,14 @@
                     }
                 })
                 .catch(err => {
-                    let msg = 'Something went wrong!';
+                    console.error('Leave Application Error:', err);
+                    let msg = 'Something went wrong! Please check the form and try again.';
                     if (err && err.errors) {
                         msg = Object.values(err.errors).flat().join(', ');
                     } else if (err && err.message) {
                         msg = err.message;
+                    } else if (typeof err === 'string') {
+                        msg = err;
                     }
                     showToast(msg, 'error');
                 });
@@ -673,6 +710,9 @@
                         catDisp = 'FULL DAY';
                     } else if (catRaw.includes('gatepass')) {
                         catClass = 'bg-soft-info text-info';
+                    } else if (catRaw.includes('wfh')) {
+                        catDisp = 'WFH';
+                        catClass = 'bg-soft-success text-success';
                     }
 
                     const catBadge = document.getElementById('viewCategoryBadge');
@@ -697,12 +737,15 @@
                     const cat = data.leave_category.toLowerCase();
                     const isGatepass = cat.includes('gatepass');
                     const isHalfDay = cat.includes('half');
+                    const isWFH = cat.includes('wfh');
 
                     // Duration & Days
                     if (isGatepass) {
                         document.getElementById('viewTotalDays').textContent = '1 Hour (Gatepass Slot)';
                     } else if (isHalfDay) {
                         document.getElementById('viewTotalDays').textContent = '0.5 Days (Half Day)';
+                    } else if (isWFH) {
+                        document.getElementById('viewTotalDays').textContent = `${data.total_days} Days (WFH)`;
                     } else {
                         document.getElementById('viewTotalDays').textContent = `${data.total_days} Total Days`;
                     }
@@ -728,6 +771,12 @@
                         // End part for Half Day
                         document.getElementById('viewEndDateText').textContent = 'Same Day';
                         document.getElementById('viewEndTimeText').textContent = '0.5 Day';
+                    } else if (isWFH) {
+                        // WFH: Show date range
+                        document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                        document.getElementById('viewStartTimeText').textContent = 'WFH Mode';
+                        document.getElementById('viewEndDateText').textContent = data.end_date ? new Date(data.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                        document.getElementById('viewEndTimeText').textContent = 'Return Date';
                     } else {
                         // Full Day: Show date range
                         document.getElementById('viewStartDateText').textContent = new Date(data.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -787,6 +836,9 @@
                             catDisp = 'FULL DAY';
                         } else if (catRaw.includes('gatepass')) {
                             catClass = 'bg-soft-info text-info';
+                        } else if (catRaw.includes('wfh')) {
+                            catDisp = 'WFH';
+                            catClass = 'bg-soft-success text-success';
                         }
 
                         tbody.innerHTML += `

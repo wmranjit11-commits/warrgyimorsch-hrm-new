@@ -427,8 +427,9 @@
                                             </td>
                                             <td>
                                                 <div class="hstack gap-1 justify-content-end">
-                                                    <a href="javascript:void(0);" onclick='showQuickView(@json($project))'
-                                                        class="avatar-text avatar-md bg-soft-warning text-warning rounded-circle"
+                                                    <a href="javascript:void(0);" 
+                                                        class="avatar-text avatar-md bg-soft-warning text-warning rounded-circle btn-quick-view"
+                                                        data-project="{{ json_encode($project) }}"
                                                         title="Quick View">
                                                         <i class="feather-info"></i>
                                                     </a>
@@ -481,8 +482,6 @@
         .progress-circle:hover {
             transform: scale(1.05);
         }
-
-
 
         /* Premium Custom Scrollbar for Dropdowns */
         .dropdown-menu {
@@ -647,6 +646,25 @@
             background-color: rgba(56, 88, 249, 0.1) !important;
             color: #3858f9 !important;
         }
+
+        /* Activity Style for Task Analysis */
+        .main-task-header {
+            font-weight: 700 !important;
+            color: #334155 !important;
+            font-size: 14px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+
+        .sub-task-point {
+            display: flex !important;
+            align-items: start !important;
+            gap: 8px !important;
+            margin-bottom: 6px !important;
+            padding-left: 12px !important;
+            color: #64748b !important;
+            font-size: 13px !important;
+        }
     </style>
 @endsection
 
@@ -654,22 +672,18 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Lead Search Filter & Prioritize Matching Logic - Global Failsafe
+        // Global variables/functions
         window.filterLeadList = function (input) {
             var value = input.value.toLowerCase().trim();
             var dropdown = input.closest('.dropdown-menu');
             if (!dropdown) return;
-
             var items = dropdown.querySelectorAll('li:not(.sticky-top)');
             var header = dropdown.querySelector('.sticky-top');
-
             for (var i = 0; i < items.length; i++) {
                 var li = items[i];
                 var text = (li.innerText || li.textContent).toLowerCase();
-
                 if (text.indexOf(value) > -1) {
                     li.style.setProperty('display', 'block', 'important');
-                    // Move matching item to the top (right after the search header)
                     if (value !== "" && header) {
                         header.parentNode.insertBefore(li, header.nextSibling);
                     }
@@ -680,16 +694,14 @@
         };
 
         $(document).ready(function () {
-            // Force fixed strategy for all dropdowns to prevent clipping
+            // Dropdown initialization
             $('.dropdown-toggle').each(function () {
                 new bootstrap.Dropdown(this, {
-                    popperConfig: {
-                        strategy: 'fixed'
-                    }
+                    popperConfig: { strategy: 'fixed' }
                 });
             });
 
-            // Filter Functionality
+            // Filter logic
             window.applyFilters = function () {
                 var name = $('#filterProjectName').val().toLowerCase();
                 var status = $('#filterStatus').val();
@@ -699,26 +711,19 @@
                     var rowName = $(this).data('name') || '';
                     var rowStatus = $(this).data('status') || '';
                     var rowDept = $(this).data('department') || '';
-
                     var matchName = name === "" || rowName.includes(name);
                     var matchStatus = status === "" || rowStatus === status;
                     var matchDept = department === "" || rowDept === department;
-
-                    if (matchName && matchStatus && matchDept) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
+                    if (matchName && matchStatus && matchDept) { $(this).show(); } else { $(this).hide(); }
                 });
             };
 
-            // Smooth Filter Toggle
-            $(document).on('click', '#toggleFilter', function (e) {
+            $('#toggleFilter').on('click', function (e) {
                 e.preventDefault();
                 $('#filterSection').slideToggle(400);
             });
 
-            // Handle Check All Functionality
+            // Bulk actions
             $('#checkAllProject').on('change', function () {
                 $('.checkbox').prop('checked', $(this).prop('checked'));
                 toggleBulkAction();
@@ -730,40 +735,28 @@
 
             function toggleBulkAction() {
                 var checkedCount = $('.checkbox:checked').length;
-                if (checkedCount > 0) {
-                    $('#bulk-action-wrapper').fadeIn(300);
-                } else {
-                    $('#bulk-action-wrapper').fadeOut(300);
-                }
+                if (checkedCount > 0) { $('#bulk-action-wrapper').fadeIn(300); } else { $('#bulk-action-wrapper').fadeOut(300); }
             }
 
-            // Live Ongoing Timer Logic
+            // Timers
             function updateOngoingTimers() {
                 $('.ongoing-timer').each(function () {
                     var startISO = $(this).data('start');
                     if (!startISO) return;
-
                     var start = new Date(startISO);
                     var now = new Date();
                     var diff = now - start;
-
-                    if (diff < 0) {
-                        $(this).find('.timer-display').text('0d 0h 0m 0s');
-                        return;
-                    }
-
+                    if (diff < 0) { $(this).find('.timer-display').text('0d 0h 0m 0s'); return; }
                     var days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
                     $(this).find('.timer-display').text(days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's');
                 });
             }
             setInterval(updateOngoingTimers, 1000);
             updateOngoingTimers();
 
-            // Initialize Select2 for all selects with permanent search enabled
             $('.form-select').select2({
                 width: '100%',
                 minimumResultsForSearch: 0,
@@ -771,104 +764,57 @@
                 allowClear: true
             });
 
-            // Highlighting active row for dropdown clarity
-            $(document).on('show.bs.dropdown', '.dropdown', function () {
-                $(this).closest('tr').addClass('row-active');
-            }).on('hide.bs.dropdown', function () {
-                $(this).closest('tr').removeClass('row-active');
-            });
-
-            // Prevent dropdown from closing when clicking inside search input or its container
-            $(document).on('click', '.lead-search, .sticky-top', function (e) {
-                e.stopPropagation();
+            // Quick View Click Handler (Safest way)
+            $('.btn-quick-view').on('click', function() {
+                const project = $(this).data('project');
+                showQuickView(project);
             });
         });
 
-        window.bulkDeleteProject = function () {
-            var ids = [];
-            $('.checkbox:checked').each(function () {
-                const val = $(this).attr('id')?.split('_')[1];
-                if (val) ids.push(val);
-            });
+        // Global functions outside ready for reliability
+        window.showQuickView = function (project) {
+            const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+            document.getElementById('qvProjectName').innerText = project.name;
+            document.getElementById('qvDescription').innerHTML = project.description || '<p class="text-muted">No description available.</p>';
 
-            if (ids.length === 0) {
-                Toast.fire({ icon: 'warning', title: 'Please select at least one project.' });
-                return;
-            }
+            const leaders = project.leaders || [];
+            const members = project.members || [];
+            const allEmps = @json($employees);
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `You are about to delete ${ids.length} selected projects.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3858f9',
-                cancelButtonColor: '#a3a3a3',
-                confirmButtonText: 'Yes, delete them!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    confirmButton: 'btn btn-primary px-4 py-2 me-2',
-                    cancelButton: 'btn btn-secondary px-4 py-2 ms-2'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '{{ route("projects.bulk-delete") }}',
-                        type: 'POST',
-                        data: {
-                            ids: ids,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function (response) {
-                            location.reload();
-                        },
-                        error: function (xhr) {
-                            Toast.fire({ icon: 'error', title: 'Error deleting projects.' });
-                        }
-                    });
-                }
-            });
-        };
-
-        // Event listener for the bulk delete button
-        $('#btn-bulk-delete').on('click', function () {
-            bulkDeleteProject();
-        });
-
-        // Premium Status Update
-        window.updateProjectStatus = function (id, status) {
-            updateProjectField(id, { status: status }, 'Status Updated');
-            setTimeout(() => location.reload(), 500); // Reload to update styles easily
-        };
-
-        // Premium Lead Update
-        window.updateProjectLead = function (id, leadId) {
-            var leaders = leadId ? [leadId] : [];
-            updateProjectField(id, { leaders: leaders }, 'Lead Updated');
-            setTimeout(() => location.reload(), 500);
-        };
-
-        // Generic Update Function
-        function updateProjectField(id, data, successTitle) {
-            var url = '{{ route("projects.update-field", ["project" => ":id"]) }}'.replace(':id', id);
-
-            $.ajax({
-                url: url,
-                type: 'PATCH',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                data: data,
-                success: function (response) {
-                    if (typeof Toast !== 'undefined') {
-                        Toast.fire({ icon: 'success', title: successTitle });
+            let teamHtml = '';
+            if (leaders.length > 0) {
+                teamHtml += '<h6 class="fw-bold text-primary mb-3">Project Leads</h6><div class="row g-3 mb-4">';
+                allEmps.forEach(emp => {
+                    if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
+                        teamHtml += `<div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
+                                <div class="fw-bold small text-dark">${emp.name}</div>
+                            </div>
+                        </div>`;
                     }
-                },
-                error: function (xhr) {
-                    console.error('Update failed:', xhr.responseText);
-                }
-            });
-        }
+                });
+                teamHtml += '</div>';
+            }
+            if (members.length > 0) {
+                teamHtml += '<h6 class="fw-bold text-info mb-3">Team Members</h6><div class="row g-3">';
+                allEmps.forEach(emp => {
+                    if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
+                        teamHtml += `<div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                                <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
+                                <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
+                            </div>
+                        </div>`;
+                    }
+                });
+                teamHtml += '</div>';
+            }
+            if (teamHtml === '') teamHtml = '<div class="alert alert-soft-secondary text-center">No team members assigned.</div>';
+            document.getElementById('qvTeamList').innerHTML = teamHtml;
+            modal.show();
+        };
 
-        // Premium Delete Confirmation
         window.confirmDeleteProject = function (form, name) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -885,188 +831,166 @@
                 },
                 buttonsStyling: false
             }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
+                if (result.isConfirmed) { form.submit(); }
             });
         };
-        // Quick View Logic
-        window.showQuickView = function (project) {
-            const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
-            document.getElementById('qvProjectName').innerText = project.name;
-            document.getElementById('qvDescription').innerHTML = project.description || '<p class="text-muted">No description available.</p>';
 
-            // Fetch Team Details (Leads & Members)
-            const leaders = project.leaders || [];
-            const members = project.members || [];
-            const allEmps = @json($employees);
-
-            let teamHtml = '';
-
-            // Show Leaders
-            if (leaders.length > 0) {
-                teamHtml += '<h6 class="fw-bold text-primary mb-3">Project Leads</h6><div class="row g-3 mb-4">';
-                allEmps.forEach(emp => {
-                    if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
-                        teamHtml += `<div class="col-md-6">
-                                                        <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                                                            <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
-                                                            <div class="fw-bold small text-dark">${emp.name}</div>
-                                                        </div>
-                                                    </div>`;
-                    }
-                });
-                teamHtml += '</div>';
-            }
-
-            // Show Members
-            if (members.length > 0) {
-                teamHtml += '<h6 class="fw-bold text-info mb-3">Team Members</h6><div class="row g-3">';
-                allEmps.forEach(emp => {
-                    if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
-                        teamHtml += `<div class="col-md-4">
-                                                        <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
-                                                            <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
-                                                            <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
-                                                        </div>
-                                                    </div>`;
-                    }
-                });
-                teamHtml += '</div>';
-            }
-
-            if (teamHtml === '') teamHtml = '<div class="alert alert-soft-secondary text-center">No team members assigned.</div>';
-
-            document.getElementById('qvTeamList').innerHTML = teamHtml;
-            modal.show();
-        };
-
-        // Task Progress Analysis Logic
         window.showTaskProgress = function (projectId) {
             const modalEl = document.getElementById('taskProgressModal');
             const listContainer = document.getElementById('tpList');
-
             listContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Analyzing tasks...</p></div>';
-
-            // Show Modal
-            if (window.bootstrap && window.bootstrap.Modal) {
-                (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
-            } else if (window.jQuery && jQuery.fn.modal) {
-                jQuery(modalEl).modal('show');
-            } else {
-                modalEl.style.display = 'block';
-                modalEl.classList.add('show');
-                modalEl.style.backgroundColor = 'rgba(0,0,0,0.8)';
-            }
+            
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
 
             fetch(`/projects/${projectId}/tasks-summary`)
-                .then(res => {
-                    if (!res.ok) throw new Error('Network response was not ok');
-                    return res.json();
-                })
+                .then(res => res.json())
                 .then(data => {
                     document.getElementById('tpProjectName').innerText = data.project_name;
-
                     if (!data.tasks || data.tasks.length === 0) {
                         listContainer.innerHTML = '<div class="alert alert-soft-secondary text-center">No tasks found for this project.</div>';
                         return;
                     }
-
+                    
                     let html = '';
-                    // Group work by employee and then by date
                     const employeeWork = {};
 
                     data.tasks.forEach(task => {
                         const empName = task.employee ? task.employee.name : 'Unassigned';
                         if (!employeeWork[empName]) employeeWork[empName] = {};
 
-                        // Process each follow-up as an individual work entry
                         if (task.follow_ups && task.follow_ups.length > 0) {
                             task.follow_ups.forEach(fu => {
                                 const date = new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                                if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
+                                if (!employeeWork[empName][date]) employeeWork[empName][date] = { tasks: {}, dailyTotal: 0 };
+                                
+                                const taskTitle = task.task_title;
+                                if (!employeeWork[empName][date].tasks[taskTitle]) {
+                                    employeeWork[empName][date].tasks[taskTitle] = { updates: [], taskTotal: 0 };
+                                }
 
-                                // Parse time from "5 hours" etc.
                                 let time = 0;
                                 const matches = (fu.time_taken || "").match(/[+-]?([0-9]*[.])?[0-9]+/);
                                 if (matches) time = parseFloat(matches[0]);
 
-                                employeeWork[empName][date].entries.push({
-                                    title: task.task_title,
+                                employeeWork[empName][date].tasks[taskTitle].updates.push({
                                     description: fu.work_description,
                                     time: time,
-                                    status: task.status,
                                     timestamp: new Date(fu.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                 });
+                                employeeWork[empName][date].tasks[taskTitle].taskTotal += time;
                                 employeeWork[empName][date].dailyTotal += time;
-                            });
-                        } else {
-                            // Task with no follow-ups yet
-                            const date = 'No Activity';
-                            if (!employeeWork[empName][date]) employeeWork[empName][date] = { entries: [], dailyTotal: 0 };
-                            employeeWork[empName][date].entries.push({
-                                title: task.task_title,
-                                description: 'No progress updates provided yet.',
-                                time: 0,
-                                status: task.status,
-                                timestamp: ''
                             });
                         }
                     });
 
                     for (const [empName, dates] of Object.entries(employeeWork)) {
-                        html += `<div class="mb-4">
-                                                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                                                            <div class="avatar-text avatar-md bg-primary text-white rounded-circle">${empName.charAt(0)}</div>
-                                                            <h5 class="fw-bold text-dark mb-0">${empName}</h5>
-                                                        </div>`;
+                        html += `<div class="mb-5">
+                            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                                <div class="avatar-text avatar-lg bg-primary text-white rounded-circle shadow">${empName.charAt(0)}</div>
+                                <div>
+                                    <h4 class="fw-bold text-dark mb-0">${empName}</h4>
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 1px;">Project Contributor</small>
+                                </div>
+                            </div>`;
 
-                        // Sort dates descending
                         const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
-
                         sortedDates.forEach(date => {
                             const dayData = dates[date];
-                            html += `<div class="ms-4 mb-4 position-relative">
-                                                            <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded border shadow-sm" style="border-left: 4px solid #3858f9 !important;">
-                                                                <span class="fw-bold text-primary"><i class="feather-calendar me-1"></i> ${date}</span>
-                                                                <span class="badge bg-soft-dark text-dark fw-bold">Total Day Work: ${dayData.dailyTotal.toFixed(1)} Hours</span>
-                                                            </div>
-                                                            <div class="ms-3">`;
+                            let dTotal = dayData.dailyTotal;
+                            let dTh = Math.floor(dTotal);
+                            let dTm = Math.round((dTotal - dTh) * 60);
+                            let dTimeStr = (dTh > 0 ? dTh + 'h ' : '') + (dTm > 0 ? dTm + 'm' : (dTh === 0 ? '0m' : ''));
+                            
+                            html += `<div class="ms-4 mb-5">
+                                <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-4 border">
+                                    <div class="fw-bold text-dark fs-15"><i class="feather-calendar text-primary me-2"></i>${date}</div>
+                                    <div class="badge bg-dark text-white px-3 py-2 rounded-pill fs-12">Total Day: ${dTimeStr}</div>
+                                </div>
+                                <div class="ms-2 border-start ps-4 position-relative" style="border-left: 2px dashed #cbd5e1 !important;">`;
 
-                            dayData.entries.forEach(entry => {
-                                html += `<div class="mb-3 p-3 bg-white rounded-3 border position-relative">
-                                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                    <div class="pe-5">
-                                                                        <div class="fw-bold text-dark fs-14">${entry.title}</div>
-                                                                        <div class="text-muted" style="font-size: 11px;">${entry.timestamp}</div>
-                                                                    </div>
-                                                                    <div class="text-end">
-                                                                        <div class="badge bg-soft-primary text-primary fw-bold px-3 py-1 mb-1" style="font-size: 12px; border-radius: 20px; border: 1px solid rgba(56, 88, 249, 0.2);">
-                                                                            ${entry.time} Hrs
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="text-muted small border-start ps-2 py-1 activity-description" style="font-size: 13px; border-left-width: 3px !important; border-left-color: #e2e8f0 !important;">
-                                                                    ${entry.description ? entry.description.replace(/<[^>]*>?/gm, '') : ''}
-                                                                </div>
-                                                            </div>`;
-                            });
+                            for (const [title, taskData] of Object.entries(dayData.tasks)) {
+                                let tTotal = taskData.taskTotal;
+                                let tTh = Math.floor(tTotal);
+                                let tTm = Math.round((tTotal - tTh) * 60);
+                                let tTimeStr = (tTh > 0 ? tTh + 'h ' : '') + (tTm > 0 ? tTm + 'm' : (tTh === 0 ? '0m' : ''));
 
+                                html += `<div class="mb-5 position-relative">
+                                    <div class="position-absolute start-0 translate-middle-x bg-white" style="margin-left: -26px; width: 14px; height: 14px; border-radius: 50%; border: 4px solid #3858f9; top: 6px; box-shadow: 0 0 0 5px #fff;"></div>
+                                    <div class="task-group-card p-4 rounded-4 border bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="fw-bold text-dark mb-0 fs-16">${title}</h5>
+                                            <span class="badge bg-soft-primary text-primary border border-primary border-opacity-10">${tTimeStr}</span>
+                                        </div>
+                                        <div class="updates-timeline">`;
+
+                                taskData.updates.forEach(update => {
+                                    let uh = Math.floor(update.time);
+                                    let um = Math.round((update.time - uh) * 60);
+                                    let uTimeStr = (uh > 0 ? uh + 'h ' : '') + (um > 0 ? um + 'm' : (uh === 0 ? '0m' : ''));
+
+                                    let pointsHtml = '';
+                                    if (update.description) {
+                                        const lines = update.description.split(/\n|<br>|<p>|<\/p>|<div>|<\/div>|<li>|<\/li>/).filter(l => l.trim() !== "");
+                                        let isFirstLine = true;
+                                        lines.forEach(line => {
+                                            const clean = line.replace(/<[^>]*>?/gm, '').replace(/^[•\*\-·\d\.\s]+/u, '').trim();
+                                            if (clean) {
+                                                if (isFirstLine) {
+                                                    pointsHtml += `<div class="main-task-header">• ${clean}</div>`;
+                                                    isFirstLine = false;
+                                                } else {
+                                                    pointsHtml += `<div class="sub-task-point">
+                                                        <i class="feather-check text-success mt-1" style="font-size: 11px;"></i>
+                                                        <span>${clean}</span>
+                                                    </div>`;
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    html += `<div class="update-item mb-4 last-child-mb-0">
+                                        <div class="d-flex align-items-center gap-2 mb-2 text-muted" style="font-size: 11px;">
+                                            <i class="feather-clock"></i>
+                                            <span class="fw-bold text-uppercase">${update.timestamp} Update</span>
+                                            <span class="opacity-50">|</span>
+                                            <span class="fw-bold text-primary">${uTimeStr}</span>
+                                        </div>
+                                        <div class="ps-1">
+                                            ${pointsHtml || '<div class="text-muted italic fs-13">No details provided</div>'}
+                                        </div>
+                                    </div>`;
+                                });
+
+                                html += `</div></div></div>`;
+                            }
                             html += `</div></div>`;
                         });
-
                         html += `</div>`;
                     }
                     listContainer.innerHTML = html;
-                })
-                .catch(err => {
-                    console.error('Error fetching task summary:', err);
-                    listContainer.innerHTML = `<div class="alert alert-soft-danger text-center">
-                                                    <strong>Oops!</strong> Something went wrong while loading the data.<br>
-                                                    <small class="text-muted">${err.message}</small>
-                                                </div>`;
                 });
         };
+
+        window.updateProjectStatus = function (id, status) {
+            updateProjectField(id, { status: status }, 'Status Updated');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        window.updateProjectLead = function (id, leadId) {
+            updateProjectField(id, { leaders: leadId ? [leadId] : [] }, 'Lead Updated');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        function updateProjectField(id, data, successTitle) {
+            var url = '{{ route("projects.update-field", ["project" => ":id"]) }}'.replace(':id', id);
+            $.ajax({
+                url: url, type: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                data: data,
+                success: function () { if (typeof Toast !== 'undefined') Toast.fire({ icon: 'success', title: successTitle }); }
+            });
+        }
     </script>
 
     <!-- Quick View Modal -->

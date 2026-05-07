@@ -60,12 +60,63 @@ class ProjectController extends Controller
         $employees = \App\Models\Employee::all();
         $departments = \App\Models\Department::all();
 
-        // Fetch activities (TaskFollowUps) for this project
-        $activities = TaskFollowUp::whereHas('dailyTask', function ($q) use ($project) {
-            $q->where('project_id', $project->id);
-        })->with('dailyTask.employee')->latest()->get();
+        // 1. Get all tasks created for this project
+        $tasks = DailyTask::where('project_id', $project->id)
+            ->with(['employee', 'creator', 'followUps'])
+            ->get();
 
-        return view('projects.show', compact('project', 'employees', 'departments', 'activities'));
+        $dayGroups = [];
+
+        foreach ($tasks as $task) {
+            // Task Creation Event
+            $date = $task->created_at->format('d M Y');
+            $dayGroups[$date][$task->id]['task'] = $task;
+            $dayGroups[$date][$task->id]['events'][] = (object)[
+                'type' => 'creation',
+                'created_at' => $task->created_at,
+                'description' => $task->description,
+                'photo' => $task->photo,
+                'time_taken' => null,
+            ];
+
+            // Follow-up (Progress) Events
+            foreach ($task->followUps as $fu) {
+                $fuDate = $fu->created_at->format('d M Y');
+                $dayGroups[$fuDate][$task->id]['task'] = $task;
+                $dayGroups[$fuDate][$task->id]['events'][] = (object)[
+                    'type' => 'progress',
+                    'created_at' => $fu->created_at,
+                    'description' => $fu->work_description,
+                    'photo' => $fu->photo,
+                    'time_taken' => $fu->time_taken,
+                    'reference_name' => $fu->reference_name,
+                ];
+            }
+        }
+
+        // Sort events within each task by time and calculate daily task totals
+        foreach ($dayGroups as $date => &$tasksInDay) {
+            foreach ($tasksInDay as $taskId => &$data) {
+                $dailyTaskTime = 0;
+                foreach ($data['events'] as $event) {
+                    if ($event->type == 'progress' && $event->time_taken) {
+                        $dailyTaskTime += (float)$event->time_taken;
+                    }
+                }
+                $data['daily_total_time'] = $dailyTaskTime;
+
+                usort($data['events'], function($a, $b) {
+                    return $b->created_at <=> $a->created_at; // Latest first
+                });
+            }
+        }
+
+        // Sort days descending
+        uksort($dayGroups, function($a, $b) {
+            return strtotime($b) - strtotime($a);
+        });
+
+        return view('projects.show', compact('project', 'employees', 'departments', 'dayGroups'));
     }
 
     public function edit(Project $project)

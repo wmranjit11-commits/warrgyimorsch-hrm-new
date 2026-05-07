@@ -251,6 +251,8 @@ class DashboardController extends Controller
                         WHEN leave_applications.leave_category = 'Full Day' THEN 'Full Day Leave'
                         WHEN LOWER(leave_applications.leave_category) LIKE '%Half%' THEN 'Half Day'
                         WHEN leave_applications.leave_category = 'Gatepass' THEN 'Early Leave'
+                        WHEN leave_applications.leave_category = 'WFH' THEN 'Working from Home'
+                        ELSE leave_applications.leave_category
                     END as leave_type
                 ")
             );
@@ -436,6 +438,8 @@ class DashboardController extends Controller
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
             ->whereIn('leave_applications.status', ['approved', 'unauthorised']);
 
+        ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
+        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
         // USER → force own data
         if (!$isAdmin) {
