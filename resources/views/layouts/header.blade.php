@@ -36,40 +36,70 @@
                 </div>
                 <div class="dropdown nxl-h-item">
                     @php
-                        $notifications = [];
+                        $notifications = collect();
                         $role = strtoupper(auth()->user()->role);
                         
+                        // --- Celebrations Notification Logic (NEW) ---
+                        $today = now()->format('m-d');
+                        $celebrations = \App\Models\Employee::where(function($q) use ($today) {
+                                $q->whereRaw("DATE_FORMAT(date_of_birth, '%m-%d') = ?", [$today])
+                                  ->orWhereRaw("DATE_FORMAT(date_of_joining, '%m-%d') = ?", [$today]);
+                            })
+                            ->get()
+                            ->map(function($emp) use ($today) {
+                                $isBirthday = \Carbon\Carbon::parse($emp->date_of_birth)->format('m-d') == $today;
+                                $type = $isBirthday ? 'Birthday' : 'Work Anniversary';
+                                $years = \Carbon\Carbon::parse($emp->date_of_joining)->diffInYears(now());
+                                
+                                return (object)[
+                                    'id' => 'celebration-' . $emp->id,
+                                    'type' => 'celebration',
+                                    'event_type' => $type,
+                                    'employee' => $emp,
+                                    'years' => $years,
+                                    'message' => $isBirthday 
+                                        ? "Today is {$emp->name}'s Birthday! 🎂" 
+                                        : "Today is {$emp->name}'s {$years}" . ($years==1?'st':($years==2?'nd':($years==3?'rd':'th'))) . " Work Anniversary! 🏆",
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ];
+                            });
 
-                        if ($role == 'ADMIN' || $role == 'SUPER ADMIN') {
+                        if ($role == 'ADMIN' || $role == 'SUPER_ADMIN' || $role == 'SUPER ADMIN') {
 
-                            // 1. Leave Notifications (existing)
+                            // 1. Leave Notifications
                             $leaveNotifications = \App\Models\LeaveApplication::with('employee')
                                 ->latest()
                                 ->get();
 
-                            // 2. Payroll Comment Notifications (NEW)
+                            // 2. Payroll Comment Notifications
                             $payrollNotifications = \App\Models\Payroll::with('employee')
                                 ->whereNotNull('remarks')
                                 ->where('remarks', '!=', '')
                                 ->latest()
                                 ->get();
 
-                            // Merge both
-                            $notifications = $leaveNotifications
+                            // Merge all
+                            $notifications = $celebrations
+                            ->concat($leaveNotifications)
                             ->concat($payrollNotifications)
                             ->sortByDesc(function ($item) {
-                                return isset($item->remarks) 
-                                    ? $item->updated_at 
-                                    : $item->created_at;
-                            })->take(3);
+                                return isset($item->type) && $item->type == 'celebration'
+                                    ? now()
+                                    : (isset($item->remarks) ? $item->updated_at : $item->created_at);
+                            })->take(5);
 
                         } else {
-                            $notifications = \App\Models\LeaveApplication::where('employee_id', auth()->user()->employee_id)
+                            $myLeaves = \App\Models\LeaveApplication::where('employee_id', auth()->user()->employee_id)
                                 ->whereIn('status', ['approved', 'rejected', 'Approved', 'Rejected'])
                                 ->where('updated_at', '>=', now()->subDays(3))
                                 ->latest()
-                                ->limit(3)
                                 ->get();
+                                
+                            $notifications = $celebrations
+                                ->concat($myLeaves)
+                                ->sortByDesc('updated_at')
+                                ->take(5);
                         }
                     @endphp
                     <a class="nxl-head-link me-3" data-bs-toggle="dropdown" href="#" role="button"
@@ -90,8 +120,9 @@
                             @forelse($notifications as $item)
                                 <div class="notifications-item">
                                     @php
-                                        $isPayroll = isset($item->remarks);
-                                        $emp = ($role == 'ADMIN' || $role == 'SUPER ADMIN') ? $item->employee : auth()->user()->employee;
+                                        $isCelebration = isset($item->type) && $item->type == 'celebration';
+                                        $isPayroll = !$isCelebration && isset($item->remarks);
+                                        $emp = (in_array($role, ['ADMIN', 'SUPER_ADMIN', 'SUPER ADMIN']) || $isCelebration) ? $item->employee : auth()->user()->employee;
                                         $photo = ($emp && $emp->photo) ? asset('storage/' . $emp->photo) : null;
                                     @endphp
                                     @if($photo)
@@ -102,28 +133,34 @@
                                         </div>
                                     @endif
                                     <div class="notifications-desc">
-                                        <a href="{{ $isPayroll ? route('payroll.index') : route('leave.history') }}" class="font-body text-truncate-2-line">
-                                            
-                                            @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-
-                                                @if($isPayroll)
-                                                    <span class="fw-semibold text-dark">{{ $item->employee->name ?? 'Someone' }}</span>
-                                                    commented: <span class="text-muted">"{{ $item->remarks }}"</span>
+                                        @if($isCelebration)
+                                            <a href="{{ route('employees.employeeDays') }}" class="font-body text-truncate-2-line">
+                                                <span class="fw-bold text-dark">{{ $item->message }}</span>
+                                            </a>
+                                        @else
+                                            <a href="{{ $isPayroll ? route('payroll.index') : route('leave.history') }}" class="font-body text-truncate-2-line">
+                                                @if(in_array($role, ['ADMIN', 'SUPER_ADMIN', 'SUPER ADMIN']))
+                                                    @if($isPayroll)
+                                                        <span class="fw-semibold text-dark">{{ $item->employee->name ?? 'Someone' }}</span>
+                                                        commented: <span class="text-muted">"{{ $item->remarks }}"</span>
+                                                    @else
+                                                        <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span>
+                                                        applied for {{ $item->leave_type }} leave.
+                                                    @endif
                                                 @else
-                                                    <span class="fw-semibold text-dark">{{ $emp->name ?? 'Someone' }}</span>
-                                                    applied for {{ $item->leave_type }} leave.
+                                                    Your leave application for {{ $item->leave_type }} has been
+                                                    <span class="fw-bold {{ $item->status == 'approved' ? 'text-success' : 'text-danger' }}">
+                                                        {{ strtoupper($item->status) }}
+                                                    </span>.
                                                 @endif
-                                            @else
-                                                Your leave application for {{ $item->leave_type }} has been
-                                                <span class="fw-bold {{ $item->status == 'approved' ? 'text-success' : 'text-danger' }}">
-                                                    {{ strtoupper($item->status) }}
-                                                </span>.
-                                            @endif
-                                        </a>
+                                            </a>
+                                        @endif
+
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="notifications-date text-muted border-bottom border-bottom-dashed" style="font-size: 10px;">
-                                                @if($role == 'ADMIN' || $role == 'SUPER ADMIN')
-                
+                                                @if($isCelebration)
+                                                    <i class="feather-gift fs-10 me-1 text-danger"></i> Happening Today!
+                                                @elseif(in_array($role, ['ADMIN', 'SUPER_ADMIN', 'SUPER ADMIN']))
                                                     @if($isPayroll)
                                                         <i class="feather-message-square fs-10 me-1"></i> Commented: {{ $item->updated_at->format('d M, h:i A') }}
                                                     @else
@@ -134,7 +171,7 @@
                                                 @endif
                                             </div>
                                             <div class="d-flex align-items-center float-end gap-2">
-                                                <a href="{{ route('leave.history') }}" class="text-primary" data-bs-toggle="tooltip" title="View Detail">
+                                                <a href="{{ $isCelebration ? route('employees.employeeDays') : route('leave.history') }}" class="text-primary" data-bs-toggle="tooltip" title="View Detail">
                                                     <i class="feather-eye fs-12"></i>
                                                 </a>
                                             </div>

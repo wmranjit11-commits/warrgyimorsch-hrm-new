@@ -2,383 +2,514 @@
 
 @section('content')
 
-<div class="employee-day-wrapper">
+<div class="celebrations-container">
 
-    <!-- Header -->
-    <div class="top-header">
-
-        <div>
-            <h1 class="page-title">
-               Celebrations
-            </h1>
-
-            <p class="page-subtitle">
-                Upcoming birthdays & work anniversaries
-            </p>
+    <!-- Hero Header -->
+    <div class="celebrations-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Team <span class="gradient-text">Milestones</span></h1>
+            <p class="hero-subtitle">Celebrating the people who make our company great.</p>
         </div>
 
-        <!-- Tabs -->
-        <div class="custom-tabs">
-
-            <button class="tab-btn active"
-                onclick="switchTab('birthday', this)">
-                Birthday
+        <div class="celebration-switcher">
+            <button class="switcher-btn active" onclick="switchCelebrationTab('birthday', this)">
+                <span class="icon">🎂</span> Birthdays
             </button>
-
-            <button class="tab-btn"
-                onclick="switchTab('anniversary', this)">
-                Anniversary
+            <button class="switcher-btn" onclick="switchCelebrationTab('anniversary', this)">
+                <span class="icon">🎖️</span> Anniversaries
             </button>
+        </div>
+    </div>
 
+    <!-- Birthday Section -->
+    <div id="tab-birthday" class="celebration-section">
+        <div class="premium-grid">
+            @php $birthdayCount = 0; @endphp
+            @foreach ($employees as $employee)
+                @php
+                    $birthday = \Carbon\Carbon::parse($employee->date_of_birth)->year(now()->year);
+                    if ($birthday->isPast() && !$birthday->isToday()) {
+                        $birthday->addYear();
+                    }
+                    $today = now()->startOfDay();
+                    $daysRemaining = $today->diffInDays($birthday->startOfDay(), false);
+                @endphp
+
+                @if ($daysRemaining >= 0 && $daysRemaining <= 3)
+                    @php $birthdayCount++; @endphp
+                    <div class="premium-card-wrapper animate-card">
+                        <div class="premium-card birthday-theme">
+                            <div class="card-glow"></div>
+                            <div class="premium-card-body">
+                                <div class="premium-profile-section">
+                                    <div class="premium-avatar-container">
+                                        @if($employee->photo)
+                                            <img src="{{ asset('storage/' . $employee->photo) }}" alt="{{ $employee->name }}" class="avatar-img">
+                                        @else
+                                            <div class="avatar-initials">
+                                                {{ substr($employee->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div class="floating-icon birthday-icon">🎂</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="premium-info-section">
+                                    <h3 class="emp-name">{{ $employee->name }}</h3>
+                                    <p class="emp-label">Birthday Celebration</p>
+                                    
+                                    <div class="premium-card-footer">
+                                        <div class="date-info">
+                                            <span class="date-text">{{ $birthday->format('d M, Y') }}</span>
+                                        </div>
+                                        <div class="status-indicator {{ $daysRemaining == 0 ? 'is-today' : 'is-upcoming' }}">
+                                            @if($daysRemaining == 0)
+                                                Today! 🎉
+                                            @else
+                                                {{ $daysRemaining }} Days Left
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
         </div>
 
+        @if($birthdayCount == 0)
+            <div class="empty-state-premium">
+                <div class="empty-icon">🎂</div>
+                <h3>No Birthdays Soon</h3>
+                <p>No team members have birthdays in the next 3 days.</p>
+            </div>
+        @endif
     </div>
 
-    <!-- Birthday Tab -->
-    <div id="tab-birthday" class="tab-content">
+    <!-- Anniversary Section -->
+    <div id="tab-anniversary" class="celebration-section d-none">
+        <div class="premium-grid">
+            @php $anniversaryCount = 0; @endphp
+            @foreach ($employees as $employee)
+                @php
+                    $joiningDate = \Carbon\Carbon::parse($employee->date_of_joining);
+                    $anniversary = $joiningDate->copy()->year(now()->year);
+                    if ($anniversary->isPast() && !$anniversary->isToday()) {
+                        $anniversary->addYear();
+                    }
+                    $today = now()->startOfDay();
+                    $daysRemaining = $today->diffInDays($anniversary->startOfDay(), false);
+                    $years = $joiningDate->diffInYears($anniversary);
+                @endphp
 
-        @foreach ($employees as $employee)
-
-            @php
-
-                $birthday = \Carbon\Carbon::parse($employee->date_of_birth)
-                    ->year(now()->year);
-
-                if ($birthday->isPast()) {
-                    $birthday->addYear();
-                }
-
-                $today = now()->startOfDay();
-
-                $totalDaysLeft = $today->diffInDays($birthday->startOfDay());
-
-            @endphp
-
-            @if ($totalDaysLeft <= 9)
-                <div class="log-card">
-
-                    <div class="log-date">
-
-                        <h2>
-                            {{ $birthday->format('d') }}
-                        </h2>
-
-                        <span>
-                            {{ strtoupper($birthday->format('M')) }}
-                        </span>
-
-                    </div>
-
-                    <div class="log-info">
-
-                        <h4>
-                            {{ $employee->name }}
-                        </h4>
-
-                        <div class="log-meta">
-
-                            <span class="meta-badge">
-                                BIRTHDAY
-                            </span>
-
-                            <span class="meta-days">
-                                {{ $totalDaysLeft }} days left
-                            </span>
-
-
+                @if($years > 0 && $daysRemaining >= 0 && $daysRemaining <= 3)
+                    @php $anniversaryCount++; @endphp
+                    <div class="premium-card-wrapper animate-card">
+                        <div class="premium-card anniversary-theme">
+                            <div class="card-glow"></div>
+                            <div class="premium-card-body">
+                                <div class="premium-profile-section">
+                                    <div class="premium-avatar-container">
+                                        @if($employee->photo)
+                                            <img src="{{ asset('storage/' . $employee->photo) }}" alt="{{ $employee->name }}" class="avatar-img">
+                                        @else
+                                            <div class="avatar-initials">
+                                                {{ substr($employee->name, 0, 1) }}
+                                            </div>
+                                        @endif
+                                        <div class="floating-icon anniversary-icon">🏆</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="premium-info-section">
+                                    <h3 class="emp-name">{{ $employee->name }}</h3>
+                                    <p class="emp-label">{{ $years }}{{ $years == 1 ? 'st' : ($years == 2 ? 'nd' : ($years == 3 ? 'rd' : 'th')) }} Work Anniversary</p>
+                                    
+                                    <div class="premium-card-footer">
+                                        <div class="date-info">
+                                            <span class="date-text">{{ $anniversary->format('d M, Y') }}</span>
+                                        </div>
+                                        <div class="status-indicator {{ $daysRemaining == 0 ? 'is-today' : 'is-upcoming' }}">
+                                            @if($daysRemaining == 0)
+                                                Today! 🎊
+                                            @else
+                                                {{ $daysRemaining }} Days Left
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
+                @endif
+            @endforeach
+        </div>
 
-                    <div>
-                        <span class="status-pill">
-                            UPCOMING
-                        </span>
-                    </div>
-
-                </div>
-            @endif
-
-        @endforeach
-
-    </div>
-
-
-
-    <!-- Anniversary Tab -->
-    <div id="tab-anniversary" class="tab-content d-none">
-
-        @foreach ($employees as $employee)
-
-            @php
-
-                $joiningDate = \Carbon\Carbon::parse($employee->date_of_joining);
-
-                $anniversary = $joiningDate->copy()
-                    ->year(now()->year);
-
-                if ($anniversary->isPast()) {
-                    $anniversary->addYear();
-                }
-
-                $totalDaysLeft = $today->diffInDays($anniversary->startOfDay());
-
-                $yearsCompleted = $joiningDate->diffInYears($anniversary);
-
-            @endphp
-
-            @if ($totalDaysLeft <= 3)
-                <div class="log-card">
-
-                    <div class="log-date">
-
-                        <h2>
-                            {{ $anniversary->format('d') }}
-                        </h2>
-
-                        <span>
-                            {{ strtoupper($anniversary->format('M')) }}
-                        </span>
-
-                    </div>
-
-                    <div class="log-info">
-
-                        <h4>
-                            {{ $employee->name }}
-                        </h4>
-
-                        <div class="log-meta">
-
-                            <span class="meta-badge anniversary">
-                                {{ $yearsCompleted }} YEARS
-                            </span>
-
-                            <span class="meta-days">
-                                {{ $totalDaysLeft }} days left
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div>
-                        <span class="status-pill">
-                            UPCOMING
-                        </span>
-                    </div>
-
-                </div>
-            @endif
-
-
-        @endforeach
-
+        @if($anniversaryCount == 0)
+            <div class="empty-state-premium">
+                <div class="empty-icon">🏆</div>
+                <h3>No Anniversaries Soon</h3>
+                <p>No work anniversaries in the next 3 days.</p>
+            </div>
+        @endif
     </div>
 
 </div>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
-    /* Wrapper */
-    .employee-day-wrapper{
-        padding: 32px 36px;
-        background: #f8fafc;
-        min-height: 100vh;
+    .celebrations-container {
+        --bg-main: #f0f4f9;
+        --card-bg: #ffffff;
+        --primary: #6366f1;
+        --secondary: #a855f7;
+        --text-dark: #0f172a;
+        --text-light: #64748b;
+        --birthday-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        --anniversary-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+        --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
+        --shadow-strong: 0 20px 50px -12px rgba(99, 102, 241, 0.15);
+        
+        padding: 30px;
+        font-family: 'Outfit', sans-serif;
     }
 
-    /* Header */
-    .top-header{
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        margin-bottom: 32px;
-        flex-wrap: wrap;
-        gap: 20px;
+    /* Hero Header */
+    .celebrations-hero {
+        text-align: center;
+        margin-bottom: 60px;
     }
 
-    .page-title{
-        font-size: 24px;
+    .hero-title {
+        font-size: 48px;
         font-weight: 700;
-        color: #172b4d;
-        margin-bottom: 4px;
-        line-height: 1.2;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
     }
 
-    .page-subtitle{
-        font-size: 14px;
-        color: #7b8794;
-        margin-bottom: 0;
-        font-weight: 500;
+    .gradient-text {
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    /* Tabs */
-    .custom-tabs{
-        background: #f1f5f9;
-        padding: 4px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
+    .hero-subtitle {
+        font-size: 18px;
+        color: var(--text-light);
+        margin-bottom: 40px;
     }
 
-    .tab-btn{
+    /* Switcher */
+    .celebration-switcher {
+        display: inline-flex;
+        background: #fff;
+        padding: 8px;
+        border-radius: 24px;
+        box-shadow: var(--shadow-soft);
+        gap: 8px;
+    }
+
+    .switcher-btn {
         border: none;
         background: transparent;
-        padding: 10px 26px;
-        border-radius: 12px;
-        font-size: 14px;
+        padding: 12px 32px;
+        border-radius: 18px;
+        font-size: 16px;
         font-weight: 600;
-        color: #94a3b8;
-        transition: 0.3s;
-    }
-
-    .tab-btn.active{
-        background: #fff;
-        color: #172b4d;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    }
-
-    .tab-content{
-        width: 75%;
-        margin: auto;
-    }
-
-    /* Cards */
-    .log-card{
-        background: #fff;
-        border: 1px solid #edf0f5;
-        border-radius: 24px;
-        padding: 28px 32px;
-        margin-bottom: 20px;
+        color: var(--text-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 20px;
+        gap: 10px;
     }
 
-    /* Date */
-    .log-date{
-        min-width: 78px;
-        border-right: 1px solid #edf0f5;
-        padding-right: 24px;
-        text-align: center;
+    .switcher-btn.active {
+        background: var(--text-dark);
+        color: #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
-    .log-date h2{
-        font-size: 28px;
-        line-height: 1;
+    /* Grid - 3 per row */
+    .premium-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Premium Card */
+    .premium-card-wrapper {
+        perspective: 2000px;
+    }
+
+    .premium-card {
+        background: var(--card-bg);
+        border-radius: 32px;
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(255,255,255,0.8);
+        min-height: 200px;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-15px) rotateX(5deg) rotateY(-5deg);
+        box-shadow: var(--shadow-strong);
+    }
+
+    .card-glow {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        transition: all 0.5s ease;
+    }
+
+    .premium-card:hover .card-glow {
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    }
+
+    .premium-card-body {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Profile Section */
+    .premium-profile-section {
+        flex-shrink: 0;
+    }
+
+    .premium-avatar-container {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        padding: 6px;
+        background: #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        position: relative;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .avatar-initials {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--primary);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
         font-weight: 700;
-        color: #172b4d;
-        margin-bottom: 2px;
     }
 
-    .log-date span{
-        font-size: 13px;
-        font-weight: 700;
-        color: #94a3b8;
-        letter-spacing: 0.5px;
+    .floating-icon {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        background: #fff;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        border: 3px solid #fff;
+        z-index: 10;
+        transition: all 0.3s ease;
     }
 
-    /* Info */
-    .log-info{
+    .premium-card:hover .floating-icon {
+        transform: scale(1.2) rotate(15deg);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+    }
+
+    /* Info Section */
+    .premium-info-section {
         flex: 1;
     }
 
-    .log-info h4{
-        font-size: 16px;
+    .emp-name {
+        font-size: 24px;
         font-weight: 700;
-        color: #172b4d;
-        margin-bottom: 8px;
+        color: var(--text-dark);
+        margin-bottom: 6px;
+        letter-spacing: -0.01em;
     }
 
-    /* Meta */
-    .log-meta{
+    .emp-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 24px;
+    }
+
+    .premium-card-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .date-info {
         display: flex;
         align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
+        gap: 8px;
+        color: var(--text-light);
+        font-weight: 500;
     }
 
-    .meta-badge{
-        background: #f1f5f9;
-        color: #8b9bb4;
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .3px;
-    }
-
-    .meta-badge.anniversary{
-        background: #ecfdf3;
-        color: #16a34a;
-    }
-
-    .meta-days{
-        color: #64748b;
-        font-weight: 700;
+    .status-indicator {
+        display: inline-flex;
+        padding: 6px 16px;
+        border-radius: 12px;
         font-size: 13px;
-    }
-
-    .meta-time{
-        color: #64748b;
-        font-size: 13px;
-    }
-
-    /* Status */
-    .status-pill{
-        background: #f1f5f9;
-        color: #64748b;
-        padding: 9px 18px;
-        border-radius: 30px;
-        font-size: 12px;
         font-weight: 700;
-        letter-spacing: .3px;
+        width: fit-content;
     }
 
-/* Mobile */
-@media(max-width:768px){
-
-    .employee-day-wrapper{
-        padding: 20px;
+    .is-today {
+        background: #fff1f2;
+        color: #e11d48;
+        border: 1px solid #fecdd3;
+        animation: pulse-border 2s infinite;
     }
 
-    .log-card{
+    .is-upcoming {
+        background: #f0f9ff;
+        color: #0284c7;
+        border: 1px solid #bae6fd;
+    }
+
+    .is-passed {
+        background: #f8fafc;
+        color: #94a3b8;
+        border: 1px solid #e2e8f0;
+    }
+
+    @keyframes pulse-border {
+        0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(225, 29, 72, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+    }
+
+    /* Animations */
+    .animate-card {
+        animation: slideUp 0.8s cubic-bezier(0.2, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .premium-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+        .premium-grid { grid-template-columns: 1fr; }
+        .celebrations-container { padding: 40px 20px; }
+        .hero-title { font-size: 36px; }
+        .premium-card-body { flex-direction: column; text-align: center; }
+        .status-indicator { margin: 0 auto; }
+    }
+
+    .d-none { display: none; }
+
+    /* Empty State */
+    .empty-state-premium {
+        background: white;
+        border-radius: 40px;
+        padding: 80px 40px;
+        text-align: center;
+        border: 3px dashed #e2e8f0;
+        margin-top: 40px;
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        padding: 22px;
-    }
-
-    .log-date{
-        border-right: none;
-        border-bottom: 1px solid #edf0f5;
-        padding-right: 0;
-        padding-bottom: 14px;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        text-align: left;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        grid-column: 1 / -1; /* Span full grid width */
     }
 
-}
+    .empty-icon {
+        font-size: 80px;
+        margin-bottom: 24px;
+        animation: float-emoji 3s ease-in-out infinite;
+    }
+
+    @keyframes float-emoji {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-10px) scale(1.1); }
+    }
+
+    .empty-state-premium h3 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 12px;
+    }
+
+    .empty-state-premium p {
+        font-size: 16px;
+        color: var(--text-light);
+        max-width: 400px;
+    }
 
 </style>
 
 <script>
-
-    function switchTab(tabId, el){
-
-        document.querySelectorAll('.tab-btn')
-            .forEach(btn => btn.classList.remove('active'));
-
+    function switchCelebrationTab(tabId, el) {
+        document.querySelectorAll('.switcher-btn').forEach(btn => btn.classList.remove('active'));
         el.classList.add('active');
 
-        document.querySelectorAll('.tab-content')
-            .forEach(tab => tab.classList.add('d-none'));
+        document.querySelectorAll('.celebration-section').forEach(sec => sec.classList.add('d-none'));
+        const target = document.getElementById('tab-' + tabId);
+        target.classList.remove('d-none');
 
-        document.getElementById('tab-' + tabId)
-            .classList.remove('d-none');
+        // Re-trigger animations
+        const cards = target.querySelectorAll('.animate-card');
+        cards.forEach((card, index) => {
+            card.style.animation = 'none';
+            card.offsetHeight; // reflow
+            card.style.animation = null;
+            card.style.animationDelay = (index * 0.1) + 's';
+        });
     }
 
+    document.addEventListener('DOMContentLoaded', function() {
+        const initialCards = document.querySelectorAll('#tab-birthday .animate-card');
+        initialCards.forEach((card, index) => {
+            card.style.animationDelay = (index * 0.1) + 's';
+        });
+    });
 </script>
 
 @endsection
