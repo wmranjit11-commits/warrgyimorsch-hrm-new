@@ -61,7 +61,7 @@ class LeaveController extends Controller
                 ->get();
         }
 
-        return view('leave.allotment', compact('employees', 'allotments', 'selectedMonth', 'history'));
+        return view('leave.allotment', compact('employees', 'allotments', 'selectedMonth', 'history', 'isAdmin'));
     }
 
     public function storeAllotment(Request $request)
