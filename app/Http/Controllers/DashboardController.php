@@ -439,7 +439,6 @@ class DashboardController extends Controller
 
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
             ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
-
             ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
         // USER → force own data
@@ -524,23 +523,24 @@ class DashboardController extends Controller
         // USER → include attendance count
 
         $leaveDates = LeaveApplication::where('employee_id', $employeeId)
-            ->whereIn('status', ['approved', 'unauthorised'])
-            ->when($from && $to, function ($q) use ($from, $to) {
-                $q->where(function ($sub) use ($from, $to) {
-                    $sub->whereBetween('start_date', [$from, $to])
-                        ->orWhereBetween('end_date', [$from, $to]);
-                });
-            })
-            ->get()
-            ->flatMap(function ($leave) {
-                $dates = [];
-                $start = \Carbon\Carbon::parse($leave->start_date);
-                $end = \Carbon\Carbon::parse($leave->end_date);
+        ->whereIn('status', ['approved', 'unauthorised'])
+        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%')
+        ->when($from && $to, function ($q) use ($from, $to) {
+            $q->where(function ($sub) use ($from, $to) {
+                $sub->whereBetween('start_date', [$from, $to])
+                    ->orWhereBetween('end_date', [$from, $to]);
+            });
+        })
+        ->get()
+        ->flatMap(function ($leave) {
+            $dates = [];
+            $start = \Carbon\Carbon::parse($leave->start_date);
+            $end = \Carbon\Carbon::parse($leave->end_date);
 
-                while ($start->lte($end)) {
-                    $dates[] = $start->toDateString();
-                    $start->addDay();
-                }
+            while ($start->lte($end)) {
+                $dates[] = $start->toDateString();
+                $start->addDay();
+            }
 
                 return $dates;
             });

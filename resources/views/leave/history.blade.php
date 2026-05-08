@@ -173,9 +173,6 @@
                                         <td class="small text-muted">
                                             <div class="fw-bold text-dark">
                                                 {{ $leave->start_date->format('d-M-Y') }}
-                                                <span class="ms-1 text-muted fw-normal">
-                                                    ({{ $leave->total_days }} {{ str_contains(strtolower($leave->leave_category), 'wfh') ? 'Days (WFH)' : ($leave->total_days == 1 ? 'Day' : 'Days') }})
-                                                </span>
                                             </div>
                                             @if(str_contains(strtolower($leave->leave_category), 'gatepass') && $leave->start_time)
                                                 <span class="badge bg-soft-info text-info p-1 px-2 mt-1" style="font-size: 9px;">

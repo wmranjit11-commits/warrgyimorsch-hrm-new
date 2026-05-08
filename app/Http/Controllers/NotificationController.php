@@ -55,6 +55,6 @@ class NotificationController extends Controller
                 ->paginate(20);
         }
 
-        return view('notifications.index', compact('notifications', 'role'));
+        return view('notifications.index', compact('notifications', 'isAdmin'));
     }
 }
