@@ -59,10 +59,11 @@
                         <h5 class="fw-bold mb-0 me-3" style="color: #334155; font-size: 16px;">Department List</h5>
                     </div>
 
-                    <div class="input-group" style="width: 250px;">
-                        <span class="input-group-text bg-light border-0"><i class="feather-search text-muted"></i></span>
-                        <input type="text" id="deptSearch" class="form-control bg-light border-0 shadow-none fw-bold"
-                            placeholder="Search..." onkeyup="filterDepts()" style="height: 44px; font-size: 14px; border-radius: 0 10px 10px 0;">
+                    <div class="wghrm-search-container d-flex align-items-center"
+                        style="width: 250px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
+                        <i class="feather-search text-muted" style="font-size: 14px;"></i>
+                        <input type="text" id="deptSearch" onkeyup="filterDepts()" placeholder="Search..."
+                            style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
                     </div>
                 </div>
                 
@@ -150,6 +151,12 @@
     }
     .table thead th { border: none !important; }
     .avatar-md { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+
+    .wghrm-search-container:focus-within {
+        border-color: #3858f9 !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.1) !important;
+    }
 </style>
 
 <script>

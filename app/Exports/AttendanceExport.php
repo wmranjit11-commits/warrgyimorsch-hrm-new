@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Holiday;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -20,10 +21,12 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     protected $endDate;
     protected $dates = [];
     protected $attendanceMap;
+    protected $holidayMap = [];
+    protected $activityDays = [];
     protected $employeeId;
 
 
-    public function __construct($startDate, $endDate ,$employeeId)
+    public function __construct($startDate, $endDate, $employeeId)
     {
         $this->startDate = Carbon::parse($startDate)->startOfDay();
         $this->endDate = Carbon::parse($endDate)->endOfDay();
@@ -44,18 +47,49 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $attQuery->where('employee_id', $this->employeeId);
         }
 
-        $attendances = $attQuery->get();
+        $attendances = $attQuery->with('employee')->get();
 
         $this->attendanceMap = [];
-
+        $attendancesByDate = [];
         foreach ($attendances as $att) {
             $dateKey = Carbon::parse($att->attendance_date)->format('Y-m-d');
+            $this->attendanceMap[$att->employee_id][$dateKey] = $att;
+            $attendancesByDate[$dateKey][] = $att;
+        }
 
-            $this->attendanceMap[$att->employee_id][$dateKey] = strtoupper(substr($att->status, 0, 1));
+        foreach ($attendancesByDate as $date => $atts) {
+            $earlyOuts = 0;
+            $totalPresent = 0;
+            foreach ($atts as $att) {
+                if (strtolower($att->status) === 'present' || strtolower($att->status) === 'early_out') {
+                    if ($att->check_out && $att->employee && $att->employee->time_out) {
+                        $totalPresent++;
+                        $checkOut = Carbon::parse($att->check_out);
+                        $punchTime = $checkOut->format('H:i');
+                        // Early out if between 3:00 PM and 5:30 PM
+                        if ($punchTime >= '15:00' && $punchTime < '17:30') {
+                            $earlyOuts++;
+                        }
+                    }
+                }
+            }
+            if ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7) {
+                $this->activityDays[$date] = true;
+            }
+        }
+
+        $holidays = Holiday::whereBetween('date', [
+            $this->startDate->toDateString(),
+            $this->endDate->toDateString()
+        ])->get();
+
+        foreach ($holidays as $h) {
+            $dateKey = Carbon::parse($h->date)->format('Y-m-d');
+            $this->holidayMap[$dateKey] = $h->title;
         }
     }
 
-  public function collection()
+    public function collection()
     {
         $query = Employee::orderBy('name', 'asc');
 
@@ -98,17 +132,77 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
         foreach ($this->dates as $date) {
             $dateKey = $date->format('Y-m-d');
+            $att = $this->attendanceMap[$emp->id][$dateKey] ?? null;
 
-            $status = $this->attendanceMap[$emp->id][$dateKey] ?? '-';
+            if ($att) {
+                $statusRaw = strtolower($att->status);
+                $displayText = ucfirst(str_replace('_', ' ', $statusRaw));
+                $isActivityDay = isset($this->activityDays[$dateKey]);
 
-            $row[] = $status;
+                if (in_array($statusRaw, ['present', 'late', 'early_out', 'half_day', 'wfh', 'early_leave'])) {
+                    $times = [];
+                    if ($att->check_in) {
+                        $times[] = Carbon::parse($att->check_in)->format('h:i A');
+                    }
+                    if ($att->check_out) {
+                        $times[] = Carbon::parse($att->check_out)->format('h:i A');
+                    }
 
-            if ($status === 'P') {
-                $present++;
-            } elseif ($status === 'A') {
-                $absent++;
-            } elseif ($status !== '-') {
-                $others++;
+                    $appendActivity = false;
+                    $isEarly = false;
+                    $isHalfDayPunch = false;
+
+                    if ($att->check_out && $att->employee && $att->employee->time_out) {
+                        $checkOut = Carbon::parse($att->check_out);
+                        $punchTime = $checkOut->format('H:i');
+                        
+                        if ($punchTime < '15:00') {
+                            $isHalfDayPunch = true;
+                        } elseif ($punchTime < '17:30') {
+                            $isEarly = true;
+                        }
+                    }
+
+                    if ($isActivityDay && ($isEarly || $statusRaw === 'early_out' || $statusRaw === 'early_leave' || ($statusRaw === 'half_day' && !$isHalfDayPunch))) {
+                        $displayText = "Present";
+                        $appendActivity = true;
+                    } else {
+                        if ($isEarly) {
+                            $displayText = "Early Out";
+                        } elseif ($isHalfDayPunch || $statusRaw === 'half_day') {
+                            $displayText = "Half Day";
+                        } else {
+                            $displayText = ucfirst(str_replace('_', ' ', $statusRaw));
+                            if ($displayText === 'Early out' || $displayText === 'Early leave') {
+                                $displayText = 'Early Out';
+                            }
+                        }
+                    }
+
+                    if (!empty($times)) {
+                        $displayText .= ' (' . implode(' - ', $times) . ')';
+                    }
+
+                    if ($appendActivity) {
+                        $displayText .= " Activity";
+                    }
+
+                    $present++;
+                }
+ elseif ($statusRaw === 'absent' || $statusRaw === 'leave') {
+                    $absent++;
+                } else {
+                    $others++;
+                }
+                $row[] = $displayText;
+            } else {
+                if ($date->isSunday()) {
+                    $row[] = 'Sunday';
+                } elseif (isset($this->holidayMap[$dateKey])) {
+                    $row[] = $this->holidayMap[$dateKey];
+                } else {
+                    $row[] = '-';
+                }
             }
         }
 
