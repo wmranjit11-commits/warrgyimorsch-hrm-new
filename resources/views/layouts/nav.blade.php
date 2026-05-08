@@ -202,7 +202,7 @@
                     </ul>
                 </li>
                 <li class="nxl-item">
-                    <a href="{{ route('employee.day') }}" class="nxl-link">
+                    <a href="{{ route('employees.employeeDays') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="fa-solid fa-cake-candles"></i></span>
                         <span class="nxl-mtext">Celebrations</span>
                     </a>

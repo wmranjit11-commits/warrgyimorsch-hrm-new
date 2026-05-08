@@ -66,6 +66,9 @@ class LeaveController extends Controller
 
     public function storeAllotment(Request $request)
     {
+
+        // echo "<pre>";print_r($request);exit;
+
         $roleSlug = auth()->user()->role; // e.g. "manager"
 
         $roleId = DB::table('roles_master')

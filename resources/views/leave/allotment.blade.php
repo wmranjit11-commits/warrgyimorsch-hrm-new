@@ -81,7 +81,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center">
-                                                    @if(auth()->user()->role === 'admin')
+                                                    @if(auth()->user()->role === 'super_admin')
                                                         <input type="number" step="0.5"
                                                             class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
                                                             data-employee-id="{{ $emp->id }}"
