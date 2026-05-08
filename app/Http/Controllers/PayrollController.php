@@ -537,7 +537,7 @@ class PayrollController extends Controller
             }
 
             // 📧 Send Email
-            \Mail::to('mohammadkaif.warrgyizmorsch@gmail.com')->send(
+            \Mail::to($employee->email)->send(
                 new \App\Mail\SalarySlipMail($employee, $total, $allPayrolls)
             );
             // return response()->json([
