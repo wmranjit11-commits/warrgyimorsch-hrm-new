@@ -287,9 +287,9 @@
                 @csrf
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
-                                class="text-danger">*</span></label>
-                        <input type="text"
+                        <!-- <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
+                                class="text-danger">*</span></label> -->
+                        <input type="hidden"
                             class="form-control border-0 bg-light shadow-sm"
                             value="{{ auth()->user()->name }}"
                             readonly
@@ -297,8 +297,8 @@
                         <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label>
-                        <input type="text" class="form-control border-0 bg-light shadow-sm" value="{{ date('d-m-Y') }}"
+                        <!-- <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label> -->
+                        <input type="hidden" class="form-control border-0 bg-light shadow-sm" value="{{ date('d-m-Y') }}"
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
@@ -339,6 +339,22 @@
                             <option value="First Half">First Half</option>
                             <option value="Second Half">Second Half</option>
                         </select>
+                    </div>
+
+                    
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
+                                class="text-danger">*</span></label>
+                        <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
+                            style="height: 48px; border-radius: 10px;" required onchange="calculateDays()"
+                            min="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <div class="col-md-6" id="endDateWrapper">
+                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
+                        <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
+                            style="height: 48px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-6" id="leaveTypeWrapper">
@@ -389,7 +405,7 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Total Days/Duration</label>
                         <input type="text" name="total_days" id="totalDays"
                             class="form-control border-0 bg-light shadow-sm fw-bold text-primary" value="1"

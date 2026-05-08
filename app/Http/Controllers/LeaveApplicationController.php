@@ -10,6 +10,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LeaveApplicationMail;
+use App\Mail\LeaveStatusUpdatedMail;
 
 class LeaveApplicationController extends Controller
 {
@@ -143,7 +146,12 @@ class LeaveApplicationController extends Controller
             $data['end_date'] = $request->end_date ?? $request->start_date;
         }
 
-        LeaveApplication::create($data);
+        // LeaveApplication::create($data);
+        $leave = LeaveApplication::create($data);
+        $employee = Employee::findOrFail($data['employee_id']);
+
+        Mail::to('mdkaif14104@gmail.com')
+            ->send((new LeaveApplicationMail($leave, $employee))->replyTo($employee->email));
 
         return response()->json(['success' => true, 'message' => 'Leave application submitted successfully']);
     }
@@ -225,6 +233,13 @@ class LeaveApplicationController extends Controller
         }
 
         $leave->update(['status' => $request->status]);
+
+        $employee = Employee::find($leave->employee_id);
+
+        if ($employee && $employee->email) {
+            Mail::to($employee->email)
+                ->send(new LeaveStatusUpdatedMail($leave, $employee));
+        }
 
         return response()->json(['success' => true, 'message' => 'Status updated successfully']);
     }
