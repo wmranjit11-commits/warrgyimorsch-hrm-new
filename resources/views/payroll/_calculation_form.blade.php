@@ -8,25 +8,40 @@
                 <div class="row g-2 align-items-end">
                     <div class="col-4">
                         <label class="form-label small fw-bold text-muted mb-2">Employee</label>
-                        <select id="employeeSelect" class="form-select border-0 bg-light py-2 px-2 shadow-none fw-bold"
-                            style="border-radius: 8px; height: 45px; font-size: 13px;">
-                            <option value="">Select</option>
-                            @foreach (\App\Models\Employee::all() as $emp)
-                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="dropdown">
+                            <button class="wghrm-custom-select-btn fw-bold dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" data-bs-auto-close="outside" id="employeeSelectBtn"
+                                style="border-radius: 8px; height: 45px !important; font-size: 13px; background: #f1f5f9; border: none; box-shadow: none;">
+                                Select
+                            </button>
+                            <div class="dropdown-menu wghrm-custom-dropdown-menu" style="width: 100%;">
+                                <div class="wghrm-custom-search-box">
+                                    <input type="text" class="wghrm-custom-search-input"
+                                        placeholder="Search employee..." onkeyup="wghrmFilterItems(this)"
+                                        onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                </div>
+                                @foreach(\App\Models\Employee::all() as $emp)
+                                    <a class="dropdown-item wghrm-custom-dropdown-item"
+                                        href="javascript:void(0);"
+                                        onclick="document.getElementById('employeeSelect').value='{{ $emp->id }}'; document.getElementById('employeeSelectBtn').innerText='{{ addslashes($emp->name) }}'; bootstrap.Dropdown.getInstance(this.closest('.dropdown').querySelector('.dropdown-toggle')).hide();">
+                                        {{ $emp->name }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                        <input type="hidden" id="employeeSelect" value="">
                     </div>
                     <div class="col-4 text-center">
                         <label class="form-label small fw-bold text-muted mb-2">Month</label>
                         <input type="month" id="monthSelect"
                             class="form-control border-0 bg-light py-2 px-2 shadow-none fw-bold text-center"
-                            value="{{ date('Y-m') }}" style="border-radius: 8px; height: 45px; font-size: 13px;">
+                            value="{{ date('Y-m') }}" style="border-radius: 8px; height: 45px !important; font-size: 13px;">
                     </div>
                     <div class="col-4 ps-0">
                         <button
                             class="btn btn-primary w-100 fw-bold shadow-sm"
                             onclick="calculatePayroll()"
-                            style="background: #3858f9; border: none; height: 45px; border-radius: 8px; font-size: 12px; letter-spacing: 0.5px;">
+                            style="background: #3858f9; border: none; height: 45px !important; border-radius: 8px; font-size: 12px; letter-spacing: 0.5px;">
                             CALCULATE
                         </button>
                     </div>

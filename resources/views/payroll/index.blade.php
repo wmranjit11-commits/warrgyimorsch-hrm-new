@@ -20,17 +20,17 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <!-- Share Salary Report -->
-                        <a href="javascript:void(0)" id="shareReportBtn" class="btn btn-icon btn-light-brand text-white bg-primary" 
-                            title="Share Salary Report">
+                        <a href="javascript:void(0)" id="shareReportBtn"
+                            class="btn btn-icon btn-light-brand text-white bg-primary" title="Share Salary Report">
                             <label>Share salary report</label>
                         </a>
-                        
+
                         <!-- Right Aligned Search & Actions -->
-                        <div class="input-group d-none d-md-flex" style="width: 250px;">
-                            <span class="input-group-text bg-light border-0"><i
-                                    class="feather-search text-muted"></i></span>
-                            <input type="text" id="tableSearch" class="form-control bg-light border-0 shadow-none"
-                                placeholder="Search..." onkeyup="applyFilters()">
+                        <div class="d-none d-md-flex align-items-center"
+                            style="width: 280px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
+                            <i class="feather-search text-muted" style="font-size: 14px;"></i>
+                            <input type="text" id="tableSearch" onkeyup="applyFilters()" placeholder="Search..."
+                                style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
                         </div>
 
                         <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
@@ -39,29 +39,25 @@
                         </a>
 
                         <!-- <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
-                            onclick="exportPayroll('pdf')" title="Download All (PDF)">
-                            <i class="feather-download"></i>
-                        </a> -->
+                                                                onclick="exportPayroll('pdf')" title="Download All (PDF)">
+                                                                <i class="feather-download"></i>
+                                                            </a> -->
                         <div class="relative inline-block" id="exportWrapper">
                             <!-- Button -->
-                            <a href="javascript:void(0);"
-                            id="exportBtn"
-                            class="avatar-text avatar-md bg-soft-primary text-primary d-flex align-items-center justify-content-center">
+                            <a href="javascript:void(0);" id="exportBtn"
+                                class="avatar-text avatar-md bg-soft-primary text-primary d-flex align-items-center justify-content-center">
                                 <i class="feather-download"></i>
                             </a>
 
                             <!-- Dropdown -->
-                            <div id="exportMenu"
-                                class="d-none position-absolute end-0 mt-2 bg-white border rounded shadow"
+                            <div id="exportMenu" class="d-none position-absolute end-0 mt-2 bg-white border rounded shadow"
                                 style="width: 140px; z-index: 9999;">
 
-                                <button onclick="exportPayroll('pdf')"
-                                    class="dropdown-item text-start">
+                                <button onclick="exportPayroll('pdf')" class="dropdown-item text-start">
                                     📄 PDF
                                 </button>
 
-                                <button onclick="exportPayroll('excel')"
-                                    class="dropdown-item text-start">
+                                <button onclick="exportPayroll('excel')" class="dropdown-item text-start">
                                     📊 Excel
                                 </button>
 
@@ -84,28 +80,44 @@
                         @csrf
                         <!-- Employee Dropdown -->
                         <div class="mb-3">
-                            <label class="form-label">Select Employee</label>
-                            <select class="form-control" name="employee_id">
-                                <option value="">Select</option>
-                                @foreach (\App\Models\Employee::all() as $emp)
-                                    <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                                @endforeach
-                            </select>
+                            <label class="form-label small fw-bold text-muted mb-2">Select Employee</label>
+                            <div class="dropdown">
+                                <button class="wghrm-custom-select-btn fw-bold dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown" data-bs-auto-close="outside" id="salaryEmployeeBtn"
+                                    style="border-radius: 8px; height: 45px !important; font-size: 14px; background: #fff; border: 1px solid #e2e8f0;">
+                                    Select
+                                </button>
+                                <div class="dropdown-menu wghrm-custom-dropdown-menu" style="width: 100%;">
+                                    <div class="wghrm-custom-search-box">
+                                        <input type="text" class="wghrm-custom-search-input"
+                                            placeholder="Search employee..." onkeyup="wghrmFilterItems(this)"
+                                            onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                    </div>
+                                    @foreach(\App\Models\Employee::all() as $emp)
+                                        <a class="dropdown-item wghrm-custom-dropdown-item"
+                                            href="javascript:void(0);"
+                                            onclick="document.getElementById('salaryEmployeeId').value='{{ $emp->id }}'; document.getElementById('salaryEmployeeBtn').innerText='{{ addslashes($emp->name) }}'; bootstrap.Dropdown.getInstance(this.closest('.dropdown').querySelector('.dropdown-toggle')).hide();">
+                                            {{ $emp->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <input type="hidden" id="salaryEmployeeId" name="employee_id" value="">
                         </div>
 
                         <!-- Date From -->
                         <div class="mb-3">
-                            <label class="form-label">From Date</label>
-                            <input type="date" name="from_date" class="form-control">
+                            <label class="form-label small fw-bold text-muted mb-2">From Date</label>
+                            <input type="date" name="from_date" class="form-control" style="height: 45px; border-radius: 8px;">
                         </div>
 
                         <!-- Date To -->
                         <div class="mb-3">
-                            <label class="form-label">To Date</label>
-                            <input type="date" name="to_date" class="form-control">
+                            <label class="form-label small fw-bold text-muted mb-2">To Date</label>
+                            <input type="date" name="to_date" class="form-control" style="height: 45px; border-radius: 8px;">
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Generate</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold" style="height: 45px; border-radius: 8px; background: #3858f9; border: none;">GENERATE SLIP</button>
                     </form>
                 </div>
 
@@ -115,32 +127,51 @@
                         <div class="row g-3 align-items-end">
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted mb-2">Employee</label>
-                                <select id="employeeFilter"
-                                    class="form-select border-0 bg-white py-2 px-3 shadow-sm fw-bold"
-                                    style="border-radius: 8px; height: 40px;">
-                                    <option value="">All Employees</option>
-                                    @foreach(\App\Models\Employee::all() as $emp)
-                                        <option value="{{ $emp->id }}" {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
-                                            {{ $emp->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <div class="dropdown">
+                                    <button class="wghrm-custom-select-btn fw-bold dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="outside" id="employeeFilterBtn"
+                                        style="border-radius: 8px; height: 47px !important;">
+                                        @php
+                                            $selectedEmp = \App\Models\Employee::find(request('employee_id'));
+                                        @endphp
+                                        {{ $selectedEmp ? $selectedEmp->name : 'All Employees' }}
+                                    </button>
+                                    <div class="dropdown-menu wghrm-custom-dropdown-menu">
+                                        <div class="wghrm-custom-search-box">
+                                            <input type="text" class="wghrm-custom-search-input"
+                                                placeholder="Search employee..." onkeyup="wghrmFilterItems(this)"
+                                                onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                        </div>
+                                        <a class="dropdown-item wghrm-custom-dropdown-item {{ !request('employee_id') ? 'active' : '' }}"
+                                            href="javascript:void(0);"
+                                            onclick="document.getElementById('employeeFilter').value=''; document.getElementById('employeeFilterBtn').innerText='All Employees';">All
+                                            Employees</a>
+                                        @foreach(\App\Models\Employee::all() as $emp)
+                                            <a class="dropdown-item wghrm-custom-dropdown-item {{ request('employee_id') == $emp->id ? 'active' : '' }}"
+                                                href="javascript:void(0);"
+                                                onclick="document.getElementById('employeeFilter').value='{{ $emp->id }}'; document.getElementById('employeeFilterBtn').innerText='{{ addslashes($emp->name) }}';">
+                                                {{ $emp->name }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <input type="hidden" id="employeeFilter" value="{{ request('employee_id') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted mb-2">Month</label>
                                 <input type="month" id="monthFilter"
-                                    class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
-                                    value="{{ request('month') }}" style="border-radius: 8px; height: 40px;">
+                                    class="form-control border-0 bg-white py-0 px-3 shadow-sm fw-bold"
+                                    value="{{ request('month') }}" style="border-radius: 8px; height: 47px !important;">
                             </div>
                             <div class="col-md-4 d-flex gap-2">
                                 <button
                                     class="btn btn-primary flex-grow-1 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
-                                    style="background: #3858f9; border: none; height: 40px; border-radius: 8px;">
+                                    style="background: #3858f9; border: none; height: 47px !important; border-radius: 8px;">
                                     <i class="feather-search"></i> APPLY
                                 </button>
                                 <button class="btn btn-light border px-3 shadow-none" onclick="resetFilters()"
-                                    style="height: 40px; border-radius: 8px;">
+                                    style="height: 47px !important; border-radius: 8px;">
                                     <i class="feather-refresh-cw" style="font-size: 14px;"></i>
                                 </button>
                             </div>
@@ -184,22 +215,31 @@
                                     <td class="text-center">
                                         @php
                                             $statusClass = 'bg-soft-warning text-warning';
-                                            if ($payroll->status == 'paid') $statusClass = 'bg-soft-success text-success';
-                                            elseif ($payroll->status == 'rejected') $statusClass = 'bg-soft-danger text-danger';
+                                            if ($payroll->status == 'paid')
+                                                $statusClass = 'bg-soft-success text-success';
+                                            elseif ($payroll->status == 'rejected')
+                                                $statusClass = 'bg-soft-danger text-danger';
                                         @endphp
                                         <div class="dropdown">
                                             <span class="badge {{ $statusClass }} dropdown-toggle cursor-pointer"
-                                                data-bs-toggle="dropdown" 
-                                                data-bs-boundary="viewport"
-                                                aria-expanded="false"
+                                                data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false"
                                                 style="padding: 7px 14px; border-radius: 9px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; min-width: 105px; display: inline-block; text-align: center;">
                                                 {{ $payroll->status }}
                                             </span>
-                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" 
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2"
                                                 style="border-radius: 16px; min-width: 160px; z-index: 9999999 !important; border: 1px solid rgba(0,0,0,0.05) !important; position: absolute !important;">
-                                                <li><a class="dropdown-item fw-bold text-warning rounded-3 py-2 px-3 mb-1" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'pending')" style="font-size: 13px;">Pending</a></li>
-                                                <li><a class="dropdown-item fw-bold text-success rounded-3 py-2 px-3 mb-1" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'paid')" style="font-size: 13px;">Paid</a></li>
-                                                <li><a class="dropdown-item fw-bold text-danger rounded-3 py-2 px-3" href="javascript:void(0);" onclick="updateStatus({{ $payroll->id }}, 'rejected')" style="font-size: 13px;">Rejected</a></li>
+                                                <li><a class="dropdown-item fw-bold text-warning rounded-3 py-2 px-3 mb-1"
+                                                        href="javascript:void(0);"
+                                                        onclick="updateStatus({{ $payroll->id }}, 'pending')"
+                                                        style="font-size: 13px;">Pending</a></li>
+                                                <li><a class="dropdown-item fw-bold text-success rounded-3 py-2 px-3 mb-1"
+                                                        href="javascript:void(0);"
+                                                        onclick="updateStatus({{ $payroll->id }}, 'paid')"
+                                                        style="font-size: 13px;">Paid</a></li>
+                                                <li><a class="dropdown-item fw-bold text-danger rounded-3 py-2 px-3"
+                                                        href="javascript:void(0);"
+                                                        onclick="updateStatus({{ $payroll->id }}, 'rejected')"
+                                                        style="font-size: 13px;">Rejected</a></li>
                                             </ul>
                                         </div>
                                     </td>
@@ -229,10 +269,8 @@
                                             @endphp
                                             <a href="javascript:void(0);"
                                                 class="avatar-text avatar-md bg-soft-secondary text-secondary comment-btn {{ (!$payroll->is_read && $isAdmin) ? 'blink' : '' }}"
-                                                data-id="{{ $payroll->id }}"
-                                                data-remark="{{ $payroll->remarks ?? '' }}"
-                                                data-role="{{ auth()->user()->role }}"
-                                                title="Comment">
+                                                data-id="{{ $payroll->id }}" data-remark="{{ $payroll->remarks ?? '' }}"
+                                                data-role="{{ auth()->user()->role }}" title="Comment">
                                                 <i class="feather-message-square"></i>
                                             </a>
                                         </div>
@@ -253,14 +291,15 @@
                     <div class="modal fade" id="commentModal" tabindex="-1">
                         <div class="modal-dialog">
                             <div class="modal-content" style="border-radius: 12px;">
-                                
+
                                 <div class="modal-header">
                                     <h5 class="modal-title">Add Comment</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
 
                                 <div class="modal-body">
-                                    <textarea id="remarksField" class="form-control" rows="4" placeholder="Write comment..."></textarea>
+                                    <textarea id="remarksField" class="form-control" rows="4"
+                                        placeholder="Write comment..."></textarea>
                                     <input type="hidden" id="userRole">
                                     <input type="hidden" id="payrollId">
                                 </div>
@@ -286,7 +325,8 @@
 
 @push('modals')
     <!-- Payroll Calculation Offcanvas -->
-    <div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="payrollCalculationOffcanvas" style="width: 650px !important; background: #f8fafc;">
+    <div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="payrollCalculationOffcanvas"
+        style="width: 650px !important; background: #f8fafc;">
         <div class="offcanvas-header bg-white border-bottom px-4 py-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-3">
@@ -358,7 +398,7 @@
             let saveBtn = document.getElementById('saveBtn');
 
             field.value = remarks || '';
-            
+
             if (role === 'employee') {
                 // ✅ Employee: can edit
                 field.removeAttribute('readonly');
@@ -404,16 +444,16 @@
                 },
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
-                    location.reload();
-                } else {
-                    alert("Error: " + (data.error || "Unknown error"));
-                }
-            })
-            .catch(err => console.error("Fetch Error:", err));
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+                        location.reload();
+                    } else {
+                        alert("Error: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(err => console.error("Fetch Error:", err));
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -452,6 +492,20 @@
             window.location.href = `{{ route("payroll.index") }}?month=${month}&employee_id=${empId}`;
         }
 
+        // Custom Dropdown Search Logic
+        function wghrmFilterItems(input) {
+            const filter = input.value.toLowerCase();
+            const items = input.closest('.wghrm-custom-dropdown-menu').querySelectorAll('.wghrm-custom-dropdown-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.setProperty('display', 'block', 'important');
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                }
+            });
+        }
+
         function resetFilters() {
             window.location.href = '{{ route("payroll.index") }}';
         }
@@ -461,9 +515,9 @@
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
 
             document.getElementById('payrollModalBody').innerHTML = `
-                    <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
-                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-                    </div>`;
+                                                        <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
+                                                            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                                                        </div>`;
 
             modal.show();
 
@@ -545,6 +599,106 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
+        .wghrm-custom-select-btn {
+            background-color: #fff;
+            border: 0;
+            box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+            border-radius: 8px;
+            color: #475569;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: 40px !important;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .wghrm-custom-select-btn::after {
+            border-top: .3em solid;
+            border-right: .3em solid transparent;
+            border-bottom: 0;
+            border-left: .3em solid transparent;
+            margin-left: .255em;
+            content: "";
+        }
+
+        .wghrm-custom-dropdown-menu {
+            border-radius: 16px !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
+            padding: 10px !important;
+            margin-top: 10px !important;
+            z-index: 1060 !important;
+            background: #fff !important;
+            max-height: 350px !important;
+            overflow-y: auto !important;
+            border: 1px solid rgba(0,0,0,0.05) !important;
+            min-width: 250px !important;
+            width: 100%;
+        }
+
+        /* Custom Scrollbar (Slider) */
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .wghrm-custom-dropdown-item {
+            border-radius: 10px !important;
+            padding: 10px 15px !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            color: #475569 !important;
+            margin-bottom: 3px !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+        }
+
+        .wghrm-custom-dropdown-item:hover,
+        .wghrm-custom-dropdown-item.active {
+            background: #f1f5f9 !important;
+            color: #3858f9 !important;
+        }
+
+        .wghrm-custom-search-box {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .wghrm-custom-search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .wghrm-custom-search-input:focus {
+            border-color: #3858f9;
+            box-shadow: 0 0 0 2px rgba(56, 88, 249, 0.1);
+        }
+
         .breadcrumb-item+.breadcrumb-item::before {
             content: ">";
             color: #94a3b8;
@@ -585,6 +739,46 @@
             letter-spacing: 0.3px;
             padding-top: 5px;
             padding-bottom: 5px;
+        }
+
+        /* Premium Calendar/Date Input Styling */
+        input[type="date"],
+        input[type="month"] {
+            border: 1px solid #e2e8f0 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #334155 !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+        }
+
+        input[type="date"]:hover,
+        input[type="month"]:hover {
+            border-color: #cbd5e1 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="date"]:focus,
+        input[type="month"]:focus {
+            border-color: #3858f9 !important;
+            box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.12) !important;
+            background-color: #ffffff !important;
+            outline: none !important;
+        }
+
+        /* Customizing the native calendar picker icon */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233858f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="month"]::-webkit-calendar-picker-indicator:hover {
+            background-color: rgba(56, 88, 249, 0.08);
         }
 
         .blink {

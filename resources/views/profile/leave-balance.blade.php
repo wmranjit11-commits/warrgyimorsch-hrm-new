@@ -105,31 +105,91 @@
         transform: translateY(-3px);
         box-shadow: 0 15px 35px rgba(56, 88, 249, 0.45) !important;
     }
+
+    /* Mobile Card UI Fixes */
+    @media (max-width: 767.98px) {
+        .inventory-container {
+            padding: 15px;
+        }
+        .inventory-header {
+            padding: 20px;
+        }
+        .mobile-inventory-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .mobile-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .mobile-stat-row:last-child {
+            border-bottom: none;
+            padding-bottom: 5px;
+        }
+        .mobile-stat-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .mobile-stat-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .mobile-balance-box {
+            background: rgba(34, 197, 94, 0.05);
+            border: 1px solid rgba(34, 197, 94, 0.1);
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .mobile-balance-badge {
+            background: #16a34a;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+    }
 </style>
 
 <div class="inventory-container">
-    <div class="d-flex justify-content-between align-items-center mb-5 mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bolder text-dark mb-1" style="font-size: 32px;">Leave Balance</h2>
-            <p class="text-muted small fw-bold text-uppercase mb-0" style="letter-spacing: 1.5px;">Detailed inventory of your leave accounts</p>
+            <h2 class="fw-bolder text-dark mb-1" style="font-size: 28px;">Leave Balance</h2>
+            <p class="text-muted small fw-bold text-uppercase mb-0" style="letter-spacing: 1px;">Detailed inventory of your leave accounts</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('profile.show') }}" class="btn btn-light rounded-circle shadow-sm" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                <i class="feather-user"></i>
+            <a href="{{ route('profile.show') }}" class="btn btn-white rounded-circle shadow-sm" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #e2e8f0;">
+                <i class="feather-user text-primary"></i>
             </a>
         </div>
     </div>
     
-    <div class="inventory-card">
+    <div class="inventory-card border-0 shadow-sm">
         <div class="inventory-header">
-            <div class="premium-search">
-                <i class="feather-search text-primary" style="font-size: 20px;"></i>
-                <input type="text" id="inventorySearch" placeholder="Search leave categories (e.g. Sick, Casual)..." onkeyup="filterInventory()">
+            <div class="premium-search shadow-sm">
+                <i class="feather-search text-primary" style="font-size: 18px;"></i>
+                <input type="text" id="inventorySearch" placeholder="Search leave categories..." onkeyup="filterInventory()">
             </div>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <!-- Desktop Table View -->
+            <div class="table-responsive d-none d-md-block">
                 <table class="table premium-table mb-0" id="inventoryTable">
                     <thead>
                         <tr>
@@ -141,7 +201,7 @@
                     </thead>
                     <tbody>
                         @foreach($balances as $b)
-                        <tr class="align-middle">
+                        <tr class="align-middle inventory-item">
                             <td>
                                 <div class="type-pill">
                                     <i class="feather-tag me-2 opacity-50"></i>
@@ -171,11 +231,45 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile Card View (Refined Stacked Design) -->
+            <div class="d-md-none p-3" id="mobileInventoryList">
+                @foreach($balances as $b)
+                <div class="mobile-inventory-card inventory-item">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-primary p-3 rounded-4 shadow-sm">
+                            <i class="feather-tag text-white" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h6 class="fw-800 text-dark mb-0" style="font-size: 16px; letter-spacing: 0.5px;">{{ strtoupper($b['type']) }}</h6>
+                    </div>
+                    
+                    <div class="mobile-stat-row">
+                        <span class="mobile-stat-label">Allocated Capacity</span>
+                        <span class="mobile-stat-value text-muted">{{ number_format($b['allotted'], 1) }} Days</span>
+                    </div>
+
+                    <div class="mobile-stat-row">
+                        <span class="mobile-stat-label text-danger">Days Utilized</span>
+                        <span class="mobile-stat-value text-danger">{{ number_format($b['used'], 1) }} Days</span>
+                    </div>
+
+                    <div class="mobile-balance-box">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="feather-check-circle text-success" style="width: 18px;"></i>
+                            <span class="fw-800 text-success text-uppercase" style="font-size: 12px; letter-spacing: 0.5px;">Net Balance</span>
+                        </div>
+                        <div class="mobile-balance-badge">
+                            {{ number_format($b['available'], 1) }} DAYS
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
 
         @if(in_array(strtolower(auth()->user()->role), ['admin', 'super admin']))
-        <div class="p-5 bg-light bg-opacity-30 d-flex justify-content-center border-top">
-            <a href="{{ route('leave.balance.export') }}" class="btn export-btn d-flex align-items-center gap-3">
+        <div class="p-4 p-md-5 bg-light bg-opacity-30 d-flex justify-content-center border-top">
+            <a href="{{ route('leave.balance.export') }}" class="btn export-btn d-flex align-items-center gap-3 w-100 w-md-auto justify-content-center">
                 <i class="feather-file-text fs-5"></i>
                 GENERATE INVENTORY REPORT
             </a>
@@ -188,12 +282,12 @@
     function filterInventory() {
         const input = document.getElementById('inventorySearch');
         const filter = input.value.toLowerCase();
-        const rows = document.querySelector('#inventoryTable tbody').getElementsByTagName('tr');
-        for (let i = 0; i < rows.length; i++) {
-            const text = rows[i].getElementsByTagName('td')[0].innerText.toLowerCase();
-            rows[i].style.display = text.indexOf(filter) > -1 ? '' : 'none';
-        }
+        const items = document.querySelectorAll('.inventory-item');
+        
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.indexOf(filter) > -1 ? '' : 'none';
+        });
     }
 </script>
 @endsection
-
