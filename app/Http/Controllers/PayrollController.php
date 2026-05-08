@@ -20,13 +20,13 @@ class PayrollController extends Controller
     /**
      * Display Attendance List
      */
-   public function attendance(Request $request)
+    public function attendance(Request $request)
     {
         $query = Attendance::query();
 
         $query->join('employees', 'attendances.employee_id', '=', 'employees.id');
 
-         // ✅ Apply only if user selects filter
+        // ✅ Apply only if user selects filter
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereDate('attendance_date', '>=', $request->start_date)
                 ->whereDate('attendance_date', '<=', $request->end_date);
@@ -83,10 +83,29 @@ class PayrollController extends Controller
             ->where('attendance_date', $date)
             ->get();
 
+        $earlyOuts = 0;
+        $totalPresent = 0;
+        foreach ($details as $att) {
+            if (in_array(strtolower($att->status), ['present', 'early_out'])) {
+                if ($att->check_out && $att->employee && $att->employee->time_out) {
+                    $totalPresent++;
+                    $checkOut = Carbon::parse($att->check_out);
+                    $punchTime = $checkOut->format('H:i');
+                    // Early out if between 3:00 PM and 5:30 PM
+                    if ($punchTime >= '15:00' && $punchTime < '17:30') {
+                        $earlyOuts++;
+                    }
+                }
+            }
+        }
+
+        $isActivity = ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7);
+
         return response()->json([
             'success' => true,
             'date' => Carbon::parse($date)->format('d M Y'),
-            'data' => $details
+            'data' => $details,
+            'is_activity' => $isActivity
         ]);
     }
 
@@ -102,7 +121,7 @@ class PayrollController extends Controller
             ->value('id');
 
         // $role = strtoupper(auth()->user()->role ?? 'USER');
-         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
 
         $query = Attendance::with('employee');
 
@@ -238,19 +257,19 @@ class PayrollController extends Controller
                         $diffMinutes += 24 * 60;
                     }
 
-                $totalHours = round($diffMinutes / 60, 2);
-                // ✅ Apply your attendance logic
-                $fullDay = 8.5;
-                $graceMinutes = 15;
-                $minFullDay = $fullDay - ($graceMinutes / 60);
+                    $totalHours = round($diffMinutes / 60, 2);
+                    // ✅ Apply your attendance logic
+                    $fullDay = 8.5;
+                    $graceMinutes = 15;
+                    $minFullDay = $fullDay - ($graceMinutes / 60);
 
-                if ($totalHours >= $minFullDay) {
-                    $status = 'present';
-                } elseif ($totalHours >= 3.90) {
-                    $status = 'half_day';
-                } else {
-                    $status = 'absent';
-                }
+                    if ($totalHours >= $minFullDay) {
+                        $status = 'present';
+                    } elseif ($totalHours >= 3.90) {
+                        $status = 'half_day';
+                    } else {
+                        $status = 'absent';
+                    }
                 } catch (\Exception $e) {
                     $totalHours = 0;
                 }
@@ -280,7 +299,7 @@ class PayrollController extends Controller
     /**
      * Calculate and display payroll
      */
-   public function calculatePayroll(Request $request)
+    public function calculatePayroll(Request $request)
     {
         try {
             $month = $request->month; // YYYY-MM
@@ -305,23 +324,23 @@ class PayrollController extends Controller
                 ->where('leave_category', 'NOT LIKE', '%WFH%') // Exclude WFH from leave count
                 ->where(function ($q) use ($year, $monthNum) {
                     $q->whereMonth('start_date', $monthNum)
-                    ->orWhereMonth('end_date', $monthNum);
+                        ->orWhereMonth('end_date', $monthNum);
                 })
                 ->get();
 
-                $leaveDays = 0;
-                foreach ($leaves as $leave) {
+            $leaveDays = 0;
+            foreach ($leaves as $leave) {
 
-                    // If already stored → best case
-                    if (!empty($leave->total_days)) {
-                        $leaveDays += $leave->total_days;
-                    } else {
+                // If already stored → best case
+                if (!empty($leave->total_days)) {
+                    $leaveDays += $leave->total_days;
+                } else {
 
-                        // fallback (date diff)
-                        $days = $leave->start_date->diffInDays($leave->end_date) + 1;
-                        $leaveDays += $days;
-                    }
+                    // fallback (date diff)
+                    $days = $leave->start_date->diffInDays($leave->end_date) + 1;
+                    $leaveDays += $days;
                 }
+            }
 
             $attendanceDays = 0;
             $overtimeMinutes = 0;
@@ -349,7 +368,7 @@ class PayrollController extends Controller
                         break;
                 }
                 // 🔥 OVERTIME LOGIC
-                
+
                 $shiftMinutes = 8 * 60 + 30; // 510 min
 
                 if ($r->total_hours > 0) {
@@ -372,7 +391,7 @@ class PayrollController extends Controller
             $leaveDays = 0;
 
             foreach ($leaves as $leave) {
-                $leaveDays += $leave->total_days ?? 
+                $leaveDays += $leave->total_days ??
                     ($leave->start_date->diffInDays($leave->end_date) + 1);
             }
 
@@ -435,7 +454,7 @@ class PayrollController extends Controller
             $salaryLoss = $fullMonthSalary - $grossSalary;
 
             // 📦 Final Data
-           $payrollData = [
+            $payrollData = [
                 'employee_id' => $employeeId,
                 'month' => $month,
                 'emp_name' => $employee->name,
@@ -742,7 +761,8 @@ class PayrollController extends Controller
 
             $filename = 'payroll_report_' . date('Y-m-d') . '.xlsx';
 
-            return Excel::download(new class($payrolls) implements 
+            return Excel::download(
+                new class ($payrolls) implements
                 \Maatwebsite\Excel\Concerns\FromArray,
                 \Maatwebsite\Excel\Concerns\WithHeadings {
 
@@ -756,15 +776,15 @@ class PayrollController extends Controller
                 public function headings(): array
                 {
                     return [
-                        'Name',
-                        'ID',
-                        'Department',
-                        'Shift Time',
-                        'Month Day',
-                        'Basic Working Days',
-                        'Leave',
-                        'Net Payable',
-                        'Additional'
+                    'Name',
+                    'ID',
+                    'Department',
+                    'Shift Time',
+                    'Month Day',
+                    'Basic Working Days',
+                    'Leave',
+                    'Net Payable',
+                    'Additional'
                     ];
                 }
 
@@ -775,8 +795,8 @@ class PayrollController extends Controller
                     foreach ($this->payrolls as $payroll) {
 
                         $shiftTime = ($payroll->employee->time_in && $payroll->employee->time_out)
-                            ? $payroll->employee->time_in . ' - ' . $payroll->employee->time_out
-                            : '-';
+                        ? $payroll->employee->time_in . ' - ' . $payroll->employee->time_out
+                        : '-';
 
                         $monthDays = Carbon::parse($payroll->month)->daysInMonth;
 
@@ -786,10 +806,10 @@ class PayrollController extends Controller
                             $payroll->employee->name,
                             $payroll->employee->id,
                             $payroll->employee->department ?? '-',
-                            $shiftTime,
-                            $monthDays,
+                        $shiftTime,
+                        $monthDays,
                             $payroll->payable_days,
-                            $leave,
+                        $leave,
                             $payroll->net_payable ?? $payroll->net_salary ?? 0,
                             $payroll->other_allowance,
                         ];
@@ -798,7 +818,9 @@ class PayrollController extends Controller
                     return $data;
                 }
 
-            }, $filename);
+                },
+                $filename
+            );
         }
 
         $headers = [
@@ -866,7 +888,7 @@ class PayrollController extends Controller
     /**
      * Export attendance records (Professional Monthly Excel Grid)
      */
-   public function exportAttendance(Request $request)
+    public function exportAttendance(Request $request)
     {
         $start = $request->start_date ?? now()->startOfMonth()->toDateString();
         $end = $request->end_date ?? now()->endOfMonth()->toDateString();
@@ -903,7 +925,8 @@ class PayrollController extends Controller
         }
     }
 
-    public function edit($id){
+    public function edit($id)
+    {
         $attendance = Attendance::with('employee')->findOrFail($id);
         // Employee object mein purani attendance daal dete hain taaki blade page par array loop chal sake
         $employee = $attendance->employee;
@@ -932,12 +955,12 @@ class PayrollController extends Controller
         $employees = $attendances->map(function ($attendance) {
             $employee = $attendance->employee;
 
-            $employee->old_check_in = $attendance->check_in 
-                ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i') 
+            $employee->old_check_in = $attendance->check_in
+                ? \Carbon\Carbon::parse($attendance->check_in)->format('H:i')
                 : '';
 
-            $employee->old_check_out = $attendance->check_out 
-                ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i') 
+            $employee->old_check_out = $attendance->check_out
+                ? \Carbon\Carbon::parse($attendance->check_out)->format('H:i')
                 : '';
 
             $employee->old_status = $attendance->status;
@@ -1112,7 +1135,7 @@ class PayrollController extends Controller
     {
         $employees = Employee::orderBy('name', 'asc')->get();
 
-       $query = Attendance::selectRaw("
+        $query = Attendance::selectRaw("
         attendances.employee_id,
         employees.name as employee_name,
 
@@ -1153,8 +1176,8 @@ class PayrollController extends Controller
             END
         ) as early_count
     ")
-    ->join('employees', 'attendances.employee_id', '=', 'employees.id');
-    
+            ->join('employees', 'attendances.employee_id', '=', 'employees.id');
+
 
         // FILTER BY EMPLOYEE NAME
         if ($request->filled('employee_id')) {
@@ -1171,9 +1194,9 @@ class PayrollController extends Controller
             $query->whereDate('attendances.attendance_date', '<=', $request->end_date);
         }
         $attendance = $query
-        ->groupBy('attendances.employee_id', 'employees.name')
-        ->paginate(10)
-        ->appends($request->all());
+            ->groupBy('attendances.employee_id', 'employees.name')
+            ->paginate(10)
+            ->appends($request->all());
 
         return view('payroll.employeeWise', compact('attendance', 'employees'));
     }
@@ -1192,12 +1215,39 @@ class PayrollController extends Controller
 
         $records = $query->orderBy('attendance_date', 'desc')->get();
 
+        // Calculate activity days for each date in the records
+        $activityDays = [];
+        $allDates = $records->pluck('attendance_date')->unique();
+
+        foreach ($allDates as $date) {
+            $dailyAtts = Attendance::with('employee')->where('attendance_date', $date)->get();
+            $earlyOuts = 0;
+            $totalPresent = 0;
+            foreach ($dailyAtts as $att) {
+                if (in_array(strtolower($att->status), ['present', 'early_out', 'early_leave'])) {
+                    if ($att->check_out && $att->employee && $att->employee->time_out) {
+                        $totalPresent++;
+                        $checkOut = \Carbon\Carbon::parse($att->check_out);
+                        $punchTime = $checkOut->format('H:i');
+                        // Early out if between 3:00 PM and 5:30 PM
+                        if ($punchTime >= '15:00' && $punchTime < '17:30') {
+                            $earlyOuts++;
+                        }
+                    }
+                }
+            }
+            if ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7) {
+                $activityDays[$date] = true;
+            }
+        }
+
         $employeeName = Employee::where('id', $request->employee_id)->value('name');
 
         return response()->json([
             'success' => true,
             'employee_name' => $employeeName,
-            'data' => $records
+            'data' => $records,
+            'activity_days' => $activityDays
         ]);
     }
 
@@ -1291,7 +1341,7 @@ class PayrollController extends Controller
                 'defaultFont' => 'sans-serif',
                 'isFontSubsettingEnabled' => true, // This is key for size reduction
             ]);
-        
+
         $filename = 'payslip_' . str_replace(' ', '_', $payroll->employee->name) . '_' . $payroll->month . '.pdf';
         return $pdf->download($filename);
     }
@@ -1330,7 +1380,7 @@ class PayrollController extends Controller
                 'defaultFont' => 'sans-serif',
                 'isFontSubsettingEnabled' => true,
             ]);
-        
+
         $filename = 'bulk_payslips_' . ($request->month ?? date('Y-m')) . '.pdf';
         return $pdf->download($filename);
     }

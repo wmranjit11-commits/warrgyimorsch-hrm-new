@@ -115,6 +115,53 @@
         color: #1e293b;
         font-size: 15px;
     }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .profile-header-banner {
+            height: 120px;
+        }
+        .profile-content-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px 20px;
+            margin-top: -60px;
+            gap: 15px;
+        }
+        .profile-photo-container {
+            width: 120px;
+            height: 120px;
+        }
+        .profile-title-area {
+            width: 100%;
+        }
+        .profile-title-area .d-flex {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .profile-nav-tabs {
+            flex-wrap: wrap;
+            padding: 0 15px;
+            gap: 10px;
+            justify-content: center;
+        }
+        .profile-nav-link {
+            padding: 12px 10px;
+            font-size: 12px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .profile-body {
+            padding: 20px;
+        }
+        .detail-card {
+            margin-bottom: 10px;
+        }
+        .employee-profile-wrapper {
+            padding: 20px 10px;
+        }
+    }
 </style>
 
 <div class="employee-profile-wrapper">

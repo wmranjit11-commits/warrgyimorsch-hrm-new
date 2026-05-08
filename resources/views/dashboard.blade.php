@@ -1,639 +1,922 @@
 @extends('layouts.app')
 @section('content')
     <!-- [ page-header ] start -->
-        <div class="page-header">
-            <div class="page-header-left d-flex align-items-center">
-                <div class="page-header-title">
-                    <h5 class="m-b-10">Dashboard</h5>
-                </div>
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                    <li class="breadcrumb-item">Dashboard</li>
-                </ul>
+    <div class="page-header hrm-resp-page-header">
+        <div class="page-header-left d-flex align-items-center">
+            <div class="page-header-title">
+                <h5 class="m-b-10">Dashboard</h5>
             </div>
+            <ul class="breadcrumb hrm-resp-breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item">Dashboard</li>
+            </ul>
         </div>
-        <!-- [ page-header ] end -->
-        <!-- [ Main Content ] start -->
-        <div class="main-content pt-4" style="overflow: visible !important;">
+    </div>
+    <style>
+        /* Unique Premium Dropdown UI */
+        .wghrm-custom-select-btn {
+            border-radius: 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            background-color: #fff !important;
+            padding: 8px 16px !important;
+            font-weight: 500 !important;
+            color: #64748b !important;
+            transition: all 0.2s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            text-align: left !important;
+            min-width: 120px;
+        }
+
+        .wghrm-custom-select-btn:focus,
+        .wghrm-custom-select-btn[aria-expanded="true"] {
+            border-color: #3858f9 !important;
+            box-shadow: 0 0 0 3px rgba(56, 88, 249, 0.1) !important;
+            color: #3858f9 !important;
+        }
+
+        .wghrm-custom-dropdown-menu {
+            border-radius: 16px !important;
+            border: 1px solid #f1f5f9 !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08) !important;
+            padding: 8px !important;
+            margin-top: 8px !important;
+            z-index: 99 !important;
+            /* Reduced to avoid header overlap */
+            background: #fff !important;
+            max-height: 350px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Custom Scrollbar (Slider) */
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 10px;
+            margin: 8px 0;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .wghrm-custom-search-input {
+            border-radius: 10px !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+            width: 100% !important;
+            outline: none !important;
+            background-color: #f8fafc !important;
+            margin-bottom: 8px !important;
+            transition: border-color 0.2s ease;
+        }
+
+        .wghrm-custom-search-input:focus {
+            border-color: #3858f9 !important;
+            background-color: #fff !important;
+        }
+
+        .wghrm-custom-dropdown-item {
+            border-radius: 8px !important;
+            padding: 10px 15px !important;
+            font-weight: 500 !important;
+            color: #475569 !important;
+            margin-bottom: 2px !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            display: block !important;
+            text-decoration: none !important;
+        }
+
+        .wghrm-custom-dropdown-item:hover,
+        .wghrm-custom-dropdown-item.active {
+            background-color: #eff6ff !important;
+            color: #3858f9 !important;
+        }
+
+        .wghrm-custom-dropdown-divider {
+            margin: 8px 0 !important;
+            border-top: 1px solid #f1f5f9 !important;
+        }
+
+        @media (max-width: 575.98px) {
+            .wghrm-resp-dropdown-menu {
+                position: absolute !important;
+                left: auto !important;
+                right: 0 !important;
+                max-width: calc(100vw - 30px) !important;
+                overflow-x: hidden !important;
+            }
+        }
+
+        /* Responsive Dashboard Utilities */
+        .hrm-resp-main-content {
+            overflow: visible !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .hrm-resp-page-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px;
+                padding: 15px !important;
+            }
+
+            .hrm-resp-main-content {
+                padding-top: 1rem !important;
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+            }
+
+            .hrm-resp-card-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                padding: 15px !important;
+            }
+
+            .hrm-resp-card-header-action {
+                width: 100% !important;
+            }
+
+            .hrm-resp-card-header-action .d-flex {
+                width: 100% !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+
+            .hrm-resp-card-header-action select,
+            .hrm-resp-card-header-action .dropdown,
+            .hrm-resp-card-header-action .btn {
+                flex: 1 !important;
+                min-width: 120px !important;
+            }
+
+            .hrm-resp-dropdown-menu {
+                left: 0 !important;
+                right: auto !important;
+                transform: none !important;
+                min-width: 220px !important;
+                width: 100% !important;
+            }
+
+            .avatar-lg {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 16px !important;
+            }
+
+            .fs-4 {
+                font-size: 1.1rem !important;
+            }
+
+            .gap-4 {
+                gap: 0.75rem !important;
+            }
+
+            .row {
+                margin-left: -5px !important;
+                margin-right: -5px !important;
+            }
+
+            .col-xxl-3,
+            .col-md-6,
+            .col-md-4,
+            .col-xxl-4,
+            .col-xxl-8 {
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+
+            .hrm-resp-card-header-action select,
+            .hrm-resp-card-header-action .dropdown,
+            .hrm-resp-card-header-action .btn {
+                width: 100% !important;
+                flex: none !important;
+            }
+
+            .hrm-resp-breadcrumb {
+                display: none !important;
+            }
+        }
+
+        /* Premium scrollbar for tables */
+        .hrm-resp-table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .hrm-resp-table-responsive::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
+    <!-- [ page-header ] end -->
+    <!-- [ Main Content ] start -->
+    <div class="main-content pt-md-4 pt-2 hrm-resp-main-content">
+        <div class="row">
+            <!-- [Invoices Awaiting Payment] start -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card stretch stretch-full">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-4">
+                            <div class="d-flex gap-4 align-items-center">
+                                <div class="avatar-text avatar-lg bg-gray-200">
+                                    <i class="feather-dollar-sign"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Paid in {{ $selectedMonthLabel }}
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0);"
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">{{ $totalEmpPaid }} Employees
+                                    Paid </a>
+                                <div class="w-100 text-end">
+                                    <span class="fs-12 text-dark">₹{{ number_format($totalNetSalary, 0) }}</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPaidAmount / $totalNetSalary) * 100) : 0 }}%)</span>
+                                </div>
+                            </div>
+                            <div class="progress mt-2 ht-3">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [Invoices Awaiting Payment] end -->
+            <!-- [Pending Amount] start -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card stretch stretch-full">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-4">
+                            <div class="d-flex gap-4 align-items-center">
+                                <div class="avatar-text avatar-lg bg-gray-200">
+                                    <i class="feather-clock text-warning"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Pending in {{ $selectedMonthLabel }}
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0);"
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Awaiting Payment </a>
+                                <div class="w-100 text-end">
+                                    <span class="fs-12 text-dark">{{ $totalEmpPending }} Employees</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPendingAmount / $totalNetSalary) * 100) : 0 }}%)</span>
+                                </div>
+                            </div>
+                            <div class="progress mt-2 ht-3">
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [Pending Amount] end -->
+            <!-- [Rejected Amount] start -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card stretch stretch-full">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-4">
+                            <div class="d-flex gap-4 align-items-center">
+                                <div class="avatar-text avatar-lg bg-gray-200">
+                                    <i class="feather-x-circle text-danger"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">Rejected in {{ $selectedMonthLabel }}
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showMonthlySummary('{{ $selectedMonth }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Breakdown Details</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0);"
+                                    class="fs-12 fw-medium text-muted text-truncate-1-line">Payment Failed </a>
+                                <div class="w-100 text-end">
+                                    <span class="fs-12 text-dark">Rejected</span>
+                                    <span
+                                        class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalRejectedAmount / $totalNetSalary) * 100) : 0 }}%)</span>
+                                </div>
+                            </div>
+                            <div class="progress mt-2 ht-3">
+                                <div class="progress-bar bg-danger" role="progressbar"
+                                    style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [Rejected Amount] end -->
+            <!-- [Total Employees] start -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card stretch stretch-full">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-4">
+                            <div class="d-flex gap-4 align-items-center">
+                                <div class="avatar-text avatar-lg bg-gray-200">
+                                    <i class="feather-users text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fs-4 fw-bold text-dark">{{ $totalEmployees }}</div>
+                                    <h3 class="fs-13 fw-semibold text-truncate-1-line">TOTAL STAFF</h3>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
+                                    data-bs-offset="0, 10">
+                                    <i class="feather-more-vertical"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Quick Access</div>
+                                    <a href="{{ route('dashboard') }}" class="dropdown-item">
+                                        <i class="feather-refresh-cw me-2"></i>
+                                        <span>Show All-Time History</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    @for ($i = 0; $i < 6; $i++)
+                                        @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
+                                        <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
+                                            class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
+                                            <i class="feather-calendar me-2"></i>
+                                            <span>{{ $m->format('M Y') }} Overview</span>
+                                        </a>
+                                    @endfor
+                                    <div class="dropdown-divider"></div>
+                                    <a href="javascript:void(0);" class="dropdown-item"
+                                        onclick="showFullYearBreakdown('{{ date('Y') }}')">
+                                        <i class="feather-file-text me-2"></i>
+                                        <span>Full Yearly Breakdown</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">
+                                    Attendance Rate </a>
+                                <div class="w-100 text-end">
+                                    <span class="fs-12 text-dark">{{ $attendanceRate }}%</span>
+                                    <span class="fs-11 text-muted">(Today)</span>
+                                </div>
+                            </div>
+                            <div class="progress mt-2 ht-3">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {{ $attendanceRate }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [Total Employees] end -->
+
             <div class="row">
-                <!-- [Invoices Awaiting Payment] start -->
-                <div class="col-xxl-3 col-md-6">
+
+                <!-- [Today Leave Records] start -->
+                <div class="col-md-4">
                     <div class="card stretch stretch-full">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between mb-4">
-                                <div class="d-flex gap-4 align-items-center">
-                                    <div class="avatar-text avatar-lg bg-gray-200">
-                                        <i class="feather-dollar-sign"></i>
+                        <div class="card-header hrm-resp-card-header">
+                            <h5 class="card-title">Today Leave</h5>
+                            <div class="card-header-action hrm-resp-card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete text-primary">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
                                     </div>
-                                    <div>
-                                        <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</div>
-                                        <h3 class="fs-13 fw-semibold text-truncate-1-line">Paid in {{ $selectedMonthLabel }}
-                                        </h3>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
                                     </div>
-                                </div>
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                        data-bs-offset="0, 10">
-                                        <i class="feather-more-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
-                                        @for ($i = 0; $i < 6; $i++)
-                                            @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
-                                            <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
-                                                class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
-                                                <i class="feather-calendar me-2"></i>
-                                                <span>{{ $m->format('M Y') }} Overview</span>
-                                            </a>
-                                        @endfor
-                                        <div class="dropdown-divider"></div>
-                                        <a href="javascript:void(0);" class="dropdown-item"
-                                            onclick="showMonthlySummary('{{ $selectedMonth }}')">
-                                            <i class="feather-file-text me-2"></i>
-                                            <span>Full Breakdown Details</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pt-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <a href="javascript:void(0);"
-                                        class="fs-12 fw-medium text-muted text-truncate-1-line">{{ $totalEmpPaid }} Employees
-                                        Paid </a>
-                                    <div class="w-100 text-end">
-                                        <span class="fs-12 text-dark">₹{{ number_format($totalNetSalary, 0) }}</span>
-                                        <span
-                                            class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPaidAmount / $totalNetSalary) * 100) : 0 }}%)</span>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2 ht-3">
-                                    <div class="progress-bar bg-primary" role="progressbar"
-                                        style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%">
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <!-- [Invoices Awaiting Payment] end -->
-                <!-- [Pending Amount] start -->
-                <div class="col-xxl-3 col-md-6">
-                    <div class="card stretch stretch-full">
                         <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between mb-4">
-                                <div class="d-flex gap-4 align-items-center">
-                                    <div class="avatar-text avatar-lg bg-gray-200">
-                                        <i class="feather-clock text-warning"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</div>
-                                        <h3 class="fs-13 fw-semibold text-truncate-1-line">Pending in {{ $selectedMonthLabel }}
-                                        </h3>
-                                    </div>
-                                </div>
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                        data-bs-offset="0, 10">
-                                        <i class="feather-more-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
-                                        @for ($i = 0; $i < 6; $i++)
-                                            @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
-                                            <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
-                                                class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
-                                                <i class="feather-calendar me-2"></i>
-                                                <span>{{ $m->format('M Y') }} Overview</span>
-                                            </a>
-                                        @endfor
-                                        <div class="dropdown-divider"></div>
-                                        <a href="javascript:void(0);" class="dropdown-item"
-                                            onclick="showMonthlySummary('{{ $selectedMonth }}')">
-                                            <i class="feather-file-text me-2"></i>
-                                            <span>Full Breakdown Details</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pt-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <a href="javascript:void(0);"
-                                        class="fs-12 fw-medium text-muted text-truncate-1-line">Awaiting Payment </a>
-                                    <div class="w-100 text-end">
-                                        <span class="fs-12 text-dark">{{ $totalEmpPending }} Employees</span>
-                                        <span
-                                            class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalPendingAmount / $totalNetSalary) * 100) : 0 }}%)</span>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2 ht-3">
-                                    <div class="progress-bar bg-warning" role="progressbar"
-                                        style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- [Pending Amount] end -->
-                <!-- [Rejected Amount] start -->
-                <div class="col-xxl-3 col-md-6">
-                    <div class="card stretch stretch-full">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between mb-4">
-                                <div class="d-flex gap-4 align-items-center">
-                                    <div class="avatar-text avatar-lg bg-gray-200">
-                                        <i class="feather-x-circle text-danger"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fs-4 fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</div>
-                                        <h3 class="fs-13 fw-semibold text-truncate-1-line">Rejected in {{ $selectedMonthLabel }}
-                                        </h3>
-                                    </div>
-                                </div>
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                        data-bs-offset="0, 10">
-                                        <i class="feather-more-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Select History</div>
-                                        @for ($i = 0; $i < 6; $i++)
-                                            @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
-                                            <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
-                                                class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
-                                                <i class="feather-calendar me-2"></i>
-                                                <span>{{ $m->format('M Y') }} Overview</span>
-                                            </a>
-                                        @endfor
-                                        <div class="dropdown-divider"></div>
-                                        <a href="javascript:void(0);" class="dropdown-item"
-                                            onclick="showMonthlySummary('{{ $selectedMonth }}')">
-                                            <i class="feather-file-text me-2"></i>
-                                            <span>Full Breakdown Details</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pt-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <a href="javascript:void(0);"
-                                        class="fs-12 fw-medium text-muted text-truncate-1-line">Payment Failed </a>
-                                    <div class="w-100 text-end">
-                                        <span class="fs-12 text-dark">Rejected</span>
-                                        <span
-                                            class="fs-11 text-muted">({{ $totalNetSalary > 0 ? round(($totalRejectedAmount / $totalNetSalary) * 100) : 0 }}%)</span>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2 ht-3">
-                                    <div class="progress-bar bg-danger" role="progressbar"
-                                        style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- [Rejected Amount] end -->
-                <!-- [Total Employees] start -->
-                <div class="col-xxl-3 col-md-6">
-                    <div class="card stretch stretch-full">
-                        <div class="card-body">
-                            <div class="d-flex align-items-start justify-content-between mb-4">
-                                <div class="d-flex gap-4 align-items-center">
-                                    <div class="avatar-text avatar-lg bg-gray-200">
-                                        <i class="feather-users text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fs-4 fw-bold text-dark">{{ $totalEmployees }}</div>
-                                        <h3 class="fs-13 fw-semibold text-truncate-1-line">TOTAL STAFF</h3>
-                                    </div>
-                                </div>
-                                <div class="dropdown">
-                                    <a href="javascript:void(0);" class="avatar-text avatar-sm" data-bs-toggle="dropdown"
-                                        data-bs-offset="0, 10">
-                                        <i class="feather-more-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <div class="dropdown-header text-uppercase fs-10 fw-800 text-muted">Quick Access</div>
-                                        <a href="{{ route('dashboard') }}" class="dropdown-item">
-                                            <i class="feather-refresh-cw me-2"></i>
-                                            <span>Show All-Time History</span>
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        @for ($i = 0; $i < 6; $i++)
-                                            @php $m = \Carbon\Carbon::now()->startOfMonth()->subMonths($i); @endphp
-                                            <a href="{{ route('dashboard', ['month' => $m->format('Y-m')]) }}"
-                                                class="dropdown-item {{ $selectedMonth == $m->format('Y-m') ? 'active' : '' }}">
-                                                <i class="feather-calendar me-2"></i>
-                                                <span>{{ $m->format('M Y') }} Overview</span>
-                                            </a>
-                                        @endfor
-                                        <div class="dropdown-divider"></div>
-                                        <a href="javascript:void(0);" class="dropdown-item"
-                                            onclick="showFullYearBreakdown('{{ date('Y') }}')">
-                                            <i class="feather-file-text me-2"></i>
-                                            <span>Full Yearly Breakdown</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="pt-4">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <a href="javascript:void(0);" class="fs-12 fw-medium text-muted text-truncate-1-line">
-                                        Attendance Rate </a>
-                                    <div class="w-100 text-end">
-                                        <span class="fs-12 text-dark">{{ $attendanceRate }}%</span>
-                                        <span class="fs-11 text-muted">(Today)</span>
-                                    </div>
-                                </div>
-                                <div class="progress mt-2 ht-3">
-                                    <div class="progress-bar bg-primary" role="progressbar"
-                                        style="width: {{ $attendanceRate }}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- [Total Employees] end -->
-                
-                <div class="row">
-
-                    <!-- [Today Leave Records] start -->
-                    <div class="col-md-4">
-                        <div class="card stretch stretch-full">
-                            <div class="card-header">
-                                <h5 class="card-title">Today Leave</h5>
-                                <div class="card-header-action">
-                                    <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete text-primary">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                                data-bs-toggle="remove"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                                data-bs-toggle="refresh"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                                data-bs-toggle="expand"> </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                @forelse($todayLeaveEmployees as $todayLeave)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
-                                        <div class="d-flex justify-content-between">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
-                                                    <i class="bi bi-person-fill"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">
-                                                        {{ $todayLeave->employee_name ?? 'N/A' }}
-                                                    </div>
-                                                    <div class="fs-11 text-muted">
-                                                        {{ $todayLeave->leave_type }} Today
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @empty
-                                    <div class="text-center py-4 text-muted">
-                                        No employees on leave today.
-                                    </div>
-                                @endforelse
-
-                                @if(count($todayLeaveEmployees) > 4)
-                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                        <a href="javascript:void(0);" id="prev-leave" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                            <i class="feather-chevron-left fs-20"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" id="next-leave" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                            <i class="feather-chevron-right fs-20"></i>
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="card-footer d-none">
-                                <div class="row g-4">
-                                    <div class="col-lg-3">
-                                        <div class="p-3 border border-dashed rounded">
-                                            <div class="fs-12 text-muted mb-1">Pending</div>
-                                                <h6 class="fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</h6>
-                                                <div class="progress mt-2 ht-3">
-                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 border border-dashed rounded">
-                                                <div class="fs-12 text-muted mb-1">Paid</div>
-                                                <h6 class="fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</h6>
-                                                <div class="progress mt-2 ht-3">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 border border-dashed rounded">
-                                                <div class="fs-12 text-muted mb-1">Rejected</div>
-                                                <h6 class="fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</h6>
-                                                <div class="progress mt-2 ht-3">
-                                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 border border-dashed rounded">
-                                                <div class="fs-12 text-muted mb-1">Total Salary</div>
-                                                <h6 class="fw-bold text-dark">₹{{ number_format($totalNetSalary, 0) }}</h6>
-                                                <div class="progress mt-2 ht-3">
-                                                    <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                    </div>
-                    <!-- [Today Leave Records] end -->
-
-                    <!-- [Late Arrivals] start -->
-                    <div class="col-md-4">
-                        <div class="card stretch stretch-full">
-                            <div class="card-header" style="padding: 20px;">
-                                <h5 class="card-title">Late Arrivals</h5>
-                                <div class="card-header-action">
-                                    <!-- <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"></a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"></a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"></a>
-                                        </div> -->
-                                        <!-- Filters (Below Heading, Above List) -->
-                                    <div class="d-flex gap-2" id="lateFilterContainerUnique">
-
-                                        <!-- Employee Filter -->
-                                        <select id="lateEmployeeFilter"
-                                                onchange="filterLateEmployee(this.value)"
-                                                class="form-select form-select-sm"
-                                                style="width: 100px; height: 32px !important; padding: 0 0 0 10px !important;">
-                                            <option value="">All</option>
-                                            @foreach($employees as $emp)
-                                                <option value="{{ $emp->id }}" {{ request('late_employee') == $emp->id ? 'selected' : '' }}>
-                                                    {{ $emp->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                        <!-- Time Filter -->
-                                        <div class="dropdown">
-    
-                                            <!-- Trigger Button -->
-                                            <button class="btn btn-light btn-sm dropdown-toggle"
-                                                    type="button"
-                                                    data-bs-toggle="dropdown"
-                                                    style="width: 120px; height: 32px;">
-                                                {{ request('late_range', 'Today') }}
-                                            </button>
-
-                                            <!-- Dropdown Menu -->
-                                            <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px;">
-
-                                                <!-- Normal Filters -->
-                                                <div id="normalFiltersLate">
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('today')">Today</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('yesterday')">Yesterday</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('week')">Last Week</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('month')">Current Month</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('last_month')">Last Month</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('3months')">3 Months</button>
-                                                    <button type="button" class="dropdown-item" onclick="applyLateRange('year')">1 Year</button>
-
-                                                    <div class="dropdown-divider"></div>
-
-                                                    <a href="javascript:void(0);"
-                                                    class="dropdown-item text-primary fw-bold"
-                                                    onclick="event.stopPropagation(); showLateCustomFilter()">
-                                                        Custom Range →
-                                                    </a>
-                                                </div>
-
-                                                <!-- Custom Form -->
-                                                <div id="customFilterBoxLate" style="display:none;" onclick="event.stopPropagation();">
-                                                    <label class="form-label small mb-1">From</label>
-                                                    <input type="date" id="late_from"
-                                                        class="form-control form-control-sm mb-2"
-                                                        value="{{ request('late_custom_start') }}">
-
-                                                    <label class="form-label small mb-1">To</label>
-                                                    <input type="date" id="late_to"
-                                                        class="form-control form-control-sm mb-2"
-                                                        value="{{ request('late_custom_end') }}">
-
-                                                    <button type="button" class="btn btn-sm btn-primary w-100 mb-2"
-                                                            onclick="applyLateCustomFilter()">
-                                                        Apply
-                                                    </button>
-
-                                                    <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
-                                                    onclick="hideLateCustomFilter()">← Back</a>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <!-- <select id="lateTimeFilter"
-                                                class="form-select form-select-sm"
-                                                style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
-                                            <option value="today" {{ request('late_range', 'today') == 'today' ? 'selected' : '' }}>Today</option>
-                                            <option value="week" {{ request('late_range') == 'week' ? 'selected' : '' }}>Week</option>
-                                            <option value="month" {{ request('late_range') == 'month' ? 'selected' : '' }}>Current Month</option>
-                                            <option value="3months" {{ request('late_range') == '3months' ? 'selected' : '' }}>3 Months</option>
-                                            <option value="year" {{ request('late_range') == 'year' ? 'selected' : '' }}>Year</option>
-                                        </select> -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card-body">
-                                @forelse($todayLateEmployees as $lateEmp)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
+                            @forelse($todayLeaveEmployees as $todayLeave)
+                                <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
+                                    <div class="d-flex justify-content-between">
                                         <div class="d-flex align-items-center gap-3">
-                                            <div class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
-                                                <i class="bi bi-clock"></i>
+                                            <div
+                                                class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
+                                                <i class="bi bi-person-fill"></i>
                                             </div>
                                             <div>
                                                 <div class="fw-bold">
-                                                    {{ $lateEmp['employee']->name ?? 'N/A' }}
+                                                    {{ $todayLeave->employee_name ?? 'N/A' }}
                                                 </div>
                                                 <div class="fs-11 text-muted">
-                                                    Late by {{ $lateEmp['late_duration'] }}
+                                                    {{ $todayLeave->leave_type }} Today
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                @empty
-                                    <div class="text-center py-4 text-muted">
-                                        No late arrivals found.
-                                    </div>
-                                @endforelse
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted">
+                                    No employees on leave today.
+                                </div>
+                            @endforelse
 
-                                @if(count($todayLateEmployees) > 4)
-                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                        <a href="javascript:void(0);" id="prev-late" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                            <i class="feather-chevron-left fs-20"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" id="next-late" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                            <i class="feather-chevron-right fs-20"></i>
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
+                            @if(count($todayLeaveEmployees) > 4)
+                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                    <a href="javascript:void(0);" id="prev-leave"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                        <i class="feather-chevron-left fs-20"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" id="next-leave"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                        <i class="feather-chevron-right fs-20"></i>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                    <!-- [Late Arrivals] end -->
-                    
-                    <!--! BEGIN: [Upcoming Schedule] !-->
-
-                    <div class="col-md-4">
-                        <div class="card stretch stretch-full">
-                            <div class="card-header">
-                                <h5 class="card-title">Upcoming Holidays</h5>
-                               @php
-                                    // Use test date or real date
-                                    $today = isset($today)
-                                        ? \Carbon\Carbon::parse($today)
-                                        : \Carbon\Carbon::today();
-
-                                    // Get NEXT upcoming holiday (strictly future)
-                                    $nextHoliday = collect($upcomingHolidays)
-                                        ->filter(fn($h) => \Carbon\Carbon::parse($h->date)->gt($today))
-                                        ->sortBy('date')
-                                        ->first();
-
-                                    if ($nextHoliday) {
-                                        $hDate = \Carbon\Carbon::parse($nextHoliday->date);
-
-                                        // Get proper difference (months + days)
-                                        $diff = $today->diff($hDate);
-
-                                        $months = $diff->m;
-                                        $days = $diff->d;
-
-                                        if ($months > 0) {
-                                            $remainingText = $months . ' month' . ($months > 1 ? 's ' : ' ')
-                                                        . $days . ' day' . ($days > 1 ? 's' : '') . ' left';
-                                        } else {
-                                            if ($days == 1) {
-                                                $remainingText = 'Tomorrow';
-                                            } else {
-                                                $remainingText = $days . ' days left';
-                                            }
-                                        }
-
-                                        $badgeClass = 'badge bg-soft-success text-success'; // GREEN
-                                    } else {
-                                        $remainingText = 'No upcoming holidays';
-                                        $badgeClass = 'badge bg-soft-danger text-danger';
-                                    }
-                                @endphp
-                                <span class="{{ $badgeClass }}">{{ $remainingText }}</span>
-                                <div class="card-header-action">
-                                    <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete text-primary">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                                data-bs-toggle="remove"> </a>
+                        <div class="card-footer d-none">
+                            <div class="row g-4">
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Pending</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%">
+                                            </div>
                                         </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                                data-bs-toggle="refresh"> </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Paid</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-success" role="progressbar"
+                                                style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%">
+                                            </div>
                                         </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                                data-bs-toggle="expand"> </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Rejected</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-danger" role="progressbar"
+                                                style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="p-3 border border-dashed rounded">
+                                        <div class="fs-12 text-muted mb-1">Total Salary</div>
+                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalNetSalary, 0) }}</h6>
+                                        <div class="progress mt-2 ht-3">
+                                            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                @forelse($upcomingHolidays as $index => $holiday)
-                                    @php $hDate = \Carbon\Carbon::parse($holiday->date); @endphp
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 holiday-slide-item {{ $index >= 4 ? 'd-none' : '' }}" data-index="{{ $index }}">
-                                        <div class="d-flex justify-content-between">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div
-                                                    class="wd-50 ht-50 bg-soft-primary text-primary lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
-                                                    <span class="fs-18 fw-bold mb-1 d-block">{{ $hDate->format('d') }}</span>
-                                                    <span class="fs-10 fw-semibold text-uppercase d-block">{{ $hDate->format('M') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- [Today Leave Records] end -->
+
+                <!-- [Late Arrivals] start -->
+                <div class="col-md-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header hrm-resp-card-header">
+                            <h5 class="card-title">Late Arrivals</h5>
+                            <div class="card-header-action hrm-resp-card-header-action">
+                                <!-- <div class="card-header-btn">
+                                                <div data-bs-toggle="tooltip" title="Delete">
+                                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger" data-bs-toggle="remove"></a>
                                                 </div>
-                                                <div class="text-dark">
-                                                    <a href="javascript:void(0);" class="fw-bold mb-2 text-truncate-1-line">{{ $holiday->title }}</a>
-                                                    <span class="fs-11 fw-normal text-muted text-truncate-1-line">Holiday ({{ $hDate->format('Y') }})</span>
+                                                <div data-bs-toggle="tooltip" title="Refresh">
+                                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning" data-bs-toggle="refresh"></a>
                                                 </div>
+                                                <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                                    <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success" data-bs-toggle="expand"></a>
+                                                </div> -->
+                                <!-- Filters (Below Heading, Above List) -->
+                                <div class="d-flex flex-wrap gap-2" id="lateFilterContainerUnique">
+
+                                    <!-- Employee Filter -->
+                                    <div class="dropdown">
+                                        <button class="btn wghrm-custom-select-btn dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                            @php
+                                                $lateSelectedEmp = $employees->firstWhere('id', request('late_employee'));
+                                            @endphp
+                                            {{ $lateSelectedEmp ? $lateSelectedEmp->name : 'All Employees' }}
+                                        </button>
+                                        <div class="dropdown-menu wghrm-custom-dropdown-menu">
+                                            <div class="wghrm-custom-search-box">
+                                                <input type="text" class="wghrm-custom-search-input"
+                                                    placeholder="Search employee..." onkeyup="wghrmFilterItems(this)"
+                                                    onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                            </div>
+                                            <a class="dropdown-item wghrm-custom-dropdown-item {{ !request('late_employee') ? 'active' : '' }}"
+                                                href="javascript:void(0);" onclick="filterLateEmployee('')">
+                                                All Employees
+                                            </a>
+                                            @foreach($employees as $emp)
+                                                <a class="dropdown-item wghrm-custom-dropdown-item {{ request('late_employee') == $emp->id ? 'active' : '' }}"
+                                                    href="javascript:void(0);" onclick="filterLateEmployee('{{ $emp->id }}')">
+                                                    {{ $emp->name }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Time Filter -->
+                                    <div class="dropdown">
+
+                                        <!-- Trigger Button -->
+                                        <button class="btn wghrm-custom-select-btn dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                            {{ request('late_range', 'Today') }}
+                                        </button>
+
+                                        <!-- Dropdown Menu -->
+                                        <div class="dropdown-menu dropdown-menu-end wghrm-custom-dropdown-menu">
+                                            <div class="wghrm-custom-search-box">
+                                                <input type="text" class="wghrm-custom-search-input"
+                                                    placeholder="Search range..." onkeyup="wghrmFilterItems(this)"
+                                                    onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                            </div>
+
+                                            <!-- Normal Filters -->
+                                            <div id="normalFiltersLate">
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('today')">Today</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('yesterday')">Yesterday</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('week')">Last Week</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('month')">Current Month</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('last_month')">Last Month</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('3months')">3 Months</a>
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item"
+                                                    onclick="applyLateRange('year')">1 Year</a>
+
+                                                <div class="wghrm-custom-dropdown-divider"></div>
+
+                                                <a href="javascript:void(0);"
+                                                    class="dropdown-item wghrm-custom-dropdown-item text-primary fw-bold"
+                                                    onclick="event.stopPropagation(); showLateCustomFilter()">
+                                                    Custom Range →
+                                                </a>
+                                            </div>
+
+                                            <!-- Custom Form -->
+                                            <div id="customFilterBoxLate" style="display:none;"
+                                                onclick="event.stopPropagation();">
+                                                <label class="form-label small mb-1">From</label>
+                                                <input type="date" id="late_from" class="form-control form-control-sm mb-2"
+                                                    value="{{ request('late_custom_start') }}">
+
+                                                <label class="form-label small mb-1">To</label>
+                                                <input type="date" id="late_to" class="form-control form-control-sm mb-2"
+                                                    value="{{ request('late_custom_end') }}">
+
+                                                <button type="button" class="btn btn-sm btn-primary w-100 mb-2"
+                                                    onclick="applyLateCustomFilter()">
+                                                    Apply
+                                                </button>
+
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                    onclick="hideLateCustomFilter()">← Back</a>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- <select id="lateTimeFilter"
+                                                        class="form-select form-select-sm"
+                                                        style="width: 100px; height: 32px; padding: 0 0 0 10px !important;">
+                                                    <option value="today" {{ request('late_range', 'today') == 'today' ? 'selected' : '' }}>Today</option>
+                                                    <option value="week" {{ request('late_range') == 'week' ? 'selected' : '' }}>Week</option>
+                                                    <option value="month" {{ request('late_range') == 'month' ? 'selected' : '' }}>Current Month</option>
+                                                    <option value="3months" {{ request('late_range') == '3months' ? 'selected' : '' }}>3 Months</option>
+                                                    <option value="year" {{ request('late_range') == 'year' ? 'selected' : '' }}>Year</option>
+                                                </select> -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            @forelse($todayLateEmployees as $lateEmp)
+                                <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div
+                                            class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
+                                            <i class="bi bi-clock"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">
+                                                {{ $lateEmp['employee']->name ?? 'N/A' }}
+                                            </div>
+                                            <div class="fs-11 text-muted">
+                                                Late by {{ $lateEmp['late_duration'] }}
                                             </div>
                                         </div>
                                     </div>
-                                @empty
-                                    <div class="text-center py-4 text-muted">No upcoming holidays.</div>
-                                @endforelse
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted">
+                                    No late arrivals found.
+                                </div>
+                            @endforelse
 
-                                @if(count($upcomingHolidays) > 4)
-                                    <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                        <a href="javascript:void(0);" id="prev-holiday" class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                            <i class="feather-chevron-left fs-20"></i>
-                                        </a>
-                                        <a href="javascript:void(0);" id="next-holiday" class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                            <i class="feather-chevron-right fs-20"></i>
-                                        </a>
-                                    </div>
-                                @endif
-                            </div>
-                            <a href="{{ route('holidays.index') }}"
-                                class="card-footer fs-11 fw-bold text-uppercase text-center py-4">View Full Holiday Calendar</a>
+                            @if(count($todayLateEmployees) > 4)
+                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                    <a href="javascript:void(0);" id="prev-late"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                        <i class="feather-chevron-left fs-20"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" id="next-late"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                        <i class="feather-chevron-right fs-20"></i>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                    <!--! END: [Upcoming Schedule] !-->
                 </div>
-                <div class="row">
-                    <!-- [Latest leave report] start -->
-                    <div class="col-xxl-8">
-                        <div class="card stretch stretch-full">
-                            <div class="card-header">
-                                <h5 class="card-title">Latest Leave Report</h5>
+                <!-- [Late Arrivals] end -->
 
-                                <form method="GET" class="d-flex gap-2">
-                                    <!-- Employee Dropdown -->
-                                    <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()" style="height: 32px !important; padding: 0 0 0 10px !important">
-                                        <option value="">All Employees</option>
+                <!--! BEGIN: [Upcoming Schedule] !-->
+
+                <div class="col-md-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header hrm-resp-card-header">
+                            <h5 class="card-title">Upcoming Holidays</h5>
+                            @php
+                                // Use test date or real date
+                                $today = isset($today)
+                                    ? \Carbon\Carbon::parse($today)
+                                    : \Carbon\Carbon::today();
+
+                                // Get NEXT upcoming holiday (strictly future)
+                                $nextHoliday = collect($upcomingHolidays)
+                                    ->filter(fn($h) => \Carbon\Carbon::parse($h->date)->gt($today))
+                                    ->sortBy('date')
+                                    ->first();
+
+                                if ($nextHoliday) {
+                                    $hDate = \Carbon\Carbon::parse($nextHoliday->date);
+
+                                    // Get proper difference (months + days)
+                                    $diff = $today->diff($hDate);
+
+                                    $months = $diff->m;
+                                    $days = $diff->d;
+
+                                    if ($months > 0) {
+                                        $remainingText = $months . ' month' . ($months > 1 ? 's ' : ' ')
+                                            . $days . ' day' . ($days > 1 ? 's' : '') . ' left';
+                                    } else {
+                                        if ($days == 1) {
+                                            $remainingText = 'Tomorrow';
+                                        } else {
+                                            $remainingText = $days . ' days left';
+                                        }
+                                    }
+
+                                    $badgeClass = 'badge bg-soft-success text-success'; // GREEN
+                                } else {
+                                    $remainingText = 'No upcoming holidays';
+                                    $badgeClass = 'badge bg-soft-danger text-danger';
+                                }
+                            @endphp
+                            <span class="{{ $badgeClass }}">{{ $remainingText }}</span>
+                            <div class="card-header-action hrm-resp-card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete text-primary">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
+                                    </div>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @forelse($upcomingHolidays as $index => $holiday)
+                                @php $hDate = \Carbon\Carbon::parse($holiday->date); @endphp
+                                <div class="p-3 border border-dashed rounded-3 mb-3 holiday-slide-item {{ $index >= 4 ? 'd-none' : '' }}"
+                                    data-index="{{ $index }}">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div
+                                                class="wd-50 ht-50 bg-soft-primary text-primary lh-1 d-flex align-items-center justify-content-center flex-column rounded-2 schedule-date">
+                                                <span class="fs-18 fw-bold mb-1 d-block">{{ $hDate->format('d') }}</span>
+                                                <span
+                                                    class="fs-10 fw-semibold text-uppercase d-block">{{ $hDate->format('M') }}</span>
+                                            </div>
+                                            <div class="text-dark">
+                                                <a href="javascript:void(0);"
+                                                    class="fw-bold mb-2 text-truncate-1-line">{{ $holiday->title }}</a>
+                                                <span class="fs-11 fw-normal text-muted text-truncate-1-line">Holiday
+                                                    ({{ $hDate->format('Y') }})</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-4 text-muted">No upcoming holidays.</div>
+                            @endforelse
+
+                            @if(count($upcomingHolidays) > 4)
+                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
+                                    <a href="javascript:void(0);" id="prev-holiday"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
+                                        <i class="feather-chevron-left fs-20"></i>
+                                    </a>
+                                    <a href="javascript:void(0);" id="next-holiday"
+                                        class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
+                                        <i class="feather-chevron-right fs-20"></i>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                        <a href="{{ route('holidays.index') }}"
+                            class="card-footer fs-11 fw-bold text-uppercase text-center py-4">View Full Holiday Calendar</a>
+                    </div>
+                </div>
+                <!--! END: [Upcoming Schedule] !-->
+            </div>
+            <div class="row">
+                <!-- [Latest leave report] start -->
+                <div class="col-xxl-8">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header hrm-resp-card-header">
+                            <h5 class="card-title">Latest Leave Report</h5>
+
+                            <form method="GET" class="d-flex flex-wrap gap-2" id="leaveEmployeeForm">
+                                <!-- Custom Employee Filter -->
+                                <div class="dropdown">
+                                    <button class="btn wghrm-custom-select-btn dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                        @php
+                                            $leaveEmp = $employees->firstWhere('id', request('employee_id'));
+                                        @endphp
+                                        {{ $leaveEmp ? $leaveEmp->name : 'All Employees' }}
+                                    </button>
+                                    <div class="dropdown-menu wghrm-custom-dropdown-menu">
+                                        <div class="wghrm-custom-search-box">
+                                            <input type="text" class="wghrm-custom-search-input"
+                                                placeholder="Search employee..." onkeyup="wghrmFilterItems(this)"
+                                                onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                        </div>
+                                        <a class="dropdown-item wghrm-custom-dropdown-item {{ !request('employee_id') ? 'active' : '' }}"
+                                            href="javascript:void(0);" onclick="submitLeaveEmployee('')">
+                                            All Employees
+                                        </a>
                                         @foreach($employees as $emp)
-                                            <option value="{{ $emp->id }}"
-                                                {{ request('employee_id') == $emp->id ? 'selected' : '' }}>
+                                            <a class="dropdown-item wghrm-custom-dropdown-item {{ request('employee_id') == $emp->id ? 'active' : '' }}"
+                                                href="javascript:void(0);" onclick="submitLeaveEmployee('{{ $emp->id }}')">
                                                 {{ $emp->name }}
-                                            </option>
+                                            </a>
                                         @endforeach
-                                    </select>
-
-                                    <!-- Keep filter value -->
-
-
-                                </form>
-                                <form method="GET">
-                                    <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                            @php
+                                    </div>
+                                    <input type="hidden" name="employee_id" id="leave_employee_id"
+                                        value="{{ request('employee_id') }}">
+                                </div>
+                                <script>
+                                    function submitLeaveEmployee(id) {
+                                        document.getElementById('leave_employee_id').value = id;
+                                        document.getElementById('leaveEmployeeForm').submit();
+                                    }
+                                </script>
+                            </form>
+                            <form method="GET">
+                                <input type="hidden" name="employee_id" value="{{ request('employee_id') }}">
+                                <div class="dropdown">
+                                    <button class="btn wghrm-custom-select-btn dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" data-bs-display="static" data-bs-auto-close="outside">
+                                        @php
                                             $label = 'Current Month';
 
                                             if (request('leave_from') && request('leave_to')) {
                                                 $label = \Carbon\Carbon::parse(request('leave_from'))->format('d M Y')
-                                                        . ' → ' .
-                                                        \Carbon\Carbon::parse(request('leave_to'))->format('d M Y');
+                                                    . ' → ' .
+                                                    \Carbon\Carbon::parse(request('leave_to'))->format('d M Y');
                                             } elseif (request('leave_filter') == 'week') {
                                                 $label = 'Last Week';
                                             } elseif (request('leave_filter') == 'month') {
@@ -648,507 +931,650 @@
                                         @endphp
 
                                         {{ $label }}
-                                        </button>
-
-                                        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
-
-                                            <!-- Normal Filters -->
-                                            <div id="normalFiltersLeave">
-                                                <button type="submit" name="leave_filter" value="week" class="dropdown-item">Last Week</button>
-                                                <button type="submit" name="leave_filter" value="month" class="dropdown-item">Last Month</button>
-                                                <button type="submit" name="leave_filter" value="3month" class="dropdown-item">Last 3 Months</button>
-                                                <button type="submit" name="leave_filter" value="6month" class="dropdown-item">Last 6 Months</button>
-                                                <button type="submit" name="leave_filter" value="year" class="dropdown-item">Last 1 Year</button>
-
-
-                                                <div class="dropdown-divider"></div>
-
-                                                <a href="javascript:void(0);"
-                                                class="dropdown-item text-primary fw-bold"
-                                                onclick="event.stopPropagation(); showLeaveCustomFilter()">
-                                                Custom Range →
-                                                </a>
-                                            </div>
-
-                                            <!-- Custom Form -->
-                                            <div id="customFilterBoxLeave" style="display:none;" onclick="event.stopPropagation();">
-                                                    <label class="form-label small mb-1">From</label>
-                                                    <input type="date" name="leave_from" class="form-control form-control-sm mb-2"
-                                                        value="{{ request('leave_from') }}">
-
-                                                    <label class="form-label small mb-1">To</label>
-                                                    <input type="date" name="leave_to" class="form-control form-control-sm mb-2"
-                                                        value="{{ request('leave_to') }}">
-
-                                                    <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
-                                                        Apply
-                                                    </button>
-
-                                                    <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
-                                                    onclick="hideLeaveCustomFilter()">← Back</a>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </form>
-                                <div class="card-header-action">
-                                    <div class="card-header-btn">
-                                        <div data-bs-toggle="tooltip" title="Delete">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
-                                                data-bs-toggle="remove"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Refresh">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
-                                                data-bs-toggle="refresh"> </a>
-                                        </div>
-                                        <div data-bs-toggle="tooltip" title="Maximize/Minimize">
-                                            <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
-                                                data-bs-toggle="expand"> </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body custom-card-action p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Employee</th>
-                                                <!-- <th>Month</th> -->
-                                                <th>Leave Count</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($leaveReport as $emp)
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            <div class="avatar-text avatar-md bg-soft-primary text-primary">
-                                                                {{ substr($emp->name, 0, 1) }}
-                                                            </div>
-                                                            <div>
-                                                                <span class="d-block">{{ $emp->name }}</span>
-                                                                <span class="fs-12 text-muted">{{ $emp->designation }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <!-- <td>
-                                                        <span class="badge bg-gray-200 text-dark">
-                                                            {{ request('filter') ?? 'Last Month' }}
-                                                        </span>
-                                                    </td> -->
-
-                                                    <td>
-                                                        <span class="badge bg-soft-danger text-danger">
-                                                            {{ $emp->leave_count }} Days
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="3" class="text-center text-muted py-4">
-                                                        No leave data found.
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="card-footer d-flex flex-column align-items-center gap-3">
-                                <div class="fs-12 text-muted">
-                                    @if($recentPayrolls->total() > 0)
-                                        Showing {{ $recentPayrolls->firstItem() }} to {{ $recentPayrolls->lastItem() }} of {{ $recentPayrolls->total() }} entries
-                                    @endif
-                                </div>
-                                @if($recentPayrolls->hasPages())
-                                    <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
-                                        <li>
-                                            <a href="{{ $recentPayrolls->previousPageUrl() }}" class="{{ $recentPayrolls->onFirstPage() ? 'opacity-50 pointer-events-none' : '' }}">
-                                                <i class="feather-chevron-left"></i>
-                                            </a>
-                                        </li>
-                                        @foreach ($recentPayrolls->getUrlRange(max(1, $recentPayrolls->currentPage() - 1), min($recentPayrolls->lastPage(), $recentPayrolls->currentPage() + 1)) as $page => $url)
-                                            <li>
-                                                <a href="{{ $url }}" class="{{ ($page == $recentPayrolls->currentPage()) ? 'active' : '' }}">{{ $page }}</a>
-                                            </li>
-                                        @endforeach
-                                        <li>
-                                            <a href="{{ $recentPayrolls->nextPageUrl() }}" class="{{ !$recentPayrolls->hasMorePages() ? 'opacity-50 pointer-events-none' : '' }}">
-                                                <i class="feather-chevron-right"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    <!-- [Latest leave report] end -->
-
-                      <!--! BEGIN: [Attendance Analytics] !-->
-                    <div class="col-xxl-4">
-                        <div class="card stretch stretch-full">
-                            <div class="card-header border-bottom-0 pb-0">
-                                <h5 class="card-title">Attendance Analytics</h5>
-                                    <!-- <div class="dropdown-menu dropdown-menu-end">
-                                        <a href="{{ route('payroll.attendance') }}" class="dropdown-item">
-                                            <i class="feather-external-link me-2"></i>
-                                            <span>Full Attendance List</span>
-                                        </a>
-                                    </div> -->
-                                <div class="dropdown">
-                                    <button type="button" class="avatar-text avatar-sm border-0 bg-transparent" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                        <i class="feather-more-vertical"></i>
                                     </button>
 
-                                    <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 220px; position: absolute !important;">
+                                    <div
+                                        class="dropdown-menu dropdown-menu-end wghrm-custom-dropdown-menu wghrm-resp-dropdown-menu">
+                                        <div class="wghrm-custom-search-box">
+                                            <input type="text" class="wghrm-custom-search-input"
+                                                placeholder="Search range..." onkeyup="wghrmFilterItems(this)"
+                                                onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
+                                        </div>
 
                                         <!-- Normal Filters -->
-                                        <div id="normalFilters">
-                                            <a href="?filter=today" class="dropdown-item">Today</a>
-                                            <a href="?filter=yesterday" class="dropdown-item">Yesterday</a>
-                                            <a href="?filter=week" class="dropdown-item">Last Week</a>
-                                            <a href="?filter=month" class="dropdown-item">Last Month</a>
+                                        <div id="normalFiltersLeave">
+                                            <button type="submit" name="leave_filter" value="week"
+                                                class="dropdown-item wghrm-custom-dropdown-item">Last Week</button>
+                                            <button type="submit" name="leave_filter" value="month"
+                                                class="dropdown-item wghrm-custom-dropdown-item">Last Month</button>
+                                            <button type="submit" name="leave_filter" value="3month"
+                                                class="dropdown-item wghrm-custom-dropdown-item">Last 3 Months</button>
+                                            <button type="submit" name="leave_filter" value="6month"
+                                                class="dropdown-item wghrm-custom-dropdown-item">Last 6 Months</button>
+                                            <button type="submit" name="leave_filter" value="year"
+                                                class="dropdown-item wghrm-custom-dropdown-item">Last 1 Year</button>
 
-                                            <div class="dropdown-divider"></div>
 
-                                            <a href="javascript:void(0);" class="dropdown-item text-primary fw-bold" onclick="event.stopPropagation(); showCustomFilter()">
+                                            <div class="wghrm-custom-dropdown-divider"></div>
+
+                                            <a href="javascript:void(0);"
+                                                class="dropdown-item wghrm-custom-dropdown-item text-primary fw-bold"
+                                                onclick="event.stopPropagation(); showLeaveCustomFilter()">
                                                 Custom Range →
                                             </a>
                                         </div>
 
-                                        <!-- Custom Form (hidden initially) -->
-                                        <div id="customFilterBox" style="display:none;" onclick="event.stopPropagation();">
-                                            <form method="GET">
-                                                <label class="form-label small mb-1">From</label>
-                                                <input type="date" name="from" class="form-control form-control-sm mb-2"
-                                                    value="{{ request('from') }}">
+                                        <!-- Custom Form -->
+                                        <div id="customFilterBoxLeave" style="display:none;"
+                                            onclick="event.stopPropagation();">
+                                            <label class="form-label small mb-1">From</label>
+                                            <input type="date" name="leave_from" class="form-control form-control-sm mb-2"
+                                                value="{{ request('leave_from') }}">
 
-                                                <label class="form-label small mb-1">To</label>
-                                                <input type="date" name="to" class="form-control form-control-sm mb-2"
-                                                    value="{{ request('to') }}">
+                                            <label class="form-label small mb-1">To</label>
+                                            <input type="date" name="leave_to" class="form-control form-control-sm mb-2"
+                                                value="{{ request('leave_to') }}">
 
-                                                <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
-                                                    Apply
-                                                </button>
+                                            <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                                Apply
+                                            </button>
 
-                                                <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
-                                                onclick="hideCustomFilter()">← Back</a>
-                                            </form>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                onclick="hideLeaveCustomFilter()">← Back</a>
                                         </div>
 
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-body pt-3 text-center">
-                                <div class="py-4 position-relative">
-                                    <div class="fs-1 fw-black text-primary mb-1 mt-2">
-                                        @if(request()->has('from') || request()->has('filter'))
-                                            {{ $rangeAttendanceRate }}%
-                                        @else
-                                            {{ $attendanceRate }}%
-                                        @endif
+                            </form>
+                            <div class="card-header-action hrm-resp-card-header-action">
+                                <div class="card-header-btn">
+                                    <div data-bs-toggle="tooltip" title="Delete">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-danger"
+                                            data-bs-toggle="remove"> </a>
                                     </div>
-                                    <div class="text-muted fw-bold small text-uppercase">Average Attendance Rate</div>
-                                </div>
-
-                                <div class="p-3 bg-soft-primary rounded-3 text-start mb-4">
-
-                                    @php
-                                        $isFiltered = request()->has('from') || request()->has('filter');
-                                    @endphp
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Staff Present</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangePresent : $present }}/{{ $totalEmployees }}
-                                        </span>
+                                    <div data-bs-toggle="tooltip" title="Refresh">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-warning"
+                                            data-bs-toggle="refresh"> </a>
                                     </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Work from home</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeWFH : $wfh }}/{{ $totalEmployees }}
-                                        </span>
+                                    <div data-bs-toggle="tooltip" title="Maximize/Minimize">
+                                        <a href="javascript:void(0);" class="avatar-text avatar-xs bg-success"
+                                            data-bs-toggle="expand"> </a>
                                     </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Late</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeLate : $late }}/{{ $totalEmployees }}
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Half Day</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeHalfday : $half_day }}/{{ $totalEmployees }}
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Leave</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeLeave : $leave }}/{{ $totalEmployees }}
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Early out</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeEarly : $early }}/{{ $totalEmployees }}
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="small fw-bold text-dark">Absent</span>
-                                        <span class="small fw-black text-primary">
-                                            {{ $isFiltered ? $rangeAbsent : $absent }}/{{ $totalEmployees }}
-                                        </span>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                                <!-- <div class="row g-2 text-start">
-                                    <div class="col-6 border-end">
-                                        <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
-                                        <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
-                                    </div>
-                                    <div class="col-6 ps-3">
-                                        <div class="fs-5 fw-bold text-success"></div>
-                                        <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
-                                    </div>
-                                </div> -->
-                                <div class="card-footer border-top p-3 bg-light bg-opacity-10 text-center">
-                                    <a href="{{ route('payroll.attendance.add') }}" class="fs-12 fw-bold text-primary text-uppercase">
-                                        <i class="feather-plus-circle me-1"></i> Add Daily Records
-                                    </a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!--! END: [Attendance Analytics] !-->
-                </div><!-- row end -->
-                <div class="row pt-4">
-
-                </div><!-- second row end -->
-                <!-- Monthly Summary Modal [ENHANCED] -->
-                <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                            <div class="modal-header bg-soft-primary border-0 p-4">
-                                <div>
-                                    <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
-                                    <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
-                                </div>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
+                        <div class="card-body custom-card-action p-0">
+                            <div class="table-responsive hrm-resp-table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <!-- <th>Month</th> -->
+                                            <th>Leave Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($leaveReport as $emp)
                                             <tr>
-                                                <th class="ps-4">Month</th>
-                                                <th>Basic / Earnings</th>
-                                                <th>Deductions</th>
-                                                <th>Net Payable</th>
-                                                <th class="pe-4 text-end">Trends</th>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="avatar-text avatar-md bg-soft-primary text-primary">
+                                                            {{ substr($emp->name, 0, 1) }}
+                                                        </div>
+                                                        <div>
+                                                            <span class="d-block">{{ $emp->name }}</span>
+                                                            <span class="fs-12 text-muted">{{ $emp->designation }}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- <td>
+                                                                    <span class="badge bg-gray-200 text-dark">
+                                                                        {{ request('filter') ?? 'Last Month' }}
+                                                                    </span>
+                                                                </td> -->
+
+                                                <td>
+                                                    <span class="badge bg-soft-danger text-danger">
+                                                        {{ $emp->leave_count }} Days
+                                                    </span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody id="modalHistoryTable">
-                                            <!-- Populated via JS -->
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-4">
+                                                    No leave data found.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
-                                <div class="w-100 d-flex justify-content-between align-items-center">
-                                    <div class="text-muted small">
-                                        <i class="feather-info me-1"></i> Data shown is aggregated for all employees.
-                                    </div>
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close Summary</button>
-                                </div>
+                        </div>
+                        <div class="card-footer d-flex flex-column align-items-center gap-3">
+                            <div class="fs-12 text-muted">
+                                @if($recentPayrolls->total() > 0)
+                                    Showing {{ $recentPayrolls->firstItem() }} to {{ $recentPayrolls->lastItem() }} of
+                                    {{ $recentPayrolls->total() }} entries
+                                @endif
                             </div>
+                            @if($recentPayrolls->hasPages())
+                                <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
+                                    <li>
+                                        <a href="{{ $recentPayrolls->previousPageUrl() }}"
+                                            class="{{ $recentPayrolls->onFirstPage() ? 'opacity-50 pointer-events-none' : '' }}">
+                                            <i class="feather-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    @foreach ($recentPayrolls->getUrlRange(max(1, $recentPayrolls->currentPage() - 1), min($recentPayrolls->lastPage(), $recentPayrolls->currentPage() + 1)) as $page => $url)
+                                        <li>
+                                            <a href="{{ $url }}"
+                                                class="{{ ($page == $recentPayrolls->currentPage()) ? 'active' : '' }}">{{ $page }}</a>
+                                        </li>
+                                    @endforeach
+                                    <li>
+                                        <a href="{{ $recentPayrolls->nextPageUrl() }}"
+                                            class="{{ !$recentPayrolls->hasMorePages() ? 'opacity-50 pointer-events-none' : '' }}">
+                                            <i class="feather-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            @endif
                         </div>
                     </div>
                 </div>
+                <!-- [Latest leave report] end -->
+
+                <!--! BEGIN: [Attendance Analytics] !-->
+                <div class="col-xxl-4">
+                    <div class="card stretch stretch-full">
+                        <div class="card-header border-bottom-0 pb-0">
+                            <h5 class="card-title">Attendance Analytics</h5>
+                            <!-- <div class="dropdown-menu dropdown-menu-end">
+                                                <a href="{{ route('payroll.attendance') }}" class="dropdown-item">
+                                                    <i class="feather-external-link me-2"></i>
+                                                    <span>Full Attendance List</span>
+                                                </a>
+                                            </div> -->
+                            <div class="dropdown">
+                                <button type="button" class="avatar-text avatar-sm border-0 bg-transparent"
+                                    data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                    <i class="feather-more-vertical"></i>
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-end p-2"
+                                    style="min-width: 220px; position: absolute !important;">
+
+                                    <!-- Normal Filters -->
+                                    <div id="normalFilters">
+                                        <a href="?filter=today" class="dropdown-item">Today</a>
+                                        <a href="?filter=yesterday" class="dropdown-item">Yesterday</a>
+                                        <a href="?filter=week" class="dropdown-item">Last Week</a>
+                                        <a href="?filter=month" class="dropdown-item">Last Month</a>
+
+                                        <div class="dropdown-divider"></div>
+
+                                        <a href="javascript:void(0);" class="dropdown-item text-primary fw-bold"
+                                            onclick="event.stopPropagation(); showCustomFilter()">
+                                            Custom Range →
+                                        </a>
+                                    </div>
+
+                                    <!-- Custom Form (hidden initially) -->
+                                    <div id="customFilterBox" style="display:none;" onclick="event.stopPropagation();">
+                                        <form method="GET">
+                                            <label class="form-label small mb-1">From</label>
+                                            <input type="date" name="from" class="form-control form-control-sm mb-2"
+                                                value="{{ request('from') }}">
+
+                                            <label class="form-label small mb-1">To</label>
+                                            <input type="date" name="to" class="form-control form-control-sm mb-2"
+                                                value="{{ request('to') }}">
+
+                                            <button type="submit" class="btn btn-sm btn-primary w-100 mb-2">
+                                                Apply
+                                            </button>
+
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-light w-100"
+                                                onclick="hideCustomFilter()">← Back</a>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pt-3 text-center">
+                            <div class="py-4 position-relative">
+                                <div class="fs-1 fw-black text-primary mb-1 mt-2">
+                                    @if(request()->has('from') || request()->has('filter'))
+                                        {{ $rangeAttendanceRate }}%
+                                    @else
+                                        {{ $attendanceRate }}%
+                                    @endif
+                                </div>
+                                <div class="text-muted fw-bold small text-uppercase">Average Attendance Rate</div>
+                            </div>
+
+                            <div class="p-3 bg-soft-primary rounded-3 text-start mb-4">
+
+                                @php
+                                    $isFiltered = request()->has('from') || request()->has('filter');
+                                @endphp
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Staff Present</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangePresent : $present }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Work from home</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeWFH : $wfh }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Late</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeLate : $late }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Half Day</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeHalfday : $half_day }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Leave</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeLeave : $leave }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Early out</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeEarly : $early }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">Absent</span>
+                                    <span class="small fw-black text-primary">
+                                        {{ $isFiltered ? $rangeAbsent : $absent }}/{{ $totalEmployees }}
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- <div class="row g-2 text-start">
+                                            <div class="col-6 border-end">
+                                                <div class="fs-5 fw-bold text-dark">{{ $totalEmployees }}</div>
+                                                <div class="fs-11 text-muted text-uppercase fw-bold">Total Staff</div>
+                                            </div>
+                                            <div class="col-6 ps-3">
+                                                <div class="fs-5 fw-bold text-success"></div>
+                                                <div class="fs-11 text-muted text-uppercase fw-bold">Checked-in</div>
+                                            </div>
+                                        </div> -->
+                        <div class="card-footer border-top p-3 bg-light bg-opacity-10 text-center">
+                            <a href="{{ route('payroll.attendance.add') }}"
+                                class="fs-12 fw-bold text-primary text-uppercase">
+                                <i class="feather-plus-circle me-1"></i> Add Daily Records
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!--! END: [Attendance Analytics] !-->
+        </div><!-- row end -->
+        <div class="row pt-4">
 
-            <!-- Holiday Modal Deleted -->
+        </div><!-- second row end -->
+        <!-- Monthly Summary Modal [ENHANCED] -->
+        <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-header bg-soft-primary border-0 p-4">
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-primary">Financial Breakdown History</h5>
+                            <p class="text-muted small mb-0 mt-1">Detailed payroll analytics for the last 6 months</p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="table-responsive hrm-resp-table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-uppercase fs-10 fw-800 text-muted">
+                                    <tr>
+                                        <th class="ps-4">Month</th>
+                                        <th>Basic / Earnings</th>
+                                        <th>Deductions</th>
+                                        <th>Net Payable</th>
+                                        <th class="pe-4 text-end">Trends</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalHistoryTable">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 bg-light bg-opacity-50">
+                        <div class="w-100 d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                <i class="feather-info me-1"></i> Data shown is aggregated for all employees.
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close Summary</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
 
-            <!-- [ Main Content ] end -->
+    <!-- Holiday Modal Deleted -->
+
+    <!-- [ Main Content ] end -->
 @endsection
 
 @push('scripts')
     <script shadow>
-    $(document).ready(function() {
-        // Initializing the chart with dynamic data from controller
-        var options = {
-            chart: {
-                height: 380,
-                width: "100%",
-                type: "bar",
-                toolbar: { show: false },
-                fontFamily: 'Inter, sans-serif'
-            },
-            stroke: {
-                width: [0, 0, 0],
-                show: false
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: "45%",
-                    borderRadius: 4,
-                    dataLabels: { position: 'top' }
-                }
-            },
-            colors: ["#e2e8f0", "#10b981", "#f59e0b"],
-            // series: [
-            //     {
-            //         name: "Total Payroll (Expected)",
-            //         type: "bar",
-            //         data: {!! json_encode($chartTotal) !!}
-            //     },
-            //     {
-            //         name: "Completed (Paid)",
-            //         type: "bar",
-            //         data: {!! json_encode($chartPaid) !!}
-            //     },
-            //     {
-            //         name: "Pending (Unpaid)",
-            //         type: "bar",
-            //         data: {!! json_encode($chartPending) !!}
-            //     }
-            // ],
-            // fill: {
-            //     opacity: [1, 1, 1],
-            //     type: ['solid', 'solid', 'solid']
-            // },
-            // markers: { size: 0 },
-            // xaxis: {
-            //     categories: {!! json_encode($chartMonths) !!},
-            //     axisBorder: { show: false },
-            //     axisTicks: { show: false },
-            //     labels: {
-            //         style: {
-            //             fontSize: "10px",
-            //             colors: "#64748b",
-            //             fontWeight: 600
-            //         }
-            //     }
-            // },
-            yaxis: {
-                labels: {
-                    formatter: function(e) {
-                        return "₹" + e.toLocaleString()
-                    },
-                    style: { color: "#64748b", fontWeight: 600 }
-                }
-            },
-            grid: {
-                borderColor: '#f1f5f9',
-                strokeDashArray: 4,
-                xaxis: { lines: { show: false } },
-                yaxis: { lines: { show: true } }
-            },
-            dataLabels: { enabled: false },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                y: {
-                    formatter: function(e) {
-                        return "₹" + e.toLocaleString()
+        $(document).ready(function () {
+            // Initializing the chart with dynamic data from controller
+            var options = {
+                chart: {
+                    height: 380,
+                    width: "100%",
+                    type: "bar",
+                    toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif'
+                },
+                stroke: {
+                    width: [0, 0, 0],
+                    show: false
+                },
+                plotOptions: {
+                    bar: {
+                        columnWidth: "45%",
+                        borderRadius: 4,
+                        dataLabels: { position: 'top' }
                     }
                 },
-                theme: 'dark'
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right',
-                fontSize: "12px",
-                fontFamily: "Inter",
-                fontWeight: 600,
-                markers: { radius: 12 }
-            }
-        };
+                colors: ["#e2e8f0", "#10b981", "#f59e0b"],
+                // series: [
+                //     {
+                //         name: "Total Payroll (Expected)",
+                //         type: "bar",
+                //         data: {!! json_encode($chartTotal) !!}
+                //     },
+                //     {
+                //         name: "Completed (Paid)",
+                //         type: "bar",
+                //         data: {!! json_encode($chartPaid) !!}
+                //     },
+                //     {
+                //         name: "Pending (Unpaid)",
+                //         type: "bar",
+                //         data: {!! json_encode($chartPending) !!}
+                //     }
+                // ],
+                // fill: {
+                //     opacity: [1, 1, 1],
+                //     type: ['solid', 'solid', 'solid']
+                // },
+                // markers: { size: 0 },
+                // xaxis: {
+                //     categories: {!! json_encode($chartMonths) !!},
+                //     axisBorder: { show: false },
+                //     axisTicks: { show: false },
+                //     labels: {
+                //         style: {
+                //             fontSize: "10px",
+                //             colors: "#64748b",
+                //             fontWeight: 600
+                //         }
+                //     }
+                // },
+                yaxis: {
+                    labels: {
+                        formatter: function (e) {
+                            return "₹" + e.toLocaleString()
+                        },
+                        style: { color: "#64748b", fontWeight: 600 }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f5f9',
+                    strokeDashArray: 4,
+                    xaxis: { lines: { show: false } },
+                    yaxis: { lines: { show: true } }
+                },
+                dataLabels: { enabled: false },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: {
+                        formatter: function (e) {
+                            return "₹" + e.toLocaleString()
+                        }
+                    },
+                    theme: 'dark'
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    fontSize: "12px",
+                    fontFamily: "Inter",
+                    fontWeight: 600,
+                    markers: { radius: 12 }
+                }
+            };
 
-        // Re-render chart to ensure dynamic data is applied over theme defaults
-        setTimeout(function() {
-            const chartContainer = document.querySelector("#payment-records-chart");
-            var chart;
-            if (chartContainer) {
-                chartContainer.innerHTML = '';
-                chart = new ApexCharts(chartContainer, options);
-                chart.render();
-            }
-            // Modal Drill-down Logic
-            var summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
+            // Re-render chart to ensure dynamic data is applied over theme defaults
+            setTimeout(function () {
+                const chartContainer = document.querySelector("#payment-records-chart");
+                var chart;
+                if (chartContainer) {
+                    chartContainer.innerHTML = '';
+                    chart = new ApexCharts(chartContainer, options);
+                    chart.render();
+                }
+                // Modal Drill-down Logic
+                var summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
 
-            function showMonthlySummary(month) {
-                fetch(`/dashboard/summary?month=${month}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success) {
-                            let html = '';
-                            data.history.forEach(item => {
-                                html += `
-                                    <tr>
-                                        <td class="ps-4">
-                                            <div class="fw-bold text-dark">${item.month}</div>
-                                            <div class="fs-10 text-muted text-uppercase fw-bold">Financial Record</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold text-dark">₹${item.earnings.toLocaleString()}</div>
-                                            <div class="fs-10 text-success text-uppercase fw-bold">Total Earnings</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold text-danger">-₹${item.deductions.toLocaleString()}</div>
-                                            <div class="fs-10 text-muted text-uppercase fw-bold">Total Deducted</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-black text-primary">₹${item.net.toLocaleString()}</div>
-                                            <div class="fs-10 text-muted text-uppercase fw-bold">Net Distributed</div>
-                                        </td>
-                                        <td class="pe-4 text-end">
-                                            <span class="badge bg-soft-primary text-primary fs-10 text-uppercase fw-bold">Analyzed</span>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-                            document.getElementById('modalHistoryTable').innerHTML = html;
-                            summaryModal.show();
+                function showMonthlySummary(month) {
+                    fetch(`/dashboard/summary?month=${month}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                let html = '';
+                                data.history.forEach(item => {
+                                    html += `
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark">${item.month}</div>
+                                                <div class="fs-10 text-muted text-uppercase fw-bold">Financial Record</div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark">₹${item.earnings.toLocaleString()}</div>
+                                                <div class="fs-10 text-success text-uppercase fw-bold">Total Earnings</div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-danger">-₹${item.deductions.toLocaleString()}</div>
+                                                <div class="fs-10 text-muted text-uppercase fw-bold">Total Deducted</div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-black text-primary">₹${item.net.toLocaleString()}</div>
+                                                <div class="fs-10 text-muted text-uppercase fw-bold">Net Distributed</div>
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <span class="badge bg-soft-primary text-primary fs-10 text-uppercase fw-bold">Analyzed</span>
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
+                                document.getElementById('modalHistoryTable').innerHTML = html;
+                                summaryModal.show();
+                            }
+                        });
+                }
+                // Chart Update Logic
+                function updateChartRange(range) {
+                    fetch(`/dashboard/chart?range=${range}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                chart.updateSeries(data.series);
+                                chart.updateOptions({
+                                    xaxis: { categories: data.labels }
+                                });
+                            }
+                        });
+                }
+
+                // Holiday Slider Logic
+                let currentHolidayPage = 0;
+                const holidaysPerPage = 4;
+                const totalHolidays = {{ count($upcomingHolidays) }};
+                const holidayItems = document.querySelectorAll('.holiday-slide-item');
+                const prevHolidayBtn = document.getElementById('prev-holiday');
+                const nextHolidayBtn = document.getElementById('next-holiday');
+
+                function updateHolidayView() {
+                    holidayItems.forEach((item, index) => {
+                        const start = currentHolidayPage * holidaysPerPage;
+                        const end = start + holidaysPerPage;
+                        if (index >= start && index < end) {
+                            item.classList.remove('d-none');
+                        } else {
+                            item.classList.add('d-none');
                         }
                     });
-            }
-            // Chart Update Logic
-            function updateChartRange(range) {
-                fetch(`/dashboard/chart?range=${range}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            chart.updateSeries(data.series);
-                            chart.updateOptions({
-                                xaxis: { categories: data.labels }
-                            });
+
+                    // Update Button States
+                    if (currentHolidayPage === 0) {
+                        prevHolidayBtn.classList.add('disabled');
+                        prevHolidayBtn.style.opacity = '0.5';
+                    } else {
+                        prevHolidayBtn.classList.remove('disabled');
+                        prevHolidayBtn.style.opacity = '1';
+                    }
+
+                    if ((currentHolidayPage + 1) * holidaysPerPage >= totalHolidays) {
+                        nextHolidayBtn.classList.add('disabled');
+                        nextHolidayBtn.style.opacity = '0.5';
+                    } else {
+                        nextHolidayBtn.classList.remove('disabled');
+                        nextHolidayBtn.style.opacity = '1';
+                    }
+                }
+
+                if (nextHolidayBtn) {
+                    nextHolidayBtn.addEventListener('click', function () {
+                        if ((currentHolidayPage + 1) * holidaysPerPage < totalHolidays) {
+                            currentHolidayPage++;
+                            updateHolidayView();
                         }
                     });
+                }
+
+                if (prevHolidayBtn) {
+                    prevHolidayBtn.addEventListener('click', function () {
+                        if (currentHolidayPage > 0) {
+                            currentHolidayPage--;
+                            updateHolidayView();
+                        }
+                    });
+                }
+            }, 500);
+        });
+
+        function showCustomFilter() {
+            document.getElementById('normalFilters').style.display = 'none';
+            document.getElementById('customFilterBox').style.display = 'block';
+        }
+
+        function hideCustomFilter() {
+            document.getElementById('normalFilters').style.display = 'block';
+            document.getElementById('customFilterBox').style.display = 'none';
+        }
+
+        function showLeaveCustomFilter() {
+            const box = event.target.closest('.dropdown-menu');
+            box.querySelector('#normalFiltersLeave').style.display = 'none';
+            box.querySelector('#customFilterBoxLeave').style.display = 'block';
+        }
+
+        function hideLeaveCustomFilter() {
+            const box = event.target.closest('.dropdown-menu');
+            box.querySelector('#customFilterBoxLeave').style.display = 'none';
+            box.querySelector('#normalFiltersLeave').style.display = 'block';
+        }
+
+        const lateEmployeeFilter = document.getElementById('lateEmployeeFilter');
+        const lateTimeFilter = document.getElementById('lateTimeFilter');
+
+        lateEmployeeFilter?.addEventListener('change', applyLateFilters);
+        lateTimeFilter?.addEventListener('change', applyLateFilters);
+
+        function applyLateFilters() {
+            let employee = lateEmployeeFilter?.value || '';
+            let range = lateTimeFilter?.value || new URL(window.location.href).searchParams.get('late_range') || 'today';
+
+            let url = new URL(window.location.href);
+
+            if (employee) {
+                url.searchParams.set('late_employee', employee);
+            } else {
+                url.searchParams.delete('late_employee');
             }
 
-            // Holiday Slider Logic
-            let currentHolidayPage = 0;
-            const holidaysPerPage = 4;
-            const totalHolidays = {{ count($upcomingHolidays) }};
-            const holidayItems = document.querySelectorAll('.holiday-slide-item');
-            const prevHolidayBtn = document.getElementById('prev-holiday');
-            const nextHolidayBtn = document.getElementById('next-holiday');
+            url.searchParams.set('late_range', range);
 
-            function updateHolidayView() {
-                holidayItems.forEach((item, index) => {
-                    const start = currentHolidayPage * holidaysPerPage;
-                    const end = start + holidaysPerPage;
+            window.location.href = url.toString();
+        }
+
+        // Today Leave Slider
+        initSlider({
+            itemsSelector: '.leave-slide-item',
+            prevBtnId: 'prev-leave',
+            nextBtnId: 'next-leave',
+            totalItems: {{ count($todayLeaveEmployees) }}
+        });
+
+        // Late Arrivals Slider
+        initSlider({
+            itemsSelector: '.late-slide-item',
+            prevBtnId: 'prev-late',
+            nextBtnId: 'next-late',
+            totalItems: {{ count($todayLateEmployees) }}
+        });
+
+        function initSlider({
+            itemsSelector,
+            prevBtnId,
+            nextBtnId,
+            totalItems,
+            itemsPerPage = 4
+        }) {
+            let currentPage = 0;
+            const items = document.querySelectorAll(itemsSelector);
+            const prevBtn = document.getElementById(prevBtnId);
+            const nextBtn = document.getElementById(nextBtnId);
+
+            function updateView() {
+                items.forEach((item, index) => {
+                    const start = currentPage * itemsPerPage;
+                    const end = start + itemsPerPage;
+
                     if (index >= start && index < end) {
                         item.classList.remove('d-none');
                     } else {
@@ -1156,230 +1582,122 @@
                     }
                 });
 
-                // Update Button States
-                if (currentHolidayPage === 0) {
-                    prevHolidayBtn.classList.add('disabled');
-                    prevHolidayBtn.style.opacity = '0.5';
-                } else {
-                    prevHolidayBtn.classList.remove('disabled');
-                    prevHolidayBtn.style.opacity = '1';
-                }
-
-                if ((currentHolidayPage + 1) * holidaysPerPage >= totalHolidays) {
-                    nextHolidayBtn.classList.add('disabled');
-                    nextHolidayBtn.style.opacity = '0.5';
-                } else {
-                    nextHolidayBtn.classList.remove('disabled');
-                    nextHolidayBtn.style.opacity = '1';
-                }
-            }
-
-            if (nextHolidayBtn) {
-                nextHolidayBtn.addEventListener('click', function() {
-                    if ((currentHolidayPage + 1) * holidaysPerPage < totalHolidays) {
-                        currentHolidayPage++;
-                        updateHolidayView();
+                // Prev Button
+                if (prevBtn) {
+                    if (currentPage === 0) {
+                        prevBtn.classList.add('disabled');
+                        prevBtn.style.opacity = '0.5';
+                    } else {
+                        prevBtn.classList.remove('disabled');
+                        prevBtn.style.opacity = '1';
                     }
-                });
-            }
+                }
 
-            if (prevHolidayBtn) {
-                prevHolidayBtn.addEventListener('click', function() {
-                    if (currentHolidayPage > 0) {
-                        currentHolidayPage--;
-                        updateHolidayView();
+                // Next Button
+                if (nextBtn) {
+                    if ((currentPage + 1) * itemsPerPage >= totalItems) {
+                        nextBtn.classList.add('disabled');
+                        nextBtn.style.opacity = '0.5';
+                    } else {
+                        nextBtn.classList.remove('disabled');
+                        nextBtn.style.opacity = '1';
                     }
-                });
-            }
-        }, 500);
-    });
-
-    function showCustomFilter() {
-        document.getElementById('normalFilters').style.display = 'none';
-        document.getElementById('customFilterBox').style.display = 'block';
-    }
-
-    function hideCustomFilter() {
-        document.getElementById('normalFilters').style.display = 'block';
-        document.getElementById('customFilterBox').style.display = 'none';
-    }
-
-    function showLeaveCustomFilter() {
-        const box = event.target.closest('.dropdown-menu');
-        box.querySelector('#normalFiltersLeave').style.display = 'none';
-        box.querySelector('#customFilterBoxLeave').style.display = 'block';
-    }
-
-    function hideLeaveCustomFilter() {
-        const box = event.target.closest('.dropdown-menu');
-        box.querySelector('#customFilterBoxLeave').style.display = 'none';
-        box.querySelector('#normalFiltersLeave').style.display = 'block';
-    }
-
-    const lateEmployeeFilter = document.getElementById('lateEmployeeFilter');
-    const lateTimeFilter = document.getElementById('lateTimeFilter');
-
-    lateEmployeeFilter?.addEventListener('change', applyLateFilters);
-    lateTimeFilter?.addEventListener('change', applyLateFilters);
-
-    function applyLateFilters() {
-        let employee = lateEmployeeFilter?.value || '';
-        let range = lateTimeFilter?.value || new URL(window.location.href).searchParams.get('late_range') || 'today';
-
-        let url = new URL(window.location.href);
-
-        if (employee) {
-            url.searchParams.set('late_employee', employee);
-        } else {
-            url.searchParams.delete('late_employee');
-        }
-
-        url.searchParams.set('late_range', range);
-
-        window.location.href = url.toString();
-    }
-
-    // Today Leave Slider
-    initSlider({
-        itemsSelector: '.leave-slide-item',
-        prevBtnId: 'prev-leave',
-        nextBtnId: 'next-leave',
-        totalItems: {{ count($todayLeaveEmployees) }}
-    });
-
-    // Late Arrivals Slider
-    initSlider({
-        itemsSelector: '.late-slide-item',
-        prevBtnId: 'prev-late',
-        nextBtnId: 'next-late',
-        totalItems: {{ count($todayLateEmployees) }}
-    });
-
-    function initSlider({
-        itemsSelector,
-        prevBtnId,
-        nextBtnId,
-        totalItems,
-        itemsPerPage = 4
-    }) {
-        let currentPage = 0;
-        const items = document.querySelectorAll(itemsSelector);
-        const prevBtn = document.getElementById(prevBtnId);
-        const nextBtn = document.getElementById(nextBtnId);
-
-        function updateView() {
-            items.forEach((item, index) => {
-                const start = currentPage * itemsPerPage;
-                const end = start + itemsPerPage;
-
-                if (index >= start && index < end) {
-                    item.classList.remove('d-none');
-                } else {
-                    item.classList.add('d-none');
-                }
-            });
-
-            // Prev Button
-            if (prevBtn) {
-                if (currentPage === 0) {
-                    prevBtn.classList.add('disabled');
-                    prevBtn.style.opacity = '0.5';
-                } else {
-                    prevBtn.classList.remove('disabled');
-                    prevBtn.style.opacity = '1';
                 }
             }
 
-            // Next Button
             if (nextBtn) {
-                if ((currentPage + 1) * itemsPerPage >= totalItems) {
-                    nextBtn.classList.add('disabled');
-                    nextBtn.style.opacity = '0.5';
-                } else {
-                    nextBtn.classList.remove('disabled');
-                    nextBtn.style.opacity = '1';
-                }
+                nextBtn.addEventListener('click', () => {
+                    if ((currentPage + 1) * itemsPerPage < totalItems) {
+                        currentPage++;
+                        updateView();
+                    }
+                });
             }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 0) {
+                        currentPage--;
+                        updateView();
+                    }
+                });
+            }
+
+            updateView();
         }
 
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                if ((currentPage + 1) * itemsPerPage < totalItems) {
-                    currentPage++;
-                    updateView();
+
+        document.getElementById('lateEmployeeFilter')?.addEventListener('change', function () {
+            applyLateRange(new URL(window.location.href).searchParams.get('late_range') || 'today');
+        });
+        function applyLateRange(range) {
+            let url = new URL(window.location.href);
+
+            url.searchParams.set('late_range', range);
+
+            const emp = document.getElementById('lateEmployeeFilter')?.value;
+            if (emp) url.searchParams.set('late_employee', emp);
+
+            window.location.href = url.toString();
+        }
+
+        function applyLateCustomFilter() {
+            let url = new URL(window.location.href);
+
+            url.searchParams.set('late_range', 'custom');
+            url.searchParams.set('late_custom_start', document.getElementById('late_from').value);
+            url.searchParams.set('late_custom_end', document.getElementById('late_to').value);
+
+            const emp = document.getElementById('lateEmployeeFilter')?.value;
+            if (emp) url.searchParams.set('late_employee', emp);
+
+            window.location.href = url.toString();
+        }
+
+        function showLateCustomFilter() {
+            document.getElementById('normalFiltersLate').style.display = 'none';
+            document.getElementById('customFilterBoxLate').style.display = 'block';
+        }
+
+        function hideLateCustomFilter() {
+            document.getElementById('normalFiltersLate').style.display = 'block';
+            document.getElementById('customFilterBoxLate').style.display = 'none';
+        }
+
+        function filterLateEmployee(employeeId) {
+            const url = new URL(window.location.href);
+
+            if (employeeId) {
+                url.searchParams.set('late_employee', employeeId);
+            } else {
+                url.searchParams.delete('late_employee');
+            }
+
+            // KEEP EXISTING FILTERS (very important)
+            const lateRange = "{{ request('late_range') }}";
+            const start = "{{ request('late_custom_start') }}";
+            const end = "{{ request('late_custom_end') }}";
+
+            if (lateRange) url.searchParams.set('late_range', lateRange);
+            if (start) url.searchParams.set('late_custom_start', start);
+            if (end) url.searchParams.set('late_custom_end', end);
+
+            window.location.href = url.toString();
+        }
+    </script>
+    <script>
+        // Custom Dropdown Search & Select Logic
+        function wghrmFilterItems(input) {
+            const filter = input.value.toLowerCase();
+            const items = input.closest('.wghrm-custom-dropdown-menu').querySelectorAll('.wghrm-custom-dropdown-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.setProperty('display', 'block', 'important');
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
                 }
             });
         }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                if (currentPage > 0) {
-                    currentPage--;
-                    updateView();
-                }
-            });
-        }
-
-        updateView();
-    }
-
-
-    document.getElementById('lateEmployeeFilter')?.addEventListener('change', function () {
-        applyLateRange(new URL(window.location.href).searchParams.get('late_range') || 'today');
-    });
-    function applyLateRange(range) {
-        let url = new URL(window.location.href);
-
-        url.searchParams.set('late_range', range);
-
-        const emp = document.getElementById('lateEmployeeFilter')?.value;
-        if (emp) url.searchParams.set('late_employee', emp);
-
-        window.location.href = url.toString();
-    }
-
-    function applyLateCustomFilter() {
-        let url = new URL(window.location.href);
-
-        url.searchParams.set('late_range', 'custom');
-        url.searchParams.set('late_custom_start', document.getElementById('late_from').value);
-        url.searchParams.set('late_custom_end', document.getElementById('late_to').value);
-
-        const emp = document.getElementById('lateEmployeeFilter')?.value;
-        if (emp) url.searchParams.set('late_employee', emp);
-
-        window.location.href = url.toString();
-    }
-
-    function showLateCustomFilter() {
-        document.getElementById('normalFiltersLate').style.display = 'none';
-        document.getElementById('customFilterBoxLate').style.display = 'block';
-    }
-
-    function hideLateCustomFilter() {
-        document.getElementById('normalFiltersLate').style.display = 'block';
-        document.getElementById('customFilterBoxLate').style.display = 'none';
-    }
-
-    function filterLateEmployee(employeeId) {
-        const url = new URL(window.location.href);
-
-        if (employeeId) {
-            url.searchParams.set('late_employee', employeeId);
-        } else {
-            url.searchParams.delete('late_employee');
-        }
-
-        // KEEP EXISTING FILTERS (very important)
-        const lateRange = "{{ request('late_range') }}";
-        const start = "{{ request('late_custom_start') }}";
-        const end = "{{ request('late_custom_end') }}";
-
-        if (lateRange) url.searchParams.set('late_range', lateRange);
-        if (start) url.searchParams.set('late_custom_start', start);
-        if (end) url.searchParams.set('late_custom_end', end);
-
-        window.location.href = url.toString();
-    }
     </script>
 @endpush
