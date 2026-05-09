@@ -456,15 +456,15 @@
                                         <!-- Normal Filters -->
                                         <div id="normalFiltersLeave">
                                             <button type="submit" name="leave_filter" value="week"
-                                                class="dropdown-item">Last Week</button>
+                                                class="dropdown-item" onclick="clearLeaveCustomDates()">Last Week</button>
                                             <button type="submit" name="leave_filter" value="month"
-                                                class="dropdown-item">Last Month</button>
+                                                class="dropdown-item" onclick="clearLeaveCustomDates()">Last Month</button>
                                             <button type="submit" name="leave_filter" value="3month"
-                                                class="dropdown-item">Last 3 Months</button>
+                                                class="dropdown-item" onclick="clearLeaveCustomDates()">Last 3 Months</button>
                                             <button type="submit" name="leave_filter" value="6month"
-                                                class="dropdown-item">Last 6 Months</button>
+                                                class="dropdown-item" onclick="clearLeaveCustomDates()">Last 6 Months</button>
                                             <button type="submit" name="leave_filter" value="year"
-                                                class="dropdown-item">Last 1 Year</button>
+                                                class="dropdown-item" onclick="clearLeaveCustomDates()">Last 1 Year</button>
 
 
                                             <div class="dropdown-divider"></div>
@@ -1571,6 +1571,11 @@
             if (end) url.searchParams.set('late_custom_end', end);
 
             window.location.href = url.toString();
+        }
+
+        function clearLeaveCustomDates() {
+            document.querySelector('input[name="leave_from"]').value = '';
+            document.querySelector('input[name="leave_to"]').value = '';
         }
     </script>
 @endpush

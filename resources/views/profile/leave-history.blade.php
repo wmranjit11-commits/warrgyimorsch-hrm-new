@@ -312,7 +312,7 @@
                             <option value="Sick Leave">Sick Leave</option>
                             <option value="Gatepass Leave">Early Leave</option>
                             <option value="Casual Leave">Casual Leave</option>
-                            <option value="WFH">WFH</option>
+                            <option value="wfh">WFH</option>
                         </select>
                     </div>
 
@@ -330,18 +330,23 @@
                                 <!-- <i data-feather="clock"></i> -->
                                 <span>Half Day</span>
                             </label>
+                        </div>
+                    </div>
 
-                            <!-- <input type="radio" name="leave_category" value="Gatepass" id="catGate" onchange="toggleCategoryFields()">
-                            <label for="catGate" class="category-tile">
-                                <i data-feather="log-out"></i>
-                                <span>Early Leave</span>
-                            </label>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
+                                class="text-danger">*</span></label>
+                        <div class="position-relative">
+                            <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
+                                style="height: 48px; border-radius: 10px; padding-right: 40px;" required onchange="calculateDays()">
+                        </div>
+                    </div>
 
-                            <input type="radio" name="leave_category" value="WFH" id="catWFH" onchange="toggleCategoryFields()">
-                            <label for="catWFH" class="category-tile">
-                                <i data-feather="home"></i>
-                                <span>WFH</span>
-                            </label> -->
+                    <div class="col-md-4" id="endDateWrapper">
+                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
+                        <div class="position-relative">
+                            <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
+                                style="height: 48px; border-radius: 10px; padding-right: 40px;" onchange="calculateDays()">
                         </div>
                     </div>
 
@@ -353,26 +358,6 @@
                             <option value="First Half">First Half</option>
                             <option value="Second Half">Second Half</option>
                         </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
-                                class="text-danger">*</span></label>
-                        <div class="position-relative">
-                            <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
-                                style="height: 48px; border-radius: 10px; padding-right: 40px;" required onchange="calculateDays()"
-                                min="{{ date('Y-m-d') }}">
-                            <i data-feather="calendar" class="position-absolute text-primary" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 18px;"></i>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4" id="endDateWrapper">
-                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
-                        <div class="position-relative">
-                            <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
-                                style="height: 48px; border-radius: 10px; padding-right: 40px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
-                            <i data-feather="calendar" class="position-absolute text-primary" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 18px;"></i>
-                        </div>
                     </div>
 
                     <div class="col-md-4" id="startTimeWrapper" style="display: none;">
