@@ -91,9 +91,11 @@
                                                 <span class="vr"></span>
                                                 @if($project->status != 'Completed')
                                                     @if($project->end_date)
-                                                        <span class="task-timer fw-bold text-primary" data-end="{{ $project->end_date->toIso8601String() }}">Calculating...</span>
+                                                        <span class="task-timer fw-bold text-primary"
+                                                            data-end="{{ $project->end_date->toIso8601String() }}">Calculating...</span>
                                                     @else
-                                                        <span class="task-timer fw-bold text-info" data-start="{{ $project->start_date->toIso8601String() }}">Calculating...</span>
+                                                        <span class="task-timer fw-bold text-info"
+                                                            data-start="{{ $project->start_date->toIso8601String() }}">Calculating...</span>
                                                     @endif
                                                 @endif
                                                 <span class="vr"></span>
@@ -146,7 +148,8 @@
                                             <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Due
                                                 Date</span>
                                             @if($project->end_date)
-                                                <span class="fw-bold text-dark">{{ $project->end_date->format('M d, Y') }}</span>
+                                                <span
+                                                    class="fw-bold text-dark">{{ $project->end_date->format('M d, Y') }}</span>
                                             @else
                                                 <span class="fw-bold text-info">Ongoing</span>
                                             @endif
@@ -156,14 +159,18 @@
                                 <div class="row g-4 mb-5">
                                     <div class="col-sm-6">
                                         <div class="p-3 border rounded-3 bg-light bg-opacity-10">
-                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Project Type</span>
-                                            <span class="fw-bold text-dark"><i class="feather-{{ strtolower($project->type) == 'personal' ? 'user' : 'users' }} me-2 text-primary"></i>{{ $project->type ?? 'Standard' }}</span>
+                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Project
+                                                Type</span>
+                                            <span class="fw-bold text-dark"><i
+                                                    class="feather-{{ strtolower($project->type) == 'personal' ? 'user' : 'users' }} me-2 text-primary"></i>{{ $project->type ?? 'Standard' }}</span>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="p-3 border rounded-3 bg-light bg-opacity-10">
-                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Manage Access</span>
-                                            <span class="fw-bold text-dark"><i class="feather-{{ strtolower($project->manage) == 'everyone' ? 'globe' : 'shield' }} me-2 text-primary"></i>{{ $project->manage ?? 'Everyone' }}</span>
+                                            <span class="fs-11 text-muted text-uppercase fw-bold d-block mb-1">Manage
+                                                Access</span>
+                                            <span class="fw-bold text-dark"><i
+                                                    class="feather-{{ strtolower($project->manage) == 'everyone' ? 'globe' : 'shield' }} me-2 text-primary"></i>{{ $project->manage ?? 'Everyone' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -219,7 +226,8 @@
                                                     <div class="hstack gap-3 mb-3">
                                                         <div
                                                             class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle">
-                                                            {{ substr($emp->name, 0, 1) }}</div>
+                                                            {{ substr($emp->name, 0, 1) }}
+                                                        </div>
                                                         <div>
                                                             <div class="fs-13 fw-bold text-dark">{{ $emp->name }}</div>
                                                             <div class="fs-11 text-muted">Lead Designer</div>
@@ -239,7 +247,8 @@
                                                             <div class="hstack gap-2">
                                                                 <div
                                                                     class="avatar-text avatar-sm bg-soft-info text-info rounded-circle">
-                                                                    {{ substr($emp->name, 0, 1) }}</div>
+                                                                    {{ substr($emp->name, 0, 1) }}
+                                                                </div>
                                                                 <div class="fs-12 fw-medium text-dark">{{ $emp->name }}</div>
                                                             </div>
                                                         </div>
@@ -279,7 +288,8 @@
                         list-style-position: inside !important;
                     }
 
-                    .activity-description ol, .activity-description ul {
+                    .activity-description ol,
+                    .activity-description ul {
                         padding-left: 15px !important;
                         margin-bottom: 10px !important;
                     }
@@ -311,60 +321,74 @@
                     @forelse($dayGroups as $date => $tasksInDay)
                         <div class="date-header d-flex align-items-center justify-content-between mb-3 mt-4">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle" style="width: 28px; height: 28px;">
+                                <div class="avatar-text avatar-xs bg-soft-primary text-primary rounded-circle"
+                                    style="width: 28px; height: 28px;">
                                     <i class="feather-calendar" style="font-size: 12px;"></i>
                                 </div>
                                 <h6 class="mb-0 fw-bold text-dark" style="font-size: 14px;">{{ $date }}</h6>
                             </div>
                             @php
                                 $totalDayTime = 0;
-                                foreach($tasksInDay as $tData) {
-                                    foreach($tData['events'] as $e) {
-                                        if($e->type == 'progress') {
+                                foreach ($tasksInDay as $tData) {
+                                    foreach ($tData['events'] as $e) {
+                                        if ($e->type == 'progress') {
                                             $totalDayTime += (float) preg_replace('/[^0-9.]/', '', $e->time_taken);
                                         }
                                     }
                                 }
                             @endphp
-                            <span class="badge bg-soft-secondary text-secondary fw-bold" style="font-size: 10px; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 6px;">TOTAL DAY WORK: {{ number_format($totalDayTime, 1) }} HOURS</span>
+                            <span class="badge bg-soft-secondary text-secondary fw-bold"
+                                style="font-size: 10px; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 6px;">TOTAL DAY
+                                WORK: {{ number_format($totalDayTime, 1) }} HOURS</span>
                         </div>
 
                         @foreach($tasksInDay as $taskId => $data)
                             @php $task = $data['task']; @endphp
-                            <div class="card mb-4 border shadow-none" style="border-radius: 12px; background: #fff; overflow: hidden;">
-                                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between" style="border-top: 4px solid #3858f9;">
+                            <div class="card mb-4 border shadow-none"
+                                style="border-radius: 12px; background: #fff; overflow: hidden;">
+                                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between"
+                                    style="border-top: 4px solid #3858f9;">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle fw-bold shadow-sm"
                                             style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fff;">
                                             {{ substr($task->employee->name ?? 'U', 0, 1) }}
                                         </div>
                                         <div>
-                                            <h6 class="mb-1 fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 16px;">
+                                            <h6 class="mb-1 fw-bold text-dark d-flex align-items-center gap-2"
+                                                style="font-size: 16px;">
                                                 {{ $task->task_title }}
                                                 @php
                                                     $s = $task->status;
                                                     $statusSlug = strtolower(str_replace(' ', '-', $s));
                                                     $statusClass = 'status-' . $statusSlug;
                                                 @endphp
-                                                <span class="badge {{ $statusClass }}" style="font-size: 9px; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">{{ $s }}</span>
+                                                <span class="badge {{ $statusClass }}"
+                                                    style="font-size: 9px; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">{{ $s }}</span>
                                             </h6>
                                             <div class="d-flex align-items-center gap-3 text-muted" style="font-size: 11.5px;">
-                                                <div><span class="text-uppercase fw-bold text-primary" style="font-size: 9.5px; letter-spacing: 0.5px;">ASSIGNED TO:</span> <span class="ms-1 fw-bold text-dark">{{ $task->employee->name ?? 'Unknown' }}</span></div>
-                                                <div class="d-flex align-items-center gap-1"><i class="feather-clock" style="font-size: 12px;"></i> <span class="fw-bold">{{ $task->created_at->format('h:i A') }}</span></div>
+                                                <div><span class="text-uppercase fw-bold text-primary"
+                                                        style="font-size: 9.5px; letter-spacing: 0.5px;">ASSIGNED TO:</span> <span
+                                                        class="ms-1 fw-bold text-dark">{{ $task->employee->name ?? 'Unknown' }}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1"><i class="feather-clock"
+                                                        style="font-size: 12px;"></i> <span
+                                                        class="fw-bold">{{ $task->created_at->format('h:i A') }}</span></div>
                                             </div>
                                             @if($task->description)
-                                                <div class="mt-2 text-muted small p-2 bg-light bg-opacity-50 rounded" style="font-size: 12px; border-left: 3px solid #3858f9;">
+                                                <div class="mt-2 text-muted small p-2 bg-light bg-opacity-50 rounded"
+                                                    style="font-size: 12px; border-left: 3px solid #3858f9;">
                                                     <div class="main-task-description">
                                                         @php
                                                             $desc = html_entity_decode($task->description);
                                                             $descLines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>', '<li>', '</li>'], ["\n", "\n", "\n", "\n", "\n", "\n", "\n"], $desc));
-                                                            foreach($descLines as $dLine) {
+                                                            foreach ($descLines as $dLine) {
                                                                 $dLine = trim(strip_tags(html_entity_decode($dLine), '<b><strong><i><u>'));
-                                                                if(empty($dLine)) continue;
+                                                                if (empty($dLine))
+                                                                    continue;
                                                                 echo '<div class="d-flex align-items-start gap-1 mb-1">
-                                                                        <i class="feather-circle mt-1" style="font-size: 5px; color: #3858f9;"></i>
-                                                                        <span>' . $dLine . '</span>
-                                                                      </div>';
+                                                                                                                        <i class="feather-circle mt-1" style="font-size: 5px; color: #3858f9;"></i>
+                                                                                                                        <span>' . $dLine . '</span>
+                                                                                                                      </div>';
                                                             }
                                                         @endphp
                                                     </div>
@@ -372,7 +396,9 @@
                                             @endif
                                             @if($task->photo)
                                                 <div class="mt-2">
-                                                    <button onclick="viewAttachmentPopup('{{ asset('storage/' . $task->photo) }}')" class="btn btn-sm btn-soft-primary fw-bold px-3 py-1" style="border-radius: 6px; font-size: 11px;">
+                                                    <button onclick="viewAttachmentPopup('{{ asset('storage/' . $task->photo) }}')"
+                                                        class="btn btn-sm btn-soft-primary fw-bold px-3 py-1"
+                                                        style="border-radius: 6px; font-size: 11px;">
                                                         <i class="feather-paperclip me-1"></i> VIEW MAIN ATTACHMENT
                                                     </button>
                                                 </div>
@@ -383,15 +409,20 @@
                                         @if(isset($data['daily_total_time']) && $data['daily_total_time'] > 0)
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="text-muted fw-bold" style="font-size: 10px;">TOTAL WORK:</span>
-                                                <span class="badge bg-soft-info text-info border border-info border-opacity-25 px-3 py-2" style="font-size: 11px; border-radius: 8px;">
+                                                <span
+                                                    class="badge bg-soft-info text-info border border-info border-opacity-25 px-3 py-2"
+                                                    style="font-size: 11px; border-radius: 8px;">
                                                     @php
                                                         $totalDecimal = $data['daily_total_time'];
                                                         $h = floor($totalDecimal);
                                                         $m = round(($totalDecimal - $h) * 60);
                                                         $timeDisplay = "";
-                                                        if($h > 0) $timeDisplay .= $h . "h ";
-                                                        if($m > 0) $timeDisplay .= $m . "m";
-                                                        if($h == 0 && $m == 0) $timeDisplay = "0m";
+                                                        if ($h > 0)
+                                                            $timeDisplay .= $h . "h ";
+                                                        if ($m > 0)
+                                                            $timeDisplay .= $m . "m";
+                                                        if ($h == 0 && $m == 0)
+                                                            $timeDisplay = "0m";
                                                     @endphp
                                                     {{ trim($timeDisplay) }}
                                                 </span>
@@ -407,31 +438,36 @@
                                             <div class="activity-item py-4 {{ !$loop->last ? 'border-bottom' : '' }}">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                                     <div class="d-flex align-items-center gap-2">
-                                                        <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width: 24px; height: 24px;">
+                                                        <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle"
+                                                            style="width: 24px; height: 24px;">
                                                             <i class="feather-edit-2" style="font-size: 10px;"></i>
                                                         </div>
                                                         <span class="fw-bold text-dark small">Work Progress Updated</span>
                                                         @if($event->time_taken)
-                                                            <span class="badge bg-soft-primary text-primary ms-2" style="font-size: 9px;">{{ $event->time_taken }} HRS</span>
+                                                            <span class="badge bg-soft-primary text-primary ms-2"
+                                                                style="font-size: 9px;">{{ $event->time_taken }} HRS</span>
                                                         @endif
                                                     </div>
                                                     <div class="text-muted fw-bold small">
-                                                        <i class="feather-clock me-1" style="font-size: 11px;"></i> {{ $event->created_at->format('h:i A') }}
+                                                        <i class="feather-clock me-1" style="font-size: 11px;"></i>
+                                                        {{ $event->created_at->format('h:i A') }}
                                                     </div>
                                                 </div>
 
-                                                <div class="activity-description text-muted mb-3" style="font-size: 13.5px; line-height: 1.6; padding-left: 34px;">
+                                                <div class="activity-description text-muted mb-3"
+                                                    style="font-size: 13.5px; line-height: 1.6; padding-left: 34px;">
                                                     @php
                                                         $rawDesc = html_entity_decode($event->description);
-                                                        
+
                                                         // Split by lines and process
                                                         $lines = explode("\n", str_replace(['<p>', '</p>', '<br>', '<div>', '</div>', '<li>', '</li>'], ["\n", "\n", "\n", "\n", "\n", "\n", "\n"], $rawDesc));
                                                         $processedLines = [];
                                                         $isFirstLine = true;
 
-                                                        foreach($lines as $line) {
+                                                        foreach ($lines as $line) {
                                                             $line = trim(strip_tags(html_entity_decode($line), '<span><b><strong>'));
-                                                            if(empty($line)) continue;
+                                                            if (empty($line))
+                                                                continue;
 
                                                             // Re-apply badge format for time mentions in text
                                                             $line = preg_replace('/—\s*(\d*\.?\d+)\s*(Hours|Hour|hrs|hr)/i', '<span class="badge bg-soft-info text-info ms-2" style="font-size: 10px;">$1 $2</span>', $line);
@@ -453,7 +489,9 @@
 
                                                 @if($event->photo)
                                                     <div class="mt-2" style="padding-left: 34px;">
-                                                        <button onclick="viewAttachmentPopup('{{ asset('storage/' . $event->photo) }}')" class="btn btn-sm btn-soft-primary fw-bold px-3 py-2" style="border-radius: 8px;">
+                                                        <button onclick="viewAttachmentPopup('{{ asset('storage/' . $event->photo) }}')"
+                                                            class="btn btn-sm btn-soft-primary fw-bold px-3 py-2"
+                                                            style="border-radius: 8px;">
                                                             <i class="feather-paperclip me-1"></i> VIEW ATTACHMENT
                                                         </button>
                                                     </div>

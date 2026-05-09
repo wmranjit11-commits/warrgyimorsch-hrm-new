@@ -1,62 +1,199 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        @media (max-width: 991px) {
+            .nxl-container, .nxl-content, .nxl-header, .page-header {
+                left: 0 !important;
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                transform: none !important;
+            }
+            .container-fluid {
+                padding: 10px !important;
+            }
+            .card-header {
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                gap: 15px !important;
+                padding: 20px !important;
+            }
+            .card-header > div:last-child {
+                width: 100% !important;
+                justify-content: center !important;
+                flex-wrap: wrap !important;
+            }
+            
+            /* Premium Card View for Mobile */
+            .employee-card-mobile {
+                background: #ffffff;
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 20px;
+                border: 1px solid #f1f5f9;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            /* Blue line removed as per user request */
+            .emp-mobile-header {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+            .emp-mobile-photo {
+                width: 64px;
+                height: 64px;
+                border-radius: 16px;
+                object-fit: cover;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .emp-mobile-info h6 {
+                margin: 0;
+                font-size: 17px;
+                font-weight: 800;
+                color: #1e293b;
+                line-height: 1.2;
+            }
+            .emp-mobile-id {
+                font-size: 11px;
+                font-weight: 700;
+                color: #3858f9;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 4px;
+                display: block;
+            }
+            .emp-mobile-details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                padding: 16px;
+                background: #f8fafc;
+                border-radius: 14px;
+                margin-bottom: 20px;
+            }
+            .detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .detail-label {
+                font-size: 9px;
+                text-transform: uppercase;
+                color: #94a3b8;
+                font-weight: 800;
+                letter-spacing: 0.8px;
+            }
+            .detail-value {
+                font-size: 13px;
+                color: #334155;
+                font-weight: 700;
+            }
+            .emp-mobile-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .emp-mobile-actions .btn {
+                flex: 1 1 calc(50% - 4px);
+                border-radius: 10px;
+                font-weight: 700;
+                font-size: 11px;
+                padding: 10px 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+            }
+            .emp-mobile-actions .btn-full {
+                flex: 1 1 100%;
+            }
+            .checkbox-wrapper {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+            .checkbox-wrapper input {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+        }
+    </style>
     <div class="container-fluid py-4">
         <!-- HEADER -->
         <!-- Main Content Card -->
         <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
-            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
+            <div class="card-header bg-white border-bottom py-4 d-flex justify-content-between align-items-center"
                 style="border-radius: 12px 12px 0 0;">
-                <div>
-                    <h5 class="fw-bold mb-0" style="color: #334155;">Employee Management</h5>
+                <div class="mb-2 mb-lg-0">
+                    <h5 class="fw-bold mb-1" style="color: #1e293b; font-size: 20px;">Employee Management</h5>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Home</a>
-                            </li>
-                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">
-                                List</li>
+                            <li class="breadcrumb-item d-none d-sm-inline-block"><a href="#" class="text-decoration-none text-muted small">Home</a></li>
+                            <li class="breadcrumb-item active small fw-bold" style="color: #3858f9;" aria-current="page">List</li>
                         </ol>
                     </nav>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <!-- Right Aligned Search & Actions -->
-                    <div class="d-none d-md-flex align-items-center"
-                            style="width: 280px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
-                            <i class="feather-search text-muted" style="font-size: 14px;"></i>
-                            <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Search employees..."
-                                style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
-                        </div>
-
-                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
-                            data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter Records">
-                            <i class="feather-filter"></i>
-                        </a>
-
-                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
-                            onclick="location.reload()" title="Refresh">
-                            <i class="feather-refresh-cw"></i>
-                        </a>
-
-                        @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
-                            <a href="{{ route('employees.export') }}" class="avatar-text avatar-md bg-soft-success text-success"
-                                title="Export All Employees">
-                                <i class="feather-download"></i>
-                            </a>
-
-                            <a href="{{ route('employees.create') }}" class="avatar-text avatar-md bg-primary text-white"
-                                title="Add Employee">
-                                <i class="feather-plus"></i>
-                            </a>
-
-                            @if(isset($employees) && $employees->count() > 0)
-                                <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger"
-                                    id="deleteSelectedBtn" onclick="deleteSelectedEmployees()" title="Delete Selected">
-                                    <i class="feather-trash-2"></i>
-                                </a>
-                            @endif
-                        @endif
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                    <div class="d-none d-lg-flex align-items-center me-2"
+                        style="width: 220px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 44px; padding: 0 15px;">
+                        <i class="feather-search text-muted" style="font-size: 14px;"></i>
+                        <input type="text" class="wghrm-search-input" onkeyup="syncAndFilter(this)" placeholder="Search..."
+                            style="background: transparent; border: none; outline: none; width: 100%; padding-left: 10px; font-size: 13px; font-weight: 600;">
                     </div>
+                    
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-primary text-primary"
+                        data-bs-toggle="collapse" data-bs-target="#filterSection" title="Filter" style="width: 44px; height: 44px; border-radius: 12px;">
+                        <i class="feather-filter"></i>
+                    </a>
+
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-info text-info"
+                        onclick="location.reload()" title="Refresh" style="width: 44px; height: 44px; border-radius: 12px;">
+                        <i class="feather-refresh-cw"></i>
+                    </a>
+
+                    @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
+                        <a href="{{ route('employees.export') }}" class="avatar-text avatar-md bg-soft-success text-success"
+                            title="Export" style="width: 44px; height: 44px; border-radius: 12px;">
+                            <i class="feather-download"></i>
+                        </a>
+
+                        <a href="{{ route('employees.create') }}" class="avatar-text avatar-md bg-primary text-white shadow-sm"
+                            title="Add" style="width: 44px; height: 44px; border-radius: 12px;">
+                            <i class="feather-plus"></i>
+                        </a>
+
+                        <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-danger text-danger"
+                            id="deleteSelectedBtn" onclick="deleteSelectedEmployees()" title="Delete Selected" style="width: 44px; height: 44px; border-radius: 12px;">
+                            <i class="feather-trash-2"></i>
+                        </a>
+                    @endif
+
+                    <a href="javascript:void(0);" class="avatar-text avatar-md bg-soft-secondary text-secondary d-lg-none" 
+                        onclick="$('#mobileSearchSection').toggleClass('d-none')" style="width: 44px; height: 44px; border-radius: 12px;">
+                        <i class="feather-search"></i>
+                    </a>
                 </div>
+            </div>
+
+            <!-- Mobile Search Bar -->
+            <div id="mobileSearchSection" class="d-none d-lg-none bg-light p-3 border-bottom">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-0"><i class="feather-search"></i></span>
+                    <input type="text" class="form-control border-0 wghrm-search-input" onkeyup="syncAndFilter(this)" placeholder="Search employees...">
+                </div>
+            </div>
 
                 <!-- Collapsible Filter Section -->
                 <div class="collapse" id="filterSection">
@@ -64,8 +201,8 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
-                                <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm"
-                                    placeholder="Search..." onkeyup="applyFilters()" style="border-radius: 8px; height: 44px;">
+                                <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm wghrm-search-input"
+                                    placeholder="Search..." onkeyup="syncAndFilter(this)" style="border-radius: 8px; height: 44px;">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
@@ -158,119 +295,118 @@
                         </div>
                         <span class="text-muted small fw-bold text-uppercase">entries</span>
                     </div>
-                    <div class="table-responsive" style="overflow: visible !important;">
-                        <table class="table align-middle table-hover" id="employeeTable" style="margin-bottom: 50px;">
 
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="table-responsive d-none d-lg-block" style="overflow: visible !important;">
+                        <table class="table align-middle table-hover" id="employeeTable" style="margin-bottom: 50px;">
                             <thead class="bg-light">
                                 <tr style="height: 60px;">
-                                    <th style="width:70px; padding: 15px; text-align: center;"><input type="checkbox"
-                                            id="selectAll"></th>
-                                    <th style="width:120px; padding: 15px; font-size: 14px; text-align: center;">SR. NO. <i
-                                            class="ms-1"></i></th>
-                                    <th style="width:200px; padding: 15px; font-size: 14px; text-align: center;">NAME <i
-                                            class=" ms-1"></i></th>
-                                    <th style="width:180px; padding: 15px; font-size: 14px; text-align: center;">ROLE <i
-                                            class=" ms-1"></i></th>
-                                    <th style="width:200px; padding: 15px; font-size: 14px; text-align: center;">DEPARTMENT <i
-                                            class="ms-1"></i></th>
+                                    <th style="width:70px; padding: 15px; text-align: center;"><input type="checkbox" id="selectAll"></th>
+                                    <th style="width:120px; padding: 15px; font-size: 14px; text-align: center;">SR. NO.</th>
+                                    <th style="width:200px; padding: 15px; font-size: 14px; text-align: center;">NAME</th>
+                                    <th style="width:180px; padding: 15px; font-size: 14px; text-align: center;">ROLE</th>
+                                    <th style="width:200px; padding: 15px; font-size: 14px; text-align: center;">DEPARTMENT</th>
                                     <th style="width:140px; padding: 15px; font-size: 14px; text-align: center;">ATTENDANCE</th>
                                     <th style="width:140px; padding: 15px; font-size: 14px; text-align: center;">PHOTO</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 @forelse($employees as $key => $emp)
                                     <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
                                         data-employee-id="{{ $emp->id }}" data-employee-dept="{{ $emp->department }}"
                                         data-employee-role="{{ $emp->role }}">
-
-                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox"
-                                                data-id="{{ $emp->id }}"></td>
-
-                                        <td class="fw-bold" style="padding: 12px; font-size: 15px; text-align: center;">
-                                            {{ $key + 1 }}
-                                        </td>
-
-                                        <td style="padding: 12px; text-align: center;" data-employee-id="{{ $emp->id }}">
+                                        <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox" data-id="{{ $emp->id }}"></td>
+                                        <td class="fw-bold" style="padding: 12px; font-size: 15px; text-align: center;">{{ $employees->firstItem() + $key }}</td>
+                                        <td style="padding: 12px; text-align: center;">
                                             <div class="dropdown">
-                                                <a href="javascript:void(0)"
-                                                    class="fw-bold d-flex align-items-center justify-content-center" role="button"
-                                                    data-bs-toggle="dropdown" aria-expanded="false"
-                                                    style="color:#3b82f6; font-size: 15px;">
+                                                <a href="javascript:void(0)" class="fw-bold d-flex align-items-center justify-content-center" role="button" data-bs-toggle="dropdown">
                                                     <span style="font-size:15px;">{{ $emp->name }}</span>
-                                                    <span class="ms-2 text-muted"
-                                                        style="font-size:12px; color:#3b82f6;">({{ $emp->employee_code }})</span>
+                                                    <span class="ms-2 text-muted" style="font-size:12px;">({{ $emp->employee_code }})</span>
                                                 </a>
-                                                <ul class="dropdown-menu shadow-lg border-0 p-2"
-                                                    style="min-width:180px;left:0 !important;top:100% !important;max-height:none !important;overflow-y:visible !important;box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important; border-radius:12px; z-index: 999999 !important;">
-                                                    <li>
-                                                        <a class="dropdown-item d-flex align-items-center gap-2"
-                                                            href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})"
-                                                            style="color:#6366f1;font-weight:500;">
-                                                            <i class="feather-eye" style="color:#6366f1;font-size:16px;"></i>
-                                                            View Details
-                                                        </a>
-                                                    </li>
+                                                <ul class="dropdown-menu shadow-lg border-0 p-2" style="border-radius:12px;">
+                                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0)" onclick="viewEmployee({{ $emp->id }})"><i class="feather-eye"></i> View Details</a></li>
                                                     @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center gap-2"
-                                                                href="{{ route('employees.edit', $emp->id) }}"
-                                                                style="color:#22c55e;font-weight:500;">
-                                                                <i class="feather-edit-3" style="color:#22c55e;font-size:16px;"></i>
-                                                                Edit Profile
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center gap-2 text-danger"
-                                                                href="javascript:void(0)" onclick="deleteEmployee({{ $emp->id }})"
-                                                                style="color:#ef4444;font-weight:500;">
-                                                                <i class="feather-trash-2" style="color:#ef4444;font-size:16px;"></i>
-                                                                Delete
-                                                            </a>
-                                                        </li>
+                                                        <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('employees.edit', $emp->id) }}"><i class="feather-edit-3"></i> Edit Profile</a></li>
+                                                        <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0)" onclick="deleteEmployee({{ $emp->id }})"><i class="feather-trash-2"></i> Delete</a></li>
                                                     @endif
                                                 </ul>
                                             </div>
                                         </td>
-
-                                        <td style="padding: 12px; font-size: 15px; text-align: center;">
-                                            {{ ucfirst(str_replace('_', ' ', $emp->role)) }}
-                                        </td>
-
-                                        <td style="padding: 12px; font-size: 15px; text-align: center;">
-                                            {{ ucfirst(str_replace('_', ' ', $emp->department)) }}
-                                        </td>
-
-                                        <td class="text-center" style="padding: 12px; text-align: center;">
-                                            <a href="javascript:void(0)"
-                                                onclick="openAttendanceModal({{ $emp->id }}, '{{ $emp->name }}')"
-                                                style="color: #3858f9; font-size: 20px; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                                <i class="bi bi-calendar3-event"></i>
-                                            </a>
-                                        </td>
-
-                                        <td class="text-center" style="padding: 12px; text-align: center;">
+                                        <td style="padding: 12px; font-size: 15px; text-align: center;">{{ ucfirst(str_replace('_', ' ', $emp->role)) }}</td>
+                                        <td style="padding: 12px; font-size: 15px; text-align: center;">{{ ucfirst(str_replace('_', ' ', $emp->department)) }}</td>
+                                        <td class="text-center"><a href="javascript:void(0)" onclick="openAttendanceModal({{ $emp->id }}, '{{ $emp->name }}')" style="color: #3858f9; font-size: 20px;"><i class="bi bi-calendar3-event"></i></a></td>
+                                        <td class="text-center">
                                             @if($emp->photo)
-                                                <img src="{{ asset('storage/' . $emp->photo) }}"
-                                                    style="width:50px;height:50px;border-radius:12px;object-fit:cover;border:1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin: 0 auto;">
+                                                <img src="{{ asset('storage/' . $emp->photo) }}" style="width:45px;height:45px;border-radius:10px;object-fit:cover;">
                                             @else
-                                                <div
-                                                    style="width:50px;height:50px;background:rgba(99, 102, 241, 0.1);color:#6366f1;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(99, 102, 241, 0.2);font-size:18px;font-weight:800; margin: 0 auto;">
-                                                    {{ substr($emp->name, 0, 1) }}
-                                                </div>
+                                                <div style="width:45px;height:45px;background:rgba(99, 102, 241, 0.1);color:#6366f1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto;">{{ substr($emp->name, 0, 1) }}</div>
                                             @endif
                                         </td>
-
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">No employees found. <a
-                                                href="{{ route('employees.create') }}">Add one</a></td>
-                                    </tr>
+                                    <tr><td colspan="7" class="text-center py-4 text-muted">No employees found.</td></tr>
                                 @endforelse
                             </tbody>
-
                         </table>
+                    </div>
+
+                    <!-- MOBILE CARD VIEW -->
+                    <div class="d-lg-none px-2 pt-3" id="employeeCardsMobile">
+                        @forelse($employees as $emp)
+                            <div class="employee-card-mobile fade-row" data-employee-id="{{ $emp->id }}" 
+                                 data-employee-name="{{ strtolower($emp->name) }}"
+                                 data-employee-dept="{{ strtolower($emp->department) }}" 
+                                 data-employee-role="{{ strtolower($emp->role) }}">
+                                
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" class="emp-checkbox" data-id="{{ $emp->id }}">
+                                </div>
+
+                                <div class="emp-mobile-header">
+                                    @if($emp->photo)
+                                        <img src="{{ asset('storage/' . $emp->photo) }}" class="emp-mobile-photo">
+                                    @else
+                                        <div class="emp-mobile-photo d-flex align-items-center justify-content-center bg-soft-primary text-primary fw-bold fs-4">
+                                            {{ substr($emp->name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                    <div class="emp-mobile-info">
+                                        <h6>{{ $emp->name }}</h6>
+                                        <span class="emp-mobile-id">ID: {{ $emp->employee_code }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="emp-mobile-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Role</span>
+                                        <span class="detail-value text-truncate">{{ ucfirst(str_replace('_', ' ', $emp->role)) }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Department</span>
+                                        <span class="detail-value text-truncate">{{ ucfirst(str_replace('_', ' ', $emp->department)) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="emp-mobile-actions">
+                                    <button class="btn btn-soft-primary btn-sm" onclick="viewEmployee({{ $emp->id }})">
+                                        <i class="feather-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-soft-info btn-sm" onclick="openAttendanceModal({{ $emp->id }}, '{{ $emp->name }}')">
+                                        <i class="bi bi-calendar3-event"></i> Records
+                                    </button>
+                                    @if(in_array(strtolower(auth()->user()->role), ['admin', 'super_admin', 'super admin']))
+                                        <a href="{{ route('employees.edit', $emp->id) }}" class="btn btn-soft-success btn-sm">
+                                            <i class="feather-edit-3"></i> Profile
+                                        </a>
+                                        <button class="btn btn-soft-danger btn-sm" onclick="deleteEmployee({{ $emp->id }})">
+                                            <i class="feather-trash-2"></i> Remove
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-5 text-muted fw-bold">No employees found.</div>
+                        @endforelse
                     </div>
 
                     <!-- PAGINATION -->
@@ -301,30 +437,35 @@
             aria-labelledby="employeeModalLabel">
             <div class="offcanvas-header p-3 p-md-4"
                 style="background: #0f172a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm d-md-none" data-bs-dismiss="offcanvas" style="background: rgba(255,255,255,0.15); color: white; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: none;">
+                        <i class="bi bi-chevron-left" style="font-size: 18px;"></i>
+                    </button>
                     <div
-                        style="background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-person-circle text-white fs-4"></i>
+                        style="background: rgba(255,255,255,0.1); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-person-circle text-white fs-5"></i>
                     </div>
-                    <div>
-                        <h5 class="offcanvas-title text-white fw-bold mb-0" id="employeeModalLabel">Employee Profile</h5>
+                    <div class="d-none d-sm-block">
+                        <h5 class="offcanvas-title text-white fw-bold mb-0" id="employeeModalLabel" style="font-size: 16px;">Employee Profile</h5>
                         <div
-                            style="font-size: 11px; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
+                            style="font-size: 10px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-top: 1px;">
                             CODE: <span id="employeeCodeDisplay" style="color: #818cf8; font-weight: 800;">-</span>
                         </div>
                     </div>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
-                    <button type="button" class="btn btn-sm" id="editEmployeeBtn" onclick="editEmployee()"
-                        style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); font-weight: 600; padding: 6px 15px; border-radius: 8px;">
-                        <i class="bi bi-pencil-square me-1"></i> Edit
+                    <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" id="editEmployeeBtn" onclick="editEmployee()"
+                        style="background: #22c55e; color: #ffffff; border: none; font-weight: 800; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);">
+                        <i class="bi bi-pencil-square"></i>
+                        <span class="d-none d-md-inline ms-2">Edit</span>
                     </button>
-                    <button type="button" class="btn btn-sm" id="deleteEmployeeBtn" onclick="deleteEmployee()"
-                        style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-weight: 600; padding: 6px 15px; border-radius: 8px;">
-                        <i class="bi bi-trash me-1"></i> Delete
+                    <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" id="deleteEmployeeBtn" onclick="deleteEmployee()"
+                        style="background: #ef4444; color: #ffffff; border: none; font-weight: 800; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                        <i class="bi bi-trash"></i>
+                        <span class="d-none d-md-inline ms-2">Delete</span>
                     </button>
-                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="offcanvas" aria-label="Close"
-                        style="opacity: 0.8;"></button>
+                    <button type="button" class="btn-close btn-close-white ms-1" data-bs-dismiss="offcanvas" aria-label="Close"
+                        style="opacity: 0.8; width: 10px; height: 10px;"></button>
                 </div>
             </div>
             <div class="offcanvas-body p-0" id="employeeDetails" style="background: #ffffff;">
@@ -392,94 +533,63 @@
 
         <!-- ANIMATION -->
         <style>
-            /* Unique Premium Dropdown UI for Filters */
+            /* Fixed Dropdown Search & Select UI */
             .wghrm-custom-select-btn {
-                border-radius: 8px !important;
-                border: 1px solid #e2e8f0 !important;
                 background-color: #fff !important;
-                padding: 8px 16px !important;
-                font-weight: 500 !important;
-                color: #64748b !important;
-                transition: all 0.2s ease !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                color: #1e293b !important;
+                padding: 10px 16px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: space-between !important;
-                text-align: left !important;
+                width: 100% !important;
+                height: 48px !important;
                 font-size: 14px !important;
+                font-weight: 600 !important;
+                transition: all 0.2s !important;
+                text-align: left !important;
             }
-
-            .wghrm-custom-select-btn:focus,
-            .wghrm-custom-select-btn[aria-expanded="true"] {
+            .wghrm-custom-select-btn:focus {
                 border-color: #3858f9 !important;
-                box-shadow: 0 0 0 3px rgba(56, 88, 249, 0.1) !important;
-                color: #3858f9 !important;
+                box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.1) !important;
+                outline: none !important;
             }
-
             .wghrm-custom-dropdown-menu {
                 border-radius: 12px !important;
-                border: 1px solid #f1f5f9 !important;
-                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08) !important;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.12) !important;
                 padding: 8px !important;
-                margin-top: 8px !important;
-                z-index: 9999 !important;
-                background: #fff !important;
-                max-height: 250px !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-            }
-
-            .wghrm-custom-dropdown-menu::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            .wghrm-custom-dropdown-menu::-webkit-scrollbar-track {
-                background: #f8fafc;
-                border-radius: 10px;
-                margin: 8px 0;
-            }
-
-            .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 10px;
-            }
-
-            .wghrm-custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
-            }
-
-            .wghrm-custom-search-input {
-                border-radius: 10px !important;
                 border: 1px solid #e2e8f0 !important;
-                padding: 8px 12px !important;
-                font-size: 13px !important;
                 width: 100% !important;
+                min-width: 200px !important;
+                z-index: 9999 !important;
+            }
+            .wghrm-custom-search-box {
+                padding: 4px;
+                margin-bottom: 8px;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .wghrm-custom-search-input {
+                width: 100% !important;
+                padding: 8px 12px !important;
+                border-radius: 8px !important;
+                border: 1px solid #e2e8f0 !important;
+                font-size: 13px !important;
                 outline: none !important;
-                background-color: #f8fafc !important;
-                transition: border-color 0.2s ease;
+                background: #f8fafc !important;
             }
-
-            .wghrm-custom-search-input:focus {
-                border-color: #3858f9 !important;
-                background-color: #fff !important;
-                box-shadow: 0 0 0 3px rgba(56, 88, 249, 0.1) !important;
-            }
-
             .wghrm-custom-dropdown-item {
                 border-radius: 8px !important;
-                padding: 8px 15px !important;
-                font-weight: 500 !important;
-                font-size: 14px !important;
+                padding: 10px 15px !important;
+                font-weight: 600 !important;
+                font-size: 13px !important;
                 color: #475569 !important;
-                margin-bottom: 2px !important;
-                transition: all 0.2s ease !important;
                 cursor: pointer !important;
                 display: block !important;
                 text-decoration: none !important;
             }
-
-            .wghrm-custom-dropdown-item:hover,
-            .wghrm-custom-dropdown-item.active {
-                background-color: #eff6ff !important;
+            .wghrm-custom-dropdown-item:hover, .wghrm-custom-dropdown-item.active {
+                background: #f1f5f9 !important;
                 color: #3858f9 !important;
             }
 
@@ -555,14 +665,22 @@
                 }
 
                 .nav-tabs-custom {
-                    margin: 0 10px 20px 10px !important;
-                    flex-wrap: wrap;
+                    margin: 0 15px 25px 15px !important;
+                    flex-wrap: nowrap !important;
+                    overflow-x: auto !important;
+                    padding: 4px !important;
+                    gap: 4px !important;
+                    scrollbar-width: none; /* Hide scrollbar for Firefox */
+                }
+                .nav-tabs-custom::-webkit-scrollbar {
+                    display: none; /* Hide scrollbar for Chrome/Safari */
                 }
 
                 .nav-tab {
-                    flex: 1 1 30%;
+                    flex: 0 0 auto !important;
+                    min-width: 100px !important;
                     font-size: 11px !important;
-                    padding: 10px 5px !important;
+                    padding: 10px 15px !important;
                 }
             }
 
@@ -671,36 +789,41 @@
 
             .nav-tabs-custom {
                 display: flex;
-                background: #f1f5f9;
-                padding: 6px;
-                border-radius: 14px;
-                margin: 0 20px 25px 20px;
-                gap: 4px;
+                background: #f8fafc;
+                padding: 5px;
+                border-radius: 16px;
+                margin: 0 25px 30px 25px;
+                gap: 5px;
+                border: 1px solid #e2e8f0;
             }
 
             .nav-tab {
                 flex: 1;
-                padding: 10px 5px;
+                padding: 12px 5px;
                 border: none;
                 background: transparent;
                 color: #64748b;
-                font-weight: 700;
+                font-weight: 800;
                 font-size: 11px;
                 text-transform: uppercase;
-                letter-spacing: 0.5px;
-                border-radius: 10px;
+                letter-spacing: 0.8px;
+                border-radius: 12px;
                 cursor: pointer;
-                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
+                gap: 8px;
+            }
+
+            .nav-tab i {
+                font-size: 14px;
             }
 
             .nav-tab.active {
-                color: #6366f1;
-                background: #ffffff;
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+                color: #ffffff;
+                background: #3858f9;
+                box-shadow: 0 8px 20px rgba(56, 88, 249, 0.25);
             }
 
             .tab-pane {
@@ -733,19 +856,18 @@
 
             .detail-card {
                 background: #ffffff;
-                border-radius: 16px;
-                padding: 16px;
+                border-radius: 14px;
+                padding: 18px;
                 border: 1px solid #f1f5f9;
                 display: flex;
                 align-items: center;
-                gap: 14px;
+                gap: 16px;
                 transition: all 0.3s ease;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
             }
 
             .detail-card:hover {
-                border-color: #6366f1;
-                box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08);
+                border-color: #3858f9;
+                background: #f8fafc;
                 transform: translateY(-2px);
             }
 
@@ -754,23 +876,16 @@
             }
 
             .detail-icon {
-                width: 42px;
-                height: 42px;
+                width: 44px;
+                height: 44px;
                 border-radius: 12px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 18px;
-                color: #6366f1;
-                background: rgba(99, 102, 241, 0.1);
+                color: #3858f9;
+                background: rgba(56, 88, 249, 0.08);
                 flex-shrink: 0;
-                transition: all 0.3s;
-            }
-
-            .detail-card:hover .detail-icon {
-                background: #6366f1;
-                color: #ffffff;
-                transform: scale(1.1);
             }
 
             .detail-content {
@@ -778,24 +893,22 @@
                 min-width: 0;
             }
 
-            .status-enrolled {
-                background: rgba(34, 197, 94, 0.1);
-                color: #16a34a;
-            }
-
-            .status-not-enrolled {
-                background: rgba(241, 245, 249, 1);
-                color: #475569;
-            }
-
             .detail-label {
-                font-size: 10px;
+                font-size: 9px;
                 font-weight: 800;
-                color: #64748b;
+                color: #94a3b8;
                 text-transform: uppercase;
-                letter-spacing: 0.8px;
-                margin-bottom: 2px;
+                letter-spacing: 1px;
+                margin-bottom: 4px;
                 display: block;
+            }
+
+            .detail-value {
+                font-size: 14px;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 0;
+                word-break: break-all;
             }
 
             .salary-breakdown {
@@ -1509,28 +1622,31 @@
                 const department = document.getElementById('filterDepartment').value.toLowerCase();
                 const role = document.getElementById('filterRole').value.toLowerCase();
 
+                // Table Rows
                 const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
+                // Mobile Cards
+                const cards = document.querySelectorAll(".employee-card-mobile");
+                
                 let visibleCount = 0;
 
-                rows.forEach(row => {
-                    const nameCell = row.querySelector('td:nth-child(3)');
-                    const name = nameCell ? nameCell.innerText.toLowerCase() : '';
-                    const rowDept = (row.getAttribute('data-employee-dept') || '').toLowerCase();
-                    const rowRole = (row.getAttribute('data-employee-role') || '').toLowerCase();
-
-                    // Filtering conditions
+                const filterFn = (name, rowDept, rowRole) => {
                     const nameMatch = name.includes(employeeName);
-
-                    // Robust matching for department and role (handles underscores and spaces)
                     const normDepartment = department.replace(/_/g, ' ');
                     const normRowDept = rowDept.replace(/_/g, ' ');
                     const departmentMatch = department === '' || normRowDept.includes(normDepartment) || rowDept === department;
-
                     const normRole = role.replace(/_/g, ' ');
                     const normRowRole = rowRole.replace(/_/g, ' ');
                     const roleMatch = role === '' || normRowRole.includes(normRole) || rowRole === role;
+                    return nameMatch && departmentMatch && roleMatch;
+                };
 
-                    if (nameMatch && departmentMatch && roleMatch) {
+                // Filter Table
+                rows.forEach(row => {
+                    const name = (row.querySelector('td:nth-child(3)')?.innerText || '').toLowerCase();
+                    const dept = (row.getAttribute('data-employee-dept') || '').toLowerCase();
+                    const roleVal = (row.getAttribute('data-employee-role') || '').toLowerCase();
+                    
+                    if (filterFn(name, dept, roleVal)) {
                         row.style.display = '';
                         visibleCount++;
                     } else {
@@ -1538,20 +1654,30 @@
                     }
                 });
 
-                // Show "no results" message if no rows match
-                if (visibleCount === 0 && rows.length > 0) {
-                    const tbody = document.querySelector("#employeeTable tbody");
-                    if (!document.getElementById('noResultsRow')) {
-                        const noResultsRow = document.createElement('tr');
-                        noResultsRow.id = 'noResultsRow';
-                        noResultsRow.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No employees match the filters</td>';
-                        tbody.appendChild(noResultsRow);
+                // Filter Cards
+                cards.forEach(card => {
+                    const name = (card.getAttribute('data-employee-name') || '').toLowerCase();
+                    const dept = (card.getAttribute('data-employee-dept') || '').toLowerCase();
+                    const roleVal = (card.getAttribute('data-employee-role') || '').toLowerCase();
+
+                    if (filterFn(name, dept, roleVal)) {
+                        card.style.setProperty('display', 'flex', 'important');
+                    } else {
+                        card.style.setProperty('display', 'none', 'important');
                     }
-                } else {
-                    const noResultsRow = document.getElementById('noResultsRow');
-                    if (noResultsRow) {
-                        noResultsRow.remove();
+                });
+
+                // No Results Handling
+                const noResTable = document.getElementById('noResultsRow');
+                if (visibleCount === 0 && (rows.length > 0 || cards.length > 0)) {
+                    if (!noResTable) {
+                        const tr = document.createElement('tr');
+                        tr.id = 'noResultsRow';
+                        tr.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No employees match filters</td>';
+                        document.querySelector("#employeeTable tbody")?.appendChild(tr);
                     }
+                } else if (noResTable) {
+                    noResTable.remove();
                 }
             }
 
@@ -1648,18 +1774,44 @@
                     }
                 });
             }
-            // Custom Dropdown Search & Select Logic
+            // Select Dropdown Logic
+            function selectWghrmFilter(id, value, el) {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.value = value;
+                    
+                    // Update button text
+                    const dropdown = el.closest('.dropdown');
+                    const btn = dropdown.querySelector('.wghrm-custom-select-btn');
+                    if (btn) btn.innerText = value === '' ? (id.includes('Department') ? 'All Departments' : 'All Roles') : value;
+                    
+                    // Close dropdown
+                    const bsDropdown = bootstrap.Dropdown.getInstance(btn);
+                    if (bsDropdown) bsDropdown.hide();
+                    
+                    // Apply filters
+                    applyFilters();
+                }
+            }
+
+            // Custom Dropdown Search Logic
             function wghrmFilterItems(input) {
                 const filter = input.value.toLowerCase();
-                const items = input.closest('.wghrm-custom-dropdown-menu').querySelectorAll('.wghrm-custom-dropdown-item');
+                const dropdownMenu = input.closest('.wghrm-custom-dropdown-menu');
+                const items = dropdownMenu.querySelectorAll('.wghrm-custom-dropdown-item');
                 items.forEach(item => {
                     const text = item.textContent.toLowerCase();
-                    if (text.includes(filter)) {
-                        item.style.setProperty('display', 'block', 'important');
-                    } else {
-                        item.style.setProperty('display', 'none', 'important');
-                    }
+                    item.style.display = text.includes(filter) ? 'block' : 'none';
                 });
+            }
+
+            // Unified Search Sync & Filter
+            function syncAndFilter(el) {
+                const val = el.value;
+                document.querySelectorAll('.wghrm-search-input').forEach(input => {
+                    if (input !== el) input.value = val;
+                });
+                applyFilters();
             }
         </script>
 

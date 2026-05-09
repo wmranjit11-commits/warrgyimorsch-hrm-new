@@ -29,7 +29,7 @@
                         <div class="d-none d-md-flex align-items-center"
                             style="width: 280px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
                             <i class="feather-search text-muted" style="font-size: 14px;"></i>
-                            <input type="text" id="tableSearch" onkeyup="applyFilters()" placeholder="Search..."
+                            <input type="text" id="tableSearch" onkeyup="searchTable()" placeholder="Search..."
                                 style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
                         </div>
 
@@ -490,6 +490,20 @@
             const month = document.getElementById('monthFilter').value;
             const empId = document.getElementById('employeeFilter').value;
             window.location.href = `{{ route("payroll.index") }}?month=${month}&employee_id=${empId}`;
+        }
+
+        function searchTable() {
+            const filter = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('table tbody tr.hover-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         // Custom Dropdown Search Logic

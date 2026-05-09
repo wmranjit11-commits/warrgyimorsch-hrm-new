@@ -215,7 +215,8 @@
                                                 data-placeholder="Select Project Leads..." required>
                                                 @foreach($employees as $emp)
                                                     <option value="{{ $emp->id }}" {{ is_array($project->leaders) && in_array($emp->id, $project->leaders) ? 'selected' : '' }}>
-                                                        {{ $emp->name }}</option>
+                                                        {{ $emp->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -226,7 +227,8 @@
                                                 data-placeholder="Select Team Members...">
                                                 @foreach($employees as $emp)
                                                     <option value="{{ $emp->id }}" {{ is_array($project->members) && in_array($emp->id, $project->members) ? 'selected' : '' }}>
-                                                        {{ $emp->name }}</option>
+                                                        {{ $emp->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -352,7 +354,7 @@
         }
 
         /* Select2 Premium Styling */
-        .select2-container--default .select2-selection--single, 
+        .select2-container--default .select2-selection--single,
         .select2-container--default .select2-selection--multiple {
             min-height: 48px !important;
             border-radius: 12px !important;
@@ -516,4 +518,47 @@
             });
         });
     </script>
+@endpush onStepChanging: function (event, currentIndex, newIndex) {
+if (currentIndex > newIndex) return true;
+
+// Validation for Step 2: Details
+if (currentIndex === 1) {
+var name = $('input[name="name"]').val();
+var dept = $('select[name="department"]').val();
+var startDate = $('input[name="start_date"]').val();
+var desc = $('#summernote-main').summernote('code');
+
+if (!name || !dept || !startDate) {
+if (typeof Toast !== 'undefined') {
+Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Name, Department and Start Date.' });
+} else {
+alert('Please fill all mandatory fields including Name, Department and Start Date.');
+}
+return false;
+}
+}
+
+// Validation for Step 3: Members (Team Lead check)
+if (currentIndex === 2) {
+var leaders = $('select[name="leaders[]"]').val();
+if (!leaders || leaders.length === 0) {
+if (typeof Toast !== 'undefined') {
+Toast.fire({ icon: 'error', title: 'Please select at least one Project Lead.' });
+} else {
+alert('Please select at least one Project Lead.');
+}
+return false;
+}
+}
+
+$('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
+return true;
+},
+onFinished: function (event, currentIndex) {
+$('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
+form.submit();
+}
+});
+});
+</script>
 @endpush

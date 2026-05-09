@@ -46,7 +46,7 @@
                         <div class="d-none d-md-flex align-items-center"
                             style="width: 280px; background: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0; height: 40px; padding: 0 15px; transition: all 0.3s ease;">
                             <i class="feather-search text-muted" style="font-size: 14px;"></i>
-                            <input type="text" id="tableSearch" onkeyup="applyFilters()" placeholder="Search..."
+                            <input type="text" id="tableSearch" onkeyup="searchTable()" placeholder="Search..."
                                 style="background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; width: 100%; height: 100%; padding-left: 10px; font-size: 13px; font-weight: 500; color: #334155;">
                         </div>
 
@@ -313,6 +313,20 @@
             document.getElementById('quickRangeBtn').innerText = label;
             updateDateRange(val);
             bootstrap.Dropdown.getInstance(document.getElementById('quickRangeBtn')).hide();
+        }
+
+        function searchTable() {
+            const filter = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('table tbody tr.hover-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
         function wghrmFilterItems(input) {
@@ -891,25 +905,13 @@
         /* Customizing the native calendar picker icon */
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="month"]::-webkit-calendar-picker-indicator {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233858f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
             cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
+            opacity: 0.6;
             transition: all 0.2s;
         }
-
-        input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="month"]::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="month"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
 
         /* Custom Scrollbar (Slider) */

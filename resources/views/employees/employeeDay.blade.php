@@ -174,6 +174,26 @@
         
         padding: 30px;
         font-family: 'Outfit', sans-serif;
+        box-sizing: border-box;
+    }
+
+    /* Fix for squashed layout on mobile */
+    @media (max-width: 1024px) {
+        .nxl-container {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        .nxl-content {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+
+    .celebrations-container * {
+        box-sizing: border-box;
     }
 
     /* Hero Header */
@@ -426,16 +446,136 @@
     }
 
     /* Responsive */
+    @media (max-width: 1400px) {
+        .premium-grid {
+            max-width: 100%;
+            gap: 24px;
+        }
+    }
+
     @media (max-width: 1200px) {
         .premium-grid { grid-template-columns: repeat(2, 1fr); }
+        .hero-title { font-size: 40px; }
+    }
+
+    @media (max-width: 992px) {
+        .celebrations-container { padding: 25px; }
+        .hero-title { font-size: 36px; }
+        .hero-subtitle { font-size: 16px; }
     }
 
     @media (max-width: 768px) {
-        .premium-grid { grid-template-columns: 1fr; }
-        .celebrations-container { padding: 40px 20px; }
-        .hero-title { font-size: 36px; }
-        .premium-card-body { flex-direction: column; text-align: center; }
-        .status-indicator { margin: 0 auto; }
+        .premium-grid { 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+            width: 100%;
+        }
+        .celebrations-container { padding: 20px 15px; }
+        .celebrations-hero { margin-bottom: 40px; }
+        .hero-title { font-size: 32px; }
+        .hero-subtitle { font-size: 14px; margin-bottom: 30px; }
+        
+        .celebration-switcher {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .switcher-btn {
+            padding: 10px 16px;
+            font-size: 14px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .premium-card {
+            padding: 24px;
+            border-radius: 24px;
+            width: 100%;
+            min-height: auto;
+        }
+
+        .premium-card-body {
+            gap: 24px;
+        }
+
+        .premium-avatar-container {
+            width: 100px;
+            height: 100px;
+        }
+
+        .avatar-initials {
+            font-size: 36px;
+        }
+
+        .floating-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+        }
+
+        .emp-name {
+            font-size: 22px;
+        }
+
+        .emp-label {
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .hero-title { font-size: 28px; }
+        
+        .celebration-switcher {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            max-width: 300px !important;
+            margin: 0 auto !important;
+            border-radius: 20px !important;
+            padding: 6px !important;
+            gap: 8px !important;
+        }
+        
+        .switcher-btn {
+            width: 100%;
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .premium-card-body { 
+            display: flex !important;
+            flex-direction: column !important; 
+            text-align: center !important; 
+            gap: 20px !important;
+            align-items: center !important;
+        }
+        
+        .premium-avatar-container {
+            margin: 0 auto;
+        }
+
+        .premium-card-footer {
+            align-items: center;
+        }
+
+        .status-indicator {
+            margin: 0 auto;
+        }
+        
+        .empty-state-premium {
+            padding: 40px 20px;
+            border-radius: 24px;
+        }
+
+        .empty-icon {
+            font-size: 60px;
+        }
+
+        .empty-state-premium h3 {
+            font-size: 22px;
+        }
     }
 
     .d-none { display: none; }
