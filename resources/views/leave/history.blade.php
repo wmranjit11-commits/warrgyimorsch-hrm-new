@@ -249,29 +249,31 @@
                     </div>
 
                     <div class="col-md-12">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
-                                class="text-danger">*</span></label>
-                        <div class="d-flex gap-3 bg-white p-2 rounded-3 shadow-sm border" style="height: 48px;">
-                            <div class="form-check d-flex align-items-center mb-0 ps-4 col-md-3">
-                                <input class="form-check-input" type="radio" name="leave_category" value="Full Day"
-                                    id="catFull" checked onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catFull">Full Day</label>
-                            </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
-                                <input class="form-check-input" type="radio" name="leave_category" value="Half Day"
-                                    id="catHalf" onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catHalf">Half Day</label>
-                            </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
-                                <input class="form-check-input" type="radio" name="leave_category" value="Gatepass"
-                                    id="catGate" onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catGate">Early Leave</label>
-                            </div>
-                            <div class="form-check d-flex align-items-center mb-0 ps-2 col-md-3">
-                                <input class="form-check-input" type="radio" name="leave_category" value="WFH"
-                                    id="catWFH" onchange="toggleCategoryFields()">
-                                <label class="form-check-label small fw-bold ms-1" for="catWFH">WFH</label>
-                            </div>
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Leave Category <span class="text-danger">*</span></label>
+                        <div class="category-grid">
+                            <input type="radio" name="leave_category" value="Full Day" id="catFull" checked onchange="toggleCategoryFields()">
+                            <label for="catFull" class="category-tile">
+                                <i data-feather="sun"></i>
+                                <span>Full Day</span>
+                            </label>
+
+                            <input type="radio" name="leave_category" value="Half Day" id="catHalf" onchange="toggleCategoryFields()">
+                            <label for="catHalf" class="category-tile">
+                                <i data-feather="clock"></i>
+                                <span>Half Day</span>
+                            </label>
+
+                            <input type="radio" name="leave_category" value="Gatepass" id="catGate" onchange="toggleCategoryFields()">
+                            <label for="catGate" class="category-tile">
+                                <i data-feather="log-out"></i>
+                                <span>Early Leave</span>
+                            </label>
+
+                            <input type="radio" name="leave_category" value="WFH" id="catWFH" onchange="toggleCategoryFields()">
+                            <label for="catWFH" class="category-tile">
+                                <i data-feather="home"></i>
+                                <span>WFH</span>
+                            </label>
                         </div>
                     </div>
 
@@ -283,6 +285,20 @@
                             <option value="First Half">First Half</option>
                             <option value="Second Half">Second Half</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
+                                class="text-danger">*</span></label>
+                        <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
+                            style="height: 48px; border-radius: 10px;" required onchange="calculateDays()"
+                            min="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <div class="col-md-6" id="endDateWrapper">
+                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
+                        <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
+                            style="height: 48px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
                     </div>
 
                     <div class="col-md-6" id="leaveTypeWrapper">
@@ -299,21 +315,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
-                                class="text-danger">*</span></label>
-                        <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 48px; border-radius: 10px;" required onchange="calculateDays()"
-                            min="{{ date('Y-m-d') }}">
-                    </div>
-
-                    <div class="col-md-4" id="endDateWrapper">
-                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
-                        <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
-                            style="height: 48px; border-radius: 10px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
-                    </div>
-
-                    <div class="col-md-4" id="startTimeWrapper" style="display: none;">
+                    <div class="col-md-6" id="startTimeWrapper" style="display: none;">
                         <label class="form-label small fw-bold text-muted text-uppercase">Start Time <span
                                 class="text-danger">*</span></label>
                         <input type="time" name="start_time" id="startTime" class="form-control border-0 bg-white shadow-sm"
@@ -327,7 +329,7 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted text-uppercase">Total Days/Duration</label>
                         <input type="text" name="total_days" id="totalDays"
                             class="form-control border-0 bg-light shadow-sm fw-bold text-primary" value="1"
@@ -535,26 +537,19 @@
             const startTimeWrapper = document.getElementById('startTimeWrapper');
             const endTimeWrapper = document.getElementById('endTimeWrapper');
             const halfDayOptionWrapper = document.getElementById('halfDayOptionWrapper');
-            const leaveTypeWrapper = document.getElementById('leaveTypeWrapper');
             const leaveType = document.getElementById('leaveType');
 
             halfDayOptionWrapper.style.display = 'none';
             endTimeWrapper.style.display = 'none';
-            leaveTypeWrapper.style.display = 'block';
 
             if (category === 'Gatepass') {
                 endDateWrapper.style.display = 'none';
                 startTimeWrapper.style.display = 'block';
-                endTimeWrapper.style.display = 'block';
+                // endTimeWrapper.style.display = 'block';
+                leaveTypeWrapper.style.display = 'none';
                 leaveType.value = 'Gatepass Leave';
                 document.getElementById('endDate').required = false;
                 document.getElementById('startTime').required = true;
-            } else if (category === 'Half Day') {
-                endDateWrapper.style.display = 'none';
-                startTimeWrapper.style.display = 'none';
-                halfDayOptionWrapper.style.display = 'block';
-                document.getElementById('endDate').required = false;
-                document.getElementById('startTime').required = false;
             } else if (category === 'WFH') {
                 endDateWrapper.style.display = 'block';
                 startTimeWrapper.style.display = 'none';
@@ -562,9 +557,19 @@
                 leaveType.value = 'WFH';
                 document.getElementById('endDate').required = false;
                 document.getElementById('startTime').required = false;
+            } else if (category === 'Half Day') {
+                endDateWrapper.style.display = 'none';
+                startTimeWrapper.style.display = 'none';
+                leaveTypeWrapper.style.display = 'block';
+                leaveType.value = '';
+                halfDayOptionWrapper.style.display = 'block';
+                document.getElementById('endDate').required = false;
+                document.getElementById('startTime').required = false;
             } else {
                 endDateWrapper.style.display = 'block';
                 startTimeWrapper.style.display = 'none';
+                leaveTypeWrapper.style.display = 'block';
+                leaveType.value = '';
                 document.getElementById('endDate').required = false;
                 document.getElementById('startTime').required = false;
             }
@@ -1101,6 +1106,61 @@
             justify-content: center;
             font-size: 14px;
             font-weight: 800;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .category-grid input[type="radio"] {
+            display: none;
+        }
+
+        .category-tile {
+            background: #fff;
+            border: 1px solid #dfe3ea;
+            border-radius: 16px;
+            padding: 22px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-tile i {
+            width: 30px;
+            height: 30px;
+            color: #6b7785;
+            margin-bottom: 10px;
+        }
+
+        .category-tile span {
+            font-size: 11px;
+            font-weight: 700;
+            color: #5c6670;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .category-grid input[type="radio"]:checked + .category-tile {
+            border: 2px solid #4c63ff;
+            background: #f5f7ff;
+        }
+
+        .category-grid input[type="radio"]:checked + .category-tile i,
+        .category-grid input[type="radio"]:checked + .category-tile span {
+            color: #304ffe;
+        }
+
+        .category-tile:hover {
+            transform: translateY(-2px);
+            border-color: #b8c2ff;
         }
     </style>
 @endsection
