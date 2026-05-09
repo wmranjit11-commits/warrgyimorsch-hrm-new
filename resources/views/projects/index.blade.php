@@ -427,10 +427,9 @@
                                             </td>
                                             <td>
                                                 <div class="hstack gap-1 justify-content-end">
-                                                    <a href="javascript:void(0);" 
+                                                    <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-warning text-warning rounded-circle btn-quick-view"
-                                                        data-project="{{ json_encode($project) }}"
-                                                        title="Quick View">
+                                                        data-project="{{ json_encode($project) }}" title="Quick View">
                                                         <i class="feather-info"></i>
                                                     </a>
                                                     <a href="javascript:void(0);"
@@ -765,7 +764,7 @@
             });
 
             // Quick View Click Handler (Safest way)
-            $('.btn-quick-view').on('click', function() {
+            $('.btn-quick-view').on('click', function () {
                 const project = $(this).data('project');
                 showQuickView(project);
             });
@@ -787,11 +786,11 @@
                 allEmps.forEach(emp => {
                     if (leaders.includes(emp.id.toString()) || leaders.includes(emp.id)) {
                         teamHtml += `<div class="col-md-6">
-                            <div class="d-flex align-items-center gap-2 p-2 border rounded">
-                                <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
-                                <div class="fw-bold small text-dark">${emp.name}</div>
-                            </div>
-                        </div>`;
+                                <div class="d-flex align-items-center gap-2 p-2 border rounded">
+                                    <div class="avatar-text avatar-sm bg-soft-primary text-primary rounded-circle">${emp.name.charAt(0)}</div>
+                                    <div class="fw-bold small text-dark">${emp.name}</div>
+                                </div>
+                            </div>`;
                     }
                 });
                 teamHtml += '</div>';
@@ -801,11 +800,11 @@
                 allEmps.forEach(emp => {
                     if (members.includes(emp.id.toString()) || members.includes(emp.id)) {
                         teamHtml += `<div class="col-md-4">
-                            <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
-                                <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
-                                <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
-                            </div>
-                        </div>`;
+                                <div class="d-flex align-items-center gap-2 p-2 border rounded bg-light">
+                                    <div class="avatar-text avatar-xs bg-soft-info text-info rounded-circle" style="width:24px; height:24px; font-size:10px;">${emp.name.charAt(0)}</div>
+                                    <div class="fw-medium small text-dark text-truncate">${emp.name}</div>
+                                </div>
+                            </div>`;
                     }
                 });
                 teamHtml += '</div>';
@@ -839,7 +838,7 @@
             const modalEl = document.getElementById('taskProgressModal');
             const listContainer = document.getElementById('tpList');
             listContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Analyzing tasks...</p></div>';
-            
+
             const modal = new bootstrap.Modal(modalEl);
             modal.show();
 
@@ -851,7 +850,7 @@
                         listContainer.innerHTML = '<div class="alert alert-soft-secondary text-center">No tasks found for this project.</div>';
                         return;
                     }
-                    
+
                     let html = '';
                     const employeeWork = {};
 
@@ -863,7 +862,7 @@
                             task.follow_ups.forEach(fu => {
                                 const date = new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                                 if (!employeeWork[empName][date]) employeeWork[empName][date] = { tasks: {}, dailyTotal: 0 };
-                                
+
                                 const taskTitle = task.task_title;
                                 if (!employeeWork[empName][date].tasks[taskTitle]) {
                                     employeeWork[empName][date].tasks[taskTitle] = { updates: [], taskTotal: 0 };
@@ -886,13 +885,13 @@
 
                     for (const [empName, dates] of Object.entries(employeeWork)) {
                         html += `<div class="mb-5">
-                            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-                                <div class="avatar-text avatar-lg bg-primary text-white rounded-circle shadow">${empName.charAt(0)}</div>
-                                <div>
-                                    <h4 class="fw-bold text-dark mb-0">${empName}</h4>
-                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 1px;">Project Contributor</small>
-                                </div>
-                            </div>`;
+                                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                                    <div class="avatar-text avatar-lg bg-primary text-white rounded-circle shadow">${empName.charAt(0)}</div>
+                                    <div>
+                                        <h4 class="fw-bold text-dark mb-0">${empName}</h4>
+                                        <small class="text-muted text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 1px;">Project Contributor</small>
+                                    </div>
+                                </div>`;
 
                         const sortedDates = Object.keys(dates).sort((a, b) => new Date(b) - new Date(a));
                         sortedDates.forEach(date => {
@@ -901,13 +900,13 @@
                             let dTh = Math.floor(dTotal);
                             let dTm = Math.round((dTotal - dTh) * 60);
                             let dTimeStr = (dTh > 0 ? dTh + 'h ' : '') + (dTm > 0 ? dTm + 'm' : (dTh === 0 ? '0m' : ''));
-                            
+
                             html += `<div class="ms-4 mb-5">
-                                <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-4 border">
-                                    <div class="fw-bold text-dark fs-15"><i class="feather-calendar text-primary me-2"></i>${date}</div>
-                                    <div class="badge bg-dark text-white px-3 py-2 rounded-pill fs-12">Total Day: ${dTimeStr}</div>
-                                </div>
-                                <div class="ms-2 border-start ps-4 position-relative" style="border-left: 2px dashed #cbd5e1 !important;">`;
+                                    <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-4 border">
+                                        <div class="fw-bold text-dark fs-15"><i class="feather-calendar text-primary me-2"></i>${date}</div>
+                                        <div class="badge bg-dark text-white px-3 py-2 rounded-pill fs-12">Total Day: ${dTimeStr}</div>
+                                    </div>
+                                    <div class="ms-2 border-start ps-4 position-relative" style="border-left: 2px dashed #cbd5e1 !important;">`;
 
                             for (const [title, taskData] of Object.entries(dayData.tasks)) {
                                 let tTotal = taskData.taskTotal;
@@ -916,13 +915,13 @@
                                 let tTimeStr = (tTh > 0 ? tTh + 'h ' : '') + (tTm > 0 ? tTm + 'm' : (tTh === 0 ? '0m' : ''));
 
                                 html += `<div class="mb-5 position-relative">
-                                    <div class="position-absolute start-0 translate-middle-x bg-white" style="margin-left: -26px; width: 14px; height: 14px; border-radius: 50%; border: 4px solid #3858f9; top: 6px; box-shadow: 0 0 0 5px #fff;"></div>
-                                    <div class="task-group-card p-4 rounded-4 border bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="fw-bold text-dark mb-0 fs-16">${title}</h5>
-                                            <span class="badge bg-soft-primary text-primary border border-primary border-opacity-10">${tTimeStr}</span>
-                                        </div>
-                                        <div class="updates-timeline">`;
+                                        <div class="position-absolute start-0 translate-middle-x bg-white" style="margin-left: -26px; width: 14px; height: 14px; border-radius: 50%; border: 4px solid #3858f9; top: 6px; box-shadow: 0 0 0 5px #fff;"></div>
+                                        <div class="task-group-card p-4 rounded-4 border bg-white shadow-sm" style="border-color: #e2e8f0 !important;">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="fw-bold text-dark mb-0 fs-16">${title}</h5>
+                                                <span class="badge bg-soft-primary text-primary border border-primary border-opacity-10">${tTimeStr}</span>
+                                            </div>
+                                            <div class="updates-timeline">`;
 
                                 taskData.updates.forEach(update => {
                                     let uh = Math.floor(update.time);
@@ -941,25 +940,25 @@
                                                     isFirstLine = false;
                                                 } else {
                                                     pointsHtml += `<div class="sub-task-point">
-                                                        <i class="feather-check text-success mt-1" style="font-size: 11px;"></i>
-                                                        <span>${clean}</span>
-                                                    </div>`;
+                                                            <i class="feather-check text-success mt-1" style="font-size: 11px;"></i>
+                                                            <span>${clean}</span>
+                                                        </div>`;
                                                 }
                                             }
                                         });
                                     }
 
                                     html += `<div class="update-item mb-4 last-child-mb-0">
-                                        <div class="d-flex align-items-center gap-2 mb-2 text-muted" style="font-size: 11px;">
-                                            <i class="feather-clock"></i>
-                                            <span class="fw-bold text-uppercase">${update.timestamp} Update</span>
-                                            <span class="opacity-50">|</span>
-                                            <span class="fw-bold text-primary">${uTimeStr}</span>
-                                        </div>
-                                        <div class="ps-1">
-                                            ${pointsHtml || '<div class="text-muted italic fs-13">No details provided</div>'}
-                                        </div>
-                                    </div>`;
+                                            <div class="d-flex align-items-center gap-2 mb-2 text-muted" style="font-size: 11px;">
+                                                <i class="feather-clock"></i>
+                                                <span class="fw-bold text-uppercase">${update.timestamp} Update</span>
+                                                <span class="opacity-50">|</span>
+                                                <span class="fw-bold text-primary">${uTimeStr}</span>
+                                            </div>
+                                            <div class="ps-1">
+                                                ${pointsHtml || '<div class="text-muted italic fs-13">No details provided</div>'}
+                                            </div>
+                                        </div>`;
                                 });
 
                                 html += `</div></div></div>`;
@@ -1051,4 +1050,29 @@
             </div>
         </div>
     </div>
+@endpush
+<!-- Task Progress Analysis Modal -->
+<div class="modal fade" id="taskProgressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0 ps-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="feather-clipboard text-success"></i>
+                    <span id="tpProjectName">Project Task Progress</span>
+                </h5>
+                <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="tpList" style="max-height: 65vh; overflow-y: auto;">
+                    <!-- Content will be injected here -->
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal"
+                    style="border-radius: 10px;">CLOSE ANALYSIS</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endpush

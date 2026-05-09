@@ -662,8 +662,11 @@
     .toast-icon { width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; }
     
     input[type="date"]::-webkit-calendar-picker-indicator {
-        background: transparent; bottom: 0; color: transparent; cursor: pointer;
-        height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
     }
 </style>
 @endsection
