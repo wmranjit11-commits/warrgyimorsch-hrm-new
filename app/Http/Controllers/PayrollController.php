@@ -78,35 +78,40 @@ class PayrollController extends Controller
      */
     public function getAttendanceDetails(Request $request)
     {
-        $date = $request->date;
-        $details = Attendance::with('employee')
-            ->where('attendance_date', $date)
-            ->get();
+        try {
+            $date = $request->date;
+            $details = Attendance::with('employee')
+                ->where('attendance_date', $date)
+                ->get();
 
-        $earlyOuts = 0;
-        $totalPresent = 0;
-        foreach ($details as $att) {
-            if (in_array(strtolower($att->status), ['present', 'early_out'])) {
-                if ($att->check_out && $att->employee && $att->employee->time_out) {
-                    $totalPresent++;
-                    $checkOut = Carbon::parse($att->check_out);
-                    $punchTime = $checkOut->format('H:i');
-                    // Early out if between 3:00 PM and 5:30 PM
-                    if ($punchTime >= '15:00' && $punchTime < '17:30') {
-                        $earlyOuts++;
+            $earlyOuts = 0;
+            $totalPresent = 0;
+            foreach ($details as $att) {
+                if ($att->status && in_array(strtolower($att->status), ['present', 'early_out', 'early_leave'])) {
+                    if ($att->check_out && $att->employee && $att->employee->time_out) {
+                        $totalPresent++;
+                        try {
+                            $punchTime = date('H:i', strtotime($att->check_out));
+                            if ($punchTime >= '15:00' && $punchTime < '17:30') {
+                                $earlyOuts++;
+                            }
+                        } catch (\Exception $e) {
+                        }
                     }
                 }
             }
+
+            $isActivity = ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7);
+
+            return response()->json([
+                'success' => true,
+                'date' => $date ? Carbon::parse($date)->format('d M Y') : '',
+                'data' => $details,
+                'is_activity' => $isActivity
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $isActivity = ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7);
-
-        return response()->json([
-            'success' => true,
-            'date' => Carbon::parse($date)->format('d M Y'),
-            'data' => $details,
-            'is_activity' => $isActivity
-        ]);
     }
 
     /**
@@ -1203,52 +1208,63 @@ class PayrollController extends Controller
 
     public function employeeWiseDetails(Request $request)
     {
-        $query = Attendance::with('employee')->where('employee_id', $request->employee_id);
+        try {
+            $query = Attendance::with('employee')->where('employee_id', $request->employee_id);
 
-        if ($request->filled('start_date')) {
-            $query->whereDate('attendance_date', '>=', $request->start_date);
-        }
+            if ($request->filled('start_date')) {
+                $query->whereDate('attendance_date', '>=', $request->start_date);
+            }
 
-        if ($request->filled('end_date')) {
-            $query->whereDate('attendance_date', '<=', $request->end_date);
-        }
+            if ($request->filled('end_date')) {
+                $query->whereDate('attendance_date', '<=', $request->end_date);
+            }
 
-        $records = $query->orderBy('attendance_date', 'desc')->get();
+            $records = $query->orderBy('attendance_date', 'desc')->get();
 
-        // Calculate activity days for each date in the records
-        $activityDays = [];
-        $allDates = $records->pluck('attendance_date')->unique();
+            // Calculate activity days efficiently (avoid N+1)
+            $activityDays = [];
+            $allDates = $records->pluck('attendance_date')->unique()->toArray();
 
-        foreach ($allDates as $date) {
-            $dailyAtts = Attendance::with('employee')->where('attendance_date', $date)->get();
-            $earlyOuts = 0;
-            $totalPresent = 0;
-            foreach ($dailyAtts as $att) {
-                if (in_array(strtolower($att->status), ['present', 'early_out', 'early_leave'])) {
-                    if ($att->check_out && $att->employee && $att->employee->time_out) {
-                        $totalPresent++;
-                        $checkOut = \Carbon\Carbon::parse($att->check_out);
-                        $punchTime = $checkOut->format('H:i');
-                        // Early out if between 3:00 PM and 5:30 PM
-                        if ($punchTime >= '15:00' && $punchTime < '17:30') {
-                            $earlyOuts++;
+            if (!empty($allDates)) {
+                $allDailyAtts = Attendance::with('employee')
+                    ->whereIn('attendance_date', $allDates)
+                    ->get()
+                    ->groupBy('attendance_date');
+
+                foreach ($allDailyAtts as $date => $dailyAtts) {
+                    $earlyOuts = 0;
+                    $totalPresent = 0;
+                    foreach ($dailyAtts as $att) {
+                        if ($att->status && in_array(strtolower($att->status), ['present', 'early_out', 'early_leave'])) {
+                            if ($att->check_out && $att->employee && $att->employee->time_out) {
+                                $totalPresent++;
+                                try {
+                                    $punchTime = date('H:i', strtotime($att->check_out));
+                                    if ($punchTime >= '15:00' && $punchTime < '17:30') {
+                                        $earlyOuts++;
+                                    }
+                                } catch (\Exception $e) {
+                                }
+                            }
                         }
+                    }
+                    if ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7) {
+                        $activityDays[$date] = true;
                     }
                 }
             }
-            if ($totalPresent > 2 && ($earlyOuts / $totalPresent) >= 0.7) {
-                $activityDays[$date] = true;
-            }
+
+            $employeeName = Employee::where('id', $request->employee_id)->value('name');
+
+            return response()->json([
+                'success' => true,
+                'employee_name' => $employeeName,
+                'data' => $records,
+                'activity_days' => $activityDays
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $employeeName = Employee::where('id', $request->employee_id)->value('name');
-
-        return response()->json([
-            'success' => true,
-            'employee_name' => $employeeName,
-            'data' => $records,
-            'activity_days' => $activityDays
-        ]);
     }
 
 
@@ -1295,7 +1311,7 @@ class PayrollController extends Controller
             Attendance::where('id', $id)->update([
                 'check_in' => $checkIn,
                 'check_out' => $checkOut,
-                'status' => $request->status[$id],
+                'status' => $request->status[$id] ?? 'absent',
                 'total_hours' => $totalHours
             ]);
         }
