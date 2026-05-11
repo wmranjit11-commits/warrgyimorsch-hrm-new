@@ -3,6 +3,13 @@
 @section('content')
     <!-- Feather Icons CDN for redundancy -->
     <script src="https://unpkg.com/feather-icons"></script>
+    @php
+        $selectedCategoryLabel = match (request('category')) {
+            'Gatepass Leave' => 'Early Leave',
+            'wfh' => 'WFH',
+            default => request('category'),
+        };
+    @endphp
 
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Top Header -->
@@ -43,37 +50,87 @@
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted text-uppercase"
                             style="letter-spacing: 0.5px;">Search Employee</label>
-                        <input type="text" name="search" class="form-control border-0 bg-light fw-bold"
-                            placeholder="Employee Name..." value="{{ request('search') }}"
-                            style="border-radius: 8px; height: 44px; padding-left: 15px;">
+                        <div class="wghrm-search-dropdown" id="filterEmployeeDropdown">
+                            <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #f8fafc !important; border: none !important;">
+                                <span class="wghrm-trigger-text fw-bold text-dark">{{ request('search') ?: 'Search Employee...' }}</span>
+                                <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-search-container">
+                                    <i data-feather="search" class="wghrm-search-icon"></i>
+                                    <input type="text" class="wghrm-search-input" placeholder="Type name...">
+                                </div>
+                                <div class="wghrm-items-list">
+                                    <div class="wghrm-item {{ !request('search') ? 'selected' : '' }}" data-value="" data-text="All Employees">
+                                        <span class="wghrm-item-text">All Employees</span>
+                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                    </div>
+                                    @foreach($employees as $emp)
+                                        <div class="wghrm-item {{ request('search') == $emp->name ? 'selected' : '' }}" data-value="{{ $emp->name }}" data-text="{{ $emp->name }}">
+                                            <span class="wghrm-item-text">{{ $emp->name }}</span>
+                                            <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted text-uppercase"
                             style="letter-spacing: 0.5px;">Category</label>
-                        <select name="category" class="form-select border-0 bg-light"
-                            style="border-radius: 8px; height: 44px;">
-                            <option value="">All Categories</option>
-                            <option value="Full Day" {{ request('category') == 'Full Day' ? 'selected' : '' }}>Full Day
-                            </option>
-                            <option value="Half Day" {{ request('category') == 'Half Day' ? 'selected' : '' }}>Half Day
-                            </option>
-                            <option value="Gatepass" {{ request('category') == 'Gatepass' ? 'selected' : '' }}>Early Leave
-                            </option>
-                            <option value="WFH" {{ request('category') == 'WFH' ? 'selected' : '' }}>WFH</option>
-                        </select>
+                        <div class="wghrm-search-dropdown" id="filterCategoryDropdown">
+                            <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #f8fafc !important; border: none !important;">
+                                <span class="wghrm-trigger-text fw-bold text-dark">{{ $selectedCategoryLabel ?: 'All Categories' }}</span>
+                                <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-items-list">
+                                    <div class="wghrm-item {{ !request('category') ? 'selected' : '' }}" data-value="" data-text="All Categories">
+                                        <span class="wghrm-item-text">All Categories</span>
+                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                    </div>
+                                    @foreach([
+                                        'Paid Leave' => 'Paid Leave',
+                                        'Sick Leave' => 'Sick Leave',
+                                        'Casual Leave' => 'Casual Leave',
+                                        'Gatepass Leave' => 'Early Leave',
+                                        'wfh' => 'WFH',
+                                    ] as $catValue => $catLabel)
+                                        <div class="wghrm-item {{ request('category') == $catValue ? 'selected' : '' }}" data-value="{{ $catValue }}" data-text="{{ $catLabel }}">
+                                            <span class="wghrm-item-text">{{ $catLabel }}</span>
+                                            <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <input type="hidden" name="category" value="{{ request('category') }}">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted text-uppercase"
                             style="letter-spacing: 0.5px;">Status</label>
-                        <select name="status" class="form-select border-0 bg-light"
-                            style="border-radius: 8px; height: 44px;">
-                            <option value="">All Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>On Hold</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="unauthorised" {{ request('status') == 'unauthorised' ? 'selected' : '' }}>Unauthorised</option>
-                        </select>
+                        <div class="wghrm-search-dropdown" id="filterStatusDropdown">
+                            <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #f8fafc !important; border: none !important;">
+                                <span class="wghrm-trigger-text fw-bold text-dark text-capitalize">{{ request('status') ?: 'All Status' }}</span>
+                                <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-items-list">
+                                    <div class="wghrm-item {{ !request('status') ? 'selected' : '' }}" data-value="" data-text="All Status">
+                                        <span class="wghrm-item-text">All Status</span>
+                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                    </div>
+                                    @foreach(['pending', 'approved', 'on_hold', 'rejected', 'unauthorised'] as $stat)
+                                        <div class="wghrm-item {{ request('status') == $stat ? 'selected' : '' }}" data-value="{{ $stat }}" data-text="{{ ucfirst(str_replace('_', ' ', $stat)) }}">
+                                            <span class="wghrm-item-text text-capitalize">{{ str_replace('_', ' ', $stat) }}</span>
+                                            <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <input type="hidden" name="status" value="{{ request('status') }}">
+                        </div>
                     </div>
                     <div class="col-md-1.5" style="flex: 1;">
                         <label class="form-label small fw-bold text-muted text-uppercase"
@@ -232,22 +289,37 @@
                 @csrf
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <!-- <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
-                                class="text-danger">*</span></label> -->
-                        <input type="hidden"
-                            class="form-control border-0 bg-light shadow-sm"
-                            value="{{ auth()->user()->name }}"
-                            readonly
-                            style="height: 48px; border-radius: 10px;">
-                        <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Employee <span
+                                class="text-danger">*</span></label>
+                        <div class="wghrm-search-dropdown" id="applyEmployeeDropdown">
+                            <div class="wghrm-dropdown-trigger" style="height: 48px; border-radius: 10px; background: white !important; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;">
+                                <span class="wghrm-trigger-text fw-bold text-dark">Select Employee</span>
+                                <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-search-container">
+                                    <i data-feather="search" class="wghrm-search-icon"></i>
+                                    <input type="text" class="wghrm-search-input" placeholder="Search employee...">
+                                </div>
+                                <div class="wghrm-items-list">
+                                    @foreach($employees as $emp)
+                                        <div class="wghrm-item" data-value="{{ $emp->id }}" data-text="{{ $emp->name }}">
+                                            <span class="wghrm-item-text">{{ $emp->name }}</span>
+                                            <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <input type="hidden" name="employee_id" required>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <!-- <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label> -->
-                        <input type="hidden" class="form-control border-0 bg-light shadow-sm" value="{{ date('d-m-Y') }}"
+                        <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label>
+                        <input type="text" class="form-control border-0 bg-light shadow-sm" value="{{ date('d-m-Y') }}"
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <div class="col-md-6" id="leaveTypeWrapper">
+                    <!-- <div class="col-md-6" id="leaveTypeWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
                                 class="text-danger">*</span></label>
                         <select name="leave_category" id="leaveCategory" class="form-select border-0 bg-white shadow-sm"
@@ -259,6 +331,67 @@
                             <option value="Casual Leave">Casual Leave</option>
                             <option value="wfh">WFH</option>
                         </select>
+                    </div> -->
+
+                    <div class="col-md-6" id="leaveTypeWrapper">
+                        <label class="form-label small fw-bold text-muted text-uppercase"
+                            style="letter-spacing: 0.5px;">
+                            Leave Category <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="wghrm-search-dropdown" id="leaveCategoryDropdown">
+                            <!-- Trigger -->
+                            <div class="wghrm-dropdown-trigger"
+                                style="height: 48px; border-radius: 10px; background: #f8fafc !important; border: none !important;">
+                                
+                                <span class="wghrm-trigger-text fw-bold text-dark">
+                                    Select Type...
+                                </span>
+
+                                <i data-feather="chevron-down"
+                                    style="width: 16px; height: 16px;"></i>
+                            </div>
+
+                            <!-- Dropdown Menu -->
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-items-list">
+
+                                    <div class="wghrm-item" data-value="Paid Leave" data-text="Paid Leave">
+                                        <span class="wghrm-item-text">Paid Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Sick Leave" data-text="Sick Leave">
+                                        <span class="wghrm-item-text">Sick Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Gatepass Leave" data-text="Early Leave">
+                                        <span class="wghrm-item-text">Early Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Casual Leave" data-text="Casual Leave">
+                                        <span class="wghrm-item-text">Casual Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="wfh" data-text="WFH">
+                                        <span class="wghrm-item-text">WFH</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Hidden Input -->
+                            <input type="hidden" name="leave_category" id="leaveCategory" required>
+                        </div>
                     </div>
 
                     <div class="col-md-6" id="leaveCategoryWrapper">

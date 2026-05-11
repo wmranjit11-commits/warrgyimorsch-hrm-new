@@ -16,6 +16,23 @@ use App\Mail\LeaveStatusUpdatedMail;
 
 class LeaveApplicationController extends Controller
 {
+    private function applyCategoryFilter($query, string $category): void
+    {
+        $normalizedCategory = strtolower(trim($category));
+
+        if ($normalizedCategory === 'early leave') {
+            $query->where('leave_category', 'LIKE', '%Gatepass Leave%');
+            return;
+        }
+
+        if ($normalizedCategory === 'wfh') {
+            $query->where('leave_category', 'LIKE', '%wfh%');
+            return;
+        }
+
+        $query->where('leave_category', 'LIKE', '%' . $category . '%');
+    }
+
     private function getAttendanceStatusFromLeave(string $leaveCategory, ?string $leaveType = null): string
     {
         $normalizedCategory = strtolower($leaveCategory);
@@ -64,7 +81,7 @@ class LeaveApplicationController extends Controller
             });
         }
         if ($request->filled('category')) {
-            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
+            $this->applyCategoryFilter($query, $request->category);
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -166,7 +183,7 @@ class LeaveApplicationController extends Controller
             });
         }
         if ($request->filled('category')) {
-            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
+            $this->applyCategoryFilter($query, $request->category);
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);

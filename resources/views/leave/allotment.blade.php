@@ -206,7 +206,7 @@
                                                 style="width: 14px; height: 14px;" class="text-muted"></i></span>
                                         <input type="text" class="form-control form-control-sm border-0 bg-light px-2"
                                             placeholder="Search history..." id="historySearch"
-                                            style="border-radius: 0 10px 10px 0; height: 36px; box-shadow: none;">
+                                            style="border-radius: 0 10px 10px 0 !important; box-shadow: none !important;">
                                     </div>
                                 </div>
                             </div>
