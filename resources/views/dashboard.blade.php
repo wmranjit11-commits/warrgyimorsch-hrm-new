@@ -110,6 +110,32 @@
             border-top: 1px solid #f1f5f9 !important;
         }
 
+        .late-scroll-container{
+            max-height: 350px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar */
+        .late-scroll-container::-webkit-scrollbar{
+            width: 6px;
+        }
+
+        .late-scroll-container::-webkit-scrollbar-track{
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .late-scroll-container::-webkit-scrollbar-thumb{
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .late-scroll-container::-webkit-scrollbar-thumb:hover{
+            background: #94a3b8;
+        }
+
         @media (max-width: 575.98px) {
             .wghrm-resp-dropdown-menu {
                 position: absolute !important;
@@ -493,43 +519,32 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            @forelse($todayLeaveEmployees as $todayLeave)
-                                <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
-                                    <div class="d-flex justify-content-between">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div
-                                                class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
-                                                <i class="bi bi-person-fill"></i>
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold">
-                                                    {{ $todayLeave->employee_name ?? 'N/A' }}
+                            <div class="late-scroll-container">
+                                @forelse($todayLeaveEmployees as $todayLeave)
+                                    <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div
+                                                    class="wd-50 ht-50 bg-soft-danger text-danger d-flex align-items-center justify-content-center rounded-2">
+                                                    <i class="bi bi-person-fill"></i>
                                                 </div>
-                                                <div class="fs-11 text-muted">
-                                                    {{ $todayLeave->leave_type }} Today
+                                                <div>
+                                                    <div class="fw-bold">
+                                                        {{ $todayLeave->employee_name ?? 'N/A' }}
+                                                    </div>
+                                                    <div class="fs-11 text-muted">
+                                                        {{ $todayLeave->leave_type }} Today
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-4 text-muted">
-                                    No employees on leave today.
-                                </div>
-                            @endforelse
-
-                            @if(count($todayLeaveEmployees) > 4)
-                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                    <a href="javascript:void(0);" id="prev-leave"
-                                        class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                        <i class="feather-chevron-left fs-20"></i>
-                                    </a>
-                                    <a href="javascript:void(0);" id="next-leave"
-                                        class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                        <i class="feather-chevron-right fs-20"></i>
-                                    </a>
-                                </div>
-                            @endif
+                                @empty
+                                    <div class="text-center py-4 text-muted">
+                                        No employees on leave today.
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
                         <div class="card-footer d-none">
                             <div class="row g-4">
@@ -714,41 +729,30 @@
                         </div>
 
                         <div class="card-body">
-                            @forelse($todayLateEmployees as $lateEmp)
-                                <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div
-                                            class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
-                                            <i class="bi bi-clock"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">
-                                                {{ $lateEmp['employee']->name ?? 'N/A' }}
+                            <div class="late-scroll-container">
+                                @forelse($todayLateEmployees as $lateEmp)
+                                    <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div
+                                                class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
+                                                <i class="bi bi-clock"></i>
                                             </div>
-                                            <div class="fs-11 text-muted">
-                                                Late by {{ $lateEmp['late_duration'] }}
+                                            <div>
+                                                <div class="fw-bold">
+                                                    {{ $lateEmp['employee']->name ?? 'N/A' }}
+                                                </div>
+                                                <div class="fs-11 text-muted">
+                                                    Late by {{ $lateEmp['late_duration'] }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-4 text-muted">
-                                    No late arrivals found.
-                                </div>
-                            @endforelse
-
-                            @if(count($todayLateEmployees) > 4)
-                                <div class="d-flex align-items-center justify-content-center gap-4 mt-2">
-                                    <a href="javascript:void(0);" id="prev-late"
-                                        class="avatar-text avatar-md bg-soft-primary text-primary opacity-50 border-0 disabled shadow-sm">
-                                        <i class="feather-chevron-left fs-20"></i>
-                                    </a>
-                                    <a href="javascript:void(0);" id="next-late"
-                                        class="avatar-text avatar-md bg-soft-primary text-primary border-0 shadow-sm">
-                                        <i class="feather-chevron-right fs-20"></i>
-                                    </a>
-                                </div>
-                            @endif
+                                @empty
+                                    <div class="text-center py-4 text-muted">
+                                        No late arrivals found.
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>

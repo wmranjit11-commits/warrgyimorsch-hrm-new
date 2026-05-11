@@ -319,20 +319,6 @@
                             style="height: 48px; border-radius: 10px;" readonly>
                     </div>
 
-                    <!-- <div class="col-md-6" id="leaveTypeWrapper">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
-                                class="text-danger">*</span></label>
-                        <select name="leave_category" id="leaveCategory" class="form-select border-0 bg-white shadow-sm"
-                            style="height: 48px; border-radius: 10px;" onchange="toggleCategoryFields()" required>
-                            <option value="">Select Type...</option>
-                            <option value="Paid Leave">Paid Leave</option>
-                            <option value="Sick Leave">Sick Leave</option>
-                            <option value="Gatepass Leave">Early Leave</option>
-                            <option value="Casual Leave">Casual Leave</option>
-                            <option value="wfh">WFH</option>
-                        </select>
-                    </div> -->
-
                     <div class="col-md-6" id="leaveTypeWrapper">
                         <label class="form-label small fw-bold text-muted text-uppercase"
                             style="letter-spacing: 0.5px;">

@@ -420,7 +420,30 @@
                             <span class="nxl-mtext">Leave Balance</span>
                         </a>
                     </li>
+
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-briefcase"></i></span>
+                            <span class="nxl-mtext">Project Module</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item">
+                                <a href="{{ route('projects.index') }}" class="nxl-link">
+                                    <span class="nxl-micon"><i class="feather-list"></i></span>
+                                    <span class="nxl-mtext">Projects</span>
+                                </a>
+                            </li>
+                            <li class="nxl-item">
+                                <a href="{{ route('daily-tasks.index') }}" class="nxl-link">
+                                    <span class="nxl-micon"><i class="feather-check-square"></i></span>
+                                    <span class="nxl-mtext">Daily Tasks</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
+                
             @endif
 
             <div class="card text-center">
