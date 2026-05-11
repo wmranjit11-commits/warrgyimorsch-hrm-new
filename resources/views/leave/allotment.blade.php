@@ -46,64 +46,110 @@
                                 <div class="col-12">
                                     <label class="form-label small fw-bold text-muted mb-1 text-uppercase">Select Allotment
                                         Month</label>
-                                    <select id="monthSelect" class="form-select border-0 bg-light fw-bold"
-                                        style="border-radius: 10px; height: 44px; border: 1.5px solid #f1f5f9; padding-left: 15px;"
-                                        onchange="updateView()">
-                                        @foreach(range(1, 12) as $m)
-                                            <option value="{{ sprintf('%02d', $m) }}" {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}>
-                                                {{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <div class="wghrm-search-dropdown" id="monthSelectDropdown">
+                                        <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 10px; background: #f8fafc !important; border: 1.5px solid #f1f5f9 !important;">
+                                            <span class="wghrm-trigger-text fw-bold text-dark">{{ date('F', mktime(0, 0, 0, $selectedMonth, 1)) }} {{ date('Y') }}</span>
+                                            <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                                        </div>
+                                        <div class="wghrm-dropdown-menu">
+                                            <div class="wghrm-items-list">
+                                                @foreach(range(1, 12) as $m)
+                                                    <div class="wghrm-item {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}" 
+                                                         data-value="{{ sprintf('%02d', $m) }}" 
+                                                         data-text="{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}">
+                                                        <span class="wghrm-item-text">{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}</span>
+                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="monthSelect" value="{{ $selectedMonth }}" onchange="updateView()">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
-                            <table class="table table-hover align-middle mb-0" id="employeeTable">
-                                <thead class="bg-light sticky-top">
-                                    <tr class="small text-muted fw-bold text-uppercase">
-                                        <th class="ps-4 border-0 py-3">Employee</th>
-                                        <th class="text-center border-0 py-3" style="width: 120px;">Leave Count</th>
-                                        <th class="text-center border-0 py-3" style="width: 100px;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($employees as $emp)
-                                        <tr class="border-bottom">
-                                            <td class="ps-4 py-3">
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div
-                                                        class="avatar-text avatar-xs bg-soft-primary text-primary small fw-bold">
-                                                        {{ substr($emp->name, 0, 1) }}
-                                                    </div>
-                                                    <span class="fw-bold text-dark">{{ $emp->name }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="d-flex justify-content-center">
-                                                    @if(auth()->user()->role === 'super_admin')
-                                                        <input type="number" step="0.5"
-                                                            class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
-                                                            data-employee-id="{{ $emp->id }}"
-                                                            value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
-                                                            style="border-radius: 8px; width: 80px; height: 40px;">
-                                                    @else
-                                                        <span class="fw-bold">{{ $allotments[$emp->id]->leave_count ?? 1.5 }}</span>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <button
-                                                    class="btn btn-icon btn-soft-danger d-inline-flex align-items-center justify-content-center mx-auto"
-                                                    onclick="removeRow(this)"
-                                                    style="border-radius: 8px; width: 34px; height: 34px; border: none;">
-                                                    <i data-feather="minus" style="width: 16px; height: 16px;"></i>
-                                                </button>
-                                            </td>
+                            <!-- Desktop Table -->
+                            <div class="desktop-only">
+                                <table class="table table-hover align-middle mb-0" id="employeeTable">
+                                    <thead class="bg-light sticky-top">
+                                        <tr class="small text-muted fw-bold text-uppercase">
+                                            <th class="ps-4 border-0 py-3">Employee</th>
+                                            <th class="text-center border-0 py-3" style="width: 120px;">Leave Count</th>
+                                            <th class="text-center border-0 py-3" style="width: 100px;">Action</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($employees as $emp)
+                                            <tr class="border-bottom">
+                                                <td class="ps-4 py-3">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div
+                                                            class="avatar-text avatar-xs bg-soft-primary text-primary small fw-bold">
+                                                            {{ substr($emp->name, 0, 1) }}
+                                                        </div>
+                                                        <span class="fw-bold text-dark">{{ $emp->name }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="d-flex justify-content-center">
+                                                        @if(auth()->user()->role === 'super_admin')
+                                                            <input type="number" step="0.5"
+                                                                class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
+                                                                data-employee-id="{{ $emp->id }}"
+                                                                value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
+                                                                style="border-radius: 8px; width: 80px; height: 40px;">
+                                                        @else
+                                                            <span class="fw-bold">{{ $allotments[$emp->id]->leave_count ?? 1.5 }}</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button
+                                                        class="btn btn-icon btn-soft-danger d-inline-flex align-items-center justify-content-center mx-auto"
+                                                        onclick="removeRow(this)"
+                                                        style="border-radius: 8px; width: 34px; height: 34px; border: none;">
+                                                        <i data-feather="minus" style="width: 16px; height: 16px;"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Mobile View -->
+                            <div class="mobile-only p-3">
+                                @foreach($employees as $emp)
+                                    <div class="wghrm-mobile-card mb-3">
+                                        <div class="wghrm-mobile-card-header">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="avatar-text avatar-xs bg-soft-primary text-primary small fw-bold">
+                                                    {{ substr($emp->name, 0, 1) }}
+                                                </div>
+                                                <span class="fw-bold text-dark">{{ $emp->name }}</span>
+                                            </div>
+                                            <button class="btn btn-sm btn-soft-danger border-0" onclick="removeRow(this)">
+                                                <i data-feather="minus" style="width: 14px; height: 14px;"></i>
+                                            </button>
+                                        </div>
+                                        <div class="wghrm-mobile-card-body">
+                                            <div class="wghrm-mobile-full-width d-flex justify-content-between align-items-center">
+                                                <div class="wghrm-mobile-label">ALLOTMENT COUNT</div>
+                                                @if(auth()->user()->role === 'super_admin')
+                                                    <input type="number" step="0.5"
+                                                        class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
+                                                        data-employee-id="{{ $emp->id }}"
+                                                        value="{{ $allotments[$emp->id]->leave_count ?? 1.5 }}"
+                                                        style="border-radius: 8px; width: 80px; height: 40px;">
+                                                @else
+                                                    <span class="fw-bold">{{ $allotments[$emp->id]->leave_count ?? 1.5 }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                         <div class="card-footer bg-white border-top p-4 text-end sticky-bottom">
                             <button
@@ -125,14 +171,33 @@
                                 <div class="ms-auto d-flex align-items-center gap-3">
                                     <div class="d-flex align-items-center gap-2">
                                         <label class="text-muted small fw-bold mb-0 text-nowrap">Show</label>
-                                        <select id="entriesPerPage" class="form-select border-0 bg-light fw-bold text-dark"
-                                            style="width: 80px; height: 38px; padding: 0 10px; border-radius: 8px; box-shadow: none; cursor: pointer; font-size: 13px;"
-                                            onchange="changeEntriesPerPage()">
-                                            <option value="10" selected>10</option>
-                                            <option value="15">15</option>
-                                            <option value="20">20</option>
-                                            <option value="30">30</option>
-                                        </select>
+                                        <div class="wghrm-search-dropdown" id="entriesDropdown">
+                                            <div class="wghrm-dropdown-trigger" style="width: 70px; height: 38px; border-radius: 8px; background: #f8fafc !important; border: 0 !important; font-size: 13px;">
+                                                <span class="wghrm-trigger-text fw-bold text-dark">10</span>
+                                                <i data-feather="chevron-down" style="width: 14px; height: 14px;"></i>
+                                            </div>
+                                            <div class="wghrm-dropdown-menu">
+                                                <div class="wghrm-items-list">
+                                                    <div class="wghrm-item selected" data-value="10" data-text="10">
+                                                        <span class="wghrm-item-text">10</span>
+                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                    </div>
+                                                    <div class="wghrm-item" data-value="15" data-text="15">
+                                                        <span class="wghrm-item-text">15</span>
+                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                    </div>
+                                                    <div class="wghrm-item" data-value="20" data-text="20">
+                                                        <span class="wghrm-item-text">20</span>
+                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                    </div>
+                                                    <div class="wghrm-item" data-value="30" data-text="30">
+                                                        <span class="wghrm-item-text">30</span>
+                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="entriesPerPage" value="10" onchange="changeEntriesPerPage()">
+                                        </div>
                                         <span class="text-muted small fw-bold text-nowrap">entries</span>
                                     </div>
                                     <div class="input-group" style="width: 220px;">
@@ -147,7 +212,8 @@
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div class="table-responsive">
+                            <!-- Desktop Table -->
+                            <div class="table-responsive desktop-only">
                                 <table class="table table-hover align-middle mb-0" id="historyTable">
                                     <thead class="bg-light">
                                         <tr class="small text-muted fw-bold text-uppercase">
@@ -178,6 +244,33 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <!-- Mobile Cards -->
+                            <div class="mobile-only p-3" id="historyMobileBody">
+                                @foreach($history as $h)
+                                    <div class="wghrm-mobile-card history-row mb-3">
+                                        <div class="wghrm-mobile-card-header">
+                                            <div>
+                                                <div class="wghrm-mobile-value text-primary" style="font-size: 15px;">{{ $h->employee->name }}</div>
+                                                <div class="wghrm-mobile-label">ALLOTMENT</div>
+                                            </div>
+                                            <span class="badge bg-soft-primary text-primary rounded-pill fw-bold" style="font-size: 11px;">
+                                                {{ number_format($h->leave_count, 1) }}
+                                            </span>
+                                        </div>
+                                        <div class="wghrm-mobile-card-body">
+                                            <div>
+                                                <div class="wghrm-mobile-label">MONTH</div>
+                                                <div class="wghrm-mobile-value">{{ date('F', mktime(0, 0, 0, $h->month, 1)) }}</div>
+                                            </div>
+                                            <div>
+                                                <div class="wghrm-mobile-label">DATE</div>
+                                                <div class="wghrm-mobile-value">{{ $h->created_at->format('d M, Y') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                         <div class="card-footer bg-white border-top px-4 py-3">
@@ -265,22 +358,22 @@
         /* FORCE REMOVE ALL BLUR EFFECTS */
         const styleFix = document.createElement('style');
         styleFix.innerHTML = `
-                    .modal-open .nxl-container, 
-                    .modal-open .nxl-header, 
-                    .modal-open .nxl-navigation {
-                        filter: none !important;
-                        -webkit-filter: none !important;
-                    }
-                    .modal-backdrop {
-                        backdrop-filter: none !important;
-                        -webkit-backdrop-filter: none !important;
-                        background-color: rgba(0, 0, 0, 0.7) !important;
-                    }
-                    .modal-content {
-                        backdrop-filter: none !important;
-                        -webkit-backdrop-filter: none !important;
-                    }
-                `;
+                        .modal-open .nxl-container, 
+                        .modal-open .nxl-header, 
+                        .modal-open .nxl-navigation {
+                            filter: none !important;
+                            -webkit-filter: none !important;
+                        }
+                        .modal-backdrop {
+                            backdrop-filter: none !important;
+                            -webkit-backdrop-filter: none !important;
+                            background-color: rgba(0, 0, 0, 0.7) !important;
+                        }
+                        .modal-content {
+                            backdrop-filter: none !important;
+                            -webkit-backdrop-filter: none !important;
+                        }
+                    `;
         document.head.appendChild(styleFix);
 
         function fetchLeaveBalances() {
@@ -296,17 +389,17 @@
                         const row = document.createElement('tr');
                         row.className = 'balance-row';
                         row.innerHTML = `
-                                    <td class="ps-3 py-3">
-                                        <div class="fw-bold text-dark small">${item.name}</div>
-                                    </td>
-                                    <td class="text-center small fw-bold">${item.total_allotted}</td>
-                                    <td class="text-center small fw-bold text-muted">${item.total_taken}</td>
-                                    <td class="text-center pe-3">
-                                        <span class="badge rounded-pill px-2 py-1 ${item.balance < 0 ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary'} fw-bold" style="font-size: 10px;">
-                                            ${item.balance}
-                                        </span>
-                                    </td>
-                                `;
+                                        <td class="ps-3 py-3">
+                                            <div class="fw-bold text-dark small">${item.name}</div>
+                                        </td>
+                                        <td class="text-center small fw-bold">${item.total_allotted}</td>
+                                        <td class="text-center small fw-bold text-muted">${item.total_taken}</td>
+                                        <td class="text-center pe-3">
+                                            <span class="badge rounded-pill px-2 py-1 ${item.balance < 0 ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary'} fw-bold" style="font-size: 10px;">
+                                                ${item.balance}
+                                            </span>
+                                        </td>
+                                    `;
                         tbody.appendChild(row);
                     });
                 });
@@ -354,7 +447,7 @@
                     row.style.transition = 'all 0.3s ease';
                     row.style.opacity = '0';
                     row.style.transform = 'translateX(20px)';
-                    
+
                     setTimeout(() => {
                         row.remove();
                         if (typeof Toast !== 'undefined') {
@@ -406,13 +499,25 @@
         let filteredRows = [];
 
         function initPagination() {
-            allHistoryRows = Array.from(document.querySelectorAll('#historyBody .history-row'));
+            // Get all desktop rows and mobile cards
+            const dRows = Array.from(document.querySelectorAll('#historyBody .history-row'));
+            const mCards = Array.from(document.querySelectorAll('#historyMobileBody .history-row'));
+            
+            // Map them into pairs or handle them separately? 
+            // Better to handle them by index. 
+            allHistoryRows = dRows.map((row, index) => ({
+                desktop: row,
+                mobile: mCards[index],
+                text: row.querySelector('td').innerText.toLowerCase()
+            }));
+
             filteredRows = [...allHistoryRows];
             renderPage();
         }
 
         function changeEntriesPerPage() {
-            entriesPerPage = parseInt(document.getElementById('entriesPerPage').value);
+            const input = document.getElementById('entriesPerPage');
+            entriesPerPage = parseInt(input.value) || 10;
             currentPage = 1;
             renderPage();
         }
@@ -436,32 +541,51 @@
             const tbody = document.getElementById('historyBody');
 
             function swapRows() {
-                // Hide all rows
-                allHistoryRows.forEach(row => {
-                    row.style.display = 'none';
-                    row.classList.remove('history-row-visible');
+                // Hide all
+                allHistoryRows.forEach(item => {
+                    item.desktop.style.display = 'none';
+                    item.desktop.classList.remove('history-row-visible');
+                    if (item.mobile) {
+                        item.mobile.style.display = 'none';
+                        item.mobile.classList.remove('history-row-visible');
+                    }
                 });
-                // Show current page rows with staggered fade-in
+                // Show current page
                 for (let i = start; i < end; i++) {
-                    filteredRows[i].style.display = '';
-                    const delay = (i - start) * 30; // stagger 30ms per row
+                    const item = filteredRows[i];
+                    item.desktop.style.display = '';
+                    if (item.mobile) item.mobile.style.display = '';
+                    
+                    const delay = (i - start) * 30;
                     setTimeout(() => {
-                        filteredRows[i].classList.add('history-row-visible');
+                        item.desktop.classList.add('history-row-visible');
+                        if (item.mobile) item.mobile.classList.add('history-row-visible');
                     }, delay);
                 }
             }
 
             if (isFirstRender) {
-                // No animation on first load — just show instantly
                 isFirstRender = false;
-                allHistoryRows.forEach(row => { row.style.display = 'none'; row.classList.remove('history-row-visible'); });
+                allHistoryRows.forEach(item => {
+                    item.desktop.style.display = 'none';
+                    item.desktop.classList.remove('history-row-visible');
+                    if (item.mobile) {
+                        item.mobile.style.display = 'none';
+                        item.mobile.classList.remove('history-row-visible');
+                    }
+                });
                 for (let i = start; i < end; i++) {
-                    filteredRows[i].style.display = '';
-                    filteredRows[i].classList.add('history-row-visible');
+                    const item = filteredRows[i];
+                    item.desktop.style.display = '';
+                    item.desktop.classList.add('history-row-visible');
+                    if (item.mobile) {
+                        item.mobile.style.display = '';
+                        item.mobile.classList.add('history-row-visible');
+                    }
                 }
             } else {
-                // Fade out current rows, then swap
                 tbody.classList.add('history-fade-out');
+                // Also fade out mobile container if needed, but tbody is usually enough
                 setTimeout(() => {
                     swapRows();
                     tbody.classList.remove('history-fade-out');
@@ -482,8 +606,8 @@
 
             // Previous
             html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                        <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage - 1})" style="color: #64748b; background: ${currentPage === 1 ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&laquo;</a>
-                    </li>`;
+                            <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage - 1})" style="color: #64748b; background: ${currentPage === 1 ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&laquo;</a>
+                        </li>`;
 
             // Page numbers (show max 5 pages with ellipsis)
             let pages = [];
@@ -505,16 +629,16 @@
                 } else {
                     const isActive = p === currentPage;
                     html += `<li class="page-item ${isActive ? 'active' : ''}">
-                                <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${p})" 
-                                   style="min-width: 36px; text-align: center; ${isActive ? 'background: #3858f9; color: #fff; box-shadow: 0 2px 8px rgba(56,88,249,0.3);' : 'color: #475569; background: #f1f5f9;'}">${p}</a>
-                            </li>`;
+                                    <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${p})" 
+                                       style="min-width: 36px; text-align: center; ${isActive ? 'background: #3858f9; color: #fff; box-shadow: 0 2px 8px rgba(56,88,249,0.3);' : 'color: #475569; background: #f1f5f9;'}">${p}</a>
+                                </li>`;
                 }
             });
 
             // Next
             html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                        <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage + 1})" style="color: #64748b; background: ${currentPage === totalPages ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&raquo;</a>
-                    </li>`;
+                            <a class="page-link border-0 rounded-2 fw-bold" href="#" onclick="event.preventDefault(); goToPage(${currentPage + 1})" style="color: #64748b; background: ${currentPage === totalPages ? '#f8fafc' : '#f1f5f9'}; min-width: 36px; text-align: center;">&raquo;</a>
+                        </li>`;
 
             controls.innerHTML = html;
         }
@@ -527,9 +651,8 @@
                 if (filter === '') {
                     filteredRows = [...allHistoryRows];
                 } else {
-                    filteredRows = allHistoryRows.filter(row => {
-                        const text = row.querySelector('td').innerText.toLowerCase();
-                        return text.indexOf(filter) > -1;
+                    filteredRows = allHistoryRows.filter(item => {
+                        return item.text.indexOf(filter) > -1;
                     });
                 }
                 currentPage = 1;
