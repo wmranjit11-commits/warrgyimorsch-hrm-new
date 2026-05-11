@@ -1050,29 +1050,28 @@
             </div>
         </div>
     </div>
-@endpush
-<!-- Task Progress Analysis Modal -->
-<div class="modal fade" id="taskProgressModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0 ps-4 pt-4">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                    <i class="feather-clipboard text-success"></i>
-                    <span id="tpProjectName">Project Task Progress</span>
-                </h5>
-                <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div id="tpList" style="max-height: 65vh; overflow-y: auto;">
-                    <!-- Content will be injected here -->
+    <!-- Task Progress Analysis Modal -->
+    <div class="modal fade" id="taskProgressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0 ps-4 pt-4">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="feather-clipboard text-success"></i>
+                        <span id="tpProjectName">Project Task Progress</span>
+                    </h5>
+                    <button type="button" class="btn-close shadow-none me-2" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal"
-                    style="border-radius: 10px;">CLOSE ANALYSIS</button>
+                <div class="modal-body p-4">
+                    <div id="tpList" style="max-height: 65vh; overflow-y: auto;">
+                        <!-- Content will be injected here -->
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light-brand w-100 fw-bold" data-bs-dismiss="modal"
+                        style="border-radius: 10px;">CLOSE ANALYSIS</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endpush
