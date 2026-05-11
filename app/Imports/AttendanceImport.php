@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Employee;
 use App\Models\Attendance;
+use App\Models\LeaveApplication;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Carbon\Carbon;
@@ -108,7 +109,7 @@ class AttendanceImport implements ToCollection
             );
         }
 
-        // Mark absent for employees who have no punch on imported dates
+        // Mark absent / approved leave / WFH for employees who have no punch on imported dates
         $allDates = array_unique($allDates);
 
         $employees = Employee::all();
@@ -116,27 +117,87 @@ class AttendanceImport implements ToCollection
         foreach ($employees as $employee) {
             foreach ($allDates as $date) {
 
-                $alreadyExists = Attendance::where('employee_id', $employee->id)
-                    ->where('attendance_date', $date)
-                    ->exists();
-
-                $carbonDate = \Carbon\Carbon::parse($date);
+                $carbonDate = Carbon::parse($date);
 
                 // Skip Sunday
                 if ($carbonDate->isSunday()) {
                     continue;
                 }
 
-                if (!$alreadyExists) {
-                    Attendance::create([
-                        'employee_id'      => $employee->id,
-                        'attendance_date'  => $date,
-                        'check_in'         => null,
-                        'check_out'        => null,
-                        'total_hours'      => 0,
-                        'status'           => 'absent',
-                    ]);
+                $alreadyExists = Attendance::where('employee_id', $employee->id)
+                    ->whereDate('attendance_date', $date)
+                    ->exists();
+
+                if ($alreadyExists) {
+                    continue;
                 }
+
+                // Check approved leave or WFH
+                $leaveApplication = LeaveApplication::where('employee_id', $employee->id)
+                    ->whereIn('status', ['approved', 'unpaid', 'unauthorised'])
+                    ->whereDate('start_date', '<=', $date)
+                    ->where(function ($query) use ($date) {
+                        $query->whereDate('end_date', '>=', $date)
+                            ->orWhere(function ($q) use ($date) {
+                                $q->whereNull('end_date')
+                                    ->whereDate('start_date', $date);
+                            });
+                    })
+                    ->first();
+
+                $status = 'absent';
+                $totalHours = 0;
+
+                if ($leaveApplication) {
+                    $leaveStatus   = strtolower(trim($leaveApplication->status ?? ''));
+                    $leaveType = strtolower(trim($leaveApplication->leave_type ?? ''));
+                    $leaveCategory = strtolower(trim($leaveApplication->leave_category ?? ''));
+
+                  if ($leaveStatus === 'unpaid') {
+
+                    $status = 'unpaid_leave';
+
+                    } elseif ($leaveStatus === 'unauthorised') {
+
+                        $status = 'unauthorised';
+
+                    } elseif ($leaveType === 'wfh' || $leaveCategory === 'wfh') {
+
+                        // WFH is treated as working day
+                        $status = 'wfh';
+                        $totalHours = 8;
+
+                    } elseif (
+                        $leaveCategory === 'gatepass' ||
+                        $leaveCategory === 'early leave' ||
+                        $leaveType === 'gatepass leave' ||
+                        $leaveType === 'early leave'
+                    ) {
+
+                        // Early leave is only for information, not leave deduction
+                        $status = 'early_leave';
+                        $totalHours = 1;
+
+                    } elseif ($leaveCategory === 'half day' || (float) $leaveApplication->total_days == 0.5) {
+
+                        $status = 'half_day_leave';
+                        $totalHours = 4;
+
+                    } else {
+
+                        $status = 'leave';
+                        $totalHours = 0;
+                    }
+                }
+
+                Attendance::create([
+                    'employee_id'     => $employee->id,
+                    'attendance_date' => $date,
+                    'check_in'        => null,
+                    'check_out'       => null,
+                    'total_hours'     => $totalHours,
+                    'status'          => $status,
+                ]);
             }
         }
     }
