@@ -149,7 +149,7 @@
                     <div class="d-none d-lg-flex align-items-center me-2"
                         style="width: 220px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 44px; padding: 0 15px;">
                         <i class="feather-search text-muted" style="font-size: 14px;"></i>
-                        <input type="text" class="wghrm-search-input" onkeyup="syncAndFilter(this)" placeholder="Search..."
+                        <input type="text" class="employee-page-search-input" onkeyup="syncAndFilter(this)" placeholder="Search..."
                             style="background: transparent; border: none; outline: none; width: 100%; padding-left: 10px; font-size: 13px; font-weight: 600;">
                     </div>
                     
@@ -191,7 +191,7 @@
             <div id="mobileSearchSection" class="d-none d-lg-none bg-light p-3 border-bottom">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-0"><i class="feather-search"></i></span>
-                    <input type="text" class="form-control border-0 wghrm-search-input" onkeyup="syncAndFilter(this)" placeholder="Search employees...">
+                    <input type="text" class="form-control border-0 employee-page-search-input" onkeyup="syncAndFilter(this)" placeholder="Search employees...">
                 </div>
             </div>
 
@@ -201,65 +201,90 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
-                                <input type="text" id="filterEmployeeName" class="form-control border-0 shadow-sm wghrm-search-input"
-                                    placeholder="Search..." onkeyup="syncAndFilter(this)" style="border-radius: 8px; height: 44px;">
+                                <div class="wghrm-search-dropdown" id="employeeFilterDropdown">
+                                    <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
+                                        <span class="wghrm-trigger-text fw-bold text-dark">All Employees</span>
+                                        <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
+                                    </div>
+                                    <div class="wghrm-dropdown-menu">
+                                        <div class="wghrm-search-container">
+                                            <i data-feather="search" class="wghrm-search-icon"></i>
+                                            <input type="text" class="wghrm-search-input" placeholder="Search employee...">
+                                        </div>
+                                        <div class="wghrm-items-list">
+                                            <div class="wghrm-item selected" data-value="" data-text="All Employees">
+                                                <span class="wghrm-item-text">All Employees</span>
+                                                <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                            </div>
+                                            @foreach ($employees as $employee)
+                                                @php
+                                                    $employeeLabel = trim(($employee->name ?? 'Unknown') . ' (' . ($employee->employee_code ?? $employee->id) . ')');
+                                                    $employeeFilterValue = strtolower(($employee->name ?? '') . ' ' . ($employee->employee_code ?? $employee->id));
+                                                @endphp
+                                                <div class="wghrm-item" data-value="{{ $employeeFilterValue }}" data-text="{{ $employeeLabel }}">
+                                                    <span class="wghrm-item-text">{{ $employeeLabel }}</span>
+                                                    <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="filterEmployeeName" value="">
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
-                                <input type="hidden" id="filterRole" value="" onchange="applyFilters()">
-                                <div class="dropdown w-100">
-                                    <button
-                                        class="btn wghrm-custom-select-btn dropdown-toggle w-100 d-flex justify-content-between align-items-center shadow-sm"
-                                        type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="btnFilterRole"
-                                        style="height: 44px; border-radius: 8px;">
-                                        All Roles
-                                    </button>
-                                    <div class="dropdown-menu wghrm-custom-dropdown-menu w-100 shadow-lg border-0"
-                                        style="border-radius: 12px; margin-top: 5px;">
-                                        <div class="wghrm-custom-search-box px-2 mb-2 mt-1">
-                                            <input type="text" class="wghrm-custom-search-input" placeholder="Search role..."
-                                                onkeyup="wghrmFilterItems(this)" onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
-                                        </div>
-                                        <a class="dropdown-item wghrm-custom-dropdown-item active" href="javascript:void(0);"
-                                            onclick="document.getElementById('filterRole').value=''; document.getElementById('btnFilterRole').innerText='All Roles'; applyFilters();">
-                                            All Roles
-                                        </a>
-                                        @foreach (\App\Models\RoleMaster::all() as $role)
-                                            <a class="dropdown-item wghrm-custom-dropdown-item" href="javascript:void(0);"
-                                                onclick="document.getElementById('filterRole').value='{{ $role->slug }}'; document.getElementById('btnFilterRole').innerText='{{ $role->name }}'; applyFilters();">
-                                                {{ $role->name }}
-                                            </a>
-                                        @endforeach
+                                <div class="wghrm-search-dropdown" id="roleFilterDropdown">
+                                    <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
+                                        <span class="wghrm-trigger-text fw-bold text-dark">All Roles</span>
+                                        <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                     </div>
+                                    <div class="wghrm-dropdown-menu">
+                                        <div class="wghrm-search-container">
+                                            <i data-feather="search" class="wghrm-search-icon"></i>
+                                            <input type="text" class="wghrm-search-input" placeholder="Search role...">
+                                        </div>
+                                        <div class="wghrm-items-list">
+                                            <div class="wghrm-item selected" data-value="" data-text="All Roles">
+                                                <span class="wghrm-item-text">All Roles</span>
+                                                <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                            </div>
+                                            @foreach (\App\Models\RoleMaster::all() as $role)
+                                                <div class="wghrm-item" data-value="{{ strtolower($role->slug) }}" data-text="{{ $role->name }}">
+                                                    <span class="wghrm-item-text">{{ $role->name }}</span>
+                                                    <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="filterRole" value="">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
-                                <input type="hidden" id="filterDepartment" value="" onchange="applyFilters()">
-                                <div class="dropdown w-100">
-                                    <button
-                                        class="btn wghrm-custom-select-btn dropdown-toggle w-100 d-flex justify-content-between align-items-center shadow-sm"
-                                        type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
-                                        id="btnFilterDepartment" style="height: 44px; border-radius: 8px;">
-                                        All Departments
-                                    </button>
-                                    <div class="dropdown-menu wghrm-custom-dropdown-menu w-100 shadow-lg border-0"
-                                        style="border-radius: 12px; margin-top: 5px;">
-                                        <div class="wghrm-custom-search-box px-2 mb-2 mt-1">
-                                            <input type="text" class="wghrm-custom-search-input"
-                                                placeholder="Search department..." onkeyup="wghrmFilterItems(this)" onclick="event.stopPropagation();" onkeydown="event.stopPropagation();">
-                                        </div>
-                                        <a class="dropdown-item wghrm-custom-dropdown-item active" href="javascript:void(0);"
-                                            onclick="document.getElementById('filterDepartment').value=''; document.getElementById('btnFilterDepartment').innerText='All Departments'; applyFilters();">
-                                            All Departments
-                                        </a>
-                                        @foreach (\App\Models\Department::all() as $dept)
-                                            <a class="dropdown-item wghrm-custom-dropdown-item" href="javascript:void(0);"
-                                                onclick="document.getElementById('filterDepartment').value='{{ strtolower($dept->name) }}'; document.getElementById('btnFilterDepartment').innerText='{{ $dept->name }}'; applyFilters();">
-                                                {{ $dept->name }}
-                                            </a>
-                                        @endforeach
+                                <div class="wghrm-search-dropdown" id="departmentFilterDropdown">
+                                    <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
+                                        <span class="wghrm-trigger-text fw-bold text-dark">All Departments</span>
+                                        <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                     </div>
+                                    <div class="wghrm-dropdown-menu">
+                                        <div class="wghrm-search-container">
+                                            <i data-feather="search" class="wghrm-search-icon"></i>
+                                            <input type="text" class="wghrm-search-input" placeholder="Search department...">
+                                        </div>
+                                        <div class="wghrm-items-list">
+                                            <div class="wghrm-item selected" data-value="" data-text="All Departments">
+                                                <span class="wghrm-item-text">All Departments</span>
+                                                <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                            </div>
+                                            @foreach (\App\Models\Department::all() as $dept)
+                                                <div class="wghrm-item" data-value="{{ strtolower($dept->name) }}" data-text="{{ $dept->name }}">
+                                                    <span class="wghrm-item-text">{{ $dept->name }}</span>
+                                                    <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="filterDepartment" value="">
                                 </div>
                             </div>
                             <div class="col-md-3 d-flex gap-2 align-items-end">
@@ -314,7 +339,8 @@
                                 @forelse($employees as $key => $emp)
                                     <tr class="fade-row" id="emp-row-{{ $emp->id }}" style="height: 60px; vertical-align: middle;"
                                         data-employee-id="{{ $emp->id }}" data-employee-dept="{{ $emp->department }}"
-                                        data-employee-role="{{ $emp->role }}">
+                                        data-employee-role="{{ $emp->role }}"
+                                        data-employee-search="{{ strtolower($emp->name . ' ' . ($emp->employee_code ?? $emp->id)) }}">
                                         <td style="padding: 12px; text-align: center;"><input type="checkbox" class="emp-checkbox" data-id="{{ $emp->id }}"></td>
                                         <td class="fw-bold" style="padding: 12px; font-size: 15px; text-align: center;">{{ $employees->firstItem() + $key }}</td>
                                         <td style="padding: 12px; text-align: center;">
@@ -354,7 +380,7 @@
                     <div class="d-lg-none px-2 pt-3" id="employeeCardsMobile">
                         @forelse($employees as $emp)
                             <div class="employee-card-mobile fade-row" data-employee-id="{{ $emp->id }}" 
-                                 data-employee-name="{{ strtolower($emp->name) }}"
+                                 data-employee-name="{{ strtolower($emp->name . ' ' . ($emp->employee_code ?? $emp->id)) }}"
                                  data-employee-dept="{{ strtolower($emp->department) }}" 
                                  data-employee-role="{{ strtolower($emp->role) }}">
                                 
@@ -591,6 +617,119 @@
             .wghrm-custom-dropdown-item:hover, .wghrm-custom-dropdown-item.active {
                 background: #f1f5f9 !important;
                 color: #3858f9 !important;
+            }
+
+            .wghrm-search-dropdown {
+                position: relative;
+                width: 100%;
+            }
+
+            .wghrm-dropdown-trigger {
+                width: 100%;
+                border: 1px solid #e2e8f0;
+                background: #fff;
+                border-radius: 12px;
+                padding: 10px 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+            }
+
+            .wghrm-dropdown-trigger.open {
+                border-color: #3858f9;
+                box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.08);
+            }
+
+            .wghrm-trigger-text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .wghrm-dropdown-menu {
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                right: 0;
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+                z-index: 1055;
+                padding: 10px;
+                display: none;
+            }
+
+            .wghrm-dropdown-menu.show {
+                display: block;
+            }
+
+            .wghrm-search-container {
+                position: relative;
+                margin-bottom: 10px;
+            }
+
+            .wghrm-search-icon {
+                position: absolute;
+                top: 50%;
+                left: 12px;
+                transform: translateY(-50%);
+                width: 14px;
+                height: 14px;
+                color: #94a3b8;
+            }
+
+            .wghrm-search-dropdown .wghrm-search-input {
+                width: 100%;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                background: #f8fafc;
+                padding: 10px 12px 10px 34px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #334155;
+                outline: none;
+            }
+
+            .wghrm-search-dropdown .wghrm-search-input:focus {
+                border-color: #3858f9;
+                box-shadow: 0 0 0 3px rgba(56, 88, 249, 0.08);
+            }
+
+            .wghrm-items-list {
+                max-height: 220px;
+                overflow-y: auto;
+            }
+
+            .wghrm-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                border-radius: 10px;
+                padding: 10px 12px;
+                color: #475569;
+                cursor: pointer;
+                transition: all 0.18s ease;
+            }
+
+            .wghrm-item:hover,
+            .wghrm-item.selected {
+                background: #f1f5f9;
+                color: #3858f9;
+            }
+
+            .wghrm-item-check {
+                opacity: 0;
+                transition: opacity 0.18s ease;
+            }
+
+            .wghrm-item.selected .wghrm-item-check {
+                opacity: 1;
             }
 
             body {
@@ -1642,7 +1781,7 @@
 
                 // Filter Table
                 rows.forEach(row => {
-                    const name = (row.querySelector('td:nth-child(3)')?.innerText || '').toLowerCase();
+                    const name = (row.getAttribute('data-employee-search') || row.querySelector('td:nth-child(3)')?.innerText || '').toLowerCase();
                     const dept = (row.getAttribute('data-employee-dept') || '').toLowerCase();
                     const roleVal = (row.getAttribute('data-employee-role') || '').toLowerCase();
                     
@@ -1686,6 +1825,12 @@
                 document.getElementById('filterEmployeeName').value = '';
                 document.getElementById('filterDepartment').value = '';
                 document.getElementById('filterRole').value = '';
+                document.querySelector('#employeeFilterDropdown .wghrm-trigger-text').innerText = 'All Employees';
+                document.querySelector('#roleFilterDropdown .wghrm-trigger-text').innerText = 'All Roles';
+                document.querySelector('#departmentFilterDropdown .wghrm-trigger-text').innerText = 'All Departments';
+                document.querySelectorAll('#employeeFilterDropdown .wghrm-item, #roleFilterDropdown .wghrm-item, #departmentFilterDropdown .wghrm-item').forEach((item, index) => {
+                    item.classList.toggle('selected', index === 0 || item.dataset.value === '');
+                });
 
                 // Show all rows
                 document.querySelectorAll("#employeeTable tbody tr").forEach(row => {
@@ -1697,6 +1842,10 @@
                 if (noResultsRow) {
                     noResultsRow.remove();
                 }
+
+                document.querySelectorAll('.employee-card-mobile').forEach(card => {
+                    card.style.setProperty('display', 'flex', 'important');
+                });
             }
 
             // Delete Selected Employees (Bulk Delete)
@@ -1774,45 +1923,93 @@
                     }
                 });
             }
-            // Select Dropdown Logic
-            function selectWghrmFilter(id, value, el) {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.value = value;
-                    
-                    // Update button text
-                    const dropdown = el.closest('.dropdown');
-                    const btn = dropdown.querySelector('.wghrm-custom-select-btn');
-                    if (btn) btn.innerText = value === '' ? (id.includes('Department') ? 'All Departments' : 'All Roles') : value;
-                    
-                    // Close dropdown
-                    const bsDropdown = bootstrap.Dropdown.getInstance(btn);
-                    if (bsDropdown) bsDropdown.hide();
-                    
-                    // Apply filters
-                    applyFilters();
-                }
-            }
+            function initializeSearchDropdown(dropdownId, inputId, defaultLabel) {
+                const dropdown = document.getElementById(dropdownId);
+                if (!dropdown) return;
 
-            // Custom Dropdown Search Logic
-            function wghrmFilterItems(input) {
-                const filter = input.value.toLowerCase();
-                const dropdownMenu = input.closest('.wghrm-custom-dropdown-menu');
-                const items = dropdownMenu.querySelectorAll('.wghrm-custom-dropdown-item');
+                const trigger = dropdown.querySelector('.wghrm-dropdown-trigger');
+                const triggerText = dropdown.querySelector('.wghrm-trigger-text');
+                const menu = dropdown.querySelector('.wghrm-dropdown-menu');
+                const searchInput = dropdown.querySelector('.wghrm-search-input');
+                const hiddenInput = document.getElementById(inputId);
+                const items = dropdown.querySelectorAll('.wghrm-item');
+
+                const closeMenu = () => {
+                    menu.classList.remove('show');
+                    trigger.classList.remove('open');
+                    if (searchInput) {
+                        searchInput.value = '';
+                        filterItems('');
+                    }
+                };
+
+                const filterItems = (term) => {
+                    const normalizedTerm = term.trim().toLowerCase();
+                    items.forEach(item => {
+                        const label = (item.dataset.text || item.textContent || '').toLowerCase();
+                        item.style.display = label.includes(normalizedTerm) ? 'flex' : 'none';
+                    });
+                };
+
+                trigger.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    const isOpen = menu.classList.contains('show');
+
+                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-menu.show').forEach(openMenu => {
+                        openMenu.classList.remove('show');
+                    });
+                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-trigger.open').forEach(openTrigger => {
+                        openTrigger.classList.remove('open');
+                    });
+
+                    if (!isOpen) {
+                        menu.classList.add('show');
+                        trigger.classList.add('open');
+                        if (searchInput) {
+                            searchInput.focus();
+                        }
+                    }
+                });
+
                 items.forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(filter) ? 'block' : 'none';
+                    item.addEventListener('click', function () {
+                        items.forEach(option => option.classList.remove('selected'));
+                        item.classList.add('selected');
+                        hiddenInput.value = item.dataset.value || '';
+                        triggerText.textContent = item.dataset.text || defaultLabel;
+                        applyFilters();
+                        closeMenu();
+                    });
+                });
+
+                if (searchInput) {
+                    searchInput.addEventListener('click', event => event.stopPropagation());
+                    searchInput.addEventListener('input', function () {
+                        filterItems(searchInput.value);
+                    });
+                }
+
+                document.addEventListener('click', function (event) {
+                    if (!dropdown.contains(event.target)) {
+                        closeMenu();
+                    }
                 });
             }
 
             // Unified Search Sync & Filter
             function syncAndFilter(el) {
                 const val = el.value;
-                document.querySelectorAll('.wghrm-search-input').forEach(input => {
+                document.querySelectorAll('.employee-page-search-input').forEach(input => {
                     if (input !== el) input.value = val;
                 });
                 applyFilters();
             }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initializeSearchDropdown('employeeFilterDropdown', 'filterEmployeeName', 'All Employees');
+                initializeSearchDropdown('roleFilterDropdown', 'filterRole', 'All Roles');
+                initializeSearchDropdown('departmentFilterDropdown', 'filterDepartment', 'All Departments');
+            });
         </script>
 
 @endsection

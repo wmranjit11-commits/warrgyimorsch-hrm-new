@@ -317,6 +317,209 @@
             box-shadow: 0 4px 12px rgba(56, 88, 249, 0.25);
             transform: translateY(-1px);
         }
+
+        /* Searchable Dropdown Styles */
+        .wghrm-search-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .wghrm-dropdown-trigger {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 500;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+
+        .wghrm-dropdown-trigger:hover {
+            border-color: #3858f9 !important;
+            background-color: #fff !important;
+        }
+
+        .wghrm-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            min-width: 280px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
+            display: none;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .wghrm-dropdown-menu.show {
+            display: block;
+            animation: wghrmSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes wghrmSlideDown {
+            from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .wghrm-search-container {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .wghrm-search-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 12px 0 40px;
+            background: #f1f5f9;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .wghrm-search-input:focus {
+            border-color: #3858f9;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(56, 88, 249, 0.1);
+        }
+
+        .wghrm-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            width: 16px;
+            height: 16px;
+        }
+
+        .wghrm-items-list {
+            max-height: 250px;
+            overflow-y: auto !important;
+            margin: 0 -4px;
+            padding: 0 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        /* Custom Scrollbar for Dropdown */
+        .wghrm-items-list::-webkit-scrollbar {
+            width: 6px;
+            display: block !important;
+        }
+        .wghrm-items-list::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .wghrm-items-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+            border: 2px solid #f1f5f9;
+        }
+        .wghrm-items-list::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Mobile Card Styles */
+        @media (max-width: 768px) {
+            .wghrm-mobile-card {
+                background: white;
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 16px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            }
+            .wghrm-mobile-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+            .wghrm-mobile-card-body {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .wghrm-mobile-label {
+                font-size: 11px;
+                font-weight: 700;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 2px;
+            }
+            .wghrm-mobile-value {
+                font-size: 13px;
+                font-weight: 600;
+                color: #1e293b;
+            }
+            .wghrm-mobile-full-width {
+                grid-column: span 2;
+            }
+            .desktop-only { display: none !important; }
+        }
+        @media (min-width: 769px) {
+            .mobile-only { display: none !important; }
+        }
+
+        .wghrm-item {
+            padding: 10px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #334155;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+        }
+
+        .wghrm-item:hover {
+            background: #f0f4ff;
+            color: #3858f9;
+        }
+
+        .wghrm-item.selected {
+            background: #eef2ff;
+            color: #3858f9;
+            font-weight: 700;
+        }
+
+        .wghrm-item-text {
+            flex: 1;
+        }
+
+        .wghrm-item-check {
+            color: #3858f9;
+            display: none;
+        }
+
+        .wghrm-item.selected .wghrm-item-check {
+            display: block;
+        }
+
+        .wghrm-no-results {
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -434,6 +637,128 @@
             });
             return false;
         }
+
+        // Global Searchable Dropdown Initializer
+        function initWghrmDropdown(containerId, options = {}) {
+            const container = document.getElementById(containerId);
+            if (!container || container.dataset.initialized) return;
+            container.dataset.initialized = 'true';
+
+            const trigger = container.querySelector('.wghrm-dropdown-trigger');
+            const menu = container.querySelector('.wghrm-dropdown-menu');
+            const searchInput = container.querySelector('.wghrm-search-input');
+            const itemsList = container.querySelector('.wghrm-items-list');
+            const hiddenInput = container.querySelector('input[type="hidden"]');
+            const triggerText = trigger.querySelector('.wghrm-trigger-text');
+
+            // Toggle Menu
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close all other open dropdowns
+                document.querySelectorAll('.wghrm-dropdown-menu.show').forEach(m => {
+                    if (m !== menu) m.classList.remove('show');
+                });
+
+                const isOpen = menu.classList.contains('show');
+                menu.classList.toggle('show');
+                
+                if (!isOpen) {
+                    setTimeout(() => {
+                        if (searchInput) {
+                            searchInput.value = '';
+                            searchInput.dispatchEvent(new Event('input'));
+                            searchInput.focus();
+                        }
+                    }, 50);
+                }
+            });
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            // Search Logic
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    let hasResults = false;
+                    const items = itemsList.querySelectorAll('.wghrm-item');
+
+                    items.forEach(item => {
+                        const dataText = item.getAttribute('data-text') || item.textContent;
+                        const text = dataText.toLowerCase();
+                        if (text.includes(term)) {
+                            item.style.setProperty('display', 'flex', 'important');
+                            hasResults = true;
+                        } else {
+                            item.style.setProperty('display', 'none', 'important');
+                        }
+                    });
+
+                    let noResults = itemsList.querySelector('.wghrm-no-results');
+                    if (!hasResults) {
+                        if (!noResults) {
+                            noResults = document.createElement('div');
+                            noResults.className = 'wghrm-no-results';
+                            noResults.style.padding = '20px';
+                            noResults.style.textAlign = 'center';
+                            noResults.style.color = '#94a3b8';
+                            noResults.style.fontSize = '13px';
+                            noResults.textContent = 'No results found';
+                            itemsList.appendChild(noResults);
+                        }
+                    } else if (noResults) {
+                        noResults.remove();
+                    }
+                });
+            }
+
+            // Item Selection (Using event delegation for dynamic items)
+            itemsList.addEventListener('click', (e) => {
+                const item = e.target.closest('.wghrm-item');
+                if (!item) return;
+
+                const val = item.getAttribute('data-value');
+                const text = item.getAttribute('data-text') || item.textContent;
+
+                // Update UI
+                itemsList.querySelectorAll('.wghrm-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                triggerText.textContent = text;
+                
+                if (hiddenInput) {
+                    hiddenInput.value = val;
+                    hiddenInput.dispatchEvent(new Event('change'));
+                }
+                
+                menu.classList.remove('show');
+
+                // Trigger callback
+                if (options.onSelect) {
+                    options.onSelect(val, text);
+                }
+            });
+        }
+
+        // Auto-initialize all dropdowns on the page
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.wghrm-search-dropdown').forEach(dropdown => {
+                if (dropdown.id) initWghrmDropdown(dropdown.id);
+            });
+        });
+
+        // Re-run auto-init periodically for dynamic content (optional but helpful)
+        const observer = new MutationObserver((mutations) => {
+            document.querySelectorAll('.wghrm-search-dropdown').forEach(dropdown => {
+                if (dropdown.id) initWghrmDropdown(dropdown.id);
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     </script>
     @yield('modals')
     @stack('modals')

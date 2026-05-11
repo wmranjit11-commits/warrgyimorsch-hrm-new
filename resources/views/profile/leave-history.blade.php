@@ -303,17 +303,64 @@
                     </div>
 
                     <div class="col-md-6" id="leaveTypeWrapper">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Leave Category <span
-                                class="text-danger">*</span></label>
-                        <select name="leave_category" id="leaveCategory" class="form-select border-0 bg-white shadow-sm"
-                            style="height: 48px; border-radius: 10px;" onchange="toggleCategoryFields()" required>
-                            <option value="">Select Type...</option>
-                            <option value="Paid Leave">Paid Leave</option>
-                            <option value="Sick Leave">Sick Leave</option>
-                            <option value="Gatepass Leave">Early Leave</option>
-                            <option value="Casual Leave">Casual Leave</option>
-                            <option value="WFH">WFH</option>
-                        </select>
+                        <label class="form-label small fw-bold text-muted text-uppercase"
+                            style="letter-spacing: 0.5px;">
+                            Leave Category <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="wghrm-search-dropdown" id="leaveCategoryDropdown">
+                            <!-- Trigger -->
+                            <div class="wghrm-dropdown-trigger"
+                                style="height: 48px; border-radius: 10px; background: #f8fafc !important; border: none !important;">
+                                
+                                <span class="wghrm-trigger-text fw-bold text-dark">
+                                    Select Type...
+                                </span>
+
+                                <i data-feather="chevron-down"
+                                    style="width: 16px; height: 16px;"></i>
+                            </div>
+
+                            <!-- Dropdown Menu -->
+                            <div class="wghrm-dropdown-menu">
+                                <div class="wghrm-items-list">
+
+                                    <div class="wghrm-item" data-value="Paid Leave" data-text="Paid Leave">
+                                        <span class="wghrm-item-text">Paid Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Sick Leave" data-text="Sick Leave">
+                                        <span class="wghrm-item-text">Sick Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Gatepass Leave" data-text="Early Leave">
+                                        <span class="wghrm-item-text">Early Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="Casual Leave" data-text="Casual Leave">
+                                        <span class="wghrm-item-text">Casual Leave</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                    <div class="wghrm-item" data-value="wfh" data-text="WFH">
+                                        <span class="wghrm-item-text">WFH</span>
+                                        <i data-feather="check" class="wghrm-item-check"
+                                            style="width: 14px; height: 14px;"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Hidden Input -->
+                            <input type="hidden" name="leave_category" id="leaveCategory" required>
+                        </div>
                     </div>
 
                     <div class="col-md-6" id="leaveCategoryWrapper">
@@ -330,18 +377,23 @@
                                 <!-- <i data-feather="clock"></i> -->
                                 <span>Half Day</span>
                             </label>
+                        </div>
+                    </div>
 
-                            <!-- <input type="radio" name="leave_category" value="Gatepass" id="catGate" onchange="toggleCategoryFields()">
-                            <label for="catGate" class="category-tile">
-                                <i data-feather="log-out"></i>
-                                <span>Early Leave</span>
-                            </label>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
+                                class="text-danger">*</span></label>
+                        <div class="position-relative">
+                            <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
+                                style="height: 48px; border-radius: 10px; padding-right: 40px;" required onchange="calculateDays()">
+                        </div>
+                    </div>
 
-                            <input type="radio" name="leave_category" value="WFH" id="catWFH" onchange="toggleCategoryFields()">
-                            <label for="catWFH" class="category-tile">
-                                <i data-feather="home"></i>
-                                <span>WFH</span>
-                            </label> -->
+                    <div class="col-md-4" id="endDateWrapper">
+                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
+                        <div class="position-relative">
+                            <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
+                                style="height: 48px; border-radius: 10px; padding-right: 40px;" onchange="calculateDays()">
                         </div>
                     </div>
 
@@ -353,26 +405,6 @@
                             <option value="First Half">First Half</option>
                             <option value="Second Half">Second Half</option>
                         </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Start Date <span
-                                class="text-danger">*</span></label>
-                        <div class="position-relative">
-                            <input type="date" name="start_date" id="startDate" class="form-control border-0 bg-white shadow-sm"
-                                style="height: 48px; border-radius: 10px; padding-right: 40px;" required onchange="calculateDays()"
-                                min="{{ date('Y-m-d') }}">
-                            <i data-feather="calendar" class="position-absolute text-primary" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 18px;"></i>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4" id="endDateWrapper">
-                        <label class="form-label small fw-bold text-muted text-uppercase">End Date</label>
-                        <div class="position-relative">
-                            <input type="date" name="end_date" id="endDate" class="form-control border-0 bg-white shadow-sm"
-                                style="height: 48px; border-radius: 10px; padding-right: 40px;" onchange="calculateDays()" min="{{ date('Y-m-d') }}">
-                            <i data-feather="calendar" class="position-absolute text-primary" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; width: 18px;"></i>
-                        </div>
                     </div>
 
                     <div class="col-md-4" id="startTimeWrapper" style="display: none;">

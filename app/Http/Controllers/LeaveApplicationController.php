@@ -16,11 +16,29 @@ use App\Mail\LeaveStatusUpdatedMail;
 
 class LeaveApplicationController extends Controller
 {
-    private function getAttendanceStatusFromLeaveCategory(string $leaveCategory): string
+    private function applyCategoryFilter($query, string $category): void
+    {
+        $normalizedCategory = strtolower(trim($category));
+
+        if ($normalizedCategory === 'early leave') {
+            $query->where('leave_category', 'LIKE', '%Gatepass Leave%');
+            return;
+        }
+
+        if ($normalizedCategory === 'wfh') {
+            $query->where('leave_category', 'LIKE', '%wfh%');
+            return;
+        }
+
+        $query->where('leave_category', 'LIKE', '%' . $category . '%');
+    }
+
+    private function getAttendanceStatusFromLeave(string $leaveCategory, ?string $leaveType = null): string
     {
         $normalizedCategory = strtolower($leaveCategory);
+        $normalizedType = strtolower($leaveType ?? '');
 
-        if (str_contains($normalizedCategory, 'half')) {
+        if (str_contains($normalizedType, 'half')) {
             return 'half_day';
         }
 
@@ -35,11 +53,12 @@ class LeaveApplicationController extends Controller
         return 'leave';
     }
 
-    private function getAttendanceHoursFromLeaveCategory(string $leaveCategory): int
+    private function getAttendanceHoursFromLeave(string $leaveCategory, ?string $leaveType = null): int
     {
         $normalizedCategory = strtolower($leaveCategory);
+        $normalizedType = strtolower($leaveType ?? '');
 
-        if (str_contains($normalizedCategory, 'half')) {
+        if (str_contains($normalizedType, 'half')) {
             return 4;
         }
 
@@ -62,7 +81,7 @@ class LeaveApplicationController extends Controller
             });
         }
         if ($request->filled('category')) {
-            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
+            $this->applyCategoryFilter($query, $request->category);
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -109,8 +128,8 @@ class LeaveApplicationController extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'leave_type' => 'required',
-            'leave_category' => 'required',
+            'leave_type' => 'nullable|string',
+            'leave_category' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'start_time' => 'nullable',
@@ -125,14 +144,12 @@ class LeaveApplicationController extends Controller
             $data['employee_id'] = auth()->user()->employee_id;
         }
 
-        if ($request->leave_category === 'Gatepass') {
+        if ($request->leave_category === 'Gatepass Leave') {
+            $data['leave_type'] = 'Early Leave';
             $data['total_days'] = 0.125; // 1 hour
-        } elseif ($request->leave_category === 'WFH') {
-            $data['total_days'] = 0; // WFH doesn't count as leave
-            $data['leave_type'] = 'WFH';
-        }
+        } 
 
-        if (str_contains(strtolower($request->leave_category), 'gatepass')) {
+        if ($request->leave_category === 'Gatepass Leave') {
             $data['end_date'] = $request->start_date;
             if ($request->filled('start_time')) {
                 try {
@@ -166,7 +183,7 @@ class LeaveApplicationController extends Controller
             });
         }
         if ($request->filled('category')) {
-            $query->where('leave_category', 'LIKE', '%' . $request->category . '%');
+            $this->applyCategoryFilter($query, $request->category);
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -210,8 +227,14 @@ class LeaveApplicationController extends Controller
                         'attendance_date' => $date->format('Y-m-d')
                     ],
                     [
-                        'status' => $this->getAttendanceStatusFromLeaveCategory($leave->leave_category),
-                        'total_hours' => $this->getAttendanceHoursFromLeaveCategory($leave->leave_category),
+                        'status' => $this->getAttendanceStatusFromLeave(
+                            $leave->leave_category,
+                            $leave->leave_type
+                        ),
+                        'total_hours' => $this->getAttendanceHoursFromLeave(
+                            $leave->leave_category,
+                            $leave->leave_type
+                        ),
                         'check_in' => null,
                         'check_out' => null
                     ]
