@@ -567,7 +567,7 @@
             });
         });
     </script>
-@endpush // Ensure everything is synced
+// Ensure everything is synced
 $('#hiddenType').val($('input[name="type"]:checked').val());
 $('#hiddenManage').val($('input[name="manage"]:checked').val());
 $('#hiddenName').val($('#projectName').val());

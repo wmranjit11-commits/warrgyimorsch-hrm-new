@@ -35,9 +35,20 @@ class DailyTaskController extends Controller
         $otherProject->update(['members' => Employee::pluck('id')->toArray()]);
 
         if (!$isAdmin) {
-            $query->where('employee_id', auth()->user()->employee_id);
-            $employees = Employee::where('id', auth()->user()->employee_id)->get();
-            $projects = Project::orderBy('name')->get();
+            // $query->where('employee_id', auth()->user()->employee_id);
+            // $employees = Employee::where('id', auth()->user()->employee_id)->get();
+            // $projects = Project::orderBy('name')->get();
+            $employeeId = auth()->user()->employee_id;
+
+            $query->where('employee_id', $employeeId);
+
+            $employees = Employee::where('id', $employeeId)->get();
+
+            // Show only assigned projects
+            $projects = Project::whereJsonContains('members', (string) $employeeId)
+                ->orderBy('name')
+                ->get();
+
         } else {
             $projects = Project::orderBy('name')->get();
             $employees = Employee::orderBy('name')->get();

@@ -277,23 +277,6 @@
                                                             style="max-width: 250px;">
                                                             {!! strip_tags($project->description) !!}
                                                         </div>
-                                                        @if ($isAdmin)
-                                                            <div class="project-list-actions mt-1" style="font-size: 10px;">
-                                                                <a href="{{ route('projects.show', $project) }}"
-                                                                    class="text-primary fw-medium me-1">VIEW</a>
-                                                                <span class="text-muted opacity-50 me-1">|</span>
-                                                                <a href="{{ route('projects.edit', $project) }}"
-                                                                    class="text-info fw-medium me-1">EDIT</a>
-                                                                <span class="text-muted opacity-50 me-1">|</span>
-                                                                <form action="{{ route('projects.destroy', $project) }}"
-                                                                    method="POST" class="d-inline">
-                                                                    @csrf @method('DELETE')
-                                                                    <a href="javascript:void(0);"
-                                                                        onclick="confirmDeleteProject(this.closest('form'), '{{ $project->name }}')"
-                                                                        class="text-danger fw-medium">REMOVE</a>
-                                                                </form>
-                                                            </div>
-                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
@@ -445,23 +428,21 @@
                                                         title="View Details">
                                                         <i class="feather-eye"></i>
                                                     </a>
-                                                    @if ($isAdmin)
-                                                        <a href="{{ route('projects.edit', $project->slug) }}"
-                                                            class="avatar-text avatar-md bg-soft-info text-info rounded-circle"
-                                                            title="Edit">
-                                                            <i class="feather-edit-3"></i>
+                                                    <a href="{{ route('projects.edit', $project->slug) }}"
+                                                        class="avatar-text avatar-md bg-soft-info text-info rounded-circle"
+                                                        title="Edit">
+                                                        <i class="feather-edit-3"></i>
+                                                    </a>
+                                                    <form action="{{ route('projects.destroy', $project->slug) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf @method('DELETE')
+                                                        <a href="javascript:void(0);"
+                                                            class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle"
+                                                            onclick="confirmDeleteProject(this.closest('form'), '{{ $project->name }}')"
+                                                            title="Delete">
+                                                            <i class="feather-trash-2"></i>
                                                         </a>
-                                                        <form action="{{ route('projects.destroy', $project->slug) }}" method="POST"
-                                                            class="d-inline">
-                                                            @csrf @method('DELETE')
-                                                            <a href="javascript:void(0);"
-                                                                class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle"
-                                                                onclick="confirmDeleteProject(this.closest('form'), '{{ $project->name }}')"
-                                                                title="Delete">
-                                                                <i class="feather-trash-2"></i>
-                                                            </a>
-                                                        </form>
-                                                    @endif
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
@@ -567,6 +548,10 @@
         .lead-item.active {
             background: rgba(56, 88, 249, 0.15) !important;
             color: #3858f9 !important;
+        }
+
+        .table-responsive .table tr td {
+            padding: 9px;
         }
 
         .table-responsive,

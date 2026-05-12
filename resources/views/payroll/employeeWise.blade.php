@@ -283,11 +283,6 @@
                                         </td>
                                         <td class="pe-4 text-end">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="{{ route('payroll.attendance.edit', $employeeId) }}"
-                                                    class="btn btn-icon btn-soft-primary rounded-circle" title="Edit"
-                                                    style="width: 34px; height: 34px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
-                                                    <i class="feather-edit" style="font-size: 14px;"></i>
-                                                </a>
                                                 <a href="javascript:void(0);"
                                                     class="btn btn-icon btn-soft-primary rounded-circle"
                                                     onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')"
@@ -332,10 +327,6 @@
                                             <span class="fw-bold text-dark fs-6">{{ $employeeName }}</span>
                                         </div>
                                         <div class="d-flex gap-2">
-                                            <a href="{{ route('payroll.attendance.employee.editByName', $employeeId) }}"
-                                                class="avatar-text avatar-sm bg-soft-primary text-primary">
-                                                <i class="feather-edit"></i>
-                                            </a>
                                             <a href="javascript:void(0);"
                                                 onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')"
                                                 class="avatar-text avatar-sm bg-soft-info text-info">
