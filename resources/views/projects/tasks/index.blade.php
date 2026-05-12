@@ -770,14 +770,15 @@
                             <div class="card border-0 shadow-sm overflow-hidden"
                                 style="border-radius: 12px; background: #ffffff; min-height: 500px;">
                                 <div class="card-header bg-white border-bottom py-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div class="d-flex align-items-center gap-2">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3"
+                                            style="background: #f8fafc; border: 1px solid #e2e8f0;">
                                             <span class="text-muted small fw-bold text-uppercase"
                                                 style="font-size: 10px; letter-spacing: 0.5px;">Show</span>
                                             <select id="modalEntriesLimit"
                                                 class="form-select select-small border-0 bg-light shadow-none fw-bold"
                                                 onchange="changeModalEntries()"
-                                                style="width: 95px; height: 36px; font-size: 13px; border-radius: 8px; padding: 0 10px; cursor: pointer;">
+                                                style="width: 90px; height: 36px; font-size: 13px; border-radius: 8px; padding: 0 10px; cursor: pointer; background-color: #ffffff !important; border: 1px solid #dbe4f0 !important;">
                                                 <option value="5">5</option>
                                                 <option value="10">10</option>
                                                 <option value="25">25</option>
@@ -786,7 +787,7 @@
                                                 style="font-size: 10px; letter-spacing: 0.5px;">entries</span>
                                         </div>
                                         <div class="input-group bg-light"
-                                            style="width: 180px; border-radius: 8px; overflow: hidden;">
+                                            style="width: 220px; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
                                             <span class="input-group-text bg-transparent border-0 py-0"><i
                                                     class="feather-search text-muted"></i></span>
                                             <input type="text" id="modalSearch"
@@ -799,7 +800,7 @@
                                 <div class="card-body p-0">
                                     <div id="modalTableContainer"
                                         style="max-height: 450px; overflow-y: auto; overflow-x: hidden; width: 100%;">
-                                        <table class="table table-hover align-middle mb-0"
+                                        <!-- <table class="table table-hover align-middle mb-0"
                                             style="width: 100%; table-layout: fixed;">
                                             <thead
                                                 style="background: #3858f9; color: white; position: sticky; top: 0; z-index: 1;">
@@ -820,18 +821,18 @@
                                                         style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 100px;">
                                                         Action</th>
                                                 </tr>
-                                            </thead>
-                                            <tbody id="followUpHistoryBody">
+                                            </thead> -->
+                                            <div id="followUpHistoryBody">
                                                 <!-- Loaded via AJAX -->
-                                            </tbody>
-                                        </table>
+                                            </div>
+                                        <!-- </table> -->
                                     </div>
                                     <!-- NUMBERED PAGINATION FOR MODAL -->
                                     <div id="modalPaginationContainer"
-                                        class="px-3 py-3 border-top d-flex justify-content-between align-items-center bg-white">
+                                        class="px-3 py-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-3 bg-white">
                                         <div class="small text-muted fw-bold" id="modalEntriesInfo"
                                             style="font-size: 12px;">Showing 0 to 0 of 0 entries</div>
-                                        <div class="d-flex gap-1 align-items-center" id="modalPaginationButtons">
+                                        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end" id="modalPaginationButtons">
                                             <!-- Numbered buttons injection -->
                                         </div>
                                     </div>
@@ -1598,10 +1599,12 @@
 
             function renderModalTable() {
                 const body = document.getElementById('followUpHistoryBody');
-                const searchTerm = document.getElementById('modalSearch').value.toLowerCase();
+                const searchTerm = document.getElementById('modalSearch').value.toLowerCase().trim();
 
                 let filtered = globalFollowUps.filter(fu => {
-                    const matchesSearch = fu.work_description.toLowerCase().includes(searchTerm) || (fu.reference_name && fu.reference_name.toLowerCase().includes(searchTerm));
+                    const description = (fu.work_description || '').toLowerCase();
+                    const employeeName = (fu.employee_name || fu.reference_name || '').toLowerCase();
+                    const matchesSearch = description.includes(searchTerm) || employeeName.includes(searchTerm);
                     return matchesSearch;
                 });
 
@@ -1613,6 +1616,8 @@
 
                 body.innerHTML = '';
                 paginated.forEach((fu, index) => {
+                    const employeeName = fu.employee_name || fu.reference_name || 'Employee';
+                    const employeeInitial = employeeName.charAt(0).toUpperCase();
                     let timeDisplay = fu.time_taken || '-';
                     if (fu.time_taken && !isNaN(fu.time_taken)) {
                         let totalHours = parseFloat(fu.time_taken);
@@ -1625,62 +1630,151 @@
                         timeDisplay = display.length > 0 ? display.join(' ') : '0m';
                     }
 
-                    let nameHtml = `<span class="fw-bold text-dark" style="font-size: 14px;"><i class="feather-user me-1 text-primary"></i>${fu.reference_name || 'Anonymous'}</span>`;
-                    let viewBtn = `<a href="javascript:void(0);" onclick="toggleFollowUpRow(${fu.id}, this)" class="avatar-text avatar-md bg-soft-info text-info rounded-circle shadow-none me-2" title="View Details" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-eye" style="font-size:14px;"></i></a>`;
                     let editBtn = `<a href="javascript:void(0);" onclick="editFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle shadow-none me-2" title="Edit Entry" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-edit-3" style="font-size:14px;"></i></a>`;
                     let delBtn = `<a href="javascript:void(0);" onclick="deleteFollowUp(${fu.id})" class="avatar-text avatar-md bg-soft-danger text-danger rounded-circle shadow-none" title="Delete" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;"><i class="feather-trash-2" style="font-size:14px;"></i></a>`;
 
                     body.innerHTML += `
-                                                                    <tr style="height: 70px; border-bottom: 1px solid #f1f5f9; background: white;">
-                                                                        <td class="ps-4 fw-bold text-dark" style="font-size: 14px;">${startIdx + index + 1}</td>
-                                                                        <td style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                                            ${nameHtml}
-                                                                        </td>
-                                                                        <td style="font-size: 14px; font-weight: 700; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                                            ${timeDisplay}
-                                                                        </td>
-                                                                        <td style="font-size: 13px; white-space: nowrap;">
-                                                                            <div class="fw-bold text-dark">${new Date(fu.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                                                                        </td>
-                                                                        <td class="pe-3 text-center">
-                                                                            <div class="d-flex align-items-center justify-content-center">
-                                                                                ${viewBtn}
-                                                                                ${editBtn}
-                                                                                ${delBtn}
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr id="desc_row_${fu.id}" class="d-none" style="background: #f8fafc;">
-                                                                        <td colspan="5" class="p-0">
-                                                                            <div id="desc_content_${fu.id}" style="display: none; background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                                                                <div style="padding: 20px 25px;">
-                                                                                    <div class="custom-html-content shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff !important; padding: 25px !important; width: 100%; overflow-x: hidden; word-wrap: break-word;">
-                                                                                        ${fu.work_description}
-                                                                                    </div>
-                                                                                    ${fu.photo ? `
-                                                                                    <div class="mt-3">
-                                                                                        <a href="javascript:void(0);" onclick="viewAttachmentPopup('/storage/${fu.photo}')" class="btn btn-sm btn-soft-primary fw-bold" style="border-radius: 8px;">
-                                                                                            <i class="feather-image me-1"></i> View Attached File
-                                                                                        </a>
-                                                                                    </div>` : ''}
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                `;
+                                        <div class="work-history-feed-item"
+                                            style="
+                                                padding: 22px 25px;
+                                                border-bottom: 1px solid #eef2f7;
+                                                background: #fff;
+                                            ">
+
+                                            <div class="d-flex justify-content-between align-items-start gap-3 w-100">
+
+                                                <!-- Left Section -->
+                                                <div class="d-flex align-items-start gap-3 w-100">
+
+                                                    <!-- Profile Image -->
+                                                    <div>
+                                                        ${fu.employee?.photo
+                                                            ? `
+                                                            <img src="/storage/${fu.employee.photo}" 
+                                                                alt="Profile"
+                                                                style="
+                                                                    width: 42px;
+                                                                    height: 42px;
+                                                                    border-radius: 50%;
+                                                                    object-fit: cover;
+                                                                    border: 2px solid #e2e8f0;
+                                                                ">
+                                                            `
+                                                            : `
+                                                            <div style="
+                                                                width: 42px;
+                                                                height: 42px;
+                                                                border-radius: 50%;
+                                                                background: #4361ee;
+                                                                color: white;
+                                                                display: flex;
+                                                                align-items: center;
+                                                                justify-content: center;
+                                                                font-weight: 700;
+                                                                font-size: 14px;
+                                                            ">
+                                                                ${employeeInitial}
+                                                            </div>
+                                                        `}
+                                                    </div>
+
+                                                    <!-- Content -->
+                                                    <div class="flex-grow-1">
+
+                                                        <!-- Name -->
+                                                        <div class="fw-bold text-dark"
+                                                            style="font-size: 15px;">
+                                                            ${employeeName}
+                                                        </div>
+
+                                                        <!-- Time -->
+                                                        <div class="text-muted mt-1"
+                                                            style="font-size: 12px;">
+                                                            ${timeDisplay} • 
+                                                            ${new Date(fu.created_at).toLocaleDateString('en-GB', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </div>
+
+                                                        <!-- Subtask -->
+                                                        ${fu.task_title ? `
+                                                            <div class="mt-3 fw-bold text-primary"
+                                                                style="
+                                                                    font-size: 14px;
+                                                                    text-transform: uppercase;
+                                                                    letter-spacing: .3px;
+                                                                ">
+                                                                • ${fu.task_title}
+                                                            </div>
+                                                        ` : ''}
+
+                                                        <!-- Task Points -->
+                                                        <div class="mt-2"
+                                                            style="
+                                                                font-size: 14px;
+                                                                line-height: 1.9;
+                                                                color: #475569;
+                                                            ">
+                                                            ${fu.work_description || `
+                                                                <span class="text-muted">No task points added.</span>
+                                                            `}
+                                                        </div>
+
+                                                        <!-- Attachment -->
+                                                        ${fu.photo ? `
+                                                            <div class="mt-3">
+                                                                <a href="javascript:void(0);" 
+                                                                    onclick="viewAttachmentPopup('/storage/${fu.photo}')" 
+                                                                    class="btn btn-sm btn-soft-primary fw-bold"
+                                                                    style="border-radius: 8px;">
+                                                                    <i class="feather-image me-1"></i>
+                                                                    View Attached File
+                                                                </a>
+                                                            </div>
+                                                        ` : ''}
+
+                                                        <!-- Action Buttons -->
+                                                        <div class="d-flex align-items-center gap-2 mt-3">
+                                                            ${editBtn}
+                                                            ${delBtn}
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
                 });
-                if (totalItems === 0) body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted fw-bold">No history found.</td></tr>';
+                if (totalItems === 0) {
+                    body.innerHTML = `
+                        <div class="py-5 text-center" style="background: #fff;">
+                            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                style="width: 56px; height: 56px; border-radius: 16px; background: #f8fafc; color: #94a3b8;">
+                                <i class="feather-inbox" style="font-size: 22px;"></i>
+                            </div>
+                            <div class="fw-bold text-muted">No history found.</div>
+                        </div>
+                    `;
+                }
 
                 document.getElementById('modalEntriesInfo').innerText = `Showing ${totalItems === 0 ? 0 : startIdx + 1} to ${Math.min(startIdx + modalPageSize, totalItems)} of ${totalItems} entries`;
 
                 const pgnBtn = document.getElementById('modalPaginationButtons');
-                let pgnHtml = `<a class="page-link cursor-pointer ${modalCurrentPage === 1 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage - 1})"><i class="feather-chevron-left"></i></a>`;
-                for (let i = 1; i <= totalPages; i++) { pgnHtml += `<li class="page-item ${i === modalCurrentPage ? 'active' : ''}"><a class="page-link cursor-pointer" onclick="changeModalPage(${i})">${i}</a></li>`; }
-                pgnHtml += `<a class="page-link cursor-pointer ${modalCurrentPage === totalPages || totalItems === 0 ? 'text-muted disabled' : ''}" onclick="changeModalPage(${modalCurrentPage + 1})"><i class="feather-chevron-right"></i></a>`;
+                let pgnHtml = `<button type="button" class="btn btn-sm ${modalCurrentPage === 1 ? 'btn-light text-muted' : 'btn-outline-primary'}" ${modalCurrentPage === 1 ? 'disabled' : ''} onclick="changeModalPage(${modalCurrentPage - 1})"><i class="feather-chevron-left"></i></button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pgnHtml += `<button type="button" class="btn btn-sm ${i === modalCurrentPage ? 'btn-primary' : 'btn-light text-dark'}" onclick="changeModalPage(${i})">${i}</button>`;
+                }
+                pgnHtml += `<button type="button" class="btn btn-sm ${modalCurrentPage === totalPages || totalItems === 0 ? 'btn-light text-muted' : 'btn-outline-primary'}" ${(modalCurrentPage === totalPages || totalItems === 0) ? 'disabled' : ''} onclick="changeModalPage(${modalCurrentPage + 1})"><i class="feather-chevron-right"></i></button>`;
                 pgnBtn.innerHTML = pgnHtml;
             }
 
-            function changeModalPage(page) { modalCurrentPage = page; renderModalTable(); }
+            function changeModalPage(page) {
+                const totalPages = Math.max(1, Math.ceil(globalFollowUps.length / modalPageSize));
+                modalCurrentPage = Math.min(Math.max(page, 1), totalPages);
+                renderModalTable();
+            }
             function changeModalEntries() { modalPageSize = parseInt(document.getElementById('modalEntriesLimit').value); modalCurrentPage = 1; renderModalTable(); }
             function filterModalHistory() { modalCurrentPage = 1; renderModalTable(); }
 
@@ -1905,31 +1999,6 @@
                     showConfirmButton: true,
                     confirmButtonColor: '#3858f9'
                 });
-            }
-
-            function toggleFollowUpRow(id, btn) {
-                const row = document.getElementById('desc_row_' + id);
-                const content = document.getElementById('desc_content_' + id);
-                const icon = btn.querySelector('i');
-
-                if (row.classList.contains('d-none')) {
-                    // Show Smoothly
-                    row.classList.remove('d-none');
-                    $(content).slideDown(400, "swing");
-                    icon.classList.remove('feather-eye');
-                    icon.classList.add('feather-eye-off');
-                    btn.classList.remove('bg-soft-info', 'text-info');
-                    btn.classList.add('bg-info', 'text-white');
-                } else {
-                    // Hide Smoothly
-                    $(content).slideUp(350, "swing", function () {
-                        row.classList.add('d-none');
-                    });
-                    icon.classList.remove('feather-eye-off');
-                    icon.classList.add('feather-eye');
-                    btn.classList.remove('bg-info', 'text-white');
-                    btn.classList.add('bg-soft-info', 'text-info');
-                }
             }
 
             $(document).ready(function () {

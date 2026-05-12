@@ -242,7 +242,15 @@ class DailyTaskController extends Controller
 
     public function getFollowUps($taskId)
     {
-        $followUps = TaskFollowUp::where('daily_task_id', $taskId)->latest()->get();
+        $followUps = TaskFollowUp::where('daily_task_id', $taskId)
+            ->latest()
+            ->get()
+            ->map(function ($followUp) {
+                $followUp->employee_name = $followUp->reference_name ?: 'Employee';
+                $followUp->employee = null;
+                return $followUp;
+            });
+
         return response()->json($followUps);
     }
 

@@ -7,15 +7,23 @@ use App\Models\DailyTask;
 use App\Models\TaskFollowUp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
     public function index()
     {
+        $roleSlug = auth()->user()->role; // e.g. "manager"
+
+        $roleId = DB::table('roles_master')
+            ->where('slug', $roleSlug)
+            ->value('id');
+
+        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
         $projects = Project::with(['tasks.employee'])->latest()->get();
         $employees = \App\Models\Employee::all();
         $departments = \App\Models\Department::all();
-        return view('projects.index', compact('projects', 'employees', 'departments'));
+        return view('projects.index', compact('projects', 'employees', 'departments', 'isAdmin'));
     }
 
     public function create()

@@ -518,7 +518,7 @@
             });
         });
     </script>
-@endpush onStepChanging: function (event, currentIndex, newIndex) {
+onStepChanging: function (event, currentIndex, newIndex) {
 if (currentIndex > newIndex) return true;
 
 // Validation for Step 2: Details
