@@ -163,7 +163,7 @@
                                         <div class="col-md-6 mb-4">
                                             <label class="form-label fw-bold fs-12 text-muted text-uppercase">Department
                                                 <span class="text-danger">*</span></label>
-                                            <select class="form-select premium-select" name="department"
+                                            <select class="form-select premium-select" id="projectDepartment" name="department"
                                                 data-placeholder="Select Department" required>
                                                 <option value=""></option>
                                                 @foreach($departments as $dept)
@@ -211,7 +211,7 @@
                                         <div class="col-md-6 mb-4">
                                             <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Leads
                                                 <span class="text-danger">*</span></label>
-                                            <select class="form-select premium-select" name="leaders[]" multiple="multiple"
+                                            <select class="form-select premium-select" id="projectLeaders" name="leaders[]" multiple="multiple"
                                                 data-placeholder="Select Project Leads..." required>
                                                 @foreach($employees as $emp)
                                                     <option value="{{ $emp->id }}" {{ is_array($project->leaders) && in_array($emp->id, $project->leaders) ? 'selected' : '' }}>
@@ -223,7 +223,7 @@
                                         <div class="col-md-6 mb-4">
                                             <label class="form-label fw-bold fs-12 text-muted text-uppercase">Team
                                                 Members</label>
-                                            <select class="form-select premium-select" name="members[]" multiple="multiple"
+                                            <select class="form-select premium-select" id="projectMembers" name="members[]" multiple="multiple"
                                                 data-placeholder="Select Team Members...">
                                                 @foreach($employees as $emp)
                                                     <option value="{{ $emp->id }}" {{ is_array($project->members) && in_array($emp->id, $project->members) ? 'selected' : '' }}>
@@ -319,6 +319,16 @@
             color: #fff !important;
             border-radius: 4px !important;
             text-decoration: none !important;
+        }
+
+        .card-input-element {
+            display: none;
+        }
+
+        .card-input-element:checked+.card {
+            border-color: #3454d1 !important;
+            background-color: rgba(52, 84, 209, 0.05) !important;
+            border-width: 2px !important;
         }
 
         /* Premium Input Styling */
@@ -438,6 +448,33 @@
     <script>
         $(document).ready(function () {
             var form = $("#project-edit-form");
+            const allEmployees = @json($employees);
+            const initialLeaderIds = @json(is_array($project->leaders) ? array_map('strval', $project->leaders) : []);
+            const initialMemberIds = @json(is_array($project->members) ? array_map('strval', $project->members) : []);
+
+            function syncDepartmentEmployees() {
+                const selectedDepartment = $('#projectDepartment').val();
+                const currentLeaderIds = ($('#projectLeaders').val() || []).map(String);
+                const currentMemberIds = ($('#projectMembers').val() || []).map(String);
+                const leaderIdsToKeep = currentLeaderIds.length ? currentLeaderIds : initialLeaderIds;
+                const memberIdsToKeep = currentMemberIds.length ? currentMemberIds : initialMemberIds;
+                const filteredEmployees = allEmployees.filter(emp => emp.department === selectedDepartment);
+
+                $('#projectLeaders').empty();
+                $('#projectMembers').empty();
+
+                filteredEmployees.forEach(function (emp) {
+                    const empId = String(emp.id);
+                    const leaderSelected = leaderIdsToKeep.includes(empId) ? 'selected' : '';
+                    const memberSelected = memberIdsToKeep.includes(empId) ? 'selected' : '';
+
+                    $('#projectLeaders').append(`<option value="${emp.id}" ${leaderSelected}>${emp.name}</option>`);
+                    $('#projectMembers').append(`<option value="${emp.id}" ${memberSelected}>${emp.name}</option>`);
+                });
+
+                $('#projectLeaders').trigger('change.select2');
+                $('#projectMembers').trigger('change.select2');
+            }
 
             $("#project-edit-wizard").steps({
                 headerTag: "h3",
@@ -462,6 +499,8 @@
                             });
                         });
                     }
+
+                    syncDepartmentEmployees();
                 },
                 onStepChanging: function (event, currentIndex, newIndex) {
                     if (currentIndex > newIndex) return true;
@@ -503,6 +542,31 @@
                     $('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
                     form.submit();
                 }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#projectDepartment').on('change', function () {
+                const selectedDepartment = $(this).val();
+                const allEmployees = @json($employees);
+                const currentLeaderIds = ($('#projectLeaders').val() || []).map(String);
+                const currentMemberIds = ($('#projectMembers').val() || []).map(String);
+                const filteredEmployees = allEmployees.filter(emp => emp.department === selectedDepartment);
+
+                $('#projectLeaders').empty();
+                $('#projectMembers').empty();
+
+                filteredEmployees.forEach(function (emp) {
+                    const empId = String(emp.id);
+                    const leaderSelected = currentLeaderIds.includes(empId) ? 'selected' : '';
+                    const memberSelected = currentMemberIds.includes(empId) ? 'selected' : '';
+
+                    $('#projectLeaders').append(`<option value="${emp.id}" ${leaderSelected}>${emp.name}</option>`);
+                    $('#projectMembers').append(`<option value="${emp.id}" ${memberSelected}>${emp.name}</option>`);
+                });
+
+                $('#projectLeaders').trigger('change.select2');
+                $('#projectMembers').trigger('change.select2');
             });
         });
     </script>

@@ -555,5 +555,39 @@
                 }
             });
         });
+
+        $(document).ready(function () {
+
+            const allEmployees = @json($employees);
+
+            $('#projectDepartment').on('change', function () {
+
+                let selectedDepartment = $(this).val();
+
+                $('#projectLeaders').empty();
+                $('#projectMembers').empty();
+
+                let filteredEmployees = allEmployees.filter(emp =>
+                    emp.department === selectedDepartment
+                );
+
+                filteredEmployees.forEach(function (emp) {
+
+                    let option = `
+                        <option value="${emp.id}">
+                            ${emp.name}
+                        </option>
+                    `;
+
+                    $('#projectLeaders').append(option);
+                    $('#projectMembers').append(option);
+                });
+
+                // Refresh select2 if used
+                $('#projectLeaders').trigger('change');
+                $('#projectMembers').trigger('change');
+            });
+
+        });
     </script>
 @endpush
