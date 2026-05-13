@@ -145,9 +145,7 @@
                                     </span>
                                 </td>
                                 <td style="padding: 15px;">
-                                    <select name="employees[{{ $index }}][status]" 
-                                            id="status_{{ $index }}"
-                                            style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
+                                    <select name="employees[{{ $index }}][status]"  id="status_{{ $index }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 3px; width: 120px; cursor: pointer;">
                                         <option value="" {{ !isset($emp->old_status) ? 'selected' : '' }}>Select</option>
                                         <option value="present" {{ (isset($emp->old_status) && $emp->old_status == 'present') ? 'selected' : '' }}>Present</option>
                                         <option value="absent" {{ (isset($emp->old_status) && $emp->old_status == 'absent') ? 'selected' : '' }}>Absent</option>
