@@ -29,9 +29,7 @@
                         <input type="month" name="month" value="{{ $selectedMonth }}" 
                             class="form-control shadow-sm border-0 w-100" onchange="this.form.submit()"
                             style="border-radius: 12px; height: 48px; font-weight: 600; padding-right: 45px; background: #fff;">
-                        <i class="feather-calendar position-absolute text-primary" 
-                            style="right: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 18px;"></i>
-                    </div>
+                     </div>
                 </form>
             </div>
         </div>

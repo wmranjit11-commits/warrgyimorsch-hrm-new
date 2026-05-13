@@ -111,15 +111,46 @@
         }
 
         .late-scroll-container{
-            max-height: 350px;
+            max-height: 485px;
             overflow-y: auto;
             overflow-x: hidden;
             padding-right: 4px;
         }
 
+        .leave-report-scroll-container{
+            height: 402px;
+            max-height: 485px;
+            overflow-y: auto !important;
+            overflow-x: auto !important;
+            display: block;
+        }
+
+        .leave-report-scroll-container table{
+            margin-bottom: 0;
+        }
+
+        .leave-report-scroll-container::-webkit-scrollbar{
+            width: 0px;
+            height: 6px;
+        }
+
+        .leave-report-scroll-container::-webkit-scrollbar-track{
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .leave-report-scroll-container::-webkit-scrollbar-thumb{
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .leave-report-scroll-container::-webkit-scrollbar-thumb:hover{
+            background: #94a3b8;
+        }
+
         /* Custom Scrollbar */
         .late-scroll-container::-webkit-scrollbar{
-            width: 6px;
+            width: 0px;
         }
 
         .late-scroll-container::-webkit-scrollbar-track{
@@ -521,7 +552,7 @@
                         <div class="card-body">
                             <div class="late-scroll-container">
                                 @forelse($todayLeaveEmployees as $todayLeave)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 leave-slide-item">
+                                    <div class="p-3 border border-dashed rounded-3 mb-3">
                                         <div class="d-flex justify-content-between">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div
@@ -544,52 +575,6 @@
                                         No employees on leave today.
                                     </div>
                                 @endforelse
-                            </div>
-                        </div>
-                        <div class="card-footer d-none">
-                            <div class="row g-4">
-                                <div class="col-lg-3">
-                                    <div class="p-3 border border-dashed rounded">
-                                        <div class="fs-12 text-muted mb-1">Pending</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPendingAmount, 0) }}</h6>
-                                        <div class="progress mt-2 ht-3">
-                                            <div class="progress-bar bg-primary" role="progressbar"
-                                                style="width: {{ $totalNetSalary > 0 ? ($totalPendingAmount / $totalNetSalary) * 100 : 0 }}%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="p-3 border border-dashed rounded">
-                                        <div class="fs-12 text-muted mb-1">Paid</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalPaidAmount, 0) }}</h6>
-                                        <div class="progress mt-2 ht-3">
-                                            <div class="progress-bar bg-success" role="progressbar"
-                                                style="width: {{ $totalNetSalary > 0 ? ($totalPaidAmount / $totalNetSalary) * 100 : 0 }}%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="p-3 border border-dashed rounded">
-                                        <div class="fs-12 text-muted mb-1">Rejected</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalRejectedAmount, 0) }}</h6>
-                                        <div class="progress mt-2 ht-3">
-                                            <div class="progress-bar bg-danger" role="progressbar"
-                                                style="width: {{ $totalNetSalary > 0 ? ($totalRejectedAmount / $totalNetSalary) * 100 : 0 }}%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="p-3 border border-dashed rounded">
-                                        <div class="fs-12 text-muted mb-1">Total Salary</div>
-                                        <h6 class="fw-bold text-dark">₹{{ number_format($totalNetSalary, 0) }}</h6>
-                                        <div class="progress mt-2 ht-3">
-                                            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -731,7 +716,7 @@
                         <div class="card-body">
                             <div class="late-scroll-container">
                                 @forelse($todayLateEmployees as $lateEmp)
-                                    <div class="p-3 border border-dashed rounded-3 mb-3 late-slide-item">
+                                    <div class="p-3 border border-dashed rounded-3 mb-3">
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="wd-50 ht-50 bg-soft-warning text-warning d-flex align-items-center justify-content-center rounded-2">
@@ -1008,7 +993,7 @@
                             </div>
                         </div>
                         <div class="card-body custom-card-action p-0">
-                            <div class="table-responsive hrm-resp-table-responsive">
+                            <div class="table-responsive hrm-resp-table-responsive leave-report-scroll-container">
                                 <table class="table table-hover mb-0">
                                     <thead>
                                         <tr>
@@ -1055,36 +1040,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="card-footer d-flex flex-column align-items-center gap-3">
-                            <div class="fs-12 text-muted">
-                                @if($recentPayrolls->total() > 0)
-                                    Showing {{ $recentPayrolls->firstItem() }} to {{ $recentPayrolls->lastItem() }} of
-                                    {{ $recentPayrolls->total() }} entries
-                                @endif
-                            </div>
-                            @if($recentPayrolls->hasPages())
-                                <ul class="list-unstyled d-flex align-items-center gap-2 mb-0 pagination-common-style">
-                                    <li>
-                                        <a href="{{ $recentPayrolls->previousPageUrl() }}"
-                                            class="{{ $recentPayrolls->onFirstPage() ? 'opacity-50 pointer-events-none' : '' }}">
-                                            <i class="feather-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                    @foreach ($recentPayrolls->getUrlRange(max(1, $recentPayrolls->currentPage() - 1), min($recentPayrolls->lastPage(), $recentPayrolls->currentPage() + 1)) as $page => $url)
-                                        <li>
-                                            <a href="{{ $url }}"
-                                                class="{{ ($page == $recentPayrolls->currentPage()) ? 'active' : '' }}">{{ $page }}</a>
-                                        </li>
-                                    @endforeach
-                                    <li>
-                                        <a href="{{ $recentPayrolls->nextPageUrl() }}"
-                                            class="{{ !$recentPayrolls->hasMorePages() ? 'opacity-50 pointer-events-none' : '' }}">
-                                            <i class="feather-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            @endif
-                        </div>
+                        
                     </div>
                 </div>
                 <!-- [Latest leave report] end -->
@@ -1545,91 +1501,6 @@
 
             window.location.href = url.toString();
         }
-
-        // Today Leave Slider
-        initSlider({
-            itemsSelector: '.leave-slide-item',
-            prevBtnId: 'prev-leave',
-            nextBtnId: 'next-leave',
-            totalItems: {{ count($todayLeaveEmployees) }}
-        });
-
-        // Late Arrivals Slider
-        initSlider({
-            itemsSelector: '.late-slide-item',
-            prevBtnId: 'prev-late',
-            nextBtnId: 'next-late',
-            totalItems: {{ count($todayLateEmployees) }}
-        });
-
-        function initSlider({
-            itemsSelector,
-            prevBtnId,
-            nextBtnId,
-            totalItems,
-            itemsPerPage = 4
-        }) {
-            let currentPage = 0;
-            const items = document.querySelectorAll(itemsSelector);
-            const prevBtn = document.getElementById(prevBtnId);
-            const nextBtn = document.getElementById(nextBtnId);
-
-            function updateView() {
-                items.forEach((item, index) => {
-                    const start = currentPage * itemsPerPage;
-                    const end = start + itemsPerPage;
-
-                    if (index >= start && index < end) {
-                        item.classList.remove('d-none');
-                    } else {
-                        item.classList.add('d-none');
-                    }
-                });
-
-                // Prev Button
-                if (prevBtn) {
-                    if (currentPage === 0) {
-                        prevBtn.classList.add('disabled');
-                        prevBtn.style.opacity = '0.5';
-                    } else {
-                        prevBtn.classList.remove('disabled');
-                        prevBtn.style.opacity = '1';
-                    }
-                }
-
-                // Next Button
-                if (nextBtn) {
-                    if ((currentPage + 1) * itemsPerPage >= totalItems) {
-                        nextBtn.classList.add('disabled');
-                        nextBtn.style.opacity = '0.5';
-                    } else {
-                        nextBtn.classList.remove('disabled');
-                        nextBtn.style.opacity = '1';
-                    }
-                }
-            }
-
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    if ((currentPage + 1) * itemsPerPage < totalItems) {
-                        currentPage++;
-                        updateView();
-                    }
-                });
-            }
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    if (currentPage > 0) {
-                        currentPage--;
-                        updateView();
-                    }
-                });
-            }
-
-            updateView();
-        }
-
 
         document.getElementById('lateEmployeeFilter')?.addEventListener('change', function () {
             applyLateRange(new URL(window.location.href).searchParams.get('late_range') || 'today');

@@ -152,7 +152,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="input-group" style="width: 250px; border-radius: 8px; overflow: hidden; background: #f1f5f9;">
-                                <span class="input-group-text bg-transparent border-0 pe-1"><i
+                                <span class="input-group-text bg-transparent border-0"><i
                                          class="feather-search text-muted" style="font-size: 13px;"></i></span>
                                 <input type="text" id="taskSearch"
                                     class="form-control border-0 bg-transparent shadow-none fw-bold" onkeyup="filterTasks()"
@@ -176,21 +176,23 @@
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Start Date</th>
-                                        <th
+                                        <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Time Tracking</th>
+                                            Time Tracking</th> -->
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Priority</th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Status</th>
-                                        <th
-                                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Assign To</th>
-                                        <th
-                                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Assign By</th>
+                                        @if ($isAdmin)
+                                            <th
+                                                style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
+                                                Assign To</th>
+                                            <th
+                                                style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
+                                                Assign By</th>
+                                        @endif
                                         <th class="pe-4 text-center"
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white; white-space: nowrap; width: 220px;">
                                             Action</th>
@@ -258,7 +260,7 @@
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td>
+                                            <!-- <td>
                                                 <div class="d-flex flex-column">
                                                     @if($task->status != 'Completed')
                                                         @if($task->end_date)
@@ -290,7 +292,7 @@
                                                         Spent: <span class="text-dark">{{ $task->formatted_total_time }}</span>
                                                     </span>
                                                 </div>
-                                            </td>
+                                            </td> -->
                                             <td>
                                                 @php
                                                     $p = strtolower($task->priority);
@@ -360,12 +362,14 @@
                                                     </ul>
                                                 </div>
                                             </td>
-                                            <td style="font-size: 14px; color: #475569;">
-                                                {{ $task->employee ? $task->employee->name : '-' }}
-                                            </td>
-                                            <td style="font-size: 14px; color: #475569;">
-                                                {{ $task->creator ? $task->creator->name : '-' }}
-                                            </td>
+                                            @if ($isAdmin)
+                                                <td style="font-size: 14px; color: #475569;">
+                                                    {{ $task->employee ? $task->employee->name : '-' }}
+                                                </td>
+                                                <td style="font-size: 14px; color: #475569;">
+                                                    {{ $task->creator ? $task->creator->name : '-' }}
+                                                </td>
+                                            @endif
                                             <td class="pe-4 text-center" style="white-space: nowrap; width: 220px;">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
@@ -376,10 +380,17 @@
                                                     <template id="task_desc_{{ $task->id }}">
                                                         <div class="p-2">
                                                             <div class="mb-4">
-                                                                <h6
-                                                                    class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
-                                                                    <i class="feather-info"></i> Original Task Description
-                                                                </h6>
+                                                                <div class="d-flex justify-content-between">
+                                                                    <h6
+                                                                        class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                                                                        <i class="feather-info"></i> Original Task Description
+                                                                    </h6>
+                                                                    @if($task->creator && $task->creator->name !== (auth()->user()->name ?? ''))
+                                                                        <div class="mb-3 text-muted small fw-bold">
+                                                                            Assigned by - {{ $task->creator->name }}
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
                                                                 <div class="p-3 bg-white rounded border"
                                                                     style="font-size: 14px; min-height: 100px;">
                                                                     {!! $task->description ?? '<span class="text-muted">No description provided.</span>' !!}
@@ -491,13 +502,13 @@
                                                         </a>
                                                     @endif
 
-                                                    <a href="javascript:void(0);"
+                                                    <!-- <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-dark text-dark rounded"
                                                         title="View Work History" data-bs-toggle="modal"
                                                         data-bs-target="#followUpModal"
                                                         onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'history', '{{ addslashes($task->task_title) }}')">
                                                         <i class="feather-clock"></i>
-                                                    </a>
+                                                    </a> -->
                                                 </div>
                                             </td>
                                         </tr>
@@ -606,21 +617,27 @@
                             <option value="Rework">Rework</option>
                         </select>
                     </div>
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Assign To <span
-                                class="text-danger">*</span></label>
-                        <select name="employee_id" id="taskEmployeeId" class="form-select premium-select"
-                            data-placeholder="Select Employee..." required>
-                            @if(count($employees) > 1)
-                                <option value="">Employee name</option>
-                            @endif
-                            @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}" {{ count($employees) == 1 ? 'selected' : '' }}>
-                                    {{ $employee->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @if ($isAdmin)
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Assign To <span
+                                    class="text-danger">*</span></label>
+                            <select name="employee_id" id="taskEmployeeId" class="form-select premium-select"
+                                data-placeholder="Select Employee..." required>
+                                @if(count($employees) > 1)
+                                    <option value="">Employee name</option>
+                                @endif
+                                @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}" {{ count($employees) == 1 ? 'selected' : '' }}>
+                                        {{ $employee->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @else
+                        <input type="hidden"
+                            name="employee_id"
+                            value="{{ auth()->user()->employee_id }}">
+                    @endif
                     <div class="col-md-12">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Task Description</label>
                         <textarea name="description" id="taskDesc" class="form-control premium-input" rows="3"
@@ -664,9 +681,9 @@
                 <div class="modal-body p-3" style="background-color: #f8fafc !important; transform: none !important;">
                     <div class="row g-4">
                         <!-- ADD FOLLOW UP FORM (LEFT) -->
-                        <div class="col-lg-5 d-none" id="followUpFormColumn">
+                        <div class="col-lg-12 d-none" id="followUpFormColumn">
                             <div class="card border-0 shadow-sm" style="border-radius: 12px; background: #ffffff;">
-                                <div class="card-body p-4">
+                                <div class="card-body p-6">
                                     <form id="followUpForm" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="daily_task_id" id="followUpTaskId">
@@ -766,7 +783,7 @@
                         </div>
 
                         <!-- FOLLOW UP HISTORY TABLE (RIGHT) -->
-                        <div class="col-lg-7" id="followUpHistoryColumn">
+                        <!-- <div class="col-lg-7" id="followUpHistoryColumn">
                             <div class="card border-0 shadow-sm overflow-hidden"
                                 style="border-radius: 12px; background: #ffffff; min-height: 500px;">
                                 <div class="card-header bg-white border-bottom py-3">
@@ -800,45 +817,20 @@
                                 <div class="card-body p-0">
                                     <div id="modalTableContainer"
                                         style="max-height: 450px; overflow-y: auto; overflow-x: hidden; width: 100%;">
-                                        <!-- <table class="table table-hover align-middle mb-0"
-                                            style="width: 100%; table-layout: fixed;">
-                                            <thead
-                                                style="background: #3858f9; color: white; position: sticky; top: 0; z-index: 1;">
-                                                <tr style="height: 52px; vertical-align: middle;">
-                                                    <th class="ps-4"
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 50px;">
-                                                        #</th>
-                                                    <th
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important;">
-                                                        Employee Name</th>
-                                                    <th
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 120px;">
-                                                        Time Spent</th>
-                                                    <th
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 110px;">
-                                                        Date</th>
-                                                    <th class="pe-3 text-center"
-                                                        style="font-size: 11px; text-transform: uppercase; color: #ffffff !important; width: 100px;">
-                                                        Action</th>
-                                                </tr>
-                                            </thead> -->
-                                            <div id="followUpHistoryBody">
-                                                <!-- Loaded via AJAX -->
-                                            </div>
-                                        <!-- </table> -->
+                            
                                     </div>
-                                    <!-- NUMBERED PAGINATION FOR MODAL -->
+                                    
                                     <div id="modalPaginationContainer"
                                         class="px-3 py-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-3 bg-white">
                                         <div class="small text-muted fw-bold" id="modalEntriesInfo"
                                             style="font-size: 12px;">Showing 0 to 0 of 0 entries</div>
                                         <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end" id="modalPaginationButtons">
-                                            <!-- Numbered buttons injection -->
+                                          
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
