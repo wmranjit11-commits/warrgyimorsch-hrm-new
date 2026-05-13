@@ -294,7 +294,7 @@
                             value="{{ auth()->user()->name }}"
                             readonly
                             style="height: 48px; border-radius: 10px;">
-                        <input type="hidden" name="employee_id" value="{{ auth()->user()->employee->id }}">
+                        <input type="hidden" name="employee_id" value="{{ auth()->user()->employee?->id }}">
                     </div>
                     <div class="col-md-6">
                         <!-- <label class="form-label small fw-bold text-muted text-uppercase">Today's Date</label> -->

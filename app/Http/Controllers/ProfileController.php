@@ -72,10 +72,19 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $employee = Employee::find($user->employee_id);
+        
+        $userRole = strtolower($user->role ?? '');
+        $all_employees = collect();
+        
+        // Match 'admin', 'super admin', 'administrator', etc.
+        if (str_contains($userRole, 'admin')) {
+            $all_employees = \App\Models\User::with('employee')->orderBy('name')->get();
+        }
 
         return view('profile.show', [
             'user' => $user,
-            'employee' => $employee
+            'employee' => $employee,
+            'all_employees' => $all_employees
         ]);
     }
 
@@ -137,16 +146,27 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'password' => ['required', 'confirmed', 'min:8'],
+            'target_user_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        $user = $request->user();
-        $user->update([
-            'password' => $validated['password'],
+        $currentUser = $request->user();
+        $targetUser = $currentUser;
+        $userRole = strtolower($currentUser->role ?? '');
+
+        // If admin/super-admin is changing another user's password
+        if ($request->filled('target_user_id') && str_contains($userRole, 'admin')) {
+            $targetUser = \App\Models\User::find($request->target_user_id);
+        }
+
+        $newPassword = $validated['password'];
+
+        $targetUser->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($newPassword),
         ]);
 
-        $employee = Employee::find($user->employee_id);
+        $employee = Employee::find($targetUser->employee_id);
         if ($employee) {
-            $employee->update(['password' => $validated['password']]);
+            $employee->update(['password' => \Illuminate\Support\Facades\Hash::make($newPassword)]);
         }
 
         return Redirect::route('profile.show')->with('success', 'Password updated successfully! ✓');

@@ -235,18 +235,6 @@
                                     </div>
                                 </section>
 
-                                <!-- Step 4: Completed -->
-                                <h3>COMPLETED</h3>
-                                <section class="py-5">
-                                    <div class="text-center">
-                                        <h2 class="fs-20 fw-bold">Ready to Update?</h2>
-                                        <p class="mb-5 text-muted">All changes are verified. Click Update to finalize.</p>
-                                        <div class="d-flex justify-content-center">
-                                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-lg"
-                                                style="border-radius: 12px;">UPDATE PROJECT NOW</button>
-                                        </div>
-                                    </div>
-                                </section>
 
                             </div>
                         </form>
@@ -518,47 +506,4 @@
             });
         });
     </script>
-onStepChanging: function (event, currentIndex, newIndex) {
-if (currentIndex > newIndex) return true;
-
-// Validation for Step 2: Details
-if (currentIndex === 1) {
-var name = $('input[name="name"]').val();
-var dept = $('select[name="department"]').val();
-var startDate = $('input[name="start_date"]').val();
-var desc = $('#summernote-main').summernote('code');
-
-if (!name || !dept || !startDate) {
-if (typeof Toast !== 'undefined') {
-Toast.fire({ icon: 'error', title: 'Please fill all mandatory fields including Name, Department and Start Date.' });
-} else {
-alert('Please fill all mandatory fields including Name, Department and Start Date.');
-}
-return false;
-}
-}
-
-// Validation for Step 3: Members (Team Lead check)
-if (currentIndex === 2) {
-var leaders = $('select[name="leaders[]"]').val();
-if (!leaders || leaders.length === 0) {
-if (typeof Toast !== 'undefined') {
-Toast.fire({ icon: 'error', title: 'Please select at least one Project Lead.' });
-} else {
-alert('Please select at least one Project Lead.');
-}
-return false;
-}
-}
-
-$('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
-return true;
-},
-onFinished: function (event, currentIndex) {
-$('#projectDescriptionEditor').val($('#summernote-main').summernote('code'));
-form.submit();
-}
-});
-});
-</script>
 @endpush

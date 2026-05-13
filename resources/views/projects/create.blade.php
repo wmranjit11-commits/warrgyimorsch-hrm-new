@@ -200,34 +200,23 @@
                                 </div>
                             </section>
 
-                            <!-- Step 4: Completed -->
-                            <h3>COMPLETED</h3>
-                            <section class="py-5">
-                                <div class="text-center">
-                                    <h2 class="fs-20 fw-bold">Success!</h2>
-                                    <p class="mb-5 text-muted">Project details are ready. Click Finish to create.</p>
-                                    <form id="finalCreateForm" action="{{ route('projects.store') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="type" id="hiddenType">
-                                        <input type="hidden" name="manage" id="hiddenManage">
-                                        <input type="hidden" name="name" id="hiddenName">
-                                        <input type="hidden" name="technology" id="hiddenTechnology">
-                                        <input type="hidden" name="description" id="hiddenDesc">
-                                        <input type="hidden" name="start_date" id="hiddenStartDate">
-                                        <input type="hidden" name="end_date" id="hiddenEndDate">
-                                        <input type="hidden" name="department" id="hiddenDepartment">
-                                        <input type="hidden" name="status" id="hiddenStatus">
-                                        <div id="hiddenMembersContainer"></div>
-                                        <div id="hiddenLeadersContainer"></div>
-                                        <div class="d-flex justify-content-center">
-                                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold shadow-lg"
-                                                style="border-radius: 12px;">CREATE PROJECT NOW</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </section>
-
                         </div>
+
+                        <!-- Hidden Form for Submission -->
+                        <form id="finalCreateForm" action="{{ route('projects.store') }}" method="POST" style="display: none;">
+                            @csrf
+                            <input type="hidden" name="type" id="hiddenType">
+                            <input type="hidden" name="manage" id="hiddenManage">
+                            <input type="hidden" name="name" id="hiddenName">
+                            <input type="hidden" name="technology" id="hiddenTechnology">
+                            <input type="hidden" name="description" id="hiddenDesc">
+                            <input type="hidden" name="start_date" id="hiddenStartDate">
+                            <input type="hidden" name="end_date" id="hiddenEndDate">
+                            <input type="hidden" name="department" id="hiddenDepartment">
+                            <input type="hidden" name="status" id="hiddenStatus">
+                            <div id="hiddenMembersContainer"></div>
+                            <div id="hiddenLeadersContainer"></div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -567,47 +556,4 @@
             });
         });
     </script>
-// Ensure everything is synced
-$('#hiddenType').val($('input[name="type"]:checked').val());
-$('#hiddenManage').val($('input[name="manage"]:checked').val());
-$('#hiddenName').val($('#projectName').val());
-$('#hiddenTechnology').val($('#projectTechnology').val());
-$('#hiddenDesc').val($('#summernote-main').summernote('code'));
-$('#hiddenStartDate').val($('#projectStartDate').val());
-$('#hiddenEndDate').val($('#projectEndDate').val());
-$('#hiddenDepartment').val($('#projectDepartment').val());
-$('#hiddenStatus').val($('#projectStatus').val());
-
-// Sync Members
-var members = $('#projectMembers').val();
-var membersHtml = '';
-if (members && members.length > 0) {
-members.forEach(function (id) {
-membersHtml += '<input type="hidden" name="members[]" value="' + id + '">';
-});
-}
-$('#hiddenMembersContainer').html(membersHtml);
-
-// Sync Leaders
-var leaders = $('#projectLeaders').val();
-var leadersHtml = '';
-if (leaders && leaders.length > 0) {
-leaders.forEach(function (id) {
-leadersHtml += '<input type="hidden" name="leaders[]" value="' + id + '">';
-});
-}
-$('#hiddenLeadersContainer').html(leadersHtml);
-
-$('#finalCreateForm').submit();
-}
-
-// Also allow the manual finish button to work
-$('#finalCreateForm').on('submit', function(e) {
-// If it's not already synced, sync it
-if($('#hiddenName').val() === "") {
-syncAndSubmit();
-}
-});
-});
-</script>
 @endpush

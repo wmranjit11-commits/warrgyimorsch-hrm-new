@@ -299,16 +299,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label>Password</label>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                    <input type="password" name="password" id="editEmpPassword" class="form-control" autocomplete="new-password" value="{{ old('password', $employee->password) }}">
-                                    <span class="input-group-text bg-white" onclick="togglePassword('editEmpPassword', this)" style="cursor:pointer; border-left:none;">
-                                        <i class="bi bi-eye-slash"></i>
-                                    </span>
-                                </div>
-                            </div>
+
                             <div class="col-md-4">
                                 <label>Aadhaar Number</label>
                                 <div class="input-group mb-3">
