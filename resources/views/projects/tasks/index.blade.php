@@ -586,12 +586,12 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Start Date <span
                                 class="text-danger">*</span></label>
-                        <input type="date" name="start_date" id="taskStartDate" class="form-control premium-input"
+                        <input type="date" name="start_date" id="taskStartDate" class="form-control premium-input" value="{{ now()->format('Y-m-d') }}"
                             onclick="this.showPicker()" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">End Date</label>
-                        <input type="date" name="end_date" id="taskEndDate" class="form-control premium-input"
+                        <input type="date" name="end_date" id="taskEndDate" class="form-control premium-input" value="{{ now()->format('Y-m-d') }}"
                             onclick="this.showPicker()">
                     </div>
                     <div class="col-md-4">
@@ -600,8 +600,8 @@
                         <select name="priority" id="taskPriority" class="form-select premium-select"
                             data-placeholder="Select Priority..." required>
                             <option value="">Select priority...</option>
-                            <option value="Hard">Hard</option>
-                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hight</option>
+                            <option value="Medium" selected>Medium</option>
                             <option value="Low">Low</option>
                         </select>
                     </div>
@@ -610,7 +610,7 @@
                         <select name="status" id="taskStatus" class="form-select premium-select"
                             data-placeholder="Select Status..." required>
                             <option value="Pending">Pending</option>
-                            <option value="In Process">In Process</option>
+                            <option value="In Process" selected>In Process</option>
                             <option value="Completed">Completed</option>
                             <option value="On Hold">On Hold</option>
                             <option value="Review">Review</option>
@@ -1238,6 +1238,10 @@
                         dropdownParent: $('body')
                     });
 
+                    // Keep the task status default stable after Select2 replaces the native select UI.
+                    $('#taskStatus').val($('#taskStatus').val() || 'In Process').trigger('change');
+                    $('#taskPriority').val($('#taskPriority').val() || 'Medium').trigger('change');
+
                     $('.select-small').select2({
                         width: 'element',
                         minimumResultsForSearch: Infinity,
@@ -1250,6 +1254,11 @@
                             width: '100%',
                             dropdownParent: $(this)
                         });
+
+                        if (this.id === 'taskOffcanvas' && !document.getElementById('taskId').value) {
+                            $('#taskStatus').val($('#taskStatus').val() || 'In Process').trigger('change');
+                            $('#taskPriority').val($('#taskPriority').val() || 'Medium').trigger('change');
+                        }
                     });
                 }
 
@@ -1353,8 +1362,11 @@
                 document.getElementById('taskTitle').value = task.task_title || '';
                 document.getElementById('taskStartDate').value = task.start_date ? task.start_date.substring(0, 10) : '';
                 document.getElementById('taskEndDate').value = task.end_date ? task.end_date.substring(0, 10) : '';
-                document.getElementById('taskPriority').value = task.priority || '';
-                document.getElementById('taskStatus').value = task.status || 'In Process';
+                document.getElementById('taskPriority').value = task.priority || 'Medium';
+
+                window.onload = function () {
+                    document.getElementById('taskStatus').value = task.status || 'In Process';
+                };
 
                 // Handle existing attachment
                 const filePreview = document.getElementById('mainTaskFilePreview');
@@ -1373,14 +1385,16 @@
                 if (window.jQuery && $.fn.select2) {
                     $('#taskProjectId').val(task.project_id).trigger('change');
                     $('#taskEmployeeId').val(task.employee_id).trigger('change');
-                    $('#taskPriority').val(task.priority).trigger('change');
-                    $('#taskStatus').val(task.status).trigger('change');
+                    $('#taskPriority').val(task.priority || 'Medium').trigger('change');
+                    $('#taskStatus').val(task.status || 'In Process').trigger('change');
                 } else {
                     const projSelect = document.getElementById('taskProjectId');
                     if (projSelect) projSelect.value = task.project_id || '';
 
                     const empSelect = document.getElementById('taskEmployeeId');
                     if (empSelect) empSelect.value = task.employee_id || '';
+                    const prioritySelect = document.getElementById('taskPriority');
+                    if (prioritySelect) prioritySelect.value = task.priority || 'Medium';
                 }
 
                 // Summernote description
@@ -1429,6 +1443,13 @@
                     }
                     if (window.jQuery && $.fn.select2) {
                         $('.form-select').val('').trigger('change');
+                        $('#taskPriority').val('Medium').trigger('change');
+                        $('#taskStatus').val('In Process').trigger('change');
+                    } else {
+                        const prioritySelect = document.getElementById('taskPriority');
+                        if (prioritySelect) prioritySelect.value = 'Medium';
+                        const statusSelect = document.getElementById('taskStatus');
+                        if (statusSelect) statusSelect.value = 'In Process';
                     }
                 } catch (e) { }
             }

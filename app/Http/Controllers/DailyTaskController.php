@@ -34,7 +34,29 @@ class DailyTaskController extends Controller
         // Sync all employees to OTHER project so they all appear in the list
         $otherProject->update(['members' => Employee::pluck('id')->toArray()]);
 
-        if (!$isAdmin) {
+        if ($role == 'team_leader') {
+
+            $teamLeaderDepartment = auth()->user()->employee->department ?? null;
+
+            // Show tasks of employees from same department
+            $departmentEmployeeIds = Employee::where('department', $teamLeaderDepartment)
+                ->pluck('id');
+
+            $query->whereIn('employee_id', $departmentEmployeeIds);
+
+            // Employees dropdown
+            $employees = Employee::where('department', $teamLeaderDepartment)->get();
+
+            // Projects assigned to department employees
+            $projects = Project::where(function ($q) use ($departmentEmployeeIds) {
+
+                foreach ($departmentEmployeeIds as $employeeId) {
+                    $q->orWhereJsonContains('members', (string) $employeeId);
+                }
+
+            })->orderBy('name')->get();
+
+        } elseif (!$isAdmin) {
             // $query->where('employee_id', auth()->user()->employee_id);
             // $employees = Employee::where('id', auth()->user()->employee_id)->get();
             // $projects = Project::orderBy('name')->get();
