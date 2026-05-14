@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\LeaveApplication;
 use App\Models\Attendance;
+use App\Models\Holiday;
 use App\Exports\LeaveApplicationsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
@@ -16,6 +17,53 @@ use App\Mail\LeaveStatusUpdatedMail;
 
 class LeaveApplicationController extends Controller
 {
+    private function getHolidayDatesBetween(Carbon $startDate, Carbon $endDate): array
+    {
+        return Holiday::whereBetween('date', [
+                $startDate->toDateString(),
+                $endDate->toDateString(),
+            ])
+            ->pluck('date')
+            ->map(fn ($date) => Carbon::parse($date)->toDateString())
+            ->all();
+    }
+
+    private function calculateWorkingLeaveDays(string $startDate, ?string $endDate = null): int
+    {
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate ?: $startDate)->startOfDay();
+
+        if ($end->lt($start)) {
+            return 0;
+        }
+
+        $holidayDates = $this->getHolidayDatesBetween($start, $end);
+        $count = 0;
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            if ($date->isSunday()) {
+                continue;
+            }
+
+            if (in_array($date->toDateString(), $holidayDates, true)) {
+                continue;
+            }
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    private function shouldSkipNonWorkingDays(LeaveApplication $leave): bool
+    {
+        $normalizedCategory = strtolower($leave->leave_category);
+        $normalizedType = strtolower($leave->leave_type ?? '');
+
+        return !str_contains($normalizedCategory, 'gatepass')
+            && !str_contains($normalizedType, 'half');
+    }
+
     private function applyCategoryFilter($query, string $category): void
     {
         $normalizedCategory = strtolower(trim($category));
@@ -120,8 +168,11 @@ class LeaveApplicationController extends Controller
         }
 
         $leaves = $query->orderBy('created_at', 'desc')->paginate(15);
+        $holidays = Holiday::pluck('date')
+            ->map(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
+            ->values();
 
-        return view('leave.history', compact('leaves', 'employees'));
+        return view('leave.history', compact('leaves', 'employees', 'holidays'));
     }
 
     public function store(Request $request)
@@ -147,7 +198,14 @@ class LeaveApplicationController extends Controller
         if ($request->leave_category === 'Gatepass Leave') {
             $data['leave_type'] = 'Early Leave';
             $data['total_days'] = 0.125; // 1 hour
-        } 
+        } elseif (str_contains(strtolower($request->leave_type ?? ''), 'half')) {
+            $data['total_days'] = 0.5;
+        } else {
+            $data['total_days'] = $this->calculateWorkingLeaveDays(
+                $request->start_date,
+                $request->end_date ?? $request->start_date
+            );
+        }
 
         if ($request->leave_category === 'Gatepass Leave') {
             $data['end_date'] = $request->start_date;
@@ -215,12 +273,20 @@ class LeaveApplicationController extends Controller
         if ($newStatus === 'approved' && $oldStatus !== 'approved') {
             $startDate = Carbon::parse($leave->start_date);
             $endDate = $leave->end_date ? Carbon::parse($leave->end_date) : $startDate->copy();
+            $holidayDates = $this->getHolidayDatesBetween($startDate, $endDate);
 
             if ($startDate->equalTo($endDate)) {
                 $endDate->addDay();
             }
 
             for ($date = $startDate->copy(); $date->lt($endDate); $date->addDay()) {
+                if (
+                    $this->shouldSkipNonWorkingDays($leave)
+                    && ($date->isSunday() || in_array($date->toDateString(), $holidayDates, true))
+                ) {
+                    continue;
+                }
+
                 Attendance::updateOrCreate(
                     [
                         'employee_id' => $leave->employee_id,

@@ -633,6 +633,34 @@
     </div>
 
     <script>
+        const holidays = @json($holidays ?? []);
+
+        function isNonWorkingDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            return date.getDay() === 0 || holidays.includes(dateString);
+        }
+
+        function calculateWorkingDayCount(startDate, endDate) {
+            let current = new Date(startDate + 'T00:00:00');
+            const end = new Date(endDate + 'T00:00:00');
+            let count = 0;
+
+            while (current <= end) {
+                const currentDate =
+                    current.getFullYear() + '-' +
+                    String(current.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(current.getDate()).padStart(2, '0');
+
+                if (!isNonWorkingDate(currentDate)) {
+                    count++;
+                }
+
+                current.setDate(current.getDate() + 1);
+            }
+
+            return count;
+        }
+
         function switchTab(tabId, el) {
             document.querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
@@ -728,19 +756,10 @@
 
             // FULL DAY
             if (start && end) {
-
-                const sDate = new Date(start);
-                const eDate = new Date(end);
-
-                const diffTime = eDate - sDate;
-
-                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-                totalDaysInput.value = diffDays > 0 ? diffDays + ' Days' : '0 Days';
+            totalDaysInput.value = calculateWorkingDayCount(start, end) + ' Days';
 
             } else if (start) {
-
-                totalDaysInput.value = '1 Day';
+                totalDaysInput.value = isNonWorkingDate(start) ? '0 Days' : '1 Day';
 
             } else {
 
@@ -774,6 +793,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify(data)
