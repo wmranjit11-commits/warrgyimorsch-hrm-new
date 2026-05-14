@@ -12,13 +12,7 @@ use App\Http\Controllers\ZKTController;
 
 
 Route::get('/sync-attendance', [ZKTController::class, 'syncAttendance']);
-// Route::get('/test-zk', function () {
-//     $zk = new \Rats\Zkteco\Lib\ZKTeco('192.168.29.150', 4370, 0, 10);
 
-//     $connected = $zk->connect();
-
-//     dd($connected);
-// });
 Route::get('/', function () {
     return view('auth.login');
 });

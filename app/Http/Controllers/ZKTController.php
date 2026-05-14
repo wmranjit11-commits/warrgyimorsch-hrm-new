@@ -4,89 +4,67 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Rats\Zkteco\Lib\ZKTeco;
-use App\Services\AttendanceService;
-
+use App\Services\PyAttendanceService;
+use Illuminate\Support\Facades\DB;
 class ZKTController extends Controller
 {
 
-    // public function syncAttendance(AttendanceService $service)
-    // {
-    //     $zk = new ZKTeco('192.168.29.150', 4370, 0, 10);
-    //     $connect = $zk->connect();
-    //    if (!$connect) {
-    //         dd("❌ Connection still failed");
-    //     }
 
-    //     dd("✅ Connected successfully");
-        
-    //     $zk->disableDevice();
 
-    //     $attendances = $zk->getAttendance();
-    //     dd($attendances);
-    //     $formatted = [];
+public function syncAttendance(PyAttendanceService $service)
+{
+    $pythonScript = "C:\\xampp\\htdocs\\python\\zk_attendance.py";
 
-    //     foreach ($attendances as $att) {
+    $output = shell_exec("python $pythonScript");
 
-    //         // store raw logs
-    //         \DB::table('attendance_logs')->updateOrInsert(
-    //             [
-    //                 'device_uid' => $att['uid'],
-    //                 'timestamp'  => $att['timestamp'],
-    //             ],
-    //             [
-    //                 'user_id' => $att['id'],
-    //                 'created_at' => now()
-    //             ]
-    //         );
-
-    //         $formatted[] = [
-    //             'employee_code' => $att['id'], // replace with mapping later
-    //             'timestamp'     => $att['timestamp'],
-    //         ];
-    //     }
-
-    //     $service->processPunches($formatted);
-
-    //     $zk->enableDevice();
-
-    //     return "✅ Attendance Synced Successfully";
-    // }
-
-   public function syncAttendance(AttendanceService $service)
-    {
-        $zk = new ZKTeco('192.168.29.150', 4370, 0, 10);
-
-        if (!$zk->connect()) {
-            return "❌ Device Connection Failed";
-        }
-
-        try {
-            $zk->disableDevice();
-
-            $attendances = $zk->getAttendance();
-
-            if (empty($attendances)) {
-                return "⚠️ No attendance records found";
-            }
-
-            $formatted = [];
-
-            foreach ($attendances as $att) {
-                $formatted[] = [
-                    'employee_code' => $att['id'] ?? $att['uid'],
-                    'timestamp'     => $att['timestamp'],
-                ];
-            }
-
-            $service->processPunches($formatted);
-
-            return "✅ Attendance Synced Successfully";
-
-        } catch (\Exception $e) {
-            return "❌ Error: " . $e->getMessage();
-        } finally {
-            $zk->enableDevice();
-        }
+    $records = json_decode($output, true);
+    // dd($records);
+    if (!$records) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No data received from biometric machine',
+            'raw' => $output
+        ]);
     }
+
+    if (isset($records['error'])) {
+        return response()->json([
+            'success' => false,
+            'message' => $records['error']
+        ]);
+    }
+
+    foreach ($records as $att) {
+
+        DB::table('attendance_logs')->updateOrInsert(
+            [
+                'device_uid' => $att['uid'],
+                'timestamp'  => $att['timestamp'],
+            ],
+            [
+                'user_id'    => $att['user_id'],
+                'status'     => $att['status'],
+                'punch'      => $att['punch'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+    }
+
+    $formatted = collect($records)->map(function ($att) {
+        return [
+            'employee_code' => $att['user_id'],
+            'timestamp'     => $att['timestamp'],
+        ];
+    })->toArray();
+
+    $service->processPunches($formatted);
+
+    return response()->json([
+        'success' => true,
+        'total_records' => count($records),
+        'message' => 'Attendance Synced Successfully'
+    ]);
+}
 
 }
