@@ -9,6 +9,10 @@
             'wfh' => 'WFH',
             default => request('category'),
         };
+
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
     @endphp
 
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
@@ -248,14 +252,16 @@
                                                     onclick="openViewModal({{ $leave->id }})" title="View Details">
                                                     <i data-feather="eye" style="width: 14px; height: 14px;"></i>
                                                 </button>
-                                                <button class="btn btn-icon btn-soft-primary"
-                                                    onclick="openActionModal({{ $leave->id }})" title="Take Action">
-                                                    <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
-                                                </button>
-                                                <button class="btn btn-icon btn-soft-danger"
-                                                    onclick="deleteApplication({{ $leave->id }})" title="Delete">
-                                                    <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
-                                                </button>
+                                                @if($isAdmin)
+                                                    <button class="btn btn-icon btn-soft-primary"
+                                                        onclick="openActionModal({{ $leave->id }})" title="Take Action">
+                                                        <i data-feather="edit-3" style="width: 14px; height: 14px;"></i>
+                                                    </button>
+                                                    <button class="btn btn-icon btn-soft-danger"
+                                                        onclick="deleteApplication({{ $leave->id }})" title="Delete">
+                                                        <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

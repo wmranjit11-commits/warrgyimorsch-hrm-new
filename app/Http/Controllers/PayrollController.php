@@ -22,55 +22,72 @@ class PayrollController extends Controller
      */
     public function attendance(Request $request)
     {
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
+
         $query = Attendance::query();
 
         $query->join('employees', 'attendances.employee_id', '=', 'employees.id');
 
-        // ✅ Apply only if user selects filter
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $query->where('employees.department', $department);
+            }
+        }
+
+        // ✅ Apply date filters
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereDate('attendance_date', '>=', $request->start_date)
                 ->whereDate('attendance_date', '<=', $request->end_date);
         }
+
+        // ✅ Apply employee filter (Employee Wise)
+        if ($request->filled('employee_id')) {
+            $query->where('attendances.employee_id', $request->employee_id);
+        }
         // ✅ GROUPING (required for your blade)
-        $attendance = $query->selectRaw("
-                attendances.attendance_date,
-                COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
-                COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
-                COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
-                COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count,
-                COUNT(CASE WHEN attendances.total_hours >= 9.50 THEN 1 END) as overtime_count,
-                SUM(
-                    CASE 
-                        WHEN attendances.check_out IS NOT NULL AND (
+        $select = [
+            'attendances.attendance_date',
+            DB::raw("COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count"),
+            DB::raw("COUNT(CASE WHEN attendances.status = 'overtime' THEN 1 END) as overtime_count"),
+            DB::raw("COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count"),
+            DB::raw("COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count"),
+            DB::raw("COUNT(CASE WHEN attendances.status IN ('absent','leave') THEN 1 END) as leave_count"),
+            DB::raw("COUNT(CASE WHEN attendances.status = 'absent' THEN 1 END) as absent_count"),
+            DB::raw("SUM(CASE WHEN attendances.check_out IS NOT NULL AND ((attendances.status = 'present' AND TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')) OR (attendances.status = 'half_day' AND TIME(attendances.check_out) <= SUBTIME(ADDTIME(TIME(employees.time_in), SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(employees.time_out, employees.time_in)) / 2)), '00:30:00'))) THEN 1 ELSE 0 END) as early_count")
+        ];
 
-                            -- ✅ Full Day Early Out
-                            (
-                                attendances.status = 'present'
-                                AND TIME(attendances.check_out) <= SUBTIME(TIME(employees.time_out), '00:30:00')
-                            )
+        $groupBy = ['attendances.attendance_date'];
 
-                            OR
+        if ($request->filled('employee_id')) {
+            $select[] = 'attendances.status';
+            $select[] = 'attendances.check_in';
+            $select[] = 'attendances.check_out';
+            $select[] = 'attendances.total_hours';
+            $groupBy[] = 'attendances.status';
+            $groupBy[] = 'attendances.check_in';
+            $groupBy[] = 'attendances.check_out';
+            $groupBy[] = 'attendances.total_hours';
+        }
 
-                            -- ✅ Half Day Early Out (half shift time)
-                            (
-                                attendances.status = 'half_day'
-                                AND TIME(attendances.check_out) <= SUBTIME(
-                                    ADDTIME(TIME(employees.time_in), SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(employees.time_out, employees.time_in)) / 2)),
-                                    '00:30:00'
-                                )
-                            )
-
-                        )
-                        THEN 1
-                        ELSE 0
-                    END
-                ) as early_count
-            ")
-            ->groupBy('attendances.attendance_date')
+        $attendance = $query->select($select)
+            ->groupBy($groupBy)
             ->orderBy('attendances.attendance_date', 'desc')
             ->paginate(31);
 
-        return view('payroll.attendance', compact('attendance'));
+        $empQuery = Employee::orderBy('name', 'asc');
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $empQuery->where('department', $department);
+            }
+        }
+        $employees = $empQuery->get();
+
+        return view('payroll.attendance', compact('attendance', 'employees'));
     }
 
     /**
@@ -79,10 +96,26 @@ class PayrollController extends Controller
     public function getAttendanceDetails(Request $request)
     {
         try {
+            $user = auth()->user();
+            $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+            $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+            $isTeamLeader = in_array($role, ['team_leader']);
+
             $date = $request->date;
-            $details = Attendance::with('employee')
-                ->where('attendance_date', $date)
-                ->get();
+            $query = Attendance::with('employee')->where('attendance_date', $date);
+
+            if ($isTeamLeader) {
+                $department = $user->employee->department ?? null;
+                if ($department) {
+                    $query->whereHas('employee', function ($q) use ($department) {
+                        $q->where('department', $department);
+                    });
+                }
+            } elseif (!$isAdmin) {
+                $query->where('employee_id', $user->employee_id);
+            }
+
+            $details = $query->get();
 
             $earlyOuts = 0;
             $totalPresent = 0;
@@ -119,19 +152,20 @@ class PayrollController extends Controller
      */
     public function getAttendance(Request $request)
     {
-        $roleSlug = auth()->user()->role;
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
+        $query = Attendance::with('employee')->join('employees', 'attendances.employee_id', '=', 'employees.id');
 
-        // $role = strtoupper(auth()->user()->role ?? 'USER');
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-
-        $query = Attendance::with('employee');
-
-        if (!$isAdmin) {
-            $query->where('employee_id', auth()->user()->employee_id);
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $query->where('employees.department', $department);
+            }
+        } elseif (!$isAdmin) {
+            $query->where('attendances.employee_id', $user->employee_id);
         }
 
         // Filter by Date Range (Start Date to End Date)
@@ -143,8 +177,8 @@ class PayrollController extends Controller
         }
 
         // Filter by employee
-        if ($isAdmin && $request->filled('employee_id')) {
-            $query->where('employee_id', $request->employee_id);
+        if (($isAdmin || $isTeamLeader) && $request->filled('employee_id')) {
+            $query->where('attendances.employee_id', $request->employee_id);
         }
 
         $attendance = $query->orderBy('attendance_date', 'desc')->paginate(10);
@@ -1138,7 +1172,19 @@ class PayrollController extends Controller
     // Show Employee wise attendace
     public function employeeWiseAttendace(Request $request)
     {
-        $employees = Employee::orderBy('name', 'asc')->get();
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
+
+        $empQuery = Employee::orderBy('name', 'asc');
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $empQuery->where('department', $department);
+            }
+        }
+        $employees = $empQuery->get();
 
         $query = Attendance::selectRaw("
         attendances.employee_id,
@@ -1183,6 +1229,13 @@ class PayrollController extends Controller
     ")
             ->join('employees', 'attendances.employee_id', '=', 'employees.id');
 
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $query->where('employees.department', $department);
+            }
+        }
+
 
         // FILTER BY EMPLOYEE NAME
         if ($request->filled('employee_id')) {
@@ -1209,7 +1262,23 @@ class PayrollController extends Controller
     public function employeeWiseDetails(Request $request)
     {
         try {
+            $user = auth()->user();
+            $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+            $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+            $isTeamLeader = in_array($role, ['team_leader']);
+
             $query = Attendance::with('employee')->where('employee_id', $request->employee_id);
+
+            // Security check for Team Leader
+            if ($isTeamLeader) {
+                $department = $user->employee->department ?? null;
+                $targetEmployee = Employee::find($request->employee_id);
+                if ($department && $targetEmployee && $targetEmployee->department !== $department) {
+                    return response()->json(['success' => false, 'message' => 'Unauthorized access to employee data.'], 403);
+                }
+            } elseif (!$isAdmin && $request->employee_id != $user->employee_id) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized access.'], 403);
+            }
 
             if ($request->filled('start_date')) {
                 $query->whereDate('attendance_date', '>=', $request->start_date);

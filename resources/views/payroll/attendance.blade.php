@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
+    @endphp
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Main Content Card -->
         <div class="px-2 px-md-4 pt-3 pt-md-4">
@@ -24,7 +29,7 @@
                         <div class="flex-grow-1 flex-md-grow-0" style="min-width: 250px; max-width: 320px;">
                             <div class="search-group d-flex align-items-center px-3"
                                 style="height: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; transition: all 0.3s ease;">
-                                <i class="feather-search text-muted me-2" style="font-size: 14px;"></i>
+                                <i data-feather="search" class="text-muted me-2" style="width: 16px; height: 16px;"></i>
                                 <input type="text" id="tableSearch" onkeyup="searchTable()" placeholder="Search records..."
                                     style="border: none; background: transparent; outline: none; width: 100%; font-size: 13px; font-weight: 500; color: #334155;">
                             </div>
@@ -32,65 +37,64 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex align-items-center gap-2">
-                            <a href="{{ route('payroll.attendace.employee') }}"
-                                class="btn btn-soft-primary btn-sm fw-bold d-flex align-items-center px-3"
-                                style="height: 40px; border-radius: 10px; border: 1px solid rgba(56, 88, 249, 0.2) !important; white-space: nowrap;">
-                                <span class="d-none d-sm-inline">EMPLOYEE WISE</span>
-                                <i class="feather-user d-sm-none"></i>
-                            </a>
+                                <a href="{{ route('payroll.attendace.employee') }}"
+                                    class="btn btn-soft-primary btn-sm fw-bold d-flex align-items-center px-3"
+                                    style="height: 40px; border-radius: 10px; border: 1px solid rgba(56, 88, 249, 0.2) !important; white-space: nowrap;">
+                                    <span class="d-none d-sm-inline">EMPLOYEE WISE</span>
+                                    <i data-feather="users" class="ms-sm-2"></i>
+                                </a>
 
-                            <div class="dropdown">
-                                <button
-                                    class="btn btn-soft-secondary btn-sm fw-bold d-flex align-items-center px-3 dropdown-toggle"
-                                    type="button" data-bs-toggle="dropdown"
-                                    style="height: 40px; border-radius: 10px; border: 1px solid rgba(100, 116, 139, 0.2) !important;">
-                                    <span class="d-none d-sm-inline">IMPORT</span>
-                                    <i class="fas fa-upload ms-2"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end p-4 shadow-lg border-0"
-                                    style="width: 320px; border-radius: 15px;">
-                                    <form action="{{ route('payroll.attendance.import') }}" method="POST"
-                                        enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold small text-dark mb-2">Import Excel/CSV
-                                                File</label>
-                                            <input type="file" class="form-control" name="import_file"
-                                                accept=".xlsx, .xls, .csv" required style="border-radius: 8px;">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"
-                                            style="border-radius: 8px;">
-                                            UPLOAD & CALCULATE
+                                @if($isAdmin)
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-soft-secondary btn-sm fw-bold d-flex align-items-center px-3 dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown"
+                                            style="height: 40px; border-radius: 10px; border: 1px solid rgba(100, 116, 139, 0.2) !important;">
+                                            <span class="d-none d-sm-inline">IMPORT</span>
+                                            <i class="fas fa-upload ms-2"></i>
                                         </button>
-                                    </form>
-                                </div>
-                            </div>
+                                        <div class="dropdown-menu dropdown-menu-end p-4 shadow-lg border-0"
+                                            style="width: 320px; border-radius: 15px;">
+                                            <form action="{{ route('payroll.attendance.import') }}" method="POST"
+                                                enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold small text-dark mb-2">Import Excel/CSV
+                                                        File</label>
+                                                    <input type="file" class="form-control" name="import_file"
+                                                        accept=".xlsx, .xls, .csv" required style="border-radius: 8px;">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100 fw-bold py-2"
+                                                    style="border-radius: 8px;">
+                                                    UPLOAD & CALCULATE
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endif
 
-                            <div class="d-flex gap-1">
-                                <a href="javascript:void(0);" class="btn btn-icon btn-soft-primary"
-                                    data-bs-toggle="collapse" data-bs-target="#filterSection"
-                                    style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
-                                    <i class="feather-filter"></i>
-                                </a>
-                                <a href="javascript:void(0);" class="btn btn-icon btn-soft-info"
-                                    onclick="exportAttendance()"
-                                    style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(13, 202, 240, 0.1) !important;">
-                                    <i class="feather-download"></i>
-                                </a>
-                                <a href="{{ route('payroll.attendance.add') }}" class="btn btn-icon btn-primary shadow-sm"
-                                    style="height: 40px; width: 40px; border-radius: 10px;">
-                                    <i class="feather-plus"></i>
-                                </a>
-                            </div>
+                                <div class="d-flex gap-1">
+                                    <a href="javascript:void(0);" class="btn btn-icon btn-soft-info"
+                                        onclick="exportAttendance()"
+                                        style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(13, 202, 240, 0.1) !important;">
+                                        <i data-feather="download"></i>
+                                    </a>
+                                    @if($isAdmin)
+                                        <a href="{{ route('payroll.attendance.add') }}" class="btn btn-icon btn-primary shadow-sm"
+                                            style="height: 40px; width: 40px; border-radius: 10px;">
+                                            <i data-feather="plus"></i>
+                                        </a>
+                                    @endif
+                                </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Collapsible Filter Section -->
-                <div class="collapse" id="filterSection">
+                <!-- Always Visible Filter Section -->
+                <div id="filterSection">
                     <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
                         <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label small fw-bold text-muted mb-2">Quick Range</label>
                                 <div class="dropdown">
                                     <button class="wghrm-custom-select-btn fw-bold dropdown-toggle" type="button"
@@ -155,13 +159,47 @@
                                 </div>
                                 <input type="hidden" id="quickRange" value="{{ request('range') }}">
                             </div>
+
                             <div class="col-md-3">
+                                <label class="form-label small fw-bold text-muted mb-2">Employee</label>
+                                <div class="dropdown">
+                                    <button class="wghrm-custom-select-btn fw-bold dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="outside" id="employeeSelectBtn">
+                                        @php
+                                            $selectedEmpId = request('employee_id');
+                                            $selectedEmp = $employees->firstWhere('id', $selectedEmpId);
+                                        @endphp
+                                        {{ $selectedEmp ? $selectedEmp->name : 'All Employees' }}
+                                    </button>
+                                    <div class="dropdown-menu wghrm-custom-dropdown-menu">
+                                        <div class="wghrm-custom-search-box">
+                                            <input type="text" class="wghrm-custom-search-input"
+                                                placeholder="Search employee..." onkeyup="wghrmFilterItems(this)">
+                                        </div>
+                                        <div class="wghrm-items-container">
+                                            <a class="dropdown-item wghrm-custom-dropdown-item {{ !$selectedEmpId ? 'active' : '' }}"
+                                                href="javascript:void(0);"
+                                                onclick="selectEmployee('', 'All Employees')">All Employees</a>
+                                            @foreach ($employees as $emp)
+                                                <a class="dropdown-item wghrm-custom-dropdown-item {{ $selectedEmpId == $emp->id ? 'active' : '' }}"
+                                                    href="javascript:void(0);"
+                                                    onclick="selectEmployee('{{ $emp->id }}', '{{ $emp->name }}')">
+                                                    {{ $emp->name }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="selectedEmployeeId" value="{{ request('employee_id') }}">
+                            </div>
+
+                            <div class="col-md-2">
                                 <label class="form-label small fw-bold text-muted mb-2">Start Date</label>
                                 <input type="date" id="startDate"
                                     class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
                                     value="{{ request('start_date') }}" style="border-radius: 10px; height: 44px;">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label small fw-bold text-muted mb-2">End Date</label>
                                 <input type="date" id="endDate"
                                     class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
@@ -172,7 +210,7 @@
                                     class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
                                     style="background: #3858f9; border: none; height: 44px; border-radius: 10px;">
-                                    <i class="feather-search"></i> APPLY
+                                    <i data-feather="search"></i> APPLY
                                 </button>
                             </div>
                         </div>
@@ -210,56 +248,91 @@
                                         </td>
                                         <td>
                                             @php $date = \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d'); @endphp
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <div class="ref-badge badge-green clickable" title="View Present"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'present')">
-                                                    Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
+                                            @if(request('employee_id'))
+                                                <div class="d-flex align-items-center gap-3">
+                                                    @php
+                                                        $statusClass = [
+                                                            'present' => 'bg-soft-success text-success',
+                                                            'absent' => 'bg-soft-danger text-danger',
+                                                            'leave' => 'bg-soft-danger text-danger',
+                                                            'half_day' => 'bg-soft-warning text-warning',
+                                                            'wfh' => 'bg-soft-purple text-purple',
+                                                            'overtime' => 'bg-soft-primary text-primary'
+                                                        ][$att->status] ?? 'bg-soft-secondary text-secondary';
+                                                    @endphp
+                                                    <span class="badge {{ $statusClass }} fw-bold text-uppercase px-3 py-2" style="font-size: 11px; border-radius: 6px;">{{ str_replace('_', ' ', $att->status) }}</span>
+                                                    
+                                                    <div class="d-flex align-items-center gap-4">
+                                                        <div class="text-center">
+                                                            <div class="small text-muted fw-bold text-uppercase" style="font-size: 9px;">Check In</div>
+                                                            <div class="fw-bold text-dark" style="font-size: 13px;">{{ $att->check_in ? date('h:i A', strtotime($att->check_in)) : '--:--' }}</div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <div class="small text-muted fw-bold text-uppercase" style="font-size: 9px;">Check Out</div>
+                                                            <div class="fw-bold text-dark" style="font-size: 13px;">{{ $att->check_out ? date('h:i A', strtotime($att->check_out)) : '--:--' }}</div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <div class="small text-muted fw-bold text-uppercase" style="font-size: 9px;">Work Hours</div>
+                                                            <div class="fw-bold text-primary" style="font-size: 13px;">{{ number_format($att->total_hours, 2) }} hrs</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="ref-badge badge-blue clickable" title="View Overtime"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
-                                                    Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
+                                            @else
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <div class="ref-badge badge-green clickable" title="View Present"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'present')">
+                                                        Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-blue clickable" title="View Overtime"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
+                                                        Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-yellow clickable" title="View Half Day"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
+                                                        Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-red clickable" title="View Leave"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'leave')">
+                                                        Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-red clickable" title="View Absent"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'absent')">
+                                                        Absent: <span class="fw-bold ms-1">{{ $att->absent_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-purple clickable" title="View Present"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
+                                                        WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
+                                                    </div>
+                                                    <div class="ref-badge badge-purple clickable" title="View Present"
+                                                        onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
+                                                        Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
+                                                    </div>
                                                 </div>
-                                                <div class="ref-badge badge-yellow clickable" title="View Half Day"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
-                                                    Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
-                                                </div>
-                                                <div class="ref-badge badge-red clickable" title="View Leave"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'leave')">
-                                                    Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
-                                                </div>
-                                                <div class="ref-badge badge-red clickable" title="View Absent"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'absent')">
-                                                    Absent: <span class="fw-bold ms-1">{{ $att->absent_count }}</span>
-                                                </div>
-                                                <div class="ref-badge badge-purple clickable" title="View Present"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
-                                                    WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
-                                                </div>
-                                                <div class="ref-badge badge-purple clickable" title="View Present"
-                                                    onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
-                                                    Early Out: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
-                                                </div>
-                                            </div>
+                                            @endif
                                         </td>
                                         <td class="pe-4 text-end">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} "
-                                                    class="btn btn-icon btn-soft-primary rounded-circle" title="Edit"
-                                                    style="width: 34px; height: 34px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
-                                                    <i class="feather-edit" style="font-size: 14px;"></i>
-                                                </a>
+                                                @if($isAdmin)
+                                                    <a href="{{ route('payroll.attendance.editByDate', \Carbon\Carbon::parse($att->attendance_date)->format('Y-m-d')) }} "
+                                                        class="btn btn-icon btn-soft-primary rounded-circle" title="Edit"
+                                                        style="width: 34px; height: 34px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
+                                                        <i data-feather="edit" style="width: 14px; height: 14px;"></i>
+                                                    </a>
+                                                @endif
                                                 <a href="javascript:void(0);"
                                                     class="btn btn-icon btn-soft-primary rounded-circle"
                                                     onclick="openAttendanceDetails('{{ $date }}')" title="View"
                                                     style="width: 34px; height: 34px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
-                                                    <i class="feather-eye" style="font-size: 14px;"></i>
+                                                    <i data-feather="eye" style="width: 14px; height: 14px;"></i>
                                                 </a>
-                                                <a href="javascript:void(0);"
-                                                    class="btn btn-icon btn-soft-danger rounded-circle"
-                                                    onclick="deleteAttendanceByDate('{{ $date }}')" title="Delete"
-                                                    style="width: 34px; height: 34px; border: 1px solid rgba(239, 68, 68, 0.1) !important;">
-                                                    <i class="feather-trash-2" style="font-size: 14px;"></i>
-                                                </a>
+                                                @if($isAdmin)
+                                                    <a href="javascript:void(0);"
+                                                        class="btn btn-icon btn-soft-danger rounded-circle"
+                                                        onclick="deleteAttendanceByDate('{{ $date }}')" title="Delete"
+                                                        style="width: 34px; height: 34px; border: 1px solid rgba(239, 68, 68, 0.1) !important;">
+                                                        <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -295,58 +368,93 @@
                                                 class="fw-bold text-dark fs-6">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d-M-Y') }}</span>
                                         </div>
                                         <div class="d-flex gap-2">
-                                            <a href="{{ route('payroll.attendance.editByDate', $date) }}"
-                                                class="avatar-text avatar-sm bg-soft-primary text-primary">
-                                                <i class="feather-edit"></i>
-                                            </a>
+                                            @if($isAdmin)
+                                                <a href="{{ route('payroll.attendance.editByDate', $date) }}"
+                                                    class="avatar-text avatar-sm bg-soft-primary text-primary">
+                                                    <i data-feather="edit"></i>
+                                                </a>
+                                            @endif
                                             <a href="javascript:void(0);" onclick="openAttendanceDetails('{{ $date }}')"
                                                 class="avatar-text avatar-sm bg-soft-info text-info">
-                                                <i class="feather-eye"></i>
+                                                <i data-feather="eye"></i>
                                             </a>
-                                            <a href="javascript:void(0);" onclick="deleteAttendanceByDate('{{ $date }}')"
-                                                class="avatar-text avatar-sm bg-soft-danger text-danger">
-                                                <i class="feather-trash-2"></i>
-                                            </a>
+                                            @if($isAdmin)
+                                                <a href="javascript:void(0);" onclick="deleteAttendanceByDate('{{ $date }}')"
+                                                    class="avatar-text avatar-sm bg-soft-danger text-danger">
+                                                    <i data-feather="trash-2"></i>
+                                                </a>
+                                            @endif
                                         </div>
                                     </div>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-green w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'present')">
-                                                Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
+                                    @if(request('employee_id'))
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                @php
+                                                    $statusClass = [
+                                                        'present' => 'bg-soft-success text-success',
+                                                        'absent' => 'bg-soft-danger text-danger',
+                                                        'leave' => 'bg-soft-danger text-danger',
+                                                        'half_day' => 'bg-soft-warning text-warning',
+                                                        'wfh' => 'bg-soft-purple text-purple',
+                                                        'overtime' => 'bg-soft-primary text-primary'
+                                                    ][$att->status] ?? 'bg-soft-secondary text-secondary';
+                                                @endphp
+                                                <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background: #f8fafc;">
+                                                    <span class="badge {{ $statusClass }} fw-bold text-uppercase px-2 py-1" style="font-size: 10px;">{{ str_replace('_', ' ', $att->status) }}</span>
+                                                    <div class="fw-bold text-primary">{{ number_format($att->total_hours, 2) }} hrs</div>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <div class="flex-fill p-2 bg-white rounded border text-center">
+                                                        <div class="small text-muted fw-bold text-uppercase" style="font-size: 8px;">Check In</div>
+                                                        <div class="fw-bold text-dark" style="font-size: 11px;">{{ $att->check_in ? date('h:i A', strtotime($att->check_in)) : '--:--' }}</div>
+                                                    </div>
+                                                    <div class="flex-fill p-2 bg-white rounded border text-center">
+                                                        <div class="small text-muted fw-bold text-uppercase" style="font-size: 8px;">Check Out</div>
+                                                        <div class="fw-bold text-dark" style="font-size: 11px;">{{ $att->check_out ? date('h:i A', strtotime($att->check_out)) : '--:--' }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-blue w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
-                                                Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
+                                    @else
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-green w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'present')">
+                                                    Present: <span class="fw-bold ms-1">{{ $att->present_count }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-blue w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'overtime')">
+                                                    Overtime: <span class="fw-bold ms-1">{{ $att->overtime_count }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-yellow w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
+                                                    Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-red w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'leave')">
+                                                    Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-purple w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
+                                                    WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="ref-badge badge-purple w-100 clickable py-2"
+                                                    onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
+                                                    Early: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-yellow w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'half_day')">
-                                                Half Day: <span class="fw-bold ms-1">{{ $att->half_day_count }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-red w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'leave')">
-                                                Leave: <span class="fw-bold ms-1">{{ $att->leave_count }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-purple w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'wfh')">
-                                                WFH: <span class="fw-bold ms-1">{{ $att->wfh_count }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="ref-badge badge-purple w-100 clickable py-2"
-                                                onclick="openAttendanceDetails('{{ $date }}', 'early_out')">
-                                                Early: <span class="fw-bold ms-1">{{ $att->early_count }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -411,6 +519,7 @@
 @endpush
 
 @push('scripts')
+    <script src="https://unpkg.com/feather-icons"></script>
     <script>
         function updateDateRange(range) {
             const startInput = document.getElementById('startDate');
@@ -509,15 +618,25 @@
             }
         });
 
+        function selectEmployee(val, label) {
+            document.getElementById('selectedEmployeeId').value = val;
+            document.getElementById('employeeSelectBtn').innerText = label;
+            bootstrap.Dropdown.getInstance(document.getElementById('employeeSelectBtn')).hide();
+        }
+
         function applyFilters() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             const range = document.getElementById('quickRange').value;
+            const empId = document.getElementById('selectedEmployeeId').value;
 
             let url = new URL(window.location.href);
             if (start) url.searchParams.set('start_date', start);
             if (end) url.searchParams.set('end_date', end);
             if (range) url.searchParams.set('range', range);
+            if (empId) url.searchParams.set('employee_id', empId);
+            else url.searchParams.delete('employee_id');
+            
             window.location.href = url.toString();
         }
 
@@ -531,6 +650,7 @@
         }
 
         function openAttendanceDetails(date, filterStatus = null) {
+            lastDate = date;
             let url = `/payroll/attendance/details?date=${date}`;
             fetch(url)
                 .then(res => res.json())
@@ -554,23 +674,27 @@
 
                         renderTable(data.data, filterStatus, data.is_activity);
 
+                        // Robust Offcanvas opening
                         const offcanvasEl = document.getElementById('attendanceDetailOffcanvas');
                         if (offcanvasEl) {
                             try {
-                                const bObj = window.bootstrap || bootstrap;
-                                let offcanvas = bObj.Offcanvas.getInstance(offcanvasEl) || new bObj.Offcanvas(offcanvasEl);
+                                // Try finding existing instance or create new one
+                                let bootstrapObj = window.bootstrap || bootstrap;
+                                let offcanvas = bootstrapObj.Offcanvas.getInstance(offcanvasEl);
+                                if (!offcanvas) {
+                                    offcanvas = new bootstrapObj.Offcanvas(offcanvasEl);
+                                }
                                 offcanvas.show();
                             } catch (e) {
-                                console.warn('Bootstrap JS failed, trying jQuery fallback:', e);
-                                if (typeof $ !== 'undefined' && $.fn.offcanvas) {
-                                    $(offcanvasEl).offcanvas('show');
+                                console.error('Bootstrap Offcanvas failed:', e);
+                                // Fallback to jQuery if available
+                                if (window.jQuery) {
+                                    jQuery(offcanvasEl).offcanvas('show');
                                 } else {
+                                    // Extreme fallback: manual show
                                     offcanvasEl.classList.add('show');
                                     offcanvasEl.style.visibility = 'visible';
-                                    document.body.classList.add('offcanvas-open');
-                                    const backdrop = document.createElement('div');
-                                    backdrop.className = 'offcanvas-backdrop fade show';
-                                    document.body.appendChild(backdrop);
+                                    offcanvasEl.style.display = 'block';
                                 }
                             }
                         }
@@ -578,7 +702,7 @@
                 })
                 .catch(err => {
                     console.error('Fetch error:', err);
-                    alert('Could not load details. Please check console.');
+                    alert('Error loading attendance details. Please try again.');
                 });
         }
 
@@ -649,12 +773,14 @@
                                         <span class="status-badge ${badgeClass}">${statusDisplay}</span>
                                     </td>
                                     <td class="pe-4 text-center d-flex justify-content-center">
-                                        <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                        <button class="btn btn-sm text-primary shadow-none" onclick="editSingleAttendance(${item.id}, '${lastDate}')">
-                                            <i class="feather-edit"></i>
-                                        </button>
+                                        @if($isAdmin)
+                                            <button class="btn btn-sm text-primary shadow-none" onclick="editSingleAttendance(${item.id})">
+                                                <i data-feather="edit" style="width:14px; height:14px;"></i>
+                                            </button>
+                                            <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
+                                                <i data-feather="trash-2" style="width:14px; height:14px;"></i>
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             `;
@@ -684,12 +810,14 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-soft-primary px-3 rounded-pill" onclick="editSingleAttendance(${item.id}, '${lastDate}')">
-                                        <i class="feather-edit me-1"></i> Edit
-                                    </button>
-                                    <button class="btn btn-sm btn-soft-danger px-3 rounded-pill" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
+                                    @if($isAdmin)
+                                        <button class="btn btn-sm btn-soft-primary px-3 rounded-pill" onclick="editSingleAttendance(${item.id}, '${lastDate}')">
+                                            <i class="feather-edit me-1"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger px-3 rounded-pill" onclick="deleteSingleAttendance(${item.id}, '${lastDate}')">
+                                            <i class="bi bi-trash me-1"></i> Delete
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         `;
@@ -702,6 +830,10 @@
             } else {
                 document.getElementById('showAllBtn').style.display = 'none';
                 document.getElementById('statusIndicator').innerText = 'Showing All Records';
+            }
+
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             }
         }
 
@@ -832,6 +964,13 @@
                 + "?start_date=" + start
                 + "&end_date=" + end;
         }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
     </script>
 
     <style>

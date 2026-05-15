@@ -71,7 +71,20 @@ class LeaveApplicationController extends Controller
 
     public function index(Request $request)
     {
-        // echo auth()->user()->role;exit;
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, [
+            'super_admin',
+            'manager',
+            'hr_executive',
+            'hr_intern',
+            'business_operation_head'
+        ]);
+
+        $isTeamLeader = in_array($role, [
+            'team_leader'
+        ]);
+
         $query = LeaveApplication::with('employee');
 
         // Search Filters
@@ -93,30 +106,21 @@ class LeaveApplicationController extends Controller
             $query->whereDate('start_date', '<=', $request->to_date);
         }
 
-        $roleName = auth()->user()->role ?? '';
-        $roleSlug = \Illuminate\Support\Str::slug($roleName);
-
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->orWhere('name', $roleName)
-            ->value('id');
-
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-
-        // Secondary safety check: If DB lookup fails or doesn't match ID list, 
-        // check if role name contains admin or hr keywords
-        if (!$isAdmin && $roleName) {
-            $lowerRole = strtolower($roleName);
-            if (str_contains($lowerRole, 'admin') || str_contains($lowerRole, 'hr')) {
-                $isAdmin = true;
-            }
-        }
-
-        if (!$isAdmin) {
-            $query->where('employee_id', auth()->user()->employee_id);
-            $employees = Employee::where('id', auth()->user()->employee_id)->get();
-        } else {
+        if ($isAdmin) {
             $employees = Employee::all();
+        } elseif ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $query->whereHas('employee', function ($q) use ($department) {
+                    $q->where('department', $department);
+                });
+                $employees = Employee::where('department', $department)->get();
+            } else {
+                $employees = collect();
+            }
+        } else {
+            $query->where('employee_id', $user->employee_id);
+            $employees = Employee::where('id', $user->employee_id)->get();
         }
 
         $leaves = $query->orderBy('created_at', 'desc')->paginate(15);

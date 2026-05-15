@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
+    @endphp
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Main Content Card -->
         <div class="px-2 px-md-4 pt-3 pt-md-4">
@@ -79,7 +84,7 @@
                                 </a>
                                 <a href="{{ route('payroll.attendance.add') }}" class="btn btn-icon btn-primary shadow-sm"
                                     style="height: 40px; width: 40px; border-radius: 10px;">
-                                    <i class="feather-plus"></i>
+                                    <i data-feather="plus"></i>
                                 </a>
                             </div>
                         </div>
@@ -288,7 +293,7 @@
                                                     onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')"
                                                     title="View"
                                                     style="width: 34px; height: 34px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
-                                                    <i class="feather-eye" style="font-size: 14px;"></i>
+                                                    <i data-feather="eye" style="width: 14px; height: 14px;"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -330,7 +335,7 @@
                                             <a href="javascript:void(0);"
                                                 onclick="openAttendanceDetails('{{ $employeeId }}', '{{ $employeeName }}')"
                                                 class="avatar-text avatar-sm bg-soft-info text-info">
-                                                <i class="feather-eye"></i>
+                                                <i data-feather="eye"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -436,7 +441,16 @@
 @endpush
 
 @push('scripts')
+    <script src="https://unpkg.com/feather-icons"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
+        const isAdmin = {{ $isAdmin ? 'true' : 'false' }};
+        const isTeamLeader = {{ $isTeamLeader ? 'true' : 'false' }};
+
         function updateDateRange(range) {
             const startInput = document.getElementById('startDate');
             const endInput = document.getElementById('endDate');
@@ -594,25 +608,8 @@
 
                         const offcanvasEl = document.getElementById('attendanceDetailOffcanvas');
                         if (offcanvasEl) {
-                            // Try multiple ways to show the offcanvas
-                            try {
-                                const bObj = window.bootstrap || bootstrap;
-                                let offcanvas = bObj.Offcanvas.getInstance(offcanvasEl) || new bObj.Offcanvas(offcanvasEl);
-                                offcanvas.show();
-                            } catch (e) {
-                                console.warn('Bootstrap JS failed, trying jQuery fallback:', e);
-                                if (typeof $ !== 'undefined' && $.fn.offcanvas) {
-                                    $(offcanvasEl).offcanvas('show');
-                                } else {
-                                    // Extreme fallback: manual style change
-                                    offcanvasEl.classList.add('show');
-                                    offcanvasEl.style.visibility = 'visible';
-                                    document.body.classList.add('offcanvas-open');
-                                    const backdrop = document.createElement('div');
-                                    backdrop.className = 'offcanvas-backdrop fade show';
-                                    document.body.appendChild(backdrop);
-                                }
-                            }
+                            const offcanvas = new bootstrap.Offcanvas(offcanvasEl);
+                            offcanvas.show();
                         }
                     }
                 })
@@ -681,25 +678,27 @@
 
                     // Desktop Row
                     body.innerHTML += `
-                            <tr class="border-bottom">
-                                <td class="ps-4 py-3 text-muted fw-bold">${index + 1}</td>
-                                <td class="fw-bold text-dark">${formatDate(item.attendance_date)}</td>
-                                <td class="text-center">${item.check_in ? formatTime(item.check_in) : '--'}</td>
-                                <td class="text-center">${item.check_out ? formatTime(item.check_out) : '--'}</td>
-                               <td class="text-center">${formatHours(item.total_hours)}</td>
-                                <td class="text-center">
-                                    <span class="status-badge ${badgeClass}">${statusDisplay}</span>
-                                </td>
-                                <td class="pe-4 text-center d-flex justify-content-center">
-                                    <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id})">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    <button class="btn btn-sm text-primary shadow-none" onclick="editSingleAttendance(${item.id}, '${item.employee_id}')">
-                                        <i class="feather-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                                <tr class="border-bottom">
+                                    <td class="ps-4 py-3 text-muted fw-bold">${index + 1}</td>
+                                    <td class="fw-bold text-dark">${formatDate(item.attendance_date)}</td>
+                                    <td class="text-center">${item.check_in ? formatTime(item.check_in) : '--'}</td>
+                                    <td class="text-center">${item.check_out ? formatTime(item.check_out) : '--'}</td>
+                                   <td class="text-center">${formatHours(item.total_hours)}</td>
+                                    <td class="text-center">
+                                        <span class="status-badge ${badgeClass}">${statusDisplay}</span>
+                                    </td>
+                                    <td class="pe-4 text-center d-flex justify-content-center">
+                                        @if($isAdmin)
+                                            <button class="btn btn-sm text-primary shadow-none" onclick="editSingleAttendance(${item.id}, '${item.employee_id}')">
+                                                <i data-feather="edit" style="width:14px; height:14px;"></i>
+                                            </button>
+                                            <button class="btn btn-sm text-danger shadow-none" onclick="deleteSingleAttendance(${item.id})">
+                                                <i data-feather="trash-2" style="width:14px; height:14px;"></i>
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            `;
 
                     // Mobile Card
                     cardsBody.innerHTML += `
@@ -726,12 +725,14 @@
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-soft-primary px-3 rounded-pill" onclick="editSingleAttendance(${item.id}, '${item.employee_id}')">
-                                        <i class="feather-edit me-1"></i> Edit
-                                    </button>
-                                    <button class="btn btn-sm btn-soft-danger px-3 rounded-pill" onclick="deleteSingleAttendance(${item.id})">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
+                                    @if($isAdmin)
+                                        <button class="btn btn-sm btn-soft-primary px-3 rounded-pill" onclick="editSingleAttendance(${item.id})">
+                                            <i data-feather="edit" style="width:14px; height:14px;" class="me-1"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger px-3 rounded-pill" onclick="deleteSingleAttendance(${item.id})">
+                                            <i data-feather="trash-2" style="width:14px; height:14px;" class="me-1"></i> Delete
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         `;
@@ -744,6 +745,10 @@
             } else {
                 document.getElementById('showAllBtn').style.display = 'none';
                 document.getElementById('statusIndicator').innerText = 'Showing All Records';
+            }
+
+            if (typeof feather !== 'undefined') {
+                feather.replace();
             }
         }
 
@@ -852,23 +857,13 @@
         }
 
         function exportAttendance() {
-            const params = new URLSearchParams(window.location.search);
-
-            const employee_id = params.get('employee_id');
-            const start = params.get('start_date');
-            const end = params.get('end_date');
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
 
             if (!start || !end) {
-                alert('Date range missing');
+                alert('Please select both dates');
                 return;
             }
-            let url = "{{ route('payroll.attendance.export') }}";
-            url += "?start_date=" + start + "&end_date=" + end;
-
-            if (employee_id) {
-                url += "&employee_id=" + employee_id;
-            }
-
             window.location.href = url;
         }
     </script>

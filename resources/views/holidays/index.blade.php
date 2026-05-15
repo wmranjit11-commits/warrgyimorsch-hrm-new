@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+    $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+    $isTeamLeader = in_array($role, ['team_leader']);
+@endphp
 
 <!-- [ page-header ] start -->
 <div class="page-header">
@@ -19,39 +24,41 @@
 <!-- [ main-content ] start -->
 <div class="main-content pt-4" style="margin-bottom: 100px;">
     <div class="row g-4">
-        <!-- HOLIDAY FORM (LEFT - 4 Cols) -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
-                <div class="card-header bg-white border-bottom py-3" style="border-radius: 12px 12px 0 0;">
-                    <h6 class="fw-bold mb-0 text-uppercase" style="color: #64748b; font-size: 11px; letter-spacing: 0.5px;">New Holiday</h6>
-                </div>
-                <div class="card-body p-4">
-                    <form id="holidayForm">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Title</label>
-                            <input type="text" name="title" id="holidayTitle" class="form-control border-0 bg-light shadow-none" 
-                                placeholder="Enter holiday title" required style="border-radius: 10px; height: 48px; font-size: 14px;">
-                        </div>
+        @if($isAdmin)
+            <!-- HOLIDAY FORM (LEFT - 4 Cols) -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px; background: white;">
+                    <div class="card-header bg-white border-bottom py-3" style="border-radius: 12px 12px 0 0;">
+                        <h6 class="fw-bold mb-0 text-uppercase" style="color: #64748b; font-size: 11px; letter-spacing: 0.5px;">New Holiday</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="holidayForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Title</label>
+                                <input type="text" name="title" id="holidayTitle" class="form-control border-0 bg-light shadow-none" 
+                                    placeholder="Enter holiday title" required style="border-radius: 10px; height: 48px; font-size: 14px;">
+                            </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Date</label>
-                            <input type="date" name="date" id="holidayDate" class="form-control border-0 bg-light shadow-none" 
-                                value="{{ date('Y-m-d') }}" onclick="this.showPicker()" required 
-                                style="border-radius: 10px; height: 48px; font-size: 14px;">
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Holiday Date</label>
+                                <input type="date" name="date" id="holidayDate" class="form-control border-0 bg-light shadow-none" 
+                                    value="{{ date('Y-m-d') }}" onclick="this.showPicker()" required 
+                                    style="border-radius: 10px; height: 48px; font-size: 14px;">
+                            </div>
 
-                        <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm" 
-                            style="background: #3858f9; border: none; height: 52px; border-radius: 10px; font-size: 14px; letter-spacing: 0.5px;">
-                            SAVE HOLIDAY
-                        </button>
-                    </form>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm" 
+                                style="background: #3858f9; border: none; height: 52px; border-radius: 10px; font-size: 14px; letter-spacing: 0.5px;">
+                                SAVE HOLIDAY
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endif
 
         <!-- HOLIDAY LIST (RIGHT - 8 Cols) -->
-        <div class="col-xl-8 col-lg-7">
+        <div class="{{ $isAdmin ? 'col-xl-8 col-lg-7' : 'col-12' }}">
             <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 12px; background: white;">
                 <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center"
                     style="border-radius: 12px 12px 0 0;">
@@ -76,7 +83,9 @@
                                     <th class="ps-4" style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Sr.No.</th>
                                     <th style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Holiday Title</th>
                                     <th style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Date</th>
-                                    <th class="pe-4 text-center" style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Action</th>
+                                    @if($isAdmin)
+                                        <th class="pe-4 text-center" style="font-size: 12px; font-weight: 700; color: white; text-transform: uppercase;">Action</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody style="border-top: 1px solid #f1f5f9;">
@@ -90,16 +99,18 @@
                                             <span class="fw-bold">{{ \Carbon\Carbon::parse($h->date)->format('d M Y') }}</span>
                                         </div>
                                     </td>
-                                    <td class="pe-4 text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="{{ route('holidays.edit', $h->id) }}" class="avatar-text avatar-md bg-soft-info text-info rounded" title="Edit">
-                                                <i class="feather-edit-3"></i>
-                                            </a>
-                                            <button type="button" onclick="confirmDelete({{ $h->id }})" class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0" title="Delete">
-                                                <i class="feather-trash-2"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+                                    @if($isAdmin)
+                                        <td class="pe-4 text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="{{ route('holidays.edit', $h->id) }}" class="avatar-text avatar-md bg-soft-info text-info rounded" title="Edit">
+                                                    <i class="feather-edit-3"></i>
+                                                </a>
+                                                <button type="button" onclick="confirmDelete({{ $h->id }})" class="avatar-text avatar-md bg-soft-danger text-danger rounded border-0" title="Delete">
+                                                    <i class="feather-trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    @endif
                                 </tr>
                                 @empty
                                 <tr>

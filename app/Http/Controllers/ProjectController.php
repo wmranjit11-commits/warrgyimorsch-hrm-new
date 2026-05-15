@@ -13,22 +13,77 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, [
+            'super_admin',
+            'manager',
+            'hr_executive',
+            'hr_intern',
+            'business_operation_head'
+        ]);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
+        $isTeamLeader = in_array($role, [
+            'team_leader'
+        ]);
 
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-        $projects = Project::with(['tasks.employee'])->latest()->get();
-        $employees = \App\Models\Employee::all();
+        $query = Project::with(['tasks.employee']);
+        if ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $query->where('department', $department);
+            } else {
+                $query->whereRaw('1=0'); // Force empty if no department
+            }
+        }
+        $projects = $query->latest()->get();
+        
+        if ($isAdmin) {
+            $employees = \App\Models\Employee::all();
+        } elseif ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $employees = \App\Models\Employee::where('department', $department)->get();
+            } else {
+                $employees = collect();
+            }
+        } else {
+            $employees = \App\Models\Employee::where('id', $user->employee_id)->get();
+        }
+
         $departments = \App\Models\Department::all();
         return view('projects.index', compact('projects', 'employees', 'departments', 'isAdmin'));
     }
 
     public function create()
     {
-        $employees = \App\Models\Employee::all();
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, [
+            'super_admin',
+            'manager',
+            'hr_executive',
+            'hr_intern',
+            'business_operation_head'
+        ]);
+
+        $isTeamLeader = in_array($role, [
+            'team_leader'
+        ]);
+
+        if ($isAdmin) {
+            $employees = \App\Models\Employee::all();
+        } elseif ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $employees = \App\Models\Employee::where('department', $department)->get();
+            } else {
+                $employees = collect();
+            }
+        } else {
+            $employees = \App\Models\Employee::where('id', $user->employee_id)->get();
+        }
+
         $departments = \App\Models\Department::all();
         return view('projects.create', compact('employees', 'departments'));
     }

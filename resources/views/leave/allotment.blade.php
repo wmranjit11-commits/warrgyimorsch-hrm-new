@@ -3,6 +3,11 @@
 @section('content')
     <!-- Feather Icons CDN for redundancy -->
     <script src="https://unpkg.com/feather-icons"></script>
+    @php
+        $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
+        $isAdmin = in_array($role, ['super_admin', 'manager', 'hr_executive', 'hr_intern', 'business_operation_head']);
+        $isTeamLeader = in_array($role, ['team_leader']);
+    @endphp
 
     <div class="container-fluid px-0" style="background: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif;">
         <!-- Top Header -->
@@ -51,12 +56,11 @@
                                             <span class="wghrm-trigger-text fw-bold text-dark">{{ date('F', mktime(0, 0, 0, $selectedMonth, 1)) }} {{ date('Y') }}</span>
                                             <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                         </div>
-                                        <div class="wghrm-dropdown-menu">
+                                        <div class="wghrm-dropdown-menu" id="monthDropdownMenu">
                                             <div class="wghrm-items-list">
                                                 @foreach(range(1, 12) as $m)
                                                     <div class="wghrm-item {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}" 
-                                                         data-value="{{ sprintf('%02d', $m) }}" 
-                                                         data-text="{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}">
+                                                         onclick="selectMonth('{{ sprintf('%02d', $m) }}', '{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}')">
                                                         <span class="wghrm-item-text">{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}</span>
                                                         <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                     </div>
@@ -93,7 +97,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center">
-                                                        @if(auth()->user()->role === 'super_admin')
+                                                        @if($isAdmin)
                                                             <input type="number" step="0.5"
                                                                 class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
                                                                 data-employee-id="{{ $emp->id }}"
@@ -105,12 +109,14 @@
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <button
-                                                        class="btn btn-icon btn-soft-danger d-inline-flex align-items-center justify-content-center mx-auto"
-                                                        onclick="removeRow(this)"
-                                                        style="border-radius: 8px; width: 34px; height: 34px; border: none;">
-                                                        <i data-feather="minus" style="width: 16px; height: 16px;"></i>
-                                                    </button>
+                                                    @if($isAdmin)
+                                                        <button
+                                                            class="btn btn-icon btn-soft-danger d-inline-flex align-items-center justify-content-center mx-auto"
+                                                            onclick="removeRow(this)"
+                                                            style="border-radius: 8px; width: 34px; height: 34px; border: none;">
+                                                            <i data-feather="minus" style="width: 16px; height: 16px;"></i>
+                                                        </button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -129,14 +135,16 @@
                                                 </div>
                                                 <span class="fw-bold text-dark">{{ $emp->name }}</span>
                                             </div>
-                                            <button class="btn btn-sm btn-soft-danger border-0" onclick="removeRow(this)">
-                                                <i data-feather="minus" style="width: 14px; height: 14px;"></i>
-                                            </button>
+                                            @if($isAdmin)
+                                                <button class="btn btn-sm btn-soft-danger border-0" onclick="removeRow(this)">
+                                                    <i data-feather="minus" style="width: 14px; height: 14px;"></i>
+                                                </button>
+                                            @endif
                                         </div>
                                         <div class="wghrm-mobile-card-body">
                                             <div class="wghrm-mobile-full-width d-flex justify-content-between align-items-center">
                                                 <div class="wghrm-mobile-label">ALLOTMENT COUNT</div>
-                                                @if(auth()->user()->role === 'super_admin')
+                                                @if($isAdmin)
                                                     <input type="number" step="0.5"
                                                         class="form-control form-control-sm text-center fw-bold allotment-input border-0 bg-light shadow-none"
                                                         data-employee-id="{{ $emp->id }}"
@@ -151,14 +159,16 @@
                                 @endforeach
                             </div>
                         </div>
-                        <div class="card-footer bg-white border-top p-4 text-end sticky-bottom">
-                            <button
-                                class="btn btn-primary px-5 py-2 fw-bold shadow-sm hstack gap-2 justify-content-center w-100"
-                                onclick="saveAllotments()"
-                                style="background: #3858f9; border: none; border-radius: 10px; height: 52px; font-size: 15px;">
-                                <i data-feather="save" style="width: 18px; height: 18px;"></i> SAVE ALLOTMENTS
-                            </button>
-                        </div>
+                        @if($isAdmin)
+                            <div class="card-footer bg-white border-top p-4 text-end sticky-bottom">
+                                <button
+                                    class="btn btn-primary px-5 py-2 fw-bold shadow-sm hstack gap-2 justify-content-center w-100"
+                                    onclick="saveAllotments()"
+                                    style="background: #3858f9; border: none; border-radius: 10px; height: 52px; font-size: 15px;">
+                                    <i data-feather="save" style="width: 18px; height: 18px;"></i> SAVE ALLOTMENTS
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -176,27 +186,20 @@
                                                 <span class="wghrm-trigger-text fw-bold text-dark">10</span>
                                                 <i data-feather="chevron-down" style="width: 14px; height: 14px;"></i>
                                             </div>
-                                            <div class="wghrm-dropdown-menu">
+                                            <div class="wghrm-dropdown-menu" id="entriesDropdownMenu">
                                                 <div class="wghrm-items-list">
-                                                    <div class="wghrm-item selected" data-value="10" data-text="10">
+                                                    <div class="wghrm-item" onclick="updateEntries(10)">
                                                         <span class="wghrm-item-text">10</span>
-                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                     </div>
-                                                    <div class="wghrm-item" data-value="15" data-text="15">
+                                                    <div class="wghrm-item" onclick="updateEntries(15)">
                                                         <span class="wghrm-item-text">15</span>
-                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                     </div>
-                                                    <div class="wghrm-item" data-value="20" data-text="20">
+                                                    <div class="wghrm-item" onclick="updateEntries(20)">
                                                         <span class="wghrm-item-text">20</span>
-                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
-                                                    </div>
-                                                    <div class="wghrm-item" data-value="30" data-text="30">
-                                                        <span class="wghrm-item-text">30</span>
-                                                        <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <input type="hidden" id="entriesPerPage" value="10" onchange="changeEntriesPerPage()">
+                                            <input type="hidden" id="entriesPerPage" value="10">
                                         </div>
                                         <span class="text-muted small fw-bold text-nowrap">entries</span>
                                     </div>
@@ -420,9 +423,65 @@
             }
         });
 
+        // Dropdown Toggle Logic
+        document.addEventListener('click', function(e) {
+            const monthDropdown = document.getElementById('monthSelectDropdown');
+            if (monthDropdown && monthDropdown.contains(e.target)) {
+                monthDropdown.querySelector('.wghrm-dropdown-menu').classList.toggle('show');
+            } else {
+                document.querySelectorAll('.wghrm-dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+            
+            const entriesDropdown = document.getElementById('entriesDropdown');
+            if (entriesDropdown && entriesDropdown.contains(e.target)) {
+                entriesDropdown.querySelector('.wghrm-dropdown-menu').classList.toggle('show');
+            }
+        });
+
+        function selectMonth(val, text) {
+            document.getElementById('monthSelect').value = val;
+            updateView();
+        }
+
+        function updateEntries(val) {
+            document.getElementById('entriesPerPage').value = val;
+            document.querySelector('#entriesDropdown .wghrm-trigger-text').innerText = val;
+            changeEntriesPerPage();
+        }
+
         function updateView() {
             const month = document.getElementById('monthSelect').value;
             window.location.href = "{{ route('leave.allotment') }}?month=" + month;
+        }
+
+        function deleteHistory(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Delete this allotment record permanently?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/leave/allotment/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Record deleted', 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showToast('Error deleting record', 'error');
+                        }
+                    });
+                }
+            });
         }
 
         function removeRow(btn) {

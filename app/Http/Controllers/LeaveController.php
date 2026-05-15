@@ -24,16 +24,57 @@ class LeaveController extends Controller
         $year = Carbon::now()->format('Y');
         $month = $selectedMonth;
 
-        // $role = strtoupper(auth()->user()->role);
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isAdmin = in_array($role, [
+            'super_admin',
+            'manager',
+            'hr_executive',
+            'hr_intern',
+            'business_operation_head'
+        ]);
 
-        $roleId = DB::table('roles_master')
-            ->where('slug', $roleSlug)
-            ->value('id');
+        $isTeamLeader = in_array($role, [
+            'team_leader'
+        ]);
 
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-        if (!$isAdmin) {
-            $employee_id = auth()->user()->employee_id;
+        if ($isAdmin) {
+            $employees = Employee::orderBy('name', 'asc')->get();
+            $allotments = LeaveAllotment::where('month', $month)
+                ->where('year', $year)
+                ->get()
+                ->keyBy('employee_id');
+
+            $history = LeaveAllotment::with('employee')
+                ->orderBy('year', 'desc')
+                ->orderBy('month', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } elseif ($isTeamLeader) {
+            $department = $user->employee->department ?? null;
+            if ($department) {
+                $employees = Employee::where('department', $department)->orderBy('name', 'asc')->get();
+                $employeeIds = $employees->pluck('id');
+                
+                $allotments = LeaveAllotment::where('month', $month)
+                    ->where('year', $year)
+                    ->whereIn('employee_id', $employeeIds)
+                    ->get()
+                    ->keyBy('employee_id');
+
+                $history = LeaveAllotment::with('employee')
+                    ->whereIn('employee_id', $employeeIds)
+                    ->orderBy('year', 'desc')
+                    ->orderBy('month', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            } else {
+                $employees = collect();
+                $allotments = collect();
+                $history = collect();
+            }
+        } else {
+            $employee_id = $user->employee_id;
             $employees = Employee::where('id', $employee_id)->get();
             $allotments = LeaveAllotment::where('month', $month)
                 ->where('year', $year)
@@ -43,18 +84,6 @@ class LeaveController extends Controller
 
             $history = LeaveAllotment::with('employee')
                 ->where('employee_id', $employee_id)
-                ->orderBy('year', 'desc')
-                ->orderBy('month', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            $employees = Employee::orderBy('name', 'asc')->get();
-            $allotments = LeaveAllotment::where('month', $month)
-                ->where('year', $year)
-                ->get()
-                ->keyBy('employee_id');
-
-            $history = LeaveAllotment::with('employee')
                 ->orderBy('year', 'desc')
                 ->orderBy('month', 'desc')
                 ->orderBy('created_at', 'desc')
