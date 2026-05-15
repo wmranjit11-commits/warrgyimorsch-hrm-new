@@ -54,6 +54,22 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+   public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+    public function hasPermission($permission)
+    {
+        if (!$this->roleData) {
+            return false;
+        }
+
+        return $this->roleData
+        ->permissions()
+        ->where('name', $permission)
+        ->exists();
+    }
+
     // Emergency Role Fix
     public function getRoleAttribute($value)
     {

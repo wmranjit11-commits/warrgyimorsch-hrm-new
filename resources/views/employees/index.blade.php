@@ -248,7 +248,7 @@
                                                 <span class="wghrm-item-text">All Roles</span>
                                                 <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                             </div>
-                                            @foreach (\App\Models\RoleMaster::all() as $role)
+                                            @foreach (\App\Models\Role::all() as $role)
                                                 <div class="wghrm-item" data-value="{{ strtolower($role->slug) }}" data-text="{{ $role->name }}">
                                                     <span class="wghrm-item-text">{{ $role->name }}</span>
                                                     <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>

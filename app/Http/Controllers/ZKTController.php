@@ -13,12 +13,13 @@ class ZKTController extends Controller
 
 public function syncAttendance(PyAttendanceService $service)
 {
-    $pythonScript = "C:\\xampp\\htdocs\\python\\zk_attendance.py";
-
-    $output = shell_exec("python $pythonScript");
+    $python = "C:\\Users\\ranji\\AppData\\Local\\Programs\\Python\\Python314\\python.exe";
+    $pythonScript = "C:\\xampp new\\htdocs\\python\\zk_attendance.py";
+    $command = "\"$python\" \"$pythonScript\"";
+    $output = shell_exec($command);
 
     $records = json_decode($output, true);
-    // dd($records);
+    //  dd($records);
     if (!$records) {
         return response()->json([
             'success' => false,

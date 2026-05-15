@@ -10,17 +10,24 @@
             </a>
         </div>
         <div class="navbar-content">
-            @php
-                $roleSlug = auth()->user()->role;
+                @php
 
-                $roleId = DB::table('roles_master')
-                    ->where('slug', $roleSlug)
-                    ->value('id');
+                    $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
 
-                $isAdmin = in_array($roleId, [1, 2, 3, 4]);
-                $isTeamLeader = in_array($roleId, [5]);
-            @endphp
-            <ul class="nxl-navbar">
+                    $isAdmin = in_array($role, [
+                        'super_admin',
+                        'manager',
+                        'hr_executive',
+                        'hr_intern',
+                        'business_operation_head'
+                    ]);
+
+                    $isTeamLeader = in_array($role, [
+                        'team_leader'
+                    ]);
+
+                @endphp
+                    <ul class="nxl-navbar">
                 <li class="nxl-item nxl-caption">
                     <label>Navigation</label>
                 </li>

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Designation;
-use App\Models\RoleMaster;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -24,7 +24,7 @@ class MasterController extends Controller
 
     public function roles()
     {
-        $roles = RoleMaster::orderBy('name')->paginate(10);
+        $roles = Role::orderBy('name')->paginate(10);
         return view('master.roles', compact('roles'));
     }
 
@@ -76,7 +76,7 @@ class MasterController extends Controller
     public function storeRole(Request $request)
     {
         $request->validate(['name' => 'required|string|max:255']);
-        RoleMaster::create([
+        Role::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name, '_'),
         ]);
@@ -86,7 +86,7 @@ class MasterController extends Controller
     public function updateRole(Request $request, $id)
     {
         $request->validate(['name' => 'required|string|max:255']);
-        $role = RoleMaster::findOrFail($id);
+        $role = Role::findOrFail($id);
         $role->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name, '_'),
@@ -97,7 +97,7 @@ class MasterController extends Controller
 
     public function destroyRole($id)
     {
-        RoleMaster::findOrFail($id)->delete();
+        Role::findOrFail($id)->delete();
         return redirect()->route('master.roles')->with('success', 'Role deleted successfully!');
     }
 }

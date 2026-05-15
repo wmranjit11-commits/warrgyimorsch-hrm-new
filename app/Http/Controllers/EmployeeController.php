@@ -11,7 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\Department;
 use App\Models\Designation;
-use App\Models\RoleMaster;
+use App\Models\Role;
 
 class EmployeeController extends Controller
 {
@@ -47,7 +47,7 @@ class EmployeeController extends Controller
     {
         $departments = Department::where('is_active', true)->orderBy('name')->get();
         $designations = Designation::where('is_active', true)->orderBy('name')->get();
-        $roles = RoleMaster::where('is_active', true)->orderBy('name')->get();
+        $roles = Role::where('is_active', true)->orderBy('name')->get();
         return view('employees.create', compact('departments', 'designations', 'roles'));
     }
 
@@ -276,7 +276,7 @@ class EmployeeController extends Controller
     {
         $user = auth()->user();
         $employeeId = $id ?? $user->employee_id;
-
+        // dd($employeeId);
         if (!$employeeId) {
             abort(403, 'No employee linked');
         }
@@ -289,7 +289,7 @@ class EmployeeController extends Controller
             ->where('slug', $roleSlug)
             ->value('id');
 
-        $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $isAdmin = in_array($roleId, [1, 2, 3, 4 ,5]);
 
         if (!$isAdmin && $user->employee_id != $employeeId) {
             abort(403, 'Unauthorized Access');
@@ -335,7 +335,7 @@ class EmployeeController extends Controller
             $dayStr = $date->format('Y-m-d');
             $record = $attendances->get($dayStr);
             $holiday = $holidays->get($dayStr);
-
+            // dd($holiday);
             $onLeave = $leaves->first(fn($l) =>
                 $date->between($l->start_date, $l->end_date ?? $l->start_date)
             );
@@ -346,7 +346,11 @@ class EmployeeController extends Controller
             $punch_out = '--:--';
             $total_hours = '0.0 hrs';
 
-            if ($record) {
+            if ($holiday) {
+                $status = 'Holiday';
+                $statusClass = 'primary';
+
+            } elseif ($record) {
                 $punch_in = $record->check_in ? \Carbon\Carbon::parse($record->check_in)->format('h:i A') : '--:--';
                 $punch_out = $record->check_out ? \Carbon\Carbon::parse($record->check_out)->format('h:i A') : '--:--';
                 $total_hours = number_format((float)$record->total_hours, 1) . ' hrs';
@@ -362,9 +366,6 @@ class EmployeeController extends Controller
                     $status = 'Present';
                     $statusClass = 'success';
                 }
-            } elseif ($holiday) {
-                $status = 'Holiday';
-                $statusClass = 'primary';
             } elseif ($onLeave) {
                 $status = 'Leave';
                 $statusClass = 'info';
@@ -403,7 +404,7 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
         $departments = Department::where('is_active', true)->orderBy('name')->get();
         $designations = Designation::where('is_active', true)->orderBy('name')->get();
-        $roles = RoleMaster::where('is_active', true)->orderBy('name')->get();
+        $roles = Role::where('is_active', true)->orderBy('name')->get();
         return view('employees.edit', compact('employee', 'departments', 'designations', 'roles'));
     }
 
