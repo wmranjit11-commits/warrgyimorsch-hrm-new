@@ -72,11 +72,11 @@
                             </div>
 
                             <div class="d-flex gap-1">
-                                <a href="javascript:void(0);" class="btn btn-icon btn-soft-primary"
+                                <!-- <a href="javascript:void(0);" class="btn btn-icon btn-soft-primary"
                                     data-bs-toggle="collapse" data-bs-target="#filterSection"
                                     style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(56, 88, 249, 0.1) !important;">
                                     <i class="feather-filter"></i>
-                                </a>
+                                </a> -->
                                 <a href="javascript:void(0);" class="btn btn-icon btn-soft-info"
                                     onclick="exportAttendance()"
                                     style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(13, 202, 240, 0.1) !important;">
@@ -92,7 +92,7 @@
                 </div>
 
                 <!-- Collapsible Filter Section -->
-                <div class="collapse" id="filterSection">
+                <div class="show" id="filterSection">
                     <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
                         <div class="row g-3 align-items-end">
                             <div class="col-md-3">
@@ -208,13 +208,17 @@
                                     class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
                                     value="{{ request('end_date') }}" style="border-radius: 10px; height: 44px;">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 d-flex justify-content-around">
                                 <button
-                                    class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                    class="btn btn-primary w-50 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
                                     style="background: #3858f9; border: none; height: 44px; border-radius: 10px;">
                                     <i class="feather-search"></i> APPLY
                                 </button>
+                                <a href="{{ route('payroll.attendace.employee') }}"
+                                    class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
+                                    style="border-radius: 8px; height: 44px; width: 80px; font-size: 13px;">
+                                RESET</a>
                             </div>
                         </div>
                     </div>
@@ -859,11 +863,20 @@
         function exportAttendance() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
+            const employeeId = document.getElementById('employee_id').value;
 
             if (!start || !end) {
                 alert('Please select both dates');
                 return;
             }
+            let url = "{{ route('payroll.attendance.export') }}"
+                + "?start_date=" + start
+                + "&end_date=" + end;
+
+            if(employeeId){
+                url += "&employee_id=" + employeeId;
+            }
+
             window.location.href = url;
         }
     </script>

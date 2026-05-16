@@ -97,6 +97,13 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $query->where('id', $this->employeeId);
         }
 
+        $query->whereHas('attendances', function ($q) {
+            $q->whereBetween('attendance_date', [
+                $this->startDate,
+                $this->endDate
+            ]);
+        });
+
         return $query->get();
     }
 
@@ -189,7 +196,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
                     $present++;
                 }
- elseif ($statusRaw === 'absent' || $statusRaw === 'leave') {
+                elseif ($statusRaw === 'absent' || $statusRaw === 'leave') {
                     $absent++;
                 } else {
                     $others++;

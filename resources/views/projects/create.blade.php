@@ -146,12 +146,20 @@
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Department <span
                                                 class="text-danger">*</span></label>
                                         <select class="form-select premium-select" id="projectDepartment"
-                                            data-placeholder="Select Department" required>
+                                            data-placeholder="Select Department" {{ auth()->user()->role == 'team_leader' ? 'disabled' : '' }} required>
                                             <option value=""></option>
                                             @foreach($departments as $dept)
-                                                <option value="{{ $dept->name }}">{{ $dept->name }}</option>
+                                                <option value="{{ $dept->name }}"
+                                                    {{ auth()->user()->role == 'team_leader' && $dept->name == auth()->user()->employee->department ? 'selected' : '' }}>
+                                                    {{ $dept->name }}
+                                                </option>
                                             @endforeach
                                         </select>
+                                        @if(auth()->user()->role == 'team_leader')
+                                            <input type="hidden"
+                                                name="department"
+                                                value="{{ auth()->user()->employee->department }}">
+                                        @endif
                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Status</label>
@@ -180,12 +188,8 @@
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Leads
                                             <span class="text-danger">*</span></label>
-                                        <select class="form-select premium-select" id="projectLeaders" multiple="multiple"
-                                            data-placeholder="Select Leads..." required>
-                                            @foreach($employees as $emp)
-                                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <input type="text" class="form-control" value="{{ $teamLeader->name }}" readonly>
+                                        <input type="hidden" name="project_leader_id" value="{{ $teamLeader->id }}">
                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Team

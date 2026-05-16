@@ -58,6 +58,7 @@ class ProjectController extends Controller
     public function create()
     {
         $user = auth()->user();
+        $teamLeader = $user->employee;
         $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
         $isAdmin = in_array($role, [
             'super_admin',
@@ -76,7 +77,7 @@ class ProjectController extends Controller
         } elseif ($isTeamLeader) {
             $department = $user->employee->department ?? null;
             if ($department) {
-                $employees = \App\Models\Employee::where('department', $department)->get();
+                $employees = \App\Models\Employee::where('department', $department)->where('id', '!=', $user->employee_id)->get();
             } else {
                 $employees = collect();
             }
@@ -85,7 +86,7 @@ class ProjectController extends Controller
         }
 
         $departments = \App\Models\Department::all();
-        return view('projects.create', compact('employees', 'departments'));
+        return view('projects.create', compact('employees', 'departments', 'teamLeader'));
     }
 
     public function store(Request $request)

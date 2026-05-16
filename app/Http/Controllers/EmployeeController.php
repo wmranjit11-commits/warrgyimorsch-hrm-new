@@ -18,7 +18,7 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
     //    $role = strtoupper(auth()->user()->role ?? 'employee');
     //     $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
@@ -29,14 +29,20 @@ class EmployeeController extends Controller
                 ->value('id');
 
             $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+            $perPage = (int) $request->query('per_page', 20);
+            $allowedPerPage = [20, 50, 100];
+
+            if (!in_array($perPage, $allowedPerPage, true)) {
+                $perPage = 20;
+            }
 
         if ($isAdmin) {
-            $employees = Employee::orderBy('name')->paginate(10);
+            $employees = Employee::orderBy('name')->paginate($perPage)->appends($request->query());
         } else {
-            $employees = Employee::where('id', auth()->user()->employee_id)->paginate(10);
+            $employees = Employee::where('id', auth()->user()->employee_id)->paginate($perPage)->appends($request->query());
         }
 
-        return view('employees.index', compact('employees'));
+        return view('employees.index', compact('employees', 'perPage'));
     }
 
 

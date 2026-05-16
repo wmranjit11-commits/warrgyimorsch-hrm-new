@@ -310,12 +310,12 @@
                             <button class="wghrm-custom-select-btn dropdown-toggle" type="button"
                                 data-bs-toggle="dropdown" id="showEntriesBtn"
                                 style="width: 80px; height: 44px; padding: 0 15px;">
-                                10
+                                {{ $perPage ?? 20 }}
                             </button>
                             <div class="dropdown-menu wghrm-custom-dropdown-menu shadow-lg border-0" style="min-width: 80px; border-radius: 12px;">
-                                <a class="dropdown-item wghrm-custom-dropdown-item active" href="javascript:void(0);" onclick="document.getElementById('showEntriesBtn').innerText='10';">10</a>
-                                <a class="dropdown-item wghrm-custom-dropdown-item" href="javascript:void(0);" onclick="document.getElementById('showEntriesBtn').innerText='25';">25</a>
-                                <a class="dropdown-item wghrm-custom-dropdown-item" href="javascript:void(0);" onclick="document.getElementById('showEntriesBtn').innerText='50';">50</a>
+                                <a class="dropdown-item wghrm-custom-dropdown-item {{ ($perPage ?? 20) == 20 ? 'active' : '' }}" href="{{ request()->fullUrlWithQuery(['per_page' => 20, 'page' => 1]) }}">20</a>
+                                <a class="dropdown-item wghrm-custom-dropdown-item {{ ($perPage ?? 50) == 50 ? 'active' : '' }}" href="{{ request()->fullUrlWithQuery(['per_page' => 50, 'page' => 1]) }}">50</a>
+                                <a class="dropdown-item wghrm-custom-dropdown-item {{ ($perPage ?? 100) == 100 ? 'active' : '' }}" href="{{ request()->fullUrlWithQuery(['per_page' => 100, 'page' => 1]) }}">100</a>
                             </div>
                         </div>
                         <span class="text-muted small fw-bold text-uppercase">entries</span>
@@ -442,8 +442,8 @@
                                 Showing {{ $employees->firstItem() }} to {{ $employees->lastItem() }} of {{ $employees->total() }}
                                 entries
                             </div>
-                            <div>
-                                {{ $employees->links('pagination::bootstrap-5') }}
+                            <div class="{{ $employees->lastPage() <= 1 ? 'd-none' : '' }}">
+                                {{ $employees->appends(request()->query())->links('pagination::bootstrap-5') }}
                             </div>
                         </div>
                     @endif
@@ -1758,6 +1758,7 @@
             // Apply Filters
             function applyFilters() {
                 const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
+                const globalSearch = (document.querySelector('.employee-page-search-input')?.value || '').toLowerCase().trim();
                 const department = document.getElementById('filterDepartment').value.toLowerCase();
                 const role = document.getElementById('filterRole').value.toLowerCase();
 
@@ -1769,14 +1770,15 @@
                 let visibleCount = 0;
 
                 const filterFn = (name, rowDept, rowRole) => {
-                    const nameMatch = name.includes(employeeName);
+                    const employeeMatch = employeeName === '' || name.includes(employeeName);
+                    const globalSearchMatch = globalSearch === '' || name.includes(globalSearch) || rowDept.includes(globalSearch) || rowRole.includes(globalSearch);
                     const normDepartment = department.replace(/_/g, ' ');
                     const normRowDept = rowDept.replace(/_/g, ' ');
                     const departmentMatch = department === '' || normRowDept.includes(normDepartment) || rowDept === department;
                     const normRole = role.replace(/_/g, ' ');
                     const normRowRole = rowRole.replace(/_/g, ' ');
                     const roleMatch = role === '' || normRowRole.includes(normRole) || rowRole === role;
-                    return nameMatch && departmentMatch && roleMatch;
+                    return employeeMatch && globalSearchMatch && departmentMatch && roleMatch;
                 };
 
                 // Filter Table
@@ -1825,6 +1827,9 @@
                 document.getElementById('filterEmployeeName').value = '';
                 document.getElementById('filterDepartment').value = '';
                 document.getElementById('filterRole').value = '';
+                document.querySelectorAll('.employee-page-search-input').forEach(input => {
+                    input.value = '';
+                });
                 document.querySelector('#employeeFilterDropdown .wghrm-trigger-text').innerText = 'All Employees';
                 document.querySelector('#roleFilterDropdown .wghrm-trigger-text').innerText = 'All Roles';
                 document.querySelector('#departmentFilterDropdown .wghrm-trigger-text').innerText = 'All Departments';

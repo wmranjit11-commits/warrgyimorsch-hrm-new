@@ -239,6 +239,11 @@ class LeaveApplicationController extends Controller
     {
         $query = LeaveApplication::with('employee');
 
+        if (auth()->user()->role == 'team_leader') {
+            $query->whereHas('employee', function ($q) {
+                $q->where('department', auth()->user()->employee->department);
+            });
+        }
         if ($request->filled('search')) {
             $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search . '%');

@@ -90,6 +90,11 @@ class LeaveController extends Controller
                 ->get();
         }
 
+        if ($isTeamLeader) {
+            $balances = $this->calculateBalances($employees);
+            return view('leave.team_balance', compact('balances', 'selectedMonth'));
+        }
+
         return view('leave.allotment', compact('employees', 'allotments', 'selectedMonth', 'history', 'isAdmin'));
     }
 
@@ -155,9 +160,9 @@ class LeaveController extends Controller
         return Excel::download(new LeaveBalancesExport($balances), $filename);
     }
 
-    private function calculateBalances()
+    private function calculateBalances($employees = null)
     {
-        $employees = Employee::all();
+        $employees = $employees ?? Employee::orderBy('name', 'asc')->get();
         $balances = [];
 
         foreach ($employees as $employee) {
@@ -205,4 +210,3 @@ class LeaveController extends Controller
         return $balances;
     }
 }
-
