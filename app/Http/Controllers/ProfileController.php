@@ -14,6 +14,7 @@ use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\LeaveApplication;
 use App\Models\LeaveAllotment;
+use App\Models\Holiday;
 
 class ProfileController extends Controller
 {
@@ -129,6 +130,9 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $employee = Employee::find($user->employee_id);
+        $holidays = Holiday::pluck('date')
+            ->map(fn ($date) => \Carbon\Carbon::parse($date)->format('Y-m-d'))
+            ->values();
 
         $leaves = collect([]);
         if ($employee) {
@@ -138,7 +142,8 @@ class ProfileController extends Controller
         return view('profile.leave-history', [
             'user' => $user,
             'employee' => $employee,
-            'leaves' => $leaves
+            'leaves' => $leaves,
+            'holidays' => $holidays,
         ]);
     }
 

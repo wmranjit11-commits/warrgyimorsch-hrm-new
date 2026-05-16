@@ -453,42 +453,65 @@
     <div class="archive-list">
         <!-- RECENT SPOTLIGHT -->
         <div id="tab-recent" class="content-pane">
-            @php $latest = $leaves->first(); @endphp
-            @if($latest)
-                <div class="spotlight-card shadow-sm border-0">
-                    <span class="text-primary small fw-bold text-uppercase mb-3 d-block" style="letter-spacing: 1px;">LATEST RECORDING</span>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h3 class="fw-bold text-dark mb-2" style="font-size: 24px;">{{ $latest->leave_type }}</h3>
-                            <div class="meta-tags mb-4">
-                                <span class="tag-sm">{{ $latest->leave_category }}</span>
-                                <span class="text-muted small fw-bold">|</span>
-                                <span class="text-muted small fw-bold">{{ $latest->total_days }} Total Days</span>
-                            </div>
-                            
-                            <div class="d-flex align-items-center gap-3 text-dark fw-bold bg-light p-3 rounded-4 d-inline-flex">
-                                <i class="feather-calendar text-primary" style="width: 20px;"></i>
-                                <span style="font-size: 15px;">{{ $latest->start_date->format('d M, Y') }} — {{ $latest->end_date ? $latest->end_date->format('d M, Y') : 'Same Day' }}</span>
+
+            @forelse($leaves->take(4) as $item)
+
+                <div class="minimal-row shadow-sm border-0 mb-3">
+                    <div class="d-flex align-items-center flex-grow-1">
+
+                        <div class="date-column">
+                            <span class="day-num">
+                                {{ $item->start_date->format('d') }}
+                            </span>
+                            <span class="month-text">
+                                {{ $item->start_date->format('M') }}
+                            </span>
+                        </div>
+
+                        <div class="info-column">
+                            <h5 class="type-title mb-1">
+                                {{ $item->leave_type }}
+                            </h5>
+
+                            <div class="meta-tags">
+                                <span class="tag-sm bg-soft-primary text-primary">
+                                    {{ $item->leave_category }}
+                                </span>
+
+                                <span class="text-muted small fw-bold">
+                                    {{ $item->total_days }}D
+                                </span>
+
+                                <span class="text-muted small fw-medium">
+                                    at {{ $item->created_at->format('H:i') }}
+                                </span>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <div class="status-dot-label shadow-sm {{ 'status-'.strtolower($latest->status) }}">
-                                {{ strtoupper(str_replace('_', ' ', $latest->status)) }}
-                            </div>
-                            @if($latest->reason)
-                                <p class="text-muted small mt-3 mb-0" style="max-width: 250px; font-style: italic;">"{{ $latest->reason }}"</p>
-                            @endif
+
+                    </div>
+
+                    <div class="status-area">
+                        <div class="status-dot-label shadow-sm {{ 'status-'.strtolower($item->status) }}">
+                            {{ strtoupper(str_replace('_',' ',$item->status)) }}
                         </div>
                     </div>
                 </div>
-            @else
+
+            @empty
+
                 <div class="text-center py-5">
-                    <div class="bg-light p-4 rounded-circle d-inline-block mb-3">
-                        <i data-feather="file-text" style="width: 40px; height: 40px;" class="text-muted"></i>
-                    </div>
-                    <h5 class="fw-bold text-muted">No recent logs found.</h5>
+                    <i data-feather="file-text"
+                    class="text-muted mb-3"
+                    style="width:40px;height:40px;">
+                    </i>
+
+                    <h5 class="fw-bold text-muted">
+                        No recent logs found.
+                    </h5>
                 </div>
-            @endif
+
+            @endforelse
+
         </div>
 
         <!-- FULL LIST -->
@@ -526,6 +549,34 @@
 </div>
 
 <script>
+    const holidays = @json($holidays ?? []);
+
+    function isNonWorkingDate(dateString) {
+        const date = new Date(dateString + 'T00:00:00');
+        return date.getDay() === 0 || holidays.includes(dateString);
+    }
+
+    function calculateWorkingDayCount(startDate, endDate) {
+        let current = new Date(startDate + 'T00:00:00');
+        const end = new Date(endDate + 'T00:00:00');
+        let count = 0;
+
+        while (current <= end) {
+            const currentDate =
+                current.getFullYear() + '-' +
+                String(current.getMonth() + 1).padStart(2, '0') + '-' +
+                String(current.getDate()).padStart(2, '0');
+
+            if (!isNonWorkingDate(currentDate)) {
+                count++;
+            }
+
+            current.setDate(current.getDate() + 1);
+        }
+
+        return count;
+    }
+
     function switchTab(tabId, el) {
         document.querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
@@ -621,19 +672,10 @@
 
         // FULL DAY
         if (start && end) {
-
-            const sDate = new Date(start);
-            const eDate = new Date(end);
-
-            const diffTime = eDate - sDate;
-
-            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-            totalDaysInput.value = diffDays > 0 ? diffDays + ' Days' : '0 Days';
+            totalDaysInput.value = calculateWorkingDayCount(start, end) + ' Days';
 
         } else if (start) {
-
-            totalDaysInput.value = '1 Day';
+            totalDaysInput.value = isNonWorkingDate(start) ? '0 Days' : '1 Day';
 
         } else {
 
@@ -663,18 +705,39 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify(data)
                 })
-                .then(res => res.json())
+                .then(async res => {
+                    const contentType = res.headers.get('content-type') || '';
+                    const payload = contentType.includes('application/json')
+                        ? await res.json()
+                        : { success: false, message: await res.text() };
+
+                    if (!res.ok || !payload.success) {
+                        if (payload.errors) {
+                            const firstError = Object.values(payload.errors).flat()[0];
+                            throw new Error(firstError || 'Unable to submit leave application.');
+                        }
+
+                        throw new Error(payload.message || 'Unable to submit leave application.');
+                    }
+
+                    return payload;
+                })
                 .then(data => {
                     if (data.success) {
-                        showToast('Leave applied successfully!', 'success');
+                        showToast(data.message || 'Leave applied successfully!', 'success');
                         setTimeout(() => window.location.reload(), 1500);
                     }
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    console.error(err);
+                    showToast(err.message || 'Something went wrong while applying leave.', 'error');
+                });
             });
         }
     });
