@@ -188,10 +188,10 @@
                                         @if ($isAdmin)
                                             <th
                                                 style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                                Assign To</th>
-                                            <th
+                                                Ownership</th>
+                                            <!-- <th
                                                 style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                                Assign By</th>
+                                                Assign By</th> -->
                                         @endif
                                         <th class="pe-4 text-center"
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white; white-space: nowrap; width: 220px;">
@@ -361,14 +361,21 @@
                                                         </li>
                                                     </ul>
                                                 </div>
+                                                @if($task->status_changed_at)
+                                                    <div class="text-muted fs-12 mt-1">
+                                                        {{ $task->status_changed_at->format('d M Y') }} ({{ $task->formatted_total_time }})
+                                                    </div>
+                                                @endif
                                             </td>
                                             @if ($isAdmin)
-                                                <td style="font-size: 14px; color: #475569;">
-                                                    {{ $task->employee ? $task->employee->name : '-' }}
+                                                <td style="font-size: 12px; color: #475569;">
+                                                    <!-- {{ $task->employee ? $task->employee->name : '-' }} -->
+                                                      Assign to: <b>{{ $task->employee ? $task->employee->name : '-' }}</b> <br>
+                                                      Assign by: <b>{{ $task->creator ? $task->creator->name : '-' }}</b>
                                                 </td>
-                                                <td style="font-size: 14px; color: #475569;">
+                                                <!-- <td style="font-size: 14px; color: #475569;">
                                                     {{ $task->creator ? $task->creator->name : '-' }}
-                                                </td>
+                                                </td> -->
                                             @endif
                                             <td class="pe-4 text-center" style="white-space: nowrap; width: 220px;">
                                                 <div class="d-flex justify-content-center gap-2">
@@ -690,7 +697,7 @@
                                         <input type="hidden" name="follow_up_id" id="followUpId">
                                         <input type="hidden" name="time_taken" id="totalFollowUpHours" value="0">
 
-                                        <div class="mb-3">
+                                        <!-- <div class="mb-3">
                                             <label class="form-label fw-bold small text-muted text-uppercase mb-2">Performed
                                                 By</label>
                                             <div
@@ -705,7 +712,7 @@
                                                 </div>
                                                 <input type="hidden" name="reference_name" id="followUpEmployee">
                                             </div>
-                                        </div>
+                                        </div> -->
 
                                         <!-- QUICK TASK ADDER -->
                                         <div class="row g-2 mb-3 p-2 rounded"

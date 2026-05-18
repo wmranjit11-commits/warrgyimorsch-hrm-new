@@ -40,13 +40,16 @@ class DashboardController extends Controller
     {
         // $role = strtoupper(auth()->user()->role ?? 'USER');
         //  $isAdmin = in_array($role, ['MANAGER', 'SUPER_ADMIN', 'HR_EXECUTIVE', 'HR_INTERN']);
-        $roleSlug = auth()->user()->role; // e.g. "manager"
+        $roleSlug = auth()->user()->role;
 
         $roleId = DB::table('roles_master')
             ->where('slug', $roleSlug)
             ->value('id');
 
         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $isTeamLeader = in_array($roleSlug, ['team_leader']);
+        $employee = Employee::where('id', auth()->user()->employee_id)->first();
+        $celebration = $this->getTodayCelebration($employee);
         $employeeId = auth()->user()->employee_id;
 
         $today = Carbon::today()->toDateString();
@@ -64,7 +67,13 @@ class DashboardController extends Controller
 
         // Employee Metrics
         // $totalEmployees = $isAdmin ? Employee::count() : 1;
-        $totalEmployees = Employee::count();
+
+        if($isTeamLeader){
+            $totalEmployees = Employee::where('department', $employee->department)->count();
+        }
+        else{
+            $totalEmployees = Employee::count();
+        }
 
         $analyticsEmployeeId = $isAdmin ? null : $employeeId;
         $todayAnalytics = $this->getAttendanceAnalytics($today, $today, $analyticsEmployeeId);
@@ -374,6 +383,8 @@ class DashboardController extends Controller
                 'employees',
                 'todayLeaveEmployees',
                 'todayLateEmployees',
+                'employee',
+                'celebration'
             ));
         }
 
@@ -415,6 +426,8 @@ class DashboardController extends Controller
             'employees',
             'todayLeaveEmployees',
             'todayLateEmployees',
+            'employee',
+            'celebration'
         ));
     }
 
@@ -686,62 +699,62 @@ class DashboardController extends Controller
         });
     }
 
-    // private function getLateEmployeesData()
-    // {
-    //     $range = request('late_range', 'today');
-    //     $employeeFilter = request('late_employee');
+    /* private function getLateEmployeesData()
+    {
+        $range = request('late_range', 'today');
+        $employeeFilter = request('late_employee');
 
-    //     [$startDate, $endDate] = $this->getLateDateRange($range);
+        [$startDate, $endDate] = $this->getLateDateRange($range);
 
-    //     $requiredWorkMinutes = 510; // 8h 30m
+        $requiredWorkMinutes = 510; // 8h 30m
 
-    //     $records = Attendance::with('employee')
-    //         ->whereBetween('attendance_date', [$startDate, $endDate])
-    //         ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
-    //         ->orderBy('attendance_date')
-    //         ->get()
-    //         ->groupBy('employee_id');
+        $records = Attendance::with('employee')
+            ->whereBetween('attendance_date', [$startDate, $endDate])
+            ->when($employeeFilter, fn($q) => $q->where('employee_id', $employeeFilter))
+            ->orderBy('attendance_date')
+            ->get()
+            ->groupBy('employee_id');
 
-    //     return $records->map(function ($employeeRecords) use ($requiredWorkMinutes) {
+        return $records->map(function ($employeeRecords) use ($requiredWorkMinutes) {
 
-    //         $balanceMinutes = 0; // +ve = extra, -ve = late
+            $balanceMinutes = 0; // +ve = extra, -ve = late
 
-    //         foreach ($employeeRecords as $item) {
+            foreach ($employeeRecords as $item) {
 
-    //             if (!$item->check_in || !$item->check_out) {
-    //                 continue;
-    //             }
+                if (!$item->check_in || !$item->check_out) {
+                    continue;
+                }
 
-    //             $checkIn = Carbon::parse($item->check_in);
-    //             $checkOut = Carbon::parse($item->check_out);
+                $checkIn = Carbon::parse($item->check_in);
+                $checkOut = Carbon::parse($item->check_out);
 
-    //             // Total worked minutes
-    //             $workedMinutes = $checkIn->diffInMinutes($checkOut);
+                // Total worked minutes
+                $workedMinutes = $checkIn->diffInMinutes($checkOut);
 
-    //             // CORE LOGIC (IMPORTANT)
-    //             $balanceMinutes += ($workedMinutes - $requiredWorkMinutes);
-    //         }
+                // CORE LOGIC (IMPORTANT)
+                $balanceMinutes += ($workedMinutes - $requiredWorkMinutes);
+            }
 
-    //         $employee = $employeeRecords->first()->employee;
+            $employee = $employeeRecords->first()->employee;
 
-    //         // Only negative = late
-    //         $finalLate = abs(min(0, $balanceMinutes));
+            // Only negative = late
+            $finalLate = abs(min(0, $balanceMinutes));
 
-    //         // Format
-    //         $hours = floor($finalLate / 60);
-    //         $minutes = $finalLate % 60;
+            // Format
+            $hours = floor($finalLate / 60);
+            $minutes = $finalLate % 60;
 
-    //         $lateDuration = $finalLate > 0
-    //             ? ($hours > 0 ? "$hours hr $minutes min" : "$minutes min")
-    //             : '0 min';
+            $lateDuration = $finalLate > 0
+                ? ($hours > 0 ? "$hours hr $minutes min" : "$minutes min")
+                : '0 min';
 
-    //         return [
-    //             'employee' => $employee,
-    //             'late_duration' => $lateDuration
-    //         ];
-    //     })
-    //     ->filter(fn($emp) => $emp['late_duration'] !== '0 min');
-    // }
+            return [
+                'employee' => $employee,
+                'late_duration' => $lateDuration
+            ];
+        })
+        ->filter(fn($emp) => $emp['late_duration'] !== '0 min');
+    } */
 
     private function getLateDateRange($range)
     {
@@ -783,6 +796,39 @@ class DashboardController extends Controller
             default:
                 return [$today, $today];
         }
+    }
+
+    private function getTodayCelebration($employee)
+    {
+        $today = \Carbon\Carbon::today()->startOfDay();
+
+        // ---------------- Birthday ----------------
+        $birthday = \Carbon\Carbon::parse($employee->date_of_birth)->year(now()->year);
+
+        if ($birthday->isPast() && !$birthday->isToday()) {
+            $birthday->addYear();
+        }
+
+        $isBirthdayToday = $birthday->isToday();
+
+        // ---------------- Anniversary ----------------
+        $joiningDate = \Carbon\Carbon::parse($employee->date_of_joining);
+        $anniversary = $joiningDate->copy()->year(now()->year);
+
+        if ($anniversary->isPast() && !$anniversary->isToday()) {
+            $anniversary->addYear();
+        }
+
+        $years = $joiningDate->diffInYears($anniversary);
+        $isAnniversaryToday = $anniversary->isToday() && $years > 0;
+
+        return [
+            'isBirthdayToday' => $isBirthdayToday,
+            'isAnniversaryToday' => $isAnniversaryToday,
+            'birthday' => $birthday,
+            'anniversary' => $anniversary,
+            'years' => $years,
+        ];
     }
 
     /**

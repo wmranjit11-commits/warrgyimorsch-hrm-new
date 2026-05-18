@@ -44,32 +44,34 @@
                                 <i class="feather-calendar d-sm-none"></i>
                             </a>
 
-                            <div class="dropdown">
-                                <button
-                                    class="btn btn-soft-secondary btn-sm fw-bold d-flex align-items-center px-3 dropdown-toggle"
-                                    type="button" data-bs-toggle="dropdown"
-                                    style="height: 40px; border-radius: 10px; border: 1px solid rgba(100, 116, 139, 0.2) !important;">
-                                    <span class="d-none d-sm-inline">IMPORT</span>
-                                    <i class="fas fa-upload ms-2"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end p-4 shadow-lg border-0"
-                                    style="width: 320px; border-radius: 15px;">
-                                    <form action="{{ route('payroll.attendance.import') }}" method="POST"
-                                        enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold small text-dark mb-2">Import Excel/CSV
-                                                File</label>
-                                            <input type="file" class="form-control" name="import_file"
-                                                accept=".xlsx, .xls, .csv" required style="border-radius: 8px;">
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"
-                                            style="border-radius: 8px;">
-                                            UPLOAD & CALCULATE
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                            @if ($isAdmin)
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-soft-secondary btn-sm fw-bold d-flex align-items-center px-3 dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown"
+                                        style="height: 40px; border-radius: 10px; border: 1px solid rgba(100, 116, 139, 0.2) !important;">
+                                        <span class="d-none d-sm-inline">IMPORT</span>
+                                        <i class="fas fa-upload ms-2"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end p-4 shadow-lg border-0"
+                                        style="width: 320px; border-radius: 15px;">
+                                        <form action="{{ route('payroll.attendance.import') }}" method="POST"
+                                            enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold small text-dark mb-2">Import Excel/CSV
+                                                    File</label>
+                                                <input type="file" class="form-control" name="import_file"
+                                                    accept=".xlsx, .xls, .csv" required style="border-radius: 8px;">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2"
+                                                style="border-radius: 8px;">
+                                                UPLOAD & CALCULATE
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div> 
+                            @endif
 
                             <div class="d-flex gap-1">
                                 <!-- <a href="javascript:void(0);" class="btn btn-icon btn-soft-primary"
@@ -82,10 +84,12 @@
                                     style="height: 40px; width: 40px; border-radius: 10px; border: 1px solid rgba(13, 202, 240, 0.1) !important;">
                                     <i class="feather-download"></i>
                                 </a>
-                                <a href="{{ route('payroll.attendance.add') }}" class="btn btn-icon btn-primary shadow-sm"
-                                    style="height: 40px; width: 40px; border-radius: 10px;">
-                                    <i data-feather="plus"></i>
-                                </a>
+                                @if ($isAdmin)
+                                    <a href="{{ route('payroll.attendance.add') }}" class="btn btn-icon btn-primary shadow-sm"
+                                        style="height: 40px; width: 40px; border-radius: 10px;">
+                                        <i data-feather="plus"></i>
+                                    </a>  
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -865,16 +869,24 @@
             const end = document.getElementById('endDate').value;
             const employeeId = document.getElementById('employee_id').value;
 
-            if (!start || !end) {
-                alert('Please select both dates');
-                return;
-            }
             let url = "{{ route('payroll.attendance.export') }}"
-                + "?start_date=" + start
-                + "&end_date=" + end;
 
-            if(employeeId){
-                url += "&employee_id=" + employeeId;
+            let params = [];
+
+            if (start) {
+                params.push("start_date=" + start);
+            }
+
+            if (end) {
+                params.push("end_date=" + end);
+            }
+
+            if (employeeId) {
+                params.push("employee_id=" + employeeId);
+            }
+
+            if (params.length > 0) {
+                url += "?" + params.join("&");
             }
 
             window.location.href = url;

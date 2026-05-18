@@ -20,11 +20,13 @@ class DailyTask extends Model
         'assigned_by',
         'description',
         'photo',
+        'status_changed_at',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'status_changed_at' => 'datetime',
     ];
 
     public function project()
