@@ -217,7 +217,7 @@
                                         <th>Technology</th>
                                         <th>Department</th>
                                         <th>Start Date</th>
-                                        <th>End Date</th>
+                                        <!-- <th>End Date</th> -->
                                         <th>Lead</th>
                                         <th>Status</th>
                                         <th class="text-end pe-4" style="width: 200px;">ACTIONS</th>
@@ -293,7 +293,7 @@
                                                 </a>
                                             </td>
                                             <td>{{ $project->start_date ? $project->start_date->format('Y-m-d') : '-' }}</td>
-                                            <td>
+                                            <!-- <td>
                                                 @if($project->end_date)
                                                     {{ $project->end_date->format('Y-m-d') }}
                                                 @else
@@ -314,7 +314,7 @@
                                                         @endif
                                                     </div>
                                                 @endif
-                                            </td>
+                                            </td> -->
                                             <td>
                                                 <div class="dropdown" style="min-width: 120px;">
                                                     @php

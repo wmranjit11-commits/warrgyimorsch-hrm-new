@@ -205,13 +205,17 @@
                                     class="form-control border-0 bg-white py-2 px-3 shadow-sm fw-bold"
                                     value="{{ request('end_date') }}" style="border-radius: 10px; height: 44px;">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 d-flex justify-content-around">
                                 <button
-                                    class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                                    class="btn btn-primary w-50 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
                                     style="background: #3858f9; border: none; height: 44px; border-radius: 10px;">
                                     <i data-feather="search"></i> APPLY
                                 </button>
+                                <a href="{{ route('payroll.attendance') }}"
+                                    class="btn btn-soft-danger fw-bold d-flex align-items-center justify-content-center"
+                                    style="border-radius: 8px; height: 44px; width: 80px; font-size: 13px;">
+                                RESET</a>
                             </div>
                         </div>
                     </div>
@@ -954,15 +958,22 @@
         function exportAttendance() {
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
+            const employeeId = document.getElementById('selectedEmployeeId')?.value || '';
 
             if (!start || !end) {
                 alert('Please select both dates');
                 return;
             }
 
-            window.location.href = "{{ route('payroll.attendance.export') }}"
+            let url = "{{ route('payroll.attendance.export') }}"
                 + "?start_date=" + start
                 + "&end_date=" + end;
+
+            if(employeeId){
+                url += "&employee_id=" + employeeId;
+            }
+
+            window.location.href = url;
         }
 
 

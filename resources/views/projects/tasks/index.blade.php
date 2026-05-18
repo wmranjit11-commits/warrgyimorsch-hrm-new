@@ -143,9 +143,9 @@
                             <select id="entriesLimit" class="form-select border-0 shadow-none fw-bold"
                                 onchange="paginateTable()"
                                 style="width: 80px; height: 38px; border-radius: 8px; font-size: 13px; color: #334155; background-color: #f1f5f9; padding: 0 10px; cursor: pointer; transition: all 0.2s ease;">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
+                                <option value="20">20</option>
                                 <option value="50">50</option>
+                                <option value="100">100</option>
                             </select>
                             <span class="text-muted fw-bold text-uppercase"
                                 style="font-size: 10px; letter-spacing: 0.5px;">Entries</span>
@@ -526,7 +526,7 @@
                             <div class="small text-muted fw-bold" id="entriesInfo" style="font-size: 14px;">Showing 1 to
                                 {{ $tasks->count() }} of {{ $tasks->count() }} entries
                             </div>
-                            <nav>
+                            <nav id="taskPaginationNav">
                                 <ul class="pagination pagination-md mb-0 gap-1" id="paginationList">
                                     <li class="page-item disabled mx-1"><a
                                             class="page-link border rounded d-flex align-items-center justify-content-center text-muted shadow-none"
@@ -1180,6 +1180,7 @@
             let globalFollowUps = [];
             let modalCurrentPage = 1;
             let modalPageSize = 5;
+            let currentTaskPage = 1;
             let myFollowUpModal = null;
             let currentModalEmployeeFilter = 'All';
 
@@ -1841,15 +1842,106 @@
                 document.querySelector('#followUpModal .modal-dialog').classList.add('modal-xl');
             }
 
+            function getFilteredTaskRows() {
+                const filter = (document.getElementById('taskSearch')?.value || '').toLowerCase().trim();
+                const rows = Array.from(document.querySelectorAll('.task-row'));
+
+                return rows.filter(row => row.innerText.toLowerCase().includes(filter));
+            }
+
+            function renderTaskPagination(totalItems, totalPages) {
+                const nav = document.getElementById('taskPaginationNav');
+                const paginationList = document.getElementById('paginationList');
+
+                if (!nav || !paginationList) return;
+
+                if (totalItems === 0 || totalPages <= 1) {
+                    nav.classList.add('d-none');
+                    paginationList.innerHTML = '';
+                    return;
+                }
+
+                nav.classList.remove('d-none');
+
+                let html = `
+                    <li class="page-item ${currentTaskPage === 1 ? 'disabled' : ''} mx-1">
+                        <a class="page-link border rounded d-flex align-items-center justify-content-center ${currentTaskPage === 1 ? 'text-muted shadow-none' : 'text-dark'}"
+                           href="javascript:void(0);"
+                           onclick="changeTaskPage(${currentTaskPage - 1})"
+                           style="width: 40px; height: 40px;">
+                            <i class="feather-chevron-left"></i>
+                        </a>
+                    </li>
+                `;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    html += `
+                        <li class="page-item ${i === currentTaskPage ? 'active' : ''} mx-1">
+                            <a class="page-link border rounded d-flex align-items-center justify-content-center ${i === currentTaskPage ? 'text-white shadow-sm' : 'text-dark shadow-none'}"
+                               href="javascript:void(0);"
+                               onclick="changeTaskPage(${i})"
+                               style="${i === currentTaskPage ? 'background: #3858f9; border-color: #3858f9;' : ''} width: 40px; height: 40px; font-weight: 700;">
+                                ${i}
+                            </a>
+                        </li>
+                    `;
+                }
+
+                html += `
+                    <li class="page-item ${currentTaskPage === totalPages ? 'disabled' : ''} mx-1">
+                        <a class="page-link border rounded d-flex align-items-center justify-content-center ${currentTaskPage === totalPages ? 'text-muted shadow-none' : 'text-dark'}"
+                           href="javascript:void(0);"
+                           onclick="changeTaskPage(${currentTaskPage + 1})"
+                           style="width: 40px; height: 40px;">
+                            <i class="feather-chevron-right"></i>
+                        </a>
+                    </li>
+                `;
+
+                paginationList.innerHTML = html;
+            }
+
+            function paginateTable() {
+                const rows = Array.from(document.querySelectorAll('.task-row'));
+                const filteredRows = getFilteredTaskRows();
+                const totalItems = filteredRows.length;
+                const limit = parseInt(document.getElementById('entriesLimit')?.value, 10) || 20;
+                const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+
+                if (currentTaskPage > totalPages) {
+                    currentTaskPage = totalPages;
+                }
+
+                const startIndex = (currentTaskPage - 1) * limit;
+                const endIndex = startIndex + limit;
+
+                rows.forEach(row => {
+                    row.style.display = 'none';
+                });
+
+                filteredRows.slice(startIndex, endIndex).forEach(row => {
+                    row.style.display = '';
+                });
+
+                const infoStart = totalItems === 0 ? 0 : startIndex + 1;
+                const infoEnd = Math.min(endIndex, totalItems);
+                document.getElementById('entriesInfo').innerText = `Showing ${infoStart} to ${infoEnd} of ${totalItems} entries`;
+
+                renderTaskPagination(totalItems, totalPages);
+            }
+
+            function changeTaskPage(page) {
+                const filteredRows = getFilteredTaskRows();
+                const limit = parseInt(document.getElementById('entriesLimit')?.value, 10) || 20;
+                const totalPages = Math.max(1, Math.ceil(filteredRows.length / limit));
+
+                currentTaskPage = Math.min(Math.max(page, 1), totalPages);
+                paginateTable();
+            }
+
             function filterTasks() {
-                const filter = document.getElementById('taskSearch').value.toLowerCase();
-                const rows = document.querySelectorAll('.task-row');
-                let visibleCount = 0;
-                rows.forEach(row => { const matches = row.innerText.toLowerCase().includes(filter); row.style.display = matches ? '' : 'none'; if (matches) visibleCount++; });
-                const limit = parseInt(document.getElementById('entriesLimit').value);
-                let counted = 0; let actVis = 0;
-                rows.forEach(row => { if (row.style.display !== 'none') { if (counted >= limit) row.style.display = 'none'; else actVis++; counted++; } });
-                document.getElementById('entriesInfo').innerText = `Showing 1 to ${actVis} of ${visibleCount} entries (filtered)`;
+                currentTaskPage = 1;
+                paginateTable();
             }
 
             document.getElementById('followUpForm').addEventListener('submit', function (e) {

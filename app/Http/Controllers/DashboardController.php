@@ -435,15 +435,31 @@ class DashboardController extends Controller
             ->value('id');
 
         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $isTeamLeader = ($roleId == 5);
         $employeeId = auth()->user()->employee_id;
+
+        // Logged-in employee department
+        $leaderDepartment = Employee::where('id', $employeeId)
+            ->value('department');
 
         $query = LeaveApplication::join('employees', 'leave_applications.employee_id', '=', 'employees.id')
             ->whereIn('leave_applications.status', ['approved', 'unauthorised'])
             ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%');
 
         // USER → force own data
-        if (!$isAdmin) {
+        if (!$isAdmin && !$isTeamLeader) {
             $query->where('employees.id', $employeeId);
+        }
+
+        // Team Leader → only department employees
+        if ($isTeamLeader) {
+
+            $query->where('employees.department', $leaderDepartment);
+
+            // optional employee filter
+            if ($request->employee_id) {
+                $query->where('employees.id', $request->employee_id);
+            }
         }
 
         // ADMIN → keep old filter
@@ -490,7 +506,7 @@ class DashboardController extends Controller
         if ($from && $to) {
 
             // ADMIN → OLD LOGIC (NO CHANGE)
-            if ($isAdmin) {
+            if ($isAdmin || $isTeamLeader) {
                 $query->where(function ($q) use ($from, $to) {
                     $q->whereBetween('leave_applications.start_date', [$from, $to])
                         ->orWhereBetween('leave_applications.end_date', [$from, $to]);
@@ -507,7 +523,7 @@ class DashboardController extends Controller
         }
 
         // ADMIN → old count
-        if ($isAdmin) {
+        if ($isAdmin || $isTeamLeader) {
             return $query->selectRaw("
                     employees.id,
                     employees.name,
@@ -593,14 +609,33 @@ class DashboardController extends Controller
             ->value('id');
 
         $isAdmin = in_array($roleId, [1, 2, 3, 4]);
+        $isTeamLeader = ($roleId == 5);
         $employeeId = auth()->user()->employee_id;
+
+        // Logged-in employee department
+        $leaderDepartment = Employee::where('id', $employeeId)
+            ->value('department');
 
         $lateRecords = Attendance::with('employee')
             ->whereBetween('attendance_date', [$startDate, $endDate])
 
             // For USER → force only logged-in employee
-            ->when(!$isAdmin, function ($q) use ($employeeId) {
+            ->when(!$isAdmin && !$isTeamLeader, function ($q) use ($employeeId) {
                 $q->where('employee_id', $employeeId);
+            })
+
+            // TEAM LEADER → same department employees
+            ->when($isTeamLeader, function ($q) use ($leaderDepartment, $employeeFilter) {
+
+                $q->whereHas('employee', function ($sub) use ($leaderDepartment, $employeeFilter) {
+
+                    $sub->where('department', $leaderDepartment);
+
+                    // optional employee filter
+                    if ($employeeFilter) {
+                        $sub->where('id', $employeeFilter);
+                    }
+                });
             })
 
             // For ADMIN → keep old filter behavior
