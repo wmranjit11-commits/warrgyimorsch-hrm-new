@@ -188,8 +188,12 @@
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Project Leads
                                             <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" value="{{ $teamLeader->name }}" readonly>
-                                        <input type="hidden" name="project_leader_id" value="{{ $teamLeader->id }}">
+                                        <select class="form-select premium-select" id="projectLeaders" multiple="multiple"
+                                            data-placeholder="Select Project Leads..." required>
+                                            @foreach($employees as $emp)
+                                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label fw-bold fs-12 text-muted text-uppercase">Team
@@ -563,34 +567,44 @@
         $(document).ready(function () {
 
             const allEmployees = @json($employees);
-
-            $('#projectDepartment').on('change', function () {
-
-                let selectedDepartment = $(this).val();
+            const syncDepartmentEmployees = () => {
+                const selectedDepartment = $('#projectDepartment').val();
+                const currentLeaderIds = ($('#projectLeaders').val() || []).map(String);
+                const currentMemberIds = ($('#projectMembers').val() || []).map(String);
 
                 $('#projectLeaders').empty();
                 $('#projectMembers').empty();
 
-                let filteredEmployees = allEmployees.filter(emp =>
+                const filteredEmployees = allEmployees.filter(emp =>
                     emp.department === selectedDepartment
                 );
 
                 filteredEmployees.forEach(function (emp) {
+                    const empId = String(emp.id);
+                    const leaderSelected = currentLeaderIds.includes(empId) ? 'selected' : '';
+                    const memberSelected = currentMemberIds.includes(empId) ? 'selected' : '';
 
-                    let option = `
-                        <option value="${emp.id}">
+                    $('#projectLeaders').append(`
+                        <option value="${emp.id}" ${leaderSelected}>
                             ${emp.name}
                         </option>
-                    `;
-
-                    $('#projectLeaders').append(option);
-                    $('#projectMembers').append(option);
+                    `);
+                    $('#projectMembers').append(`
+                        <option value="${emp.id}" ${memberSelected}>
+                            ${emp.name}
+                        </option>
+                    `);
                 });
 
-                // Refresh select2 if used
-                $('#projectLeaders').trigger('change');
-                $('#projectMembers').trigger('change');
+                $('#projectLeaders').trigger('change.select2');
+                $('#projectMembers').trigger('change.select2');
+            };
+
+            $('#projectDepartment').on('change', function () {
+                syncDepartmentEmployees();
             });
+
+            syncDepartmentEmployees();
 
         });
     </script>

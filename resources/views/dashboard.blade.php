@@ -280,7 +280,240 @@
             background: #e2e8f0;
             border-radius: 10px;
         }
+
+                .celebration-banner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 18px 24px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.05);
+            overflow: visible; /* Allows animations to escape the container boundaries */
+            animation: premiumEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .celebration-banner::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            border-radius: 14px 0 0 14px;
+        }
+
+        .celebration-icon {
+            font-size: 26px;
+            margin-right: 18px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        .celebration-content {
+            z-index: 2;
+        }
+
+        .celebration-content h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .celebration-content p {
+            margin: 4px 0 0;
+            font-size: 13.5px;
+            color: #4b5563;
+        }
+
+        /* --- THEMES --- */
+        .celebration-banner.birthday {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+        }
+        .celebration-banner.birthday::before {
+            background: linear-gradient(to bottom, #6366f1, #ec4899);
+        }
+        .celebration-banner.birthday .celebration-icon {
+            background: #eeebff;
+            color: #6366f1;
+        }
+        .celebration-banner.birthday h3 {
+            color: #4338ca;
+        }
+
+        .celebration-banner.anniversary {
+            background: linear-gradient(135deg, #ffffff 0%, #fefbeb 100%);
+        }
+        .celebration-banner.anniversary::before {
+            background: linear-gradient(to bottom, #f59e0b, #d97706);
+        }
+        .celebration-banner.anniversary .celebration-icon {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .celebration-banner.anniversary h3 {
+            color: #b45309;
+        }
+
+
+        /* --- FLOATING BALLOON & CONFETTI ENGINE --- */
+        .animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicks to pass through safely */
+            z-index: 1;
+        }
+
+        /* Balloons Base Setup */
+        .balloon {
+            position: fixed; /* Fixed to viewport so they fly up across the entire web page */
+            bottom: -60px;
+            font-size: 45px;
+            opacity: 0;
+            animation: flyUpwards 7s linear infinite;
+        }
+
+        /* Staggered positioning, sizes, and delays for natural flight tracking */
+        .b1 { left: 15vw; animation-delay: 0s; font-size: 50px; }
+        .b2 { left: 40vw; animation-delay: 1.5s; font-size: 38px; }
+        .b3 { left: 65vw; animation-delay: 0.8s; font-size: 45px; }
+        .b4 { left: 85vw; animation-delay: 2.3s; font-size: 55px; }
+
+        /* Anniversary element custom overrides */
+        .a1 { left: 20vw; animation-delay: 0s; font-size: 30px; }
+        .a2 { left: 45vw; animation-delay: 1.2s; font-size: 25px; }
+        .a3 { left: 70vw; animation-delay: 0.5s; font-size: 35px; }
+        .a4 { left: 90vw; animation-delay: 2s; font-size: 28px; }
+
+        /* Confetti Falling Pieces */
+        .confetti-piece {
+            position: absolute;
+            top: -20px;
+            width: 10px;
+            height: 10px;
+            background: #6366f1;
+            opacity: 0;
+            border-radius: 2px;
+            animation: confettiFall 4s linear infinite;
+        }
+
+        /* Give confetti different variations, placement, and speed */
+        .cp1 { left: 20%; background: #ff6b6b; animation-delay: 0s; animation-duration: 3.5s; }
+        .cp2 { left: 45%; background: #4dadf7; width: 8px; height: 12px; animation-delay: 1.2s; animation-duration: 4.2s; }
+        .cp3 { left: 60%; background: #37b24d; animation-delay: 0.4s; animation-duration: 3.8s; }
+        .cp4 { left: 75%; background: #fcc419; width: 11px; height: 7px; animation-delay: 1.8s; animation-duration: 4.5s; }
+        .cp5 { left: 90%; background: #f06595; animation-delay: 0.9s; animation-duration: 3.9s; }
+
+
+        /* --- ANIMATION KEYFRAMES --- */
+
+        /* Base container entrance slide */
+        @keyframes premiumEntrance {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Balloon float upwards with slight swaying side-to-side path */
+        @keyframes flyUpwards {
+            0% {
+                bottom: -60px;
+                transform: translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateX(30px) rotate(10deg);
+            }
+            75% {
+                transform: translateX(-20px) rotate(-10deg);
+            }
+            100% {
+                bottom: 110vh;
+                transform: translateX(10px) rotate(5deg);
+                opacity: 0;
+            }
+        }
+
+        /* Confetti tumbling effect down the card element */
+        @keyframes confettiFall {
+            0% {
+                top: -10px;
+                transform: translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                top: 150px;
+                transform: translateX(40px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive safety to clean up view on extra small phones */
+        @media (max-width: 576px) {
+            .balloon {
+                font-size: 32px; /* Smaller balloons on mobile devices */
+            }
+            .b4, .a4 {
+                display: none; /* Remove right-most elements to prevent horizontal scrolling layout bugs */
+            }
+        }
     </style>
+    @if($celebration['isBirthdayToday'])
+        <div class="celebration-banner birthday">
+            <div class="animation-container">
+                <span class="balloon b1">🎈</span>
+                <span class="balloon b2">🎈</span>
+                <span class="balloon b3">🎈</span>
+                <span class="balloon b4">🎈</span>
+                <span class="confetti-piece cp1"></span>
+                <span class="confetti-piece cp2"></span>
+                <span class="confetti-piece cp3"></span>
+                <span class="confetti-piece cp4"></span>
+                <span class="confetti-piece cp5"></span>
+            </div>
+
+            <div class="celebration-icon">🎂</div>
+            <div class="celebration-content">
+                <h3>Happy Birthday, {{ $employee->name }}! 🎉</h3>
+                <p>Wishing you a wonderful day filled with happiness, success, and great health.</p>
+            </div>
+        </div>
+    @endif
+
+    @if($celebration['isAnniversaryToday'])
+        <div class="celebration-banner anniversary">
+            <div class="animation-container">
+                <span class="balloon a1">✨</span>
+                <span class="balloon a2">⭐</span>
+                <span class="balloon a3">🎉</span>
+                <span class="balloon a4">✨</span>
+                <span class="confetti-piece cp1"></span>
+                <span class="confetti-piece cp2"></span>
+                <span class="confetti-piece cp3"></span>
+                <span class="confetti-piece cp4"></span>
+                <span class="confetti-piece cp5"></span>
+            </div>
+
+            <div class="celebration-icon">🏆</div>
+            <div class="celebration-content">
+                <h3>Happy {{ $celebration['years'] }} Year Work Anniversary, {{ $employee->name }}! 🎊</h3>
+                <p>Thank you for your incredible dedication, hard work, and loyalty.</p>
+            </div>
+        </div>
+    @endif
     <!-- [ page-header ] end -->
     <!-- [ Main Content ] start -->
     <div class="main-content pt-md-4 pt-2 hrm-resp-main-content">

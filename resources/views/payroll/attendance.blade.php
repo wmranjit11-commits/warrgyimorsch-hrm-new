@@ -562,8 +562,8 @@
                     return;
             }
 
-            startInput.value = start.toISOString().split('T')[0];
-            endInput.value = end.toISOString().split('T')[0];
+            // startInput.value = start.toISOString().split('T')[0];
+            // endInput.value = end.toISOString().split('T')[0];
         }
 
         function selectQuickRange(val, label) {
@@ -960,17 +960,24 @@
             const end = document.getElementById('endDate').value;
             const employeeId = document.getElementById('selectedEmployeeId')?.value || '';
 
-            if (!start || !end) {
-                alert('Please select both dates');
-                return;
+            let url = "{{ route('payroll.attendance.export') }}"
+
+            let params = [];
+
+            if (start) {
+                params.push("start_date=" + start);
             }
 
-            let url = "{{ route('payroll.attendance.export') }}"
-                + "?start_date=" + start
-                + "&end_date=" + end;
+            if (end) {
+                params.push("end_date=" + end);
+            }
 
-            if(employeeId){
-                url += "&employee_id=" + employeeId;
+            if (employeeId) {
+                params.push("employee_id=" + employeeId);
+            }
+
+            if (params.length > 0) {
+                url += "?" + params.join("&");
             }
 
             window.location.href = url;

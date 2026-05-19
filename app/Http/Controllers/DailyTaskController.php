@@ -186,6 +186,13 @@ class DailyTaskController extends Controller
             $validated['end_date'] = \Carbon\Carbon::parse($validated['end_date'])->endOfDay();
         }
 
+        $oldStatus = $dailyTask->status;
+        $newStatus = $validated['status'];
+
+        if (strcasecmp((string) $oldStatus, (string) $newStatus) !== 0) {
+            $validated['status_changed_at'] = now();
+        }
+
         $dailyTask->update($validated);
 
         return response()->json(['success' => 'Task updated successfully!']);
@@ -318,7 +325,13 @@ class DailyTaskController extends Controller
             return response()->json(['error' => 'Only Admin, Project Lead or Task Owner can change status.'], 403);
         }
 
-        $dailyTask->update(['status' => $validated['status']]);
+        $updateData = ['status' => $validated['status']];
+
+        if (strcasecmp((string) $dailyTask->status, (string) $validated['status']) !== 0) {
+            $updateData['status_changed_at'] = now();
+        }
+
+        $dailyTask->update($updateData);
 
         return response()->json(['success' => 'Task status updated successfully!']);
     }

@@ -58,7 +58,6 @@ class ProjectController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $teamLeader = $user->employee;
         $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
         $isAdmin = in_array($role, [
             'super_admin',
@@ -86,7 +85,7 @@ class ProjectController extends Controller
         }
 
         $departments = \App\Models\Department::all();
-        return view('projects.create', compact('employees', 'departments', 'teamLeader'));
+        return view('projects.create', compact('employees', 'departments'));
     }
 
     public function store(Request $request)

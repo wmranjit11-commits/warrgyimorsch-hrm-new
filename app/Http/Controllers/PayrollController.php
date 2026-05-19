@@ -929,8 +929,8 @@ class PayrollController extends Controller
      */
     public function exportAttendance(Request $request)
     {
-        $start = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $end = $request->end_date ?? now()->endOfMonth()->toDateString();
+        $start = $request->start_date;
+        $end = $request->end_date;
         $employeeId = $request->employee_id;
 
         $filename = 'attendance_' . $start . '_to_' . $end . '.xlsx';

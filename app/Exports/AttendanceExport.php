@@ -24,13 +24,28 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     protected $holidayMap = [];
     protected $activityDays = [];
     protected $employeeId;
+    protected $department;
 
 
     public function __construct($startDate, $endDate, $employeeId)
     {
-        $this->startDate = Carbon::parse($startDate)->startOfDay();
-        $this->endDate = Carbon::parse($endDate)->endOfDay();
+        $this->startDate = !empty($startDate)
+            ? Carbon::parse($startDate)->startOfDay()
+            : Carbon::parse(Attendance::min('attendance_date'))->startOfDay();
+
+        $this->endDate = !empty($endDate)
+            ? Carbon::parse($endDate)->endOfDay()
+            : Carbon::parse(Attendance::max('attendance_date'))->endOfDay();
         $this->employeeId = $employeeId;
+
+        $user = auth()->user();
+        $role = str_replace(' ', '_', strtolower($user->role ?? 'employee'));
+        $isTeamLeader = $role === 'team_leader';
+
+        $loggedEmployeeId = $user->employee_id;
+        $loggedEmployee = Employee::where('id', $loggedEmployeeId)->first();
+        $this->department = $isTeamLeader ? ($loggedEmployee->department ?? null) : null;
+
         $period = Carbon::parse($this->startDate);
 
         while ($period->lte($this->endDate)) {
@@ -38,14 +53,22 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             $period->addDay();
         }
 
-        $attQuery = Attendance::whereBetween('attendance_date', [
-            $this->startDate->toDateString(),
-            $this->endDate->toDateString()
-        ]);
+        $attQuery = Attendance::query();
+
+        if (!empty($this->department)) {
+            $attQuery->whereHas('employee', function ($q) {
+                $q->where('department', $this->department);
+            });
+        }
 
         if (!empty($this->employeeId)) {
             $attQuery->where('employee_id', $this->employeeId);
         }
+
+        $attQuery->whereBetween('attendance_date', [
+            $this->startDate->toDateString(),
+            $this->endDate->toDateString()
+        ]);
 
         $attendances = $attQuery->with('employee')->get();
 
@@ -92,6 +115,10 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
     public function collection()
     {
         $query = Employee::orderBy('name', 'asc');
+
+        if (!empty($this->department)) {
+            $query->where('department', $this->department);
+        }
 
         if (!empty($this->employeeId)) {
             $query->where('id', $this->employeeId);
