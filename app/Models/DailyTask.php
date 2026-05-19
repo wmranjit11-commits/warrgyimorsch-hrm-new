@@ -85,4 +85,12 @@ class DailyTask extends Model
             default => 'bg-soft-secondary text-secondary',
         };
     }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(
+            TaskStatusHistory::class,
+            'task_id'
+        )->latest();
+    }
 }

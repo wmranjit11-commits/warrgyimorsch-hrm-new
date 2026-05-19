@@ -6,6 +6,7 @@ use App\Models\DailyTask;
 use App\Models\Project;
 use App\Models\Employee;
 use App\Models\TaskFollowUp;
+use App\Models\TaskStatusHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -306,7 +307,7 @@ class DailyTaskController extends Controller
     public function updateStatus(Request $request, DailyTask $dailyTask)
     {
         $validated = $request->validate([
-            'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework',
+            'status' => 'required|string|in:Pending,In Process,Completed,On Hold,Review,Rework,Reassign', 'comment'=>'nullable|string', 'employee_id'=>'nullable'
         ]);
 
         $role = str_replace(' ', '_', strtolower(auth()->user()->role ?? 'employee'));
@@ -326,14 +327,38 @@ class DailyTaskController extends Controller
         }
 
         $updateData = ['status' => $validated['status']];
+        if($request->status=="Reassign" && $request->employee_id){
+            $updateData['employee_id'] = $request->employee_id;
+        }
 
         if (strcasecmp((string) $dailyTask->status, (string) $validated['status']) !== 0) {
             $updateData['status_changed_at'] = now();
         }
 
+        TaskStatusHistory::create([
+            'task_id'=>$dailyTask->id,
+
+            'old_status'=>$dailyTask->status,
+
+            'new_status'=>$request->status,
+
+            'comment'=>$request->comment,
+
+            'updated_by'=>auth()->id()
+        ]);
         $dailyTask->update($updateData);
 
         return response()->json(['success' => 'Task status updated successfully!']);
+    }
+
+    public function statusHistory(DailyTask $task)
+    {
+        return response()->json(
+            $task->statusHistory()
+                ->with('user')
+                ->latest()
+                ->get()
+        );
     }
 
     public function updatePriority(Request $request, DailyTask $dailyTask)
