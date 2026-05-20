@@ -76,7 +76,7 @@ class ProjectController extends Controller
         } elseif ($isTeamLeader) {
             $department = $user->employee->department ?? null;
             if ($department) {
-                $employees = \App\Models\Employee::where('department', $department)->where('id', '!=', $user->employee_id)->get();
+                $employees = \App\Models\Employee::where('department', $department)->get();
             } else {
                 $employees = collect();
             }
