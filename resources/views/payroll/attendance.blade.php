@@ -655,6 +655,7 @@
 
         function openAttendanceDetails(date, filterStatus = null) {
             lastDate = date;
+            //  let url = apiUrl(`/payroll/attendance/details?date=${date}`);
             let url = `/payroll/attendance/details?date=${date}`;
             fetch(url)
                 .then(res => res.json())

@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="base-url" content="{{ url('/') }}">
     <title>@yield('title', 'Dashboard')</title>
 
     <!-- Favicon -->
@@ -566,6 +567,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+
+        // function apiUrl(path) {
+        //     const base = document.querySelector('meta[name="base-url"]').content;
+        //     return `${base}${path}`;
+        // }
+
+        const originalFetch = window.fetch;
+        window.fetch = function (url, options) {
+            const base = document.querySelector('meta[name="base-url"]').content;
+
+            if (typeof url === "string" && url.startsWith("/")) {
+                url = base + url;
+            }
+
+            return originalFetch(url, options);
+        };
+
+
         // Toast UI configuration
         const Toast = Swal.mixin({
             toast: true,
