@@ -18,7 +18,7 @@ return new class extends Migration
             $row->date('start_date');
             $row->date('end_date');
             $row->string('priority'); // Hard, Medium, Low
-            $row->string('status')->default('In Process');
+            $row->string('status')->default('Pending');
             $row->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $row->foreignId('assigned_by')->constrained('users')->onDelete('cascade');
             $row->text('description')->nullable();

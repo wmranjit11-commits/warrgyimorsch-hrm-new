@@ -321,7 +321,7 @@
                                                     </ul>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <!-- <td>
                                                 @php
                                                     $s = $task->status;
                                                     $statusSlug = strtolower(str_replace(' ', '-', $s));
@@ -366,6 +366,59 @@
                                                         {{ $task->status_changed_at->format('d M Y') }} ({{ $task->formatted_total_time }})
                                                     </div>
                                                 @endif
+                                            </td> -->
+                                            <td class="align-middle">
+                                                @php
+                                                    $s = $task->status;
+                                                    $statusSlug = strtolower(str_replace(' ', '-', $s));
+                                                    $statusClass = 'status-' . $statusSlug;
+                                                @endphp
+
+                                                <div class="status-wrapper">
+
+                                                    <div class="d-flex align-items-center gap-2">
+
+                                                        <button
+                                                            class="btn-status {{ $statusClass }}"
+                                                            onclick="openStatusModal(
+                                                                {{ $task->id }},
+                                                                '{{ $s }}',
+                                                                {{ $task->project_id }}
+                                                            )">
+
+                                                            <span>{{ $s }}</span>
+
+                                                            <i class="feather-chevron-down"></i>
+
+                                                        </button>
+
+
+                                                        <button
+                                                            class="history-btn"
+                                                            onclick="showHistory({{ $task->id }})">
+
+                                                            <i class="feather-eye"></i>
+
+                                                        </button>
+
+                                                    </div>
+
+
+                                                    @if($task->status_changed_at)
+
+                                                        <div class="status-time">
+
+                                                            <i class="feather-clock"></i>
+
+                                                            {{ $task->status_changed_at->format('d M Y h:i A') }}
+                                                            @if ($s == "Completed")
+                                                                ({{ $task->formatted_total_time }})
+                                                            @endif
+                                                        </div>
+
+                                                    @endif
+
+                                                </div>
                                             </td>
                                             @if ($isAdmin)
                                                 <td style="font-size: 12px; color: #475569;">
@@ -556,6 +609,58 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4">
+                    <h4 class="fw-bold text-center mb-4">
+                        Update Task Status
+                    </h4>
+                    <input type="hidden" id="statusTaskId">
+                    <input type="hidden" id="statusProjectId">
+                    <div class="mb-3">
+                        <label class="fw-semibold">Select Status</label>
+                        <select class="form-select" id="statusTaskStatus">
+                            <option value="Pending">Pending</option>
+                            <option value="In Process">In Process</option>
+                            <option value="Completed">Complete</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Review">Review</option>
+                            <option value="Rework">Rework</option>
+                            <option value="Reassign">Reassign</option>
+                        </select>
+                    </div>
+                    <div id="assignSection" style="display:none" class="mb-3">
+                        <label class="fw-semibold">Assign To</label>
+                        <select class="form-select" id="assignTo">
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-semibold">Comment</label>
+                        <textarea class="form-control" id="comment" rows="3" placeholder="Enter comment"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button class="btn btn-primary px-5" onclick="submitStatus()">
+                            Confirm Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="historyModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Status Tracking</h5>
+                </div>
+                <div class="modal-body" id="historyBody"></div>
+            </div>
+        </div>
+    </div>  
 @endsection
 
 @section('modals')
@@ -615,9 +720,9 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold fs-12 text-muted text-uppercase mb-2">Status</label>
                         <select name="status" id="taskStatus" class="form-select premium-select"
-                            data-placeholder="Select Status..." required>
-                            <option value="Pending">Pending</option>
-                            <option value="In Process" selected>In Process</option>
+                            data-placeholder="Select Status..." required>Pending
+                            <option value="Pending" selected>Pending</option>
+                            <option value="In Process">In Process</option>
                             <option value="Completed">Completed</option>
                             <option value="On Hold">On Hold</option>
                             <option value="Review">Review</option>
@@ -1181,6 +1286,152 @@
             .select2-container {
                 z-index: auto !important;
             }
+
+            .btn-status{
+                min-width:120px;
+                height:20px;
+                border:none;
+                border-radius:12px;
+                font-size:12px;
+                font-weight:700;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:6px;
+                transition:all .3s ease;
+                box-shadow:0 3px 10px rgba(0,0,0,.08);
+            }
+
+            .btn-status:hover{
+                transform:translateY(-2px);
+                box-shadow:0 8px 18px rgba(0,0,0,.15);
+            }
+
+            .btn-status i{
+                font-size:11px;
+            }
+
+
+            /* Pending */
+
+            .status-pending{
+                background:#f3f4f6;
+                color:#6b7280;
+            }
+
+
+            /* In Process */
+
+            .status-in-process{
+                background:#eef2ff;
+                color:#4f46e5;
+            }
+
+
+            /* Completed */
+
+            .status-completed{
+                background:#ecfdf5;
+                color:#16a34a;
+            }
+
+
+            /* On Hold */
+
+            .status-on-hold{
+                background:#fff7ed;
+                color:#ea580c;
+            }
+
+
+            /* Review */
+
+            .status-review{
+                background:#ecfeff;
+                color:#0891b2;
+            }
+
+
+            /* Rework */
+
+            .status-rework{
+                background:#fef2f2;
+                color:#dc2626;
+            }
+
+
+            /* Reassign */
+
+            .status-reassign{
+                background:#f5f3ff;
+                color:#7c3aed;
+            }
+
+            .timeline-card{
+                padding:16px;
+                background:#f8fafc;
+                border-radius:12px;
+                margin-bottom:16px;
+                border-left:4px solid #3858f9;
+                box-shadow:0 2px 8px rgba(0,0,0,.05);
+                transition:.3s;
+            }
+
+            .timeline-card:hover{
+                transform:translateY(-2px);
+            }
+
+            .timeline-card .badge{
+                font-size:11px;
+                padding:8px 12px;
+                border-radius:30px;
+            }
+
+            .status-wrapper{
+                display:flex;
+                flex-direction:column;
+                gap:8px;
+            }
+
+            .status-action-row{
+                display:flex;
+                align-items:center;
+                gap:8px;
+            }
+
+            .history-btn{
+                width:30px;
+                height:30px;
+                border:none;
+                border-radius:8px;
+                background:#f8fafc;
+                color:#64748b;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                transition:all .3s ease;
+                box-shadow:0 2px 6px rgba(0,0,0,.06);
+            }
+
+            .history-btn:hover{
+                background:#3858f9;
+                color:#fff;
+                transform:translateY(-2px);
+            }
+
+            .status-time{
+                display:flex;
+                align-items:center;
+                gap:5px;
+                margin-left:5px;
+                color:#64748b;
+                font-size:12px;
+                font-weight:500;
+            }
+
+            .status-time i{
+                font-size:11px;
+            }
         </style>
 
         <script>
@@ -1200,6 +1451,14 @@
                 const allEmployeesMap = @json($employees->keyBy('id'));
                 const currentEmpId = {{ auth()->user()->employee_id ?? 0 }};
                 const isSysAdmin = {{ $isAdmin ? 'true' : 'false' }};
+
+                window.taskAssignmentData = {
+                    projectEmployees,
+                    projectLeadersMap,
+                    allEmployeesMap,
+                    currentEmpId,
+                    isSysAdmin
+                };
 
                 $('#taskProjectId').on('change', function() {
                     const projectId = $(this).val();
@@ -1233,9 +1492,18 @@
                             }
                         }
                     });
-                    
-                    if (window.jQuery && $.fn.select2) { $empSelect.trigger('change'); }
-                    if (count === 1) { $empSelect.find('option').last().prop('selected', true).trigger('change'); }
+
+                    const hasPreviousSelection = currentSelectedVal && $empSelect.find(`option[value="${currentSelectedVal}"]`).length;
+
+                    if (hasPreviousSelection) {
+                        $empSelect.val(currentSelectedVal);
+                    } else if (count === 1) {
+                        $empSelect.find('option').last().prop('selected', true);
+                    }
+
+                    if (window.jQuery && $.fn.select2) {
+                        $empSelect.trigger('change');
+                    }
                 });
 
                 // Initialize Select2 with Premium Styling
@@ -1264,7 +1532,7 @@
                         });
 
                         if (this.id === 'taskOffcanvas' && !document.getElementById('taskId').value) {
-                            $('#taskStatus').val($('#taskStatus').val() || 'In Process').trigger('change');
+                            $('#taskStatus').val($('#taskStatus').val() || 'Pending').trigger('change');
                             $('#taskPriority').val($('#taskPriority').val() || 'Medium').trigger('change');
                         }
                     });
@@ -1373,7 +1641,7 @@
                 document.getElementById('taskPriority').value = task.priority || 'Medium';
 
                 window.onload = function () {
-                    document.getElementById('taskStatus').value = task.status || 'In Process';
+                    document.getElementById('taskStatus').value = task.status || 'Pending';
                 };
 
                 // Handle existing attachment
@@ -1392,9 +1660,11 @@
                 // Set Select fields (Project & Employee)
                 if (window.jQuery && $.fn.select2) {
                     $('#taskProjectId').val(task.project_id).trigger('change');
-                    $('#taskEmployeeId').val(task.employee_id).trigger('change');
+                    setTimeout(() => {
+                        $('#taskEmployeeId').val(task.employee_id).trigger('change');
+                    }, 0);
                     $('#taskPriority').val(task.priority || 'Medium').trigger('change');
-                    $('#taskStatus').val(task.status || 'In Process').trigger('change');
+                    $('#taskStatus').val(task.status || 'Pending').trigger('change');
                 } else {
                     const projSelect = document.getElementById('taskProjectId');
                     if (projSelect) projSelect.value = task.project_id || '';
@@ -1452,12 +1722,12 @@
                     if (window.jQuery && $.fn.select2) {
                         $('.form-select').val('').trigger('change');
                         $('#taskPriority').val('Medium').trigger('change');
-                        $('#taskStatus').val('In Process').trigger('change');
+                        $('#taskStatus').val('Pending').trigger('change');
                     } else {
                         const prioritySelect = document.getElementById('taskPriority');
                         if (prioritySelect) prioritySelect.value = 'Medium';
                         const statusSelect = document.getElementById('taskStatus');
-                        if (statusSelect) statusSelect.value = 'In Process';
+                        if (statusSelect) statusSelect.value = 'Pending';
                     }
                 } catch (e) { }
             }
@@ -2188,24 +2458,190 @@
                 });
             }
 
-            function updateTaskStatus(id, status) {
-                fetch(`/daily-tasks/${id}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+            // function updateTaskStatus(id, status) {
+            //     fetch(`/daily-tasks/${id}/status`, {
+            //         method: 'PATCH',
+            //         headers: {
+            //             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            //             'Content-Type': 'application/json',
+            //             'Accept': 'application/json'
+            //         },
+            //         body: JSON.stringify({ status: status })
+            //     })
+            //         .then(res => res.json())
+            //         .then(data => {
+            //             if (data.success) {
+            //                 Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
+            //             } else {
+            //                 Toast.fire({ icon: 'error', title: 'Update failed' });
+            //             }
+            //         });
+            // }
+
+            let statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+            let currentProjectId=null;
+
+            function openStatusModal( id, status, projectId ){
+                $("#statusTaskId").val(id);
+                $("#statusTaskStatus").val(status).trigger('change');
+                $("#statusProjectId").val(projectId);
+                $("#comment").val('');
+                $("#assignSection").hide();
+                $("#assignTo").html(`<option value="">Select Employee</option>`);
+                statusModal.show();
+            }
+
+            function populateReassignEmployees(projectId) {
+                const assignmentData = window.taskAssignmentData || {};
+                const projectEmployees = assignmentData.projectEmployees || {};
+                const projectLeadersMap = assignmentData.projectLeadersMap || {};
+                const allEmployeesMap = assignmentData.allEmployeesMap || {};
+                const currentEmpId = assignmentData.currentEmpId || 0;
+                const isSysAdmin = !!assignmentData.isSysAdmin;
+
+                const allowedIds = projectEmployees[projectId] || [];
+                const leaders = projectLeadersMap[projectId] || [];
+                const isLeaderOfProject = leaders.includes(currentEmpId) || leaders.includes(currentEmpId.toString());
+
+                let options = '<option value="">Select Employee</option>';
+
+                Object.entries(allEmployeesMap).forEach(([id, emp]) => {
+                    const isMember = allowedIds.includes(parseInt(id)) || allowedIds.includes(id.toString());
+
+                    if (!isMember) {
+                        return;
+                    }
+
+                    if (isSysAdmin || isLeaderOfProject || id == currentEmpId) {
+                        options += `<option value="${id}">${emp.name}</option>`;
+                    }
+                });
+
+                $("#assignTo").html(options);
+            }
+
+            $(document).on("change","#statusTaskStatus",function(){
+
+                if($(this).val()=="Reassign"){
+
+                    $("#assignSection").slideDown();
+
+                    let projectId=$("#statusProjectId").val();
+                    populateReassignEmployees(projectId);
+
+                }else{
+
+                    $("#assignSection").slideUp();
+
+                    $("#assignTo").html(
+                        '<option value="">Select Employee</option>'
+                    );
+
+                }
+
+            });
+
+
+            function loadProjectMembers(){
+                fetch(`/project-members/${currentProjectId}`)
+                .then(res=>res.json())
+                .then(data=>{
+                    let options=`<option value="">Select Employee</option>`;
+                    data.forEach(emp=>{options +=`<option value="${emp.id}">${emp.name}</option>`;});
+                    $("#assignTo").html(options);
+                });
+            }
+
+
+
+            function submitStatus(){
+                let id=$("#statusTaskId").val();
+
+                let status=$("#statusTaskStatus").val();
+
+                let comment=$("#comment").val();
+
+                let employee_id = $("#assignTo").val();
+
+                fetch(`/daily-tasks/${id}/status`,
+                {
+                    method:'PATCH',
+                    headers:{
+                        'X-CSRF-TOKEN':
+                        '{{ csrf_token() }}',
+
+                        'Content-Type':
+                        'application/json',
+
+                        'Accept':
+                        'application/json'
                     },
-                    body: JSON.stringify({ status: status })
+
+                    body:JSON.stringify({
+                        status:status,
+                        comment:comment,
+                        employee_id:employee_id
+                    })
+
                 })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload());
-                        } else {
-                            Toast.fire({ icon: 'error', title: 'Update failed' });
-                        }
-                    });
+
+                .then(res=>res.json())
+                .then(data=>{
+                    if(data.success){
+                        statusModal.hide();
+                        Toast.fire({icon:'success', title:data.success})
+                        .then(()=>location.reload());
+                    }
+                });
+            }
+
+            function showHistory(id){
+                fetch(`/daily-task-history/${id}`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Failed to load history');
+                    }
+                    return res.json();
+                })
+                .then(data=>{
+                    let html='';
+                    if(data.length===0){
+                        html=`<div class="text-center text-muted py-4">No Tracking Found</div>`;
+                    }
+
+                data.forEach(item=>{
+                    html +=`<div class="timeline-card">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <b>${item.user?.name ?? 'Unknown'}</b>
+                                        changed status
+                                    </div>
+                                <div class="small text-muted">${new Date(item.created_at).toLocaleString()}</div>
+                            </div>
+
+                            <div class="mt-2">
+                                <span class="badge bg-secondary">${item.old_status ?? '-'}</span>
+                                <i class="feather-arrow-right mx-2"></i>
+                                <span class="badge bg-success">${item.new_status}</span>
+                            </div>
+
+                            ${item.comment ? `
+                                <div class="mt-3">
+                                    <div class="small fw-bold">Comment</div>
+                                    <div class="text-muted">${item.comment}</div>
+                                </div>
+                            ` : '' }
+
+                        </div>`;
+
+                });
+
+                $("#historyBody").html(html);
+                new bootstrap.Modal(document.getElementById("historyModal")).show();
+                })
+                .catch(() => {
+                    Toast.fire({ icon: 'error', title: 'Unable to load task history.' });
+                });
             }
 
             function updateTaskPriority(id, priority) {

@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'updateFollowUp'])->name('daily-tasks.follow-up.update');
     Route::delete('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'destroyFollowUp'])->name('daily-tasks.follow-up.destroy');
     Route::get('/daily-tasks/{taskId}/follow-ups', [\App\Http\Controllers\DailyTaskController::class, 'getFollowUps']);
+    Route::get('/daily-task-history/{task}', [\App\Http\Controllers\DailyTaskController::class, 'statusHistory']);
 
     // STATIC PAGES
     Route::get('/help', function () {
