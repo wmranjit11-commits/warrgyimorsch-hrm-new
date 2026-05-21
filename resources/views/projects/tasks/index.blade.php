@@ -167,21 +167,26 @@
                                     <tr style="height: 60px; vertical-align: middle;">
                                         <th class="ps-4" style="width: 60px;"><input type="checkbox" id="selectAllTasks"
                                                 class="form-check-input shadow-none"></th>
-                                        <th
+                                        <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Project.</th>
-                                        <th
+                                            Project.</th> -->
+                                        <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Task Title</th>
-                                        <th
+                                            Task Title</th> -->
+                                        <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Start Date</th>
+                                            Start Date</th> -->
                                         <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Time Tracking</th> -->
-                                        <th
+                                        <!-- <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
-                                            Priority</th>
+                                            Priority</th> -->
+                                            
+                                        <th
+                                            style="font-size:12px;font-weight:700;text-transform:uppercase;color:white;">
+                                            Task Description
+                                        </th>
                                         <th
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                             Status</th>
@@ -193,6 +198,9 @@
                                                 style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
                                                 Assign By</th> -->
                                         @endif
+                                        <th
+                                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white;">
+                                            Department</th>
                                         <th class="pe-4 text-center"
                                             style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: white; white-space: nowrap; width: 220px;">
                                             Action</th>
@@ -204,12 +212,12 @@
                                             <td class="ps-4"><input type="checkbox"
                                                     class="form-check-input task-checkbox shadow-none" value="{{ $task->id }}">
                                             </td>
-                                            <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
+                                            <!-- <td class="fw-bold" style="font-size: 14px; color: #1e293b;">
                                                 <div class="d-flex align-items-center">
                                                     @if($task->project)
                                                         <div class="avatar-image border-0 position-relative me-2"
                                                             style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                            <!-- SVG Ring for Task List -->
+                                                            SVG Ring for Task List
                                                             <svg width="32" height="32" viewBox="0 0 100 100"
                                                                 style="position: absolute; transform: rotate(-90deg);">
                                                                 <circle cx="50" cy="50" r="44" fill="none" stroke="#f1f5f9"
@@ -231,8 +239,8 @@
                                                         <span class="text-muted">-</span>
                                                     @endif
                                                 </div>
-                                            </td>
-                                            <td
+                                            </td> -->
+                                            <!-- <td
                                                 style="font-size: 14px; color: #475569; max-width: 200px; white-space: normal; word-break: break-word;">
                                                 <div class="d-flex flex-column">
                                                     <div class="fw-bold text-dark mb-1">{{ $task->task_title }}</div>
@@ -246,8 +254,8 @@
                                                     @endif
                                                 </div>
                                                 </div>
-                                            </td>
-                                            <td style="font-size: 14px; color: #475569;">
+                                            </td> -->
+                                            <!-- <td style="font-size: 14px; color: #475569;">
                                                 <div class="d-flex flex-column gap-1">
                                                     <div class="d-flex align-items-center gap-2">
                                                         <i class="feather-calendar text-primary" style="font-size: 11px;"></i>
@@ -259,7 +267,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                            </td>
+                                            </td> -->
                                             <!-- <td>
                                                 <div class="d-flex flex-column">
                                                     @if($task->status != 'Completed')
@@ -293,7 +301,7 @@
                                                     </span>
                                                 </div>
                                             </td> -->
-                                            <td>
+                                            <!-- <td>
                                                 @php
                                                     $p = strtolower($task->priority);
                                                     $priorityClass = 'priority-' . ($p == 'hard' ? 'hard' : ($p == 'medium' ? 'medium' : ($p == 'low' ? 'low' : 'normal')));
@@ -313,14 +321,14 @@
                                                                 href="javascript:void(0);"
                                                                 onclick="updateTaskPriority({{ $task->id }}, 'Medium')">Medium</a>
                                                         </li>
-                                                        <!-- <li><a class="dropdown-item fw-bold priority-normal py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateTaskPriority({{ $task->id }}, 'Normal')">Normal</a></li> -->
+                                                        <li><a class="dropdown-item fw-bold priority-normal py-2 mb-1 rounded mx-2" href="javascript:void(0);" onclick="updateTaskPriority({{ $task->id }}, 'Normal')">Normal</a></li>
                                                         <li><a class="dropdown-item fw-bold priority-low py-2 rounded mx-2"
                                                                 href="javascript:void(0);"
                                                                 onclick="updateTaskPriority({{ $task->id }}, 'Low')">Low</a>
                                                         </li>
                                                     </ul>
                                                 </div>
-                                            </td>
+                                            </td> -->
                                             <!-- <td>
                                                 @php
                                                     $s = $task->status;
@@ -367,6 +375,95 @@
                                                     </div>
                                                 @endif
                                             </td> -->
+                                            <td style="min-width:250px !important;">
+                                                <div class="d-flex align-items-center">
+
+                                                    {{-- Project Icon --}}
+                                                    <div class="me-3 d-flex align-items-center justify-content-center"
+                                                        style="width:40px;min-width:40px;">
+
+                                                        <div class="text-primary"
+                                                            style="font-size:20px;">
+                                                            <i class="feather-briefcase"></i>
+                                                        </div>
+
+                                                    </div>
+                                                    
+                                                    <div class="d-flex flex-column">
+
+                                                        {{-- Project --}}
+                                                        <div class="mb-1">
+                                                            <small class="text-muted">Project :</small>
+                                                            <span class="fw-bold text-dark">
+                                                                {{ $task->project->name ?? '-' }}
+                                                            </span>
+                                                        </div>
+
+                                                        {{-- Task --}}
+                                                        <div class="mb-1">
+                                                            <small class="text-muted">Task :</small>
+                                                            <span class="fw-bold">
+                                                                {{ $task->task_title }}
+                                                            </span>
+                                                        </div>
+
+                                                        {{-- Date --}}
+                                                        <div class="mb-1 d-flex align-items-center gap-2">
+
+                                                            <small class="text-muted">
+                                                                Start :
+                                                            </small>
+
+                                                            <i class="feather-calendar text-primary"></i>
+
+                                                            <span style="font-size: 10px;">
+                                                                {{ $task->start_date->format('d M Y') }}
+                                                            </span>
+
+                                                            @if($task->end_date)
+                                                                <span class="text-muted" style="font-size: 10px;">
+                                                                    → {{ $task->end_date->format('d M Y') }}
+                                                                </span>
+                                                            @endif
+
+                                                        </div>
+
+                                                        {{-- Priority --}}
+                                                        <div>
+
+                                                            @php
+                                                                $p = strtolower($task->priority);
+
+                                                                $priorityClass='priority-'.(
+                                                                    $p=='hard' ? 'hard' :
+                                                                    ($p=='medium' ? 'medium' :
+                                                                    ($p=='low' ? 'low' : 'normal'))
+                                                                );
+                                                            @endphp
+
+                                                            <small class="text-muted me-2">
+                                                                Priority :
+                                                            </small>
+
+                                                            <span class="priority-badge {{ $priorityClass }}">
+                                                                {{ $task->priority }}
+                                                            </span>
+
+                                                        </div>
+
+                                                        @if($task->photo)
+                                                        <a href="javascript:void(0)"
+                                                            onclick="viewAttachmentPopup('{{ asset('storage/'.$task->photo) }}')"
+                                                            class="badge bg-soft-info text-info mt-2 align-self-start">
+
+                                                            <i class="feather-paperclip"></i>
+                                                            View File
+                                                        </a>
+                                                        @endif
+
+                                                    </div>
+                                                </div>
+                                            </td>
                                             <td class="align-middle">
                                                 @php
                                                     $s = $task->status;
@@ -412,7 +509,9 @@
 
                                                             {{ $task->status_changed_at->format('d M Y h:i A') }}
                                                             @if ($s == "Completed")
-                                                                ({{ $task->formatted_total_time }})
+                                                                <div class="text-primary fw-bold">
+                                                                    {{ $task->formatted_total_time }}
+                                                                </div>
                                                             @endif
                                                         </div>
 
@@ -430,6 +529,10 @@
                                                     {{ $task->creator ? $task->creator->name : '-' }}
                                                 </td> -->
                                             @endif
+                                            <td>
+                                                <span
+                                                    class="badge bg-soft-secondary text-secondary">{{ $task->employee->department }}</span>
+                                            </td>
                                             <td class="text-center" style="white-space: nowrap;">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
@@ -712,7 +815,7 @@
                         <select name="priority" id="taskPriority" class="form-select premium-select"
                             data-placeholder="Select Priority..." required>
                             <option value="">Select priority...</option>
-                            <option value="Hard">Hight</option>
+                            <option value="Hard">High</option>
                             <option value="Medium" selected>Medium</option>
                             <option value="Low">Low</option>
                         </select>
@@ -1624,7 +1727,7 @@
                     showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, delete them!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch('{{ route("daily-tasks.bulk-delete") }}', {
+                        fetch('{{ url("/daily-tasks/bulk-delete") }}', {
                             method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ids: checked })
                         }).then(res => res.json()).then(data => { if (data.success) { Toast.fire({ icon: 'success', title: data.success }).then(() => location.reload()); } });
@@ -1707,7 +1810,7 @@
 
             function resetTaskForm() {
                 document.getElementById('taskForm').reset();
-                document.getElementById('taskForm').action = `{{ route('daily-tasks.store') }}`;
+                document.getElementById('taskForm').action = `{{ url('/daily-tasks') }}`;
                 document.getElementById('taskOffcanvasLabel').innerText = 'Create Task';
                 document.getElementById('submitTaskBtn').innerText = 'SUBMIT TASK';
                 document.getElementById('taskId').value = '';
@@ -2236,7 +2339,7 @@
                 btn.innerText = 'SUBMITTING...'; btn.disabled = true;
 
                 const followUpId = document.getElementById('followUpId').value;
-                const url = followUpId ? `/daily-tasks/follow-up/${followUpId}` : '{{ route("daily-tasks.follow-up.store") }}';
+                const url = followUpId ? `/daily-tasks/follow-up/${followUpId}` : '{{ url("/daily-tasks/follow-up") }}';
                 const formData = new FormData(this);
                 if (followUpId) {
                     formData.append('_method', 'PUT');

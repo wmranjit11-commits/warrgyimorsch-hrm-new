@@ -8,6 +8,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveApplicationController;
 use App\Http\Controllers\ZKTController;
+use App\Http\Controllers\VacancyController;
 // use Rats\Zkteco\Lib\ZKTeco;
 
 
@@ -183,6 +184,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/job-vacancy', [VacancyController::class, 'show'])->name('vacancy.show');
+    Route::post('/job-vacancy/store', [VacancyController::class,'store'])->name('job.store');
+    Route::post('/job-applications/update-status/{id}', [VacancyController::class, 'updateStatus']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/details', [ProfileController::class, 'show'])->name('profile.show');
