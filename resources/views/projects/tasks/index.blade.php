@@ -549,7 +549,7 @@
                                                         </button>
                                                     </form>
                                                     @php
-                                                        $canAddProgress = (strtoupper(auth()->user()->role) === 'ADMIN' || strtoupper(auth()->user()->role) === 'SUPER ADMIN' || auth()->user()->employee_id == $task->employee_id);
+                                                        $canAddProgress = (strtoupper(auth()->user()->role) === 'ADMIN' || strtoupper(auth()->user()->role) === 'SUPER ADMIN' || strtoupper(auth()->user()->role) === 'team_leader' || auth()->user()->employee_id == $task->employee_id);
                                                     @endphp
 
                                                     @if($canAddProgress)
