@@ -36,13 +36,62 @@ class EmployeeController extends Controller
                 $perPage = 20;
             }
 
-        if ($isAdmin) {
-            $employees = Employee::orderBy('name')->paginate($perPage)->appends($request->query());
-        } else {
-            $employees = Employee::where('id', auth()->user()->employee_id)->paginate($perPage)->appends($request->query());
+        $search = trim((string) $request->query('search', ''));
+        $employeeFilter = $request->query('employee_id');
+        $roleFilter = trim((string) $request->query('role', ''));
+        $departmentFilter = trim((string) $request->query('department', ''));
+
+        $baseQuery = Employee::query();
+
+        if (!$isAdmin) {
+            $baseQuery->where('id', auth()->user()->employee_id);
         }
 
-        return view('employees.index', compact('employees', 'perPage'));
+        $employeeFilterOptions = (clone $baseQuery)
+            ->orderBy('name')
+            ->get();
+
+        $employees = $baseQuery
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('employee_code', 'like', "%{$search}%")
+                        ->orWhere('department', 'like', "%{$search}%")
+                        ->orWhere('role', 'like', "%{$search}%");
+                });
+            })
+            ->when($employeeFilter, function ($query) use ($employeeFilter) {
+                $query->where('id', $employeeFilter);
+            })
+            ->when($roleFilter !== '', function ($query) use ($roleFilter) {
+                $normalizedRole = strtolower(str_replace(' ', '_', $roleFilter));
+
+                $query->whereRaw(
+                    "LOWER(REPLACE(role, ' ', '_')) = ?",
+                    [$normalizedRole]
+                );
+            })
+            ->when($departmentFilter !== '', function ($query) use ($departmentFilter) {
+                $normalizedDepartment = strtolower(str_replace('_', ' ', $departmentFilter));
+
+                $query->whereRaw(
+                    "LOWER(REPLACE(department, '_', ' ')) = ?",
+                    [$normalizedDepartment]
+                );
+            })
+            ->orderBy('name')
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        return view('employees.index', compact(
+            'employees',
+            'perPage',
+            'employeeFilterOptions',
+            'search',
+            'employeeFilter',
+            'roleFilter',
+            'departmentFilter'
+        ));
     }
 
 
@@ -75,6 +124,7 @@ class EmployeeController extends Controller
                 'account_number' => 'required|string|max:50',
                 'ifsc_code' => 'required|string|max:20',
                 'basic_salary' => 'required|numeric|min:0',
+                'working_mode' => 'required|in:Office,Work from home',
             ]);
 
             return DB::transaction(function () use ($request) {
@@ -359,7 +409,11 @@ class EmployeeController extends Controller
             } elseif ($record) {
                 $punch_in = $record->check_in ? \Carbon\Carbon::parse($record->check_in)->format('h:i A') : '--:--';
                 $punch_out = $record->check_out ? \Carbon\Carbon::parse($record->check_out)->format('h:i A') : '--:--';
-                $total_hours = number_format((float)$record->total_hours, 1) . ' hrs';
+                // $total_hours = number_format((float)$record->total_hours, 1) . ' hrs';
+                $totalHoursDecimal = (float) $record->total_hours;
+                $hours = floor($totalHoursDecimal);
+                $minutes = round(($totalHoursDecimal - $hours) * 60);
+                $total_hours = "{$hours}h {$minutes}m";
 
                 if ($record->total_hours < 5 && $record->total_hours > 3) {
                     $status = 'Half Day';
@@ -435,6 +489,7 @@ class EmployeeController extends Controller
                 'role' => 'required|string',
                 'email' => 'nullable|email|unique:users,email,' . $userId,
                 'employee_code' => 'nullable|string|max:50|unique:employees,employee_code,' . $employee->id,
+                'working_mode' => 'required|in:Office,Work from home',
             ]);
 
             return DB::transaction(function () use ($request, $employee, $user) {
@@ -470,6 +525,7 @@ class EmployeeController extends Controller
                     'conveyance_allowance' => $request->conveyance_allowance ?? 0,
                     'medical_allowance' => $request->medical_allowance ?? 0,
                     'other_allowance' => $request->other_allowance ?? 0,
+                    'working_mode' => $request->working_mode,
                 ];
 
                 // Only update password if provided

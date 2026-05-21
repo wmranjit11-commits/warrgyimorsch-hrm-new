@@ -430,7 +430,7 @@
                                                     {{ $task->creator ? $task->creator->name : '-' }}
                                                 </td> -->
                                             @endif
-                                            <td class="pe-4 text-center" style="white-space: nowrap; width: 220px;">
+                                            <td class="text-center" style="white-space: nowrap;">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-secondary text-secondary rounded"
@@ -1201,6 +1201,10 @@
                 transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 height: 0;
                 overflow: hidden;
+            }
+
+            .table-responsive .table tr td {
+                padding: 15px 8px;
             }
         </style>
 
