@@ -13,6 +13,54 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    private function getHolidayDatesBetween(Carbon $from, Carbon $to): array
+    {
+        return Holiday::whereBetween('date', [
+                $from->toDateString(),
+                $to->toDateString(),
+            ])
+            ->pluck('date')
+            ->mapWithKeys(fn ($date) => [Carbon::parse($date)->toDateString() => true])
+            ->all();
+    }
+
+    private function shouldSkipNonWorkingDaysForReport(LeaveApplication $leave): bool
+    {
+        $normalizedCategory = strtolower($leave->leave_category ?? '');
+        $normalizedType = strtolower($leave->leave_type ?? '');
+
+        return !str_contains($normalizedCategory, 'gatepass')
+            && !str_contains($normalizedType, 'half');
+    }
+
+    private function expandLeaveReportDates(
+        LeaveApplication $leave,
+        Carbon $from,
+        Carbon $to,
+        array $holidayDates
+    ): array {
+        $start = Carbon::parse($leave->start_date)->startOfDay()->max($from->copy()->startOfDay());
+        $end = Carbon::parse($leave->end_date ?: $leave->start_date)->startOfDay()->min($to->copy()->startOfDay());
+
+        if ($end->lt($start)) {
+            return [];
+        }
+
+        $dates = [];
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            if (
+                $this->shouldSkipNonWorkingDaysForReport($leave)
+                && ($date->isSunday() || isset($holidayDates[$date->toDateString()]))
+            ) {
+                continue;
+            }
+
+            $dates[] = $date->toDateString();
+        }
+
+        return $dates;
+    }
 
     private function getAttendanceAnalytics($from, $to, $employeeId = null)
     {
@@ -68,7 +116,7 @@ class DashboardController extends Controller
         // Employee Metrics
         // $totalEmployees = $isAdmin ? Employee::count() : 1;
 
-        if($isTeamLeader){
+        if(!$isAdmin){
             $totalEmployees = Employee::where('department', $employee->department)->count();
         }
         else{
@@ -488,7 +536,7 @@ class DashboardController extends Controller
                 case 'week':
                     $from = Carbon::now()->subWeek();
                     break;
-                case 'last_month':
+                case 'month':
                     $from = Carbon::now()->subMonth()->startOfMonth();
                     $to = Carbon::now()->subMonth()->endOfMonth();
                     break;
@@ -517,26 +565,26 @@ class DashboardController extends Controller
         }
 
         if ($from && $to) {
-
             // ADMIN → OLD LOGIC (NO CHANGE)
-            if ($isAdmin || $isTeamLeader) {
+            if ($isAdmin) {
                 $query->where(function ($q) use ($from, $to) {
                     $q->whereBetween('leave_applications.start_date', [$from, $to])
                         ->orWhereBetween('leave_applications.end_date', [$from, $to]);
                 });
             }
 
-            // USER → INCLUDE attendance date also
+            // Team leader / employee → include any leave overlapping the selected range
             if (!$isAdmin) {
-                $query->where(function ($q) use ($from, $to) {
-                    $q->whereBetween('leave_applications.start_date', [$from, $to])
-                        ->orWhereBetween('leave_applications.end_date', [$from, $to]);
-                });
+                $query->whereDate('leave_applications.start_date', '<=', $to->toDateString())
+                    ->where(function ($q) use ($from) {
+                        $q->whereDate('leave_applications.end_date', '>=', $from->toDateString())
+                            ->orWhereNull('leave_applications.end_date');
+                    });
             }
         }
 
-        // ADMIN → old count
-        if ($isAdmin || $isTeamLeader) {
+        // ADMIN → keep old dashboard behavior unchanged
+        if ($isAdmin) {
             return $query->selectRaw("
                     employees.id,
                     employees.name,
@@ -549,50 +597,73 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        // USER → include attendance count
+        $from = ($from ?: Carbon::now()->startOfMonth())->copy()->startOfDay();
+        $to = ($to ?: Carbon::today())->copy()->startOfDay();
+        $holidayDates = $this->getHolidayDatesBetween($from, $to);
+
+        if ($isTeamLeader) {
+            $leaveApplications = (clone $query)
+                ->select(
+                    'leave_applications.*',
+                    'employees.id as employee_id',
+                    'employees.name',
+                    'employees.designation'
+                )
+                ->get();
+
+            return $leaveApplications
+                ->groupBy('employee_id')
+                ->map(function ($employeeLeaves) use ($from, $to, $holidayDates) {
+                    $employee = $employeeLeaves->first();
+
+                    $leaveCount = $employeeLeaves
+                        ->flatMap(fn ($leave) => $this->expandLeaveReportDates($leave, $from, $to, $holidayDates))
+                        ->unique()
+                        ->count();
+
+                    if ($leaveCount === 0) {
+                        return null;
+                    }
+
+                    return (object) [
+                        'id' => $employee->employee_id,
+                        'name' => $employee->name,
+                        'designation' => $employee->designation,
+                        'leave_count' => $leaveCount,
+                    ];
+                })
+                ->filter()
+                ->sortByDesc('leave_count')
+                ->values();
+        }
 
         $leaveDates = LeaveApplication::where('employee_id', $employeeId)
-        ->whereIn('status', ['approved', 'unauthorised'])
-        ->where('leave_applications.leave_category', 'NOT LIKE', '%WFH%')
-        ->when($from && $to, function ($q) use ($from, $to) {
-            $q->where(function ($sub) use ($from, $to) {
-                $sub->whereBetween('start_date', [$from, $to])
-                    ->orWhereBetween('end_date', [$from, $to]);
-            });
-        })
-        ->get()
-        ->flatMap(function ($leave) {
-            $dates = [];
-            $start = \Carbon\Carbon::parse($leave->start_date);
-            $end = \Carbon\Carbon::parse($leave->end_date);
+            ->whereIn('status', ['approved', 'unauthorised'])
+            ->where('leave_category', 'NOT LIKE', '%WFH%')
+            ->when($from && $to, function ($q) use ($from, $to) {
+                $q->whereDate('start_date', '<=', $to->toDateString())
+                    ->where(function ($sub) use ($from) {
+                        $sub->whereDate('end_date', '>=', $from->toDateString())
+                            ->orWhereNull('end_date');
+                    });
+            })
+            ->get()
+            ->flatMap(fn ($leave) => $this->expandLeaveReportDates($leave, $from, $to, $holidayDates));
 
-            while ($start->lte($end)) {
-                $dates[] = $start->toDateString();
-                $start->addDay();
-            }
-
-                return $dates;
-            });
-
-
-        // 2. Get attendance leave dates
         $attendanceDates = Attendance::where('employee_id', $employeeId)
             ->whereIn('status', ['leave', 'absent'])
             ->when($from && $to, function ($q) use ($from, $to) {
-                $q->whereBetween('attendance_date', [$from, $to]);
+                $q->whereBetween('attendance_date', [$from->toDateString(), $to->toDateString()]);
             })
             ->pluck('attendance_date')
-            ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString());
+            ->map(fn ($d) => Carbon::parse($d)->toDateString())
+            ->reject(fn ($date) => Carbon::parse($date)->isSunday() || isset($holidayDates[$date]));
 
-
-        // 3. Merge + unique (THIS IS OR LOGIC)
         $totalUniqueDates = $leaveDates
             ->merge($attendanceDates)
             ->unique()
             ->count();
 
-
-        // 4. Return
         if ($totalUniqueDates > 0) {
             return collect([
                 (object) [

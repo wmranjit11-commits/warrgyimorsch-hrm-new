@@ -149,7 +149,7 @@
                     <div class="d-none d-lg-flex align-items-center me-2"
                         style="width: 220px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 44px; padding: 0 15px;">
                         <i class="feather-search text-muted" style="font-size: 14px;"></i>
-                        <input type="text" class="employee-page-search-input" onkeyup="syncAndFilter(this)" placeholder="Search..."
+                        <input type="text" class="employee-page-search-input" value="{{ $search ?? '' }}" onkeyup="syncAndFilter(this)" placeholder="Search..."
                             style="background: transparent; border: none; outline: none; width: 100%; padding-left: 10px; font-size: 13px; font-weight: 600;">
                     </div>
                     
@@ -191,100 +191,104 @@
             <div id="mobileSearchSection" class="d-none d-lg-none bg-light p-3 border-bottom">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-0"><i class="feather-search"></i></span>
-                    <input type="text" class="form-control border-0 employee-page-search-input" onkeyup="syncAndFilter(this)" placeholder="Search employees...">
+                    <input type="text" class="form-control border-0 employee-page-search-input" value="{{ $search ?? '' }}" onkeyup="syncAndFilter(this)" placeholder="Search employees...">
                 </div>
             </div>
 
                 <!-- Collapsible Filter Section -->
-                <div class="collapse" id="filterSection">
-                    <div class="card-body border-bottom bg-light bg-opacity-10 p-4">
-                        <div class="row g-3">
-                            <div class="col-md-3">
+                <div class="collapse" id="filterSection" style="overflow: visible !important;">
+                    <div class="card-body border-bottom bg-light bg-opacity-10 p-4" style="overflow: visible !important; position: relative; z-index: 999;">
+                        <div class="row g-3" style="overflow: visible !important;">
+                            <div class="col-md-3" style="overflow: visible !important;">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Employee Name / ID</label>
                                 <div class="wghrm-search-dropdown" id="employeeFilterDropdown">
                                     <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
-                                        <span class="wghrm-trigger-text fw-bold text-dark">All Employees</span>
+                                        @php $selectedEmployeeOption = $employeeFilterOptions->firstWhere('id', $employeeFilter); @endphp
+                                        <span class="wghrm-trigger-text fw-bold text-dark">
+                                            {{ $selectedEmployeeOption
+                                                ? $selectedEmployeeOption->name . ' (' . ($selectedEmployeeOption->employee_code ?? $selectedEmployeeOption->id) . ')'
+                                                : 'All Employees' }}
+                                        </span>
                                         <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                     </div>
-                                    <div class="wghrm-dropdown-menu">
+                                    <div class="wghrm-dropdown-menu" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12); z-index: 9999; padding: 10px; display: none; min-width: 100%; pointer-events: auto;">
                                         <div class="wghrm-search-container">
                                             <i data-feather="search" class="wghrm-search-icon"></i>
                                             <input type="text" class="wghrm-search-input" placeholder="Search employee...">
                                         </div>
                                         <div class="wghrm-items-list">
-                                            <div class="wghrm-item selected" data-value="" data-text="All Employees">
+                                            <div class="wghrm-item {{ empty($employeeFilter) ? 'selected' : '' }}" data-value="" data-text="All Employees">
                                                 <span class="wghrm-item-text">All Employees</span>
                                                 <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                             </div>
-                                            @foreach ($employees as $employee)
+                                            @foreach ($employeeFilterOptions as $employee)
                                                 @php
                                                     $employeeLabel = trim(($employee->name ?? 'Unknown') . ' (' . ($employee->employee_code ?? $employee->id) . ')');
-                                                    $employeeFilterValue = strtolower(($employee->name ?? '') . ' ' . ($employee->employee_code ?? $employee->id));
                                                 @endphp
-                                                <div class="wghrm-item" data-value="{{ $employeeFilterValue }}" data-text="{{ $employeeLabel }}">
+                                                <div class="wghrm-item {{ (string) $employeeFilter === (string) $employee->id ? 'selected' : '' }}" data-value="{{ $employee->id }}" data-text="{{ $employeeLabel }}">
                                                     <span class="wghrm-item-text">{{ $employeeLabel }}</span>
                                                     <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                 </div>
                                             @endforeach
                                         </div>
                                     </div>
-                                    <input type="hidden" id="filterEmployeeName" value="">
+                                    <input type="hidden" id="filterEmployeeName" value="{{ $employeeFilter ?? '' }}">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3" style="overflow: visible !important;">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Role</label>
                                 <div class="wghrm-search-dropdown" id="roleFilterDropdown">
                                     <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
-                                        <span class="wghrm-trigger-text fw-bold text-dark">All Roles</span>
+                                        <span class="wghrm-trigger-text fw-bold text-dark">{{ $roleFilter ? ucfirst(str_replace('_', ' ', $roleFilter)) : 'All Roles' }}</span>
                                         <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                     </div>
-                                    <div class="wghrm-dropdown-menu">
+                                    <div class="wghrm-dropdown-menu" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12); z-index: 9999; padding: 10px; display: none; min-width: 100%; pointer-events: auto;">
                                         <div class="wghrm-search-container">
                                             <i data-feather="search" class="wghrm-search-icon"></i>
                                             <input type="text" class="wghrm-search-input" placeholder="Search role...">
                                         </div>
                                         <div class="wghrm-items-list">
-                                            <div class="wghrm-item selected" data-value="" data-text="All Roles">
+                                            <div class="wghrm-item {{ empty($roleFilter) ? 'selected' : '' }}" data-value="" data-text="All Roles">
                                                 <span class="wghrm-item-text">All Roles</span>
                                                 <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                             </div>
                                             @foreach (\App\Models\Role::all() as $role)
-                                                <div class="wghrm-item" data-value="{{ strtolower($role->slug) }}" data-text="{{ $role->name }}">
+                                                <div class="wghrm-item {{ strtolower($role->slug) === strtolower($roleFilter ?? '') ? 'selected' : '' }}" data-value="{{ strtolower($role->slug) }}" data-text="{{ $role->name }}">
                                                     <span class="wghrm-item-text">{{ $role->name }}</span>
                                                     <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                 </div>
                                             @endforeach
                                         </div>
                                     </div>
-                                    <input type="hidden" id="filterRole" value="">
+                                    <input type="hidden" id="filterRole" value="{{ $roleFilter ?? '' }}">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3" style="overflow: visible !important;">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Department</label>
                                 <div class="wghrm-search-dropdown" id="departmentFilterDropdown">
                                     <div class="wghrm-dropdown-trigger" style="height: 44px; border-radius: 8px; background: #fff !important;">
-                                        <span class="wghrm-trigger-text fw-bold text-dark">All Departments</span>
+                                        <span class="wghrm-trigger-text fw-bold text-dark">{{ $departmentFilter ? ucfirst(str_replace('_', ' ', $departmentFilter)) : 'All Departments' }}</span>
                                         <i data-feather="chevron-down" style="width: 16px; height: 16px;"></i>
                                     </div>
-                                    <div class="wghrm-dropdown-menu">
+                                    <div class="wghrm-dropdown-menu" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12); z-index: 9999; padding: 10px; display: none; min-width: 100%; pointer-events: auto;">
                                         <div class="wghrm-search-container">
                                             <i data-feather="search" class="wghrm-search-icon"></i>
                                             <input type="text" class="wghrm-search-input" placeholder="Search department...">
                                         </div>
                                         <div class="wghrm-items-list">
-                                            <div class="wghrm-item selected" data-value="" data-text="All Departments">
+                                            <div class="wghrm-item {{ empty($departmentFilter) ? 'selected' : '' }}" data-value="" data-text="All Departments">
                                                 <span class="wghrm-item-text">All Departments</span>
                                                 <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                             </div>
                                             @foreach (\App\Models\Department::all() as $dept)
-                                                <div class="wghrm-item" data-value="{{ strtolower($dept->name) }}" data-text="{{ $dept->name }}">
+                                                <div class="wghrm-item {{ strtolower($dept->name) === strtolower($departmentFilter ?? '') ? 'selected' : '' }}" data-value="{{ strtolower($dept->name) }}" data-text="{{ $dept->name }}">
                                                     <span class="wghrm-item-text">{{ $dept->name }}</span>
                                                     <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                 </div>
                                             @endforeach
                                         </div>
                                     </div>
-                                    <input type="hidden" id="filterDepartment" value="">
+                                    <input type="hidden" id="filterDepartment" value="{{ $departmentFilter ?? '' }}">
                                 </div>
                             </div>
                             <div class="col-md-3 d-flex gap-2 align-items-end">
@@ -559,6 +563,33 @@
 
         <!-- ANIMATION -->
         <style>
+            /* Filter Section Dropdowns - Prevent Clipping */
+            #filterSection {
+                overflow: visible !important;
+            }
+            
+            #filterSection .card-body {
+                overflow: visible !important;
+            }
+            
+            #filterSection .row {
+                overflow: visible !important;
+            }
+            
+            #filterSection .col-md-3 {
+                overflow: visible !important;
+            }
+            
+            /* Ensure collapse is fully visible */
+            .collapse.show {
+                overflow: visible !important;
+            }
+            
+            /* Card overflow for dropdowns */
+            .card {
+                overflow: visible !important;
+            }
+            
             /* Fixed Dropdown Search & Select UI */
             .wghrm-custom-select-btn {
                 background-color: #fff !important;
@@ -622,6 +653,7 @@
             .wghrm-search-dropdown {
                 position: relative;
                 width: 100%;
+                overflow: visible;
             }
 
             .wghrm-dropdown-trigger {
@@ -637,6 +669,8 @@
                 cursor: pointer;
                 transition: all 0.2s ease;
                 box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+                position: relative;
+                z-index: 1;
             }
 
             .wghrm-dropdown-trigger.open {
@@ -659,18 +693,27 @@
                 border: 1px solid #e2e8f0;
                 border-radius: 12px;
                 box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
-                z-index: 1055;
+                z-index: 9999 !important;
                 padding: 10px;
                 display: none;
+                min-width: 100%;
+                width: auto;
+                pointer-events: auto !important;
+                visibility: visible !important;
             }
 
             .wghrm-dropdown-menu.show {
-                display: block;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
             }
 
             .wghrm-search-container {
                 position: relative;
                 margin-bottom: 10px;
+                display: block !important;
+                visibility: visible !important;
             }
 
             .wghrm-search-icon {
@@ -703,6 +746,9 @@
             .wghrm-items-list {
                 max-height: 220px;
                 overflow-y: auto;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
 
             .wghrm-item {
@@ -1212,35 +1258,13 @@
 
         <!-- SEARCH & VIEW MODAL -->
         <script>
-            // Search functionality (top search bar)
-            document.getElementById('searchInput').addEventListener('keyup', function () {
-                const searchValue = this.value.toLowerCase();
-                const rows = document.querySelectorAll("#employeeTable tbody tr");
-
-                rows.forEach(row => {
-                    if (row.id === 'noResultsRow') return;
-
-                    const displayStatus = row.innerText.toLowerCase().includes(searchValue) ? '' : 'none';
-                    row.style.display = displayStatus;
+            // Legacy search binding guard: current page uses .employee-page-search-input fields instead.
+            const legacySearchInput = document.getElementById('searchInput');
+            if (legacySearchInput) {
+                legacySearchInput.addEventListener('keyup', function () {
+                    syncAndFilter(this);
                 });
-
-                // Show no results message if needed
-                const visibleRows = Array.from(rows).filter(r => r.style.display !== 'none' && r.id !== 'noResultsRow').length;
-                if (visibleRows === 0) {
-                    const tbody = document.querySelector("#employeeTable tbody");
-                    if (!document.getElementById('noResultsRow')) {
-                        const noResultsRow = document.createElement('tr');
-                        noResultsRow.id = 'noResultsRow';
-                        noResultsRow.innerHTML = '<td colspan="6" class="text-center text-muted">No employees found</td>';
-                        tbody.appendChild(noResultsRow);
-                    }
-                } else {
-                    const noResultsRow = document.getElementById('noResultsRow');
-                    if (noResultsRow) {
-                        noResultsRow.remove();
-                    }
-                }
-            });
+            }
 
             // Select All Checkbox
             document.getElementById('selectAll').addEventListener('change', function () {
@@ -1755,102 +1779,50 @@
                 document.getElementById('filterSection').style.display = 'none';
             }
 
+            function buildEmployeeFilterUrl() {
+                const url = new URL(window.location.href);
+                const employeeId = document.getElementById('filterEmployeeName')?.value || '';
+                const globalSearch = (document.querySelector('.employee-page-search-input')?.value || '').trim();
+                const department = document.getElementById('filterDepartment')?.value || '';
+                const role = document.getElementById('filterRole')?.value || '';
+
+                if (employeeId) {
+                    url.searchParams.set('employee_id', employeeId);
+                } else {
+                    url.searchParams.delete('employee_id');
+                }
+
+                if (globalSearch) {
+                    url.searchParams.set('search', globalSearch);
+                } else {
+                    url.searchParams.delete('search');
+                }
+
+                if (department) {
+                    url.searchParams.set('department', department);
+                } else {
+                    url.searchParams.delete('department');
+                }
+
+                if (role) {
+                    url.searchParams.set('role', role);
+                } else {
+                    url.searchParams.delete('role');
+                }
+
+                url.searchParams.set('page', '1');
+
+                return url.toString();
+            }
+
             // Apply Filters
             function applyFilters() {
-                const employeeName = document.getElementById('filterEmployeeName').value.toLowerCase();
-                const globalSearch = (document.querySelector('.employee-page-search-input')?.value || '').toLowerCase().trim();
-                const department = document.getElementById('filterDepartment').value.toLowerCase();
-                const role = document.getElementById('filterRole').value.toLowerCase();
-
-                // Table Rows
-                const rows = document.querySelectorAll("#employeeTable tbody tr:not(#noResultsRow)");
-                // Mobile Cards
-                const cards = document.querySelectorAll(".employee-card-mobile");
-                
-                let visibleCount = 0;
-
-                const filterFn = (name, rowDept, rowRole) => {
-                    const employeeMatch = employeeName === '' || name.includes(employeeName);
-                    const globalSearchMatch = globalSearch === '' || name.includes(globalSearch) || rowDept.includes(globalSearch) || rowRole.includes(globalSearch);
-                    const normDepartment = department.replace(/_/g, ' ');
-                    const normRowDept = rowDept.replace(/_/g, ' ');
-                    const departmentMatch = department === '' || normRowDept.includes(normDepartment) || rowDept === department;
-                    const normRole = role.replace(/_/g, ' ');
-                    const normRowRole = rowRole.replace(/_/g, ' ');
-                    const roleMatch = role === '' || normRowRole.includes(normRole) || rowRole === role;
-                    return employeeMatch && globalSearchMatch && departmentMatch && roleMatch;
-                };
-
-                // Filter Table
-                rows.forEach(row => {
-                    const name = (row.getAttribute('data-employee-search') || row.querySelector('td:nth-child(3)')?.innerText || '').toLowerCase();
-                    const dept = (row.getAttribute('data-employee-dept') || '').toLowerCase();
-                    const roleVal = (row.getAttribute('data-employee-role') || '').toLowerCase();
-                    
-                    if (filterFn(name, dept, roleVal)) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-
-                // Filter Cards
-                cards.forEach(card => {
-                    const name = (card.getAttribute('data-employee-name') || '').toLowerCase();
-                    const dept = (card.getAttribute('data-employee-dept') || '').toLowerCase();
-                    const roleVal = (card.getAttribute('data-employee-role') || '').toLowerCase();
-
-                    if (filterFn(name, dept, roleVal)) {
-                        card.style.setProperty('display', 'flex', 'important');
-                    } else {
-                        card.style.setProperty('display', 'none', 'important');
-                    }
-                });
-
-                // No Results Handling
-                const noResTable = document.getElementById('noResultsRow');
-                if (visibleCount === 0 && (rows.length > 0 || cards.length > 0)) {
-                    if (!noResTable) {
-                        const tr = document.createElement('tr');
-                        tr.id = 'noResultsRow';
-                        tr.innerHTML = '<td colspan="7" class="text-center py-4 text-muted">No employees match filters</td>';
-                        document.querySelector("#employeeTable tbody")?.appendChild(tr);
-                    }
-                } else if (noResTable) {
-                    noResTable.remove();
-                }
+                window.location.href = buildEmployeeFilterUrl();
             }
 
             // Clear Filters
             function clearFilters() {
-                document.getElementById('filterEmployeeName').value = '';
-                document.getElementById('filterDepartment').value = '';
-                document.getElementById('filterRole').value = '';
-                document.querySelectorAll('.employee-page-search-input').forEach(input => {
-                    input.value = '';
-                });
-                document.querySelector('#employeeFilterDropdown .wghrm-trigger-text').innerText = 'All Employees';
-                document.querySelector('#roleFilterDropdown .wghrm-trigger-text').innerText = 'All Roles';
-                document.querySelector('#departmentFilterDropdown .wghrm-trigger-text').innerText = 'All Departments';
-                document.querySelectorAll('#employeeFilterDropdown .wghrm-item, #roleFilterDropdown .wghrm-item, #departmentFilterDropdown .wghrm-item').forEach((item, index) => {
-                    item.classList.toggle('selected', index === 0 || item.dataset.value === '');
-                });
-
-                // Show all rows
-                document.querySelectorAll("#employeeTable tbody tr").forEach(row => {
-                    row.style.display = '';
-                });
-
-                // Remove no results message
-                const noResultsRow = document.getElementById('noResultsRow');
-                if (noResultsRow) {
-                    noResultsRow.remove();
-                }
-
-                document.querySelectorAll('.employee-card-mobile').forEach(card => {
-                    card.style.setProperty('display', 'flex', 'important');
-                });
+                window.location.href = "{{ route('employees.index') }}";
             }
 
             // Delete Selected Employees (Bulk Delete)
@@ -1930,7 +1902,10 @@
             }
             function initializeSearchDropdown(dropdownId, inputId, defaultLabel) {
                 const dropdown = document.getElementById(dropdownId);
-                if (!dropdown) return;
+                if (!dropdown) {
+                    console.warn(`Dropdown ${dropdownId} not found`);
+                    return;
+                }
 
                 const trigger = dropdown.querySelector('.wghrm-dropdown-trigger');
                 const triggerText = dropdown.querySelector('.wghrm-trigger-text');
@@ -1939,12 +1914,27 @@
                 const hiddenInput = document.getElementById(inputId);
                 const items = dropdown.querySelectorAll('.wghrm-item');
 
+                if (!trigger || !menu) {
+                    console.warn(`Dropdown components missing for ${dropdownId}`, {trigger, menu});
+                    return;
+                }
+
+                console.log(`Initializing dropdown: ${dropdownId}`);
+
                 const closeMenu = () => {
-                    menu.classList.remove('show');
+                    menu.style.display = 'none';
                     trigger.classList.remove('open');
                     if (searchInput) {
                         searchInput.value = '';
                         filterItems('');
+                    }
+                };
+
+                const openMenu = () => {
+                    menu.style.display = 'block';
+                    trigger.classList.add('open');
+                    if (searchInput) {
+                        setTimeout(() => searchInput.focus(), 50);
                     }
                 };
 
@@ -1958,21 +1948,30 @@
 
                 trigger.addEventListener('click', function (event) {
                     event.stopPropagation();
-                    const isOpen = menu.classList.contains('show');
+                    
+                    // Check if menu is currently visible
+                    const isOpen = menu.style.display === 'block';
+                    console.log(`Dropdown trigger clicked for ${dropdownId}, display:`, menu.style.display, 'isOpen:', isOpen);
 
-                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-menu.show').forEach(openMenu => {
-                        openMenu.classList.remove('show');
-                    });
-                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-trigger.open').forEach(openTrigger => {
-                        openTrigger.classList.remove('open');
-                    });
-
-                    if (!isOpen) {
-                        menu.classList.add('show');
-                        trigger.classList.add('open');
-                        if (searchInput) {
-                            searchInput.focus();
+                    // Close all other dropdowns
+                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-menu').forEach(otherMenu => {
+                        if (otherMenu !== menu) {
+                            otherMenu.style.display = 'none';
                         }
+                    });
+                    document.querySelectorAll('.wghrm-search-dropdown .wghrm-dropdown-trigger').forEach(otherTrigger => {
+                        if (otherTrigger !== trigger) {
+                            otherTrigger.classList.remove('open');
+                        }
+                    });
+
+                    // Toggle current dropdown
+                    if (!isOpen) {
+                        openMenu();
+                        console.log(`✓ OPENED dropdown ${dropdownId}`);
+                    } else {
+                        closeMenu();
+                        console.log(`✗ CLOSED dropdown ${dropdownId}`);
                     }
                 });
 
@@ -1982,8 +1981,8 @@
                         item.classList.add('selected');
                         hiddenInput.value = item.dataset.value || '';
                         triggerText.textContent = item.dataset.text || defaultLabel;
-                        applyFilters();
                         closeMenu();
+                        console.log(`Selected item in ${dropdownId}:`, item.dataset.text);
                     });
                 });
 
@@ -2002,18 +2001,37 @@
             }
 
             // Unified Search Sync & Filter
+            let employeeSearchTimer;
+
             function syncAndFilter(el) {
                 const val = el.value;
                 document.querySelectorAll('.employee-page-search-input').forEach(input => {
                     if (input !== el) input.value = val;
                 });
-                applyFilters();
+                window.clearTimeout(employeeSearchTimer);
+                employeeSearchTimer = window.setTimeout(() => {
+                    window.location.href = buildEmployeeFilterUrl();
+                }, 350);
             }
 
             document.addEventListener('DOMContentLoaded', function () {
+                console.log('=== DOMContentLoaded fired ===');
+                
+                // Reset all dropdowns to initial closed state
+                console.log('Resetting all dropdowns to closed state...');
+                document.querySelectorAll('.wghrm-dropdown-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+                document.querySelectorAll('.wghrm-dropdown-trigger').forEach(trigger => {
+                    trigger.classList.remove('open');
+                });
+                
+                console.log('Initializing dropdowns...');
                 initializeSearchDropdown('employeeFilterDropdown', 'filterEmployeeName', 'All Employees');
                 initializeSearchDropdown('roleFilterDropdown', 'filterRole', 'All Roles');
                 initializeSearchDropdown('departmentFilterDropdown', 'filterDepartment', 'All Departments');
+                
+                console.log('=== Initialization complete ===');
             });
         </script>
 

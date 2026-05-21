@@ -353,6 +353,56 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="col-md-4">
+                                <label>Working Mode</label>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-laptop"></i>
+                                    </span>
+
+                                    <div class="dropdown flex-grow-1">
+
+                                        <button class="wghrm-custom-select-btn dropdown-toggle"
+                                            type="button"
+                                            id="working_modeDropdownBtn"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-auto-close="outside">
+
+                                            <span id="working_modeDropdownText">
+                                                {{ old('working_mode','Office') }}
+                                            </span>
+
+                                        </button>
+
+                                        <div class="dropdown-menu wghrm-custom-dropdown-menu w-100">
+
+                                            <a class="dropdown-item wghrm-custom-dropdown-item"
+                                                href="javascript:void(0)"
+                                                onclick="wghrmSelectValue(this,'working_mode','Office','Office')">
+
+                                                Office
+                                            </a>
+
+                                            <a class="dropdown-item wghrm-custom-dropdown-item"
+                                                href="javascript:void(0)"
+                                                onclick="wghrmSelectValue(this,'working_mode','Work from home','Work from home')">
+
+                                                Work from home
+                                            </a>
+
+                                        </div>
+
+                                        <input
+                                            type="hidden"
+                                            name="working_mode"
+                                            id="working_modeInput"
+                                            value="{{ old('working_mode','Office') }}">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-md-4">
                                 <label>Mobile Number <span class="text-danger">*</span></label>
                                 <div class="input-group mb-3">
@@ -800,15 +850,17 @@
 
                 const menu = element.closest('.wghrm-custom-dropdown-menu');
                 const items = menu.querySelectorAll('.wghrm-custom-dropdown-item');
+
                 items.forEach(item => item.classList.remove('active'));
                 element.classList.add('active');
 
-                // Trigger change event if needed for validation
-                document.getElementById(field + 'Input').dispatchEvent(new Event('change'));
+                document.getElementById(field + 'Input')
+                    .dispatchEvent(new Event('change'));
 
-                // Close dropdown manually
-                const dropdownToggle = document.getElementById(field + 'DropdownBtn');
-                dropdownToggle.click(); // Simple toggle to close
+                const dropdownToggle =
+                    document.getElementById(field + 'DropdownBtn');
+
+                dropdownToggle.click();
             }
 
             // Tab Navigation with Validation

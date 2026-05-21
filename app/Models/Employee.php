@@ -40,6 +40,7 @@ class Employee extends Model
         'conveyance_allowance',
         'medical_allowance',
         'other_allowance',
+        'working_mode',
     ];
 
     public function leaveAllotments()
