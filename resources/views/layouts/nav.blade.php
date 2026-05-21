@@ -235,6 +235,14 @@
                         </li>
                     </ul>
                 </li>
+            
+                <li class="nxl-item">
+                    <a href="{{ route('vacancy.show') }}" class="nxl-link">
+                                <span class="nxl-micon"><i class="feather-user-plus"></i></span>
+                                <span class="nxl-mtext">Job Vacancy</span>
+                    </a>
+                </li>
+
                 <li class="nxl-item">
                     <a href="{{ route('employees.employeeDays') }}" class="nxl-link">
                                 <span class="nxl-micon"><i class="fa-solid fa-cake-candles"></i></span>
