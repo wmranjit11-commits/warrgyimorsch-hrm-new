@@ -156,7 +156,7 @@
                 </div>
 
                 <!-- BUTTONS -->
-                <div class="col-md-2 d-flex gap-2 align-items-end">
+                <div class="col-md-2 d-flex align-items-end justify-content-center">
                     <!-- <button type="button"
                         class="btn btn-primary flex-grow-1 fw-bold"
                         onclick="applyFilters()"
@@ -182,15 +182,11 @@
                 <div class="card stretch stretch-full">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Qualification</th>
-                                        <th>Department</th>
-                                        <th>Designation</th>
-                                        <th>Interview Schedule</th>
-                                        <th>Interviewer</th>
+                                        <th>Basic Information</th>
+                                        <th>Interview</th>
                                         <th>Status</th>
                                         <th>Resume</th>
                                     </tr>
@@ -198,45 +194,93 @@
 
                                 <tbody>
                                     @foreach($applications as $app)
-                                    <tr class="job-row">
-                                        <td class="job-name">{{ $app->name }}</td>
-                                        <td>{{ $app->qualification }}</td>
-                                        <td class="job-department">{{ $app->department->name ?? 'N/A' }}</td>
-                                        <td>{{ $app->designation }}</td>
-                                        <td>
-                                            {{ $app->interview_date }} <br>
-                                            <small>{{ \Carbon\Carbon::parse($app->interview_time)->format('h:i A') }}</small>
-                                        </td>
-                                        <td>{{ $app->interviewer->name ?? 'N/A' }}</td>
+                                    <tr>
 
-                                        {{-- STATUS (editable dropdown) --}}
-                                        <td class="job-status">
+                                        {{-- BASIC INFORMATION --}}
+                                        <td>
+                                            <div class="fw-semibold">{{ $app->name }}</div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-mail me-1"></i> {{ $app->email }}
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-phone me-1"></i> {{ $app->phone }}
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-book me-1"></i> {{ $app->qualification }}
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-grid me-1"></i> {{ $app->department->name ?? 'N/A' }}
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-briefcase me-1"></i> {{ $app->designation }}
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                <i class="feather-activity me-1"></i> {{ $app->experience }}
+                                            </div>
+                                        </td>
+
+                                        {{-- INTERVIEW INFORMATION --}}
+                                        <td>
+                                            <div class="small">
+                                                <i class="feather-calendar me-1 text-primary"></i>
+                                                {{ $app->interview_date }}
+                                            </div>
+
+                                            <div class="small text-muted mb-2">
+                                                <i class="feather-clock me-1"></i>
+                                                {{ \Carbon\Carbon::parse($app->interview_time)->format('h:i A') }}
+                                            </div>
+                                            <div class="small text-muted mb-2">
+                                                <i class="feather-user me-1"></i>
+                                                {{ $app->interviewer->name ?? 'No Interviewer' }}
+                                            </div>
+
+                                            @if($app->interview_details)
+                                                <a href="{{ $app->interview_details }}"
+                                                target="_blank"
+                                                class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 px-2 py-1"
+                                                style="font-size: 12px; border-radius: 6px;">
+                                                    <i class="feather-video"></i>
+                                                    Join Meeting
+                                                </a>
+                                            @else
+                                                <span class="text-muted small">No link</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- STATUS --}}
+                                        <td>
                                             <form method="POST" action="{{ url('/job-applications/update-status/'.$app->id) }}">
                                                 @csrf
 
-                                                <select name="status" class="form-select form-select-sm job-status-select"
+                                                <select name="status" style="width: 120px;"
+                                                    class="form-select form-select-sm"
                                                     onchange="this.form.submit()">
-                                                    <option value="Pending" {{ $app->status == 'Pending' ? 'selected' : '' }}>
-                                                        Pending
-                                                    </option>
-                                                    <option value="Selected" {{ $app->status == 'Selected' ? 'selected' : '' }}>
-                                                        Selected
-                                                    </option>
-                                                    <option value="Awaited" {{ $app->status == 'Awaited' ? 'selected' : '' }}>
-                                                        Awaited
-                                                    </option>
-                                                    <option value="Rejected" {{ $app->status == 'Rejected' ? 'selected' : '' }}>
-                                                        Rejected
-                                                    </option>
+
+                                                    <option value="Pending" {{ $app->status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="Selected" {{ $app->status == 'Selected' ? 'selected' : '' }}>Selected</option>
+                                                    <option value="Awaited" {{ $app->status == 'Awaited' ? 'selected' : '' }}>Awaited</option>
+                                                    <option value="Rejected" {{ $app->status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+
                                                 </select>
                                             </form>
                                         </td>
 
-                                        {{-- RESUME VIEW ICON --}}
+                                        {{-- RESUME --}}
                                         <td>
-                                            <a href="{{ asset('storage/' . $app->resume) }}" target="_blank"
-                                                class="avatar-text avatar-md bg-soft-primary text-primary rounded-circle" title="View Details">
-                                                <i class="feather-eye"></i>
+                                            <a href="{{ asset('storage/' . $app->resume) }}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center"
+                                            style="width:32px; height:32px; border-radius:8px;"
+                                            title="View Resume">
+
+                                                <i class="feather-file-text" style="font-size:14px;"></i>
                                             </a>
                                         </td>
 
@@ -286,7 +330,30 @@
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Qualification</label>
-                                <input type="text" class="form-control" placeholder="B.Tech, MCA..." name="qualification">
+                                <select class="form-select" name="qualification" required>
+                                    <option value="">Select Qualification</option>
+
+                                    <option value="B.Tech">B.Tech</option>
+                                    <option value="BCA">BCA</option>
+                                    <option value="MCA">MCA</option>
+                                    <option value="M.Tech">M.Tech</option>
+                                    <option value="B.Sc IT">B.Sc IT</option>
+                                    <option value="M.Sc IT">M.Sc IT</option>
+                                    <option value="B.Sc Computer Science">B.Sc Computer Science</option>
+                                    <option value="M.Sc Computer Science">M.Sc Computer Science</option>
+                                    <option value="BE Computer Engineering">BE Computer Engineering</option>
+                                    <option value="Diploma in Computer Engineering">
+                                        Diploma in Computer Engineering
+                                    </option>
+                                    <option value="PGDCA">PGDCA</option>
+                                    <option value="MBA IT">MBA IT</option>
+                                    <option value="Full Stack Development">Full Stack Development</option>
+                                    <option value="Cyber Security">Cyber Security</option>
+                                    <option value="Data Science">Data Science</option>
+                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Department</label>
@@ -303,7 +370,16 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Designation</label>
-                                <input type="text" name="designation" class="form-control" placeholder="Enter designation">
+
+                                <select class="form-select" name="designation" required>
+                                    <option value="">Select Designation</option>
+
+                                    @foreach($designations as $designation)
+                                        <option value="{{ $designation->name }}">
+                                            {{ $designation->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Experience</label>
@@ -320,7 +396,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Interview Date</label>
-                                <input type="date" class="form-control" name="interview_date">
+                                <input type="date" value="{{ date('Y-m-d') }}" class="form-control" name="interview_date">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Interview Time</label>
@@ -335,9 +411,8 @@
                                     <option>Rejected</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label>Interviewer</label>
-
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Interviewer</label>
                                 <select class="form-select" name="interviewer_id">
                                     <option value="">Select Interviewer</option>
                                     @foreach($employees as $employee)
@@ -346,6 +421,11 @@
                                         </option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="col-md">
+                                <label class="form-label">Interview Description / Link</label>
+                                <textarea class="form-control" name="interview_details" rows="3"
+                                    placeholder="Enter interview description or meeting link"></textarea>
                             </div>
                         </div>
                     </div>
@@ -357,7 +437,11 @@
                         <h6 class="fw-bold mb-3 text-primary">Profile Upload</h6>
                         <div class="mb-3">
                             <label class="form-label">Upload Resume/Profile</label>
-                            <input type="file" class="form-control" name="resume">
+                            <input type="file" class="form-control" name="resume" id="resume" accept=".pdf,.doc,.docx">
+                            <div id="resumeError" class="text-danger small mt-1 d-none">
+                                Resume size should not exceed 2 MB.
+                            </div>
+                            <small class="text-muted"> Accepted formats: PDF, DOC, DOCX | Maximum file size: 2 MB</small>
                         </div>
                     </div>
                 </div>
@@ -370,45 +454,65 @@
     </div>
 
     <script>
-// Toggle filter
-document.getElementById("toggleFilter").addEventListener("click", function () {
-    let filter = document.getElementById("filterSection");
+        // Toggle filter
+        document.getElementById("toggleFilter").addEventListener("click", function () {
+            let filter = document.getElementById("filterSection");
 
-    filter.style.display = (filter.style.display === "none" || filter.style.display === "")
-        ? "block"
-        : "none";
-});
-
-
-// Apply filters
-function applyFilters() {
-    let name = document.getElementById("filterName").value.toLowerCase();
-    let status = document.getElementById("filterStatus").value.toLowerCase();
-    let department = document.getElementById("filterDepartment").value.toLowerCase();
-
-    let rows = document.querySelectorAll(".job-row");
-
-    rows.forEach(row => {
-
-        let rowName = row.querySelector(".job-name")?.innerText.toLowerCase() || "";
-        let rowStatus = row.querySelector(".job-status-select")?.value.toLowerCase() || "";
-        let rowDept = row.querySelector(".job-department")?.innerText.toLowerCase() || "";
-
-        let matchName = rowName.includes(name);
-        let matchStatus = status === "" || rowStatus.includes(status);
-        let matchDept = department === "" || rowDept.includes(department);
-
-        row.style.display = (matchName && matchStatus && matchDept) ? "" : "none";
-    });
-}
+            filter.style.display = (filter.style.display === "none" || filter.style.display === "")
+                ? "block"
+                : "none";
+        });
 
 
-// Reset filters
-function resetFilters() {
-    document.getElementById("filterName").value = "";
-    document.getElementById("filterStatus").value = "";
-    document.getElementById("filterDepartment").value = "";
-    applyFilters();
-}
-</script>
+        // Apply filters
+        function applyFilters() {
+            let name = document.getElementById("filterName").value.toLowerCase();
+            let status = document.getElementById("filterStatus").value.toLowerCase();
+            let department = document.getElementById("filterDepartment").value.toLowerCase();
+
+            let rows = document.querySelectorAll(".job-row");
+
+            rows.forEach(row => {
+
+                let rowName = row.querySelector(".job-name")?.innerText.toLowerCase() || "";
+                let rowStatus = row.querySelector(".job-status-select")?.value.toLowerCase() || "";
+                let rowDept = row.querySelector(".job-department")?.innerText.toLowerCase() || "";
+
+                let matchName = rowName.includes(name);
+                let matchStatus = status === "" || rowStatus.includes(status);
+                let matchDept = department === "" || rowDept.includes(department);
+
+                row.style.display = (matchName && matchStatus && matchDept) ? "" : "none";
+            });
+        }
+
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById("filterName").value = "";
+            document.getElementById("filterStatus").value = "";
+            document.getElementById("filterDepartment").value = "";
+            applyFilters();
+        }
+
+        document.getElementById('resume').addEventListener('change', function() {
+            let file = this.files[0];
+            if(file){
+                let maxSize = 2 * 1024 * 1024; //2MB
+                if(file.size > maxSize){
+                    this.classList.add('is-invalid');
+                    document
+                        .getElementById('resumeError')
+                        .classList.remove('d-none');
+
+                    this.value = '';
+                    return;
+                }
+                this.classList.remove('is-invalid');
+                document
+                    .getElementById('resumeError')
+                    .classList.add('d-none');
+            }
+        });
+    </script>
 @endsection

@@ -395,7 +395,7 @@
                                                         <div class="mb-1">
                                                             <small class="text-muted">Project :</small>
                                                             <span class="fw-bold text-dark">
-                                                                {{ $task->project->name ?? '-' }}
+                                                                {{ Str::limit($task->project->name ?? '-', 25) }}
                                                             </span>
                                                         </div>
 
@@ -403,7 +403,7 @@
                                                         <div class="mb-1">
                                                             <small class="text-muted">Task :</small>
                                                             <span class="fw-bold">
-                                                                {{ $task->task_title }}
+                                                                {{ Str::limit($task->task_title, 25) }}
                                                             </span>
                                                         </div>
 
@@ -542,6 +542,39 @@
                                                     </a>
                                                     <template id="task_desc_{{ $task->id }}">
                                                         <div class="p-2">
+                                                            {{-- Project & Task Details --}}
+                                                            <div class="mb-4">
+
+                                                                {{-- Project --}}
+                                                                <div class="mb-4">
+                                                                    <h6 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                                                                        <i class="feather-briefcase"></i> Project
+                                                                    </h6>
+
+                                                                    <div class="p-3 bg-white rounded border"
+                                                                        style="font-size:14px; min-height:60px;">
+                                                                        <span class="fw-semibold text-dark">
+                                                                            {{ $task->project->name ?? '-' }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {{-- Task Title --}}
+                                                                <div class="mb-4">
+                                                                    <h6 class="fw-bold text-success mb-3 d-flex align-items-center gap-2">
+                                                                        <i class="feather-check-square"></i> Task Title
+                                                                    </h6>
+
+                                                                    <div class="p-3 bg-white rounded border"
+                                                                        style="font-size:14px; min-height:60px;">
+                                                                        <span class="fw-semibold text-dark">
+                                                                            {{ $task->task_title }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                            
                                                             <div class="mb-4">
                                                                 <div class="d-flex justify-content-between">
                                                                     <h6
@@ -651,19 +684,14 @@
                                                             <i class="feather-trash-2"></i>
                                                         </button>
                                                     </form>
-                                                    @php
-                                                        $canAddProgress = (strtoupper(auth()->user()->role) === 'ADMIN' || strtoupper(auth()->user()->role) === 'SUPER ADMIN' || strtoupper(auth()->user()->role) === 'team_leader' || auth()->user()->employee_id == $task->employee_id);
-                                                    @endphp
-
-                                                    @if($canAddProgress)
-                                                        <a href="javascript:void(0);"
-                                                            class="avatar-text avatar-md bg-soft-info text-info rounded"
-                                                            title="Add Work Progress" data-bs-toggle="modal"
-                                                            data-bs-target="#followUpModal"
-                                                            onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add', '{{ addslashes($task->task_title) }}', {{ $task->employee_id ?? 'null' }}, '{{ addslashes($task->employee->name ?? auth()->user()->name ?? 'Employee') }}')">
-                                                            <i class="feather-plus-circle"></i>
-                                                        </a>
-                                                    @endif
+                                                    
+                                                    <a href="javascript:void(0);"
+                                                        class="avatar-text avatar-md bg-soft-info text-info rounded"
+                                                        title="Add Work Progress" data-bs-toggle="modal"
+                                                        data-bs-target="#followUpModal"
+                                                        onclick="openFollowUpModal({{ $task->id }}, '{{ addslashes($task->project->name ?? 'N/A') }}', 'add', '{{ addslashes($task->task_title) }}', {{ $task->employee_id ?? 'null' }}, '{{ addslashes($task->employee->name ?? auth()->user()->name ?? 'Employee') }}')">
+                                                        <i class="feather-plus-circle"></i>
+                                                    </a>
 
                                                     <!-- <a href="javascript:void(0);"
                                                         class="avatar-text avatar-md bg-soft-dark text-dark rounded"
@@ -888,8 +916,11 @@
                 <div class="modal-header text-white p-3" style="background: #3858f9; border: none !important;">
                     <h5 class="modal-title fw-bold" id="followUpModalLabel" style="color: #ffffff !important;">Work History
                     </h5>
-                    <span id="followUpTaskTitle" class="badge bg-white text-primary ms-2 fw-bold"
-                        style="font-size: 11px; padding: 5px 10px; border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase;"></span>
+                    <span id="followUpTaskTitle" class="badge bg-white text-primary ms-2 fw-bold text-truncate"
+                        style="font-size: 11px; padding: 5px 10px; border-radius: 6px; letter-spacing: 0.5px;
+                        text-transform: uppercase;  max-width:650px; display:inline-block; white-space:nowrap; 
+                        overflow:hidden; text-overflow:ellipsis;">
+                    </span>
                     <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -1847,7 +1878,11 @@
                 if (taskTitle) {
                     headerTitle += ` | Task: ${taskTitle}`;
                 }
-                document.getElementById('followUpTaskTitle').innerText = headerTitle;
+                // document.getElementById('followUpTaskTitle').innerText = headerTitle;
+                const titleElement = document.getElementById('followUpTaskTitle');
+                titleElement.innerText = headerTitle;
+                // Full text visible on hover
+                titleElement.setAttribute('title', headerTitle);
                 document.getElementById('followUpForm').reset();
                 document.getElementById('followUpId').value = '';
                 document.getElementById('totalFollowUpHours').value = 0;

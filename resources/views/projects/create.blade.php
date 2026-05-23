@@ -417,6 +417,9 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
+            // We will use a state variable to track if the project name is currently valid
+            var isProjectNameValid = true;
+
             $("#project-create-wizard").steps({
                 headerTag: "h3",
                 bodyTag: "section",
@@ -457,9 +460,9 @@
                     // Always allow going back
                     if (currentIndex > newIndex) return true;
 
-                    // Clear previous errors
-                    $('.form-control, .form-select, .note-editor').removeClass('is-invalid');
-                    $('.invalid-feedback').remove();
+                    // Clear generic step-change error indicators
+                    $('.form-control, .form-select, .note-editor').not('#projectName').removeClass('is-invalid');
+                    $('.invalid-feedback').not('.duplicate-feedback').remove();
 
                     // Validation for Step 1: Type & Manage
                     if (currentIndex === 0) {
@@ -483,21 +486,25 @@
                     if (currentIndex === 1) {
                         var name = $('#projectName').val();
                         var dept = $('#projectDepartment').val();
-                        var desc = $('#summernote-main').summernote('code');
                         var startDate = $('#projectStartDate').val();
                         var hasError = false;
 
+                        // STOPS WIZARD FROM RUNNING NEXT IF SYSTEM CACHED AN EXTRA DUPLICATION PROBLEM
+                        if (!isProjectNameValid || $('#projectName').hasClass('is-invalid')) {
+                            return false;
+                        }
+
                         if (!name) {
-                            $('#projectName').addClass('is-invalid').after('<div class="invalid-feedback fw-bold" style="font-size: 11px;">Project name is required.</div>');
+                            $('#projectName').addClass('is-invalid').after('<div class="invalid-feedback fw-bold text-danger mt-1" style="font-size: 11px;">Project name is required.</div>');
                             hasError = true;
                         }
                         if (!startDate) {
-                            $('#projectStartDate').addClass('is-invalid').after('<div class="invalid-feedback fw-bold" style="font-size: 11px;">Start date is required.</div>');
+                            $('#projectStartDate').addClass('is-invalid').after('<div class="invalid-feedback fw-bold mt-1" style="font-size: 11px;">Start date is required.</div>');
                             hasError = true;
                         }
                         if (!dept) {
                             $('#projectDepartment').addClass('is-invalid');
-                            $('#projectDepartment').parent().append('<div class="invalid-feedback d-block fw-bold" style="font-size: 11px;">Department is required.</div>');
+                            $('#projectDepartment').parent().append('<div class="invalid-feedback d-block fw-bold mt-1" style="font-size: 11px;">Department is required.</div>');
                             hasError = true;
                         }
 
@@ -508,7 +515,7 @@
                     if (currentIndex === 2) {
                         var leaders = $('#projectLeaders').val();
                         if (!leaders || leaders.length === 0) {
-                            $('#projectLeaders').parent().append('<div class="invalid-feedback d-block fw-bold" style="font-size: 11px;">Please select at least one Project Lead.</div>');
+                            $('#projectLeaders').parent().append('<div class="invalid-feedback d-block fw-bold mt-1" style="font-size: 11px;">Please select at least one Project Lead.</div>');
                             return false;
                         }
                     }
@@ -521,7 +528,6 @@
             });
 
             function syncAndSubmit() {
-                // Ensure everything is synced
                 $('#hiddenType').val($('input[name="type"]:checked').val());
                 $('#hiddenManage').val($('input[name="manage"]:checked').val());
                 $('#hiddenName').val($('#projectName').val());
@@ -555,12 +561,51 @@
                 $('#finalCreateForm').submit();
             }
 
-            // Also allow the manual finish button to work
             $('#finalCreateForm').on('submit', function (e) {
-                // If it's not already synced, sync it
                 if ($('#hiddenName').val() === "") {
                     syncAndSubmit();
                 }
+            });
+
+            // ====================================================================
+            // FIX: Delegated real-time duplicate listener
+            // ====================================================================
+            $(document).on('blur change input', '#projectName', function () {
+                var projectName = $(this).val().trim();
+                var $inputField = $(this);
+
+                // Reset visual styling indicators
+                $inputField.removeClass('is-invalid is-valid');
+                $inputField.parent().find('.duplicate-feedback').remove();
+                isProjectNameValid = true;
+
+                if (projectName === '') {
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('projects.check-name') }}", 
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}", 
+                        name: projectName
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.exists) {
+                            isProjectNameValid = false;
+                            $inputField.removeClass('is-valid').addClass('is-invalid');
+                            
+                            // We drop a custom selector label `.duplicate-feedback` so standard clear statements won't wipe it out on tabs
+                            $inputField.after('<div class="invalid-feedback duplicate-feedback d-block fw-bold text-danger mt-1" style="font-size: 11px;">This project name already exists.</div>');
+                        } else {
+                            isProjectNameValid = true;
+                        }
+                    },
+                    error: function () {
+                        console.error("Could not reach validation engine backend.");
+                    }
+                });
             });
         });
 

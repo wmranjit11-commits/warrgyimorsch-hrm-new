@@ -88,6 +88,16 @@ class ProjectController extends Controller
         return view('projects.create', compact('employees', 'departments'));
     }
 
+    public function checkName(Request $request)
+    {
+        // Query the database to see if the name field matches the incoming value
+        $exists = Project::whereRaw('LOWER(name) = ?', [strtolower($request->name)])->exists();
+
+        return response()->json([
+            'exists' => $exists
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
