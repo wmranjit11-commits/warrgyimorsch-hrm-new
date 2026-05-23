@@ -18,6 +18,7 @@ class JobVacancy extends Model
         'interview_date',
         'interview_time',
         'interviewer_id',
+        'interview_details',
         'status',
         'resume',
         'remarks'

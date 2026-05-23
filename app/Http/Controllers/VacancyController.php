@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
+use App\Models\Designation;
 use App\Models\Employee;
 use App\Models\JobVacancy;
 use Illuminate\Http\Request;
@@ -11,7 +12,8 @@ class VacancyController extends Controller
 {
     public function show() {
         $departments = Department::select('id','name')->get();
-        $employees = Employee::where('role', 'employee')
+        $designations = Designation::select('id', 'name')->get();
+        $employees = Employee::whereIn('role', [ 'super_admin', 'manager', 'hr-executive', 'team_leader'])
                 ->select('id','name')
                 ->get();
 
@@ -24,11 +26,15 @@ class VacancyController extends Controller
         $rejectedCount = JobVacancy::where('status', 'rejected')->count();
         $selectedCount = JobVacancy::where('status', 'selected')->count();
 
-        return view('vacancy.index', compact('departments', 'employees', 'applications', 'pendingCount', 'awaitedCount', 'rejectedCount', 'selectedCount'));
+        return view('vacancy.index', compact('departments', 'designations', 'employees', 'applications', 'pendingCount', 'awaitedCount', 'rejectedCount', 'selectedCount'));
     }
 
     public function store(Request $request)
     {
+        $request->validate([
+            'resume' => 'required|mimes:pdf,doc,docx|max:2048'
+        ]);
+
         $data = $request->all();
 
         if($request->hasFile('resume')){
