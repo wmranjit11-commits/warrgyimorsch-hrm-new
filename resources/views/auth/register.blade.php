@@ -10,7 +10,7 @@
     <meta name="author" content="theme_ocean">
     <!--! The above 6 meta tags *must* come first in the head; any other head content must come *after* these tags !-->
     <!--! BEGIN: Apps Title-->
-    <title>Duralux || Register Minimal</title>
+    <title>Warrgyizmorch || Register Minimal</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}">
@@ -56,7 +56,7 @@
                     </div>
                     <div class="card-body p-sm-5">
                         <h2 class="fs-20 fw-bolder mb-4">Register</h2>
-                        <h4 class="fs-13 fw-bold mb-2">Manage all your Duralux crm</h4>
+                        <h4 class="fs-13 fw-bold mb-2">Manage all your Warrgyizmorsch crm</h4>
                         <p class="fs-12 fw-medium text-muted">Let's get you all setup, so you can verify your personal account and begine setting up your profile.</p>
                         <form method="POST" action="{{ route('register') }}" class="w-100 mt-4 pt-2">
                             @csrf
@@ -88,7 +88,7 @@
                             <div class="mt-4">
                                 <div class="form-check mb-2">
                                     <input type="checkbox" class="form-check-input" id="receiveMail" name="receiveMail">
-                                    <label class="form-check-label c-pointer text-muted" for="receiveMail" style="font-weight: 400 !important">Yes, I want to receive Duralux community emails</label>
+                                    <label class="form-check-label c-pointer text-muted" for="receiveMail" style="font-weight: 400 !important">Yes, I want to receive Warrgyizmorsch community emails</label>
                                 </div>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="termsCondition" name="terms" required>

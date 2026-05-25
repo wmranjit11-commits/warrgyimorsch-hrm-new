@@ -9,6 +9,7 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveApplicationController;
 use App\Http\Controllers\ZKTController;
 use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\ReviewController;
 // use Rats\Zkteco\Lib\ZKTeco;
 
 
@@ -189,6 +190,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/job-vacancy', [VacancyController::class, 'show'])->name('vacancy.show');
     Route::post('/job-vacancy/store', [VacancyController::class,'store'])->name('job.store');
     Route::post('/job-applications/update-status/{id}', [VacancyController::class, 'updateStatus']);
+    Route::get('/job-requirement', [VacancyController::class, 'showRequirements'])->name('requirement.show');
+    Route::post('/job-requirement/store', [VacancyController::class, 'storeRequirement'])->name('requirement.store');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/employee-review', [ReviewController::class, 'index'])->name('employee.review');
+    Route::post('/employee-review/store', [ReviewController::class,'store']);
+    Route::get('/review-details/{id}', [ReviewController::class,'details']);
 });
 
 Route::middleware('auth')->group(function () {

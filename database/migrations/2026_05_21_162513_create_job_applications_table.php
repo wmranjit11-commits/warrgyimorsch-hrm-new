@@ -8,7 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('job_applications', function (Blueprint $table) {
+        if (!Schema::hasTable('job_applications')) {
+            Schema::create('job_applications', function (Blueprint $table) {
             $table->id();
 
             $table->string('name');
@@ -41,7 +42,8 @@ return new class extends Migration
                 ->references('id')
                 ->on('employees')
                 ->onDelete('set null');
-        });
+            });
+        }
     }
 
     public function down(): void
