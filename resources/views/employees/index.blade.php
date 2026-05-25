@@ -485,12 +485,12 @@
                 </div>
                 <div class="d-flex gap-2 align-items-center">
                     <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" id="editEmployeeBtn" onclick="editEmployee()"
-                        style="background: #22c55e; color: #ffffff; border: none; font-weight: 800; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);">
+                        style="background: #22c55e; color: #ffffff; border: none; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);">
                         <i class="bi bi-pencil-square"></i>
                         <span class="d-none d-md-inline ms-2">Edit</span>
                     </button>
                     <button type="button" class="btn btn-sm d-flex align-items-center justify-content-center" id="deleteEmployeeBtn" onclick="deleteEmployee()"
-                        style="background: #ef4444; color: #ffffff; border: none; font-weight: 800; width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                        style="background: #ef4444; color: #ffffff; border: none; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
                         <i class="bi bi-trash"></i>
                         <span class="d-none d-md-inline ms-2">Delete</span>
                     </button>
@@ -1524,7 +1524,7 @@
                     alert('No employee selected');
                     return;
                 }
-                window.location.href = `/employees/${id}/edit`;
+                window.location.href = `{{ url('/employees') }}/${id}/edit`;
             }
 
             // Delete Employee
@@ -1554,7 +1554,7 @@
                     if (result.isConfirmed) {
                         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                        fetch(`/employees/${id}`, {
+                        fetch(`{{ url('/employees') }}/${id}`, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': csrfToken,
