@@ -30,6 +30,7 @@ class PayrollController extends Controller
         $query = Attendance::query();
 
         $query->join('employees', 'attendances.employee_id', '=', 'employees.id');
+        $query->whereDate('attendances.attendance_date', '<=', now()->toDateString());
 
         if ($isTeamLeader) {
             $department = $user->employee->department ?? null;
