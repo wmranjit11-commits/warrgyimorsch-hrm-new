@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\LeaveApplication;
 use App\Models\Attendance;
 use App\Models\Holiday;
+use App\Models\LeaveAllotment;
 use App\Exports\LeaveApplicationsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
@@ -17,6 +18,43 @@ use App\Mail\LeaveStatusUpdatedMail;
 
 class LeaveApplicationController extends Controller
 {
+    private function getEmployeeBalanceSummary(int $employeeId): array
+    {
+        $totalAllotted = LeaveAllotment::where('employee_id', $employeeId)->sum('leave_count');
+
+        $approvedLeaves = LeaveApplication::where('employee_id', $employeeId)
+            ->where('status', 'approved')
+            ->get();
+
+        $totalTaken = 0;
+
+        foreach ($approvedLeaves as $leave) {
+            $category = strtolower($leave->leave_category ?? '');
+
+            if (str_contains($category, 'gatepass')) {
+                continue;
+            }
+
+            if (str_contains($category, 'half')) {
+                $totalTaken += 0.5;
+                continue;
+            }
+
+            $startDate = Carbon::parse($leave->start_date);
+            $endDate = $leave->end_date ? Carbon::parse($leave->end_date) : $startDate->copy();
+
+            $totalTaken += $startDate->equalTo($endDate)
+                ? 1
+                : $startDate->diffInDays($endDate);
+        }
+
+        return [
+            'total_allotted' => $totalAllotted,
+            'total_taken' => $totalTaken,
+            'balance' => $totalAllotted - $totalTaken,
+        ];
+    }
+
     private function getHolidayDatesBetween(Carbon $startDate, Carbon $endDate): array
     {
         return Holiday::whereBetween('date', [
@@ -352,7 +390,10 @@ class LeaveApplicationController extends Controller
     public function getDetails($id)
     {
         $leave = LeaveApplication::with('employee')->findOrFail($id);
-        return response()->json($leave);
+        return response()->json(array_merge(
+            $leave->toArray(),
+            $this->getEmployeeBalanceSummary((int) $leave->employee_id)
+        ));
     }
 
     public function getEmployeeLeaves($employeeId)

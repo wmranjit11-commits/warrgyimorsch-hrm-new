@@ -192,6 +192,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/job-applications/update-status/{id}', [VacancyController::class, 'updateStatus']);
     Route::get('/job-requirement', [VacancyController::class, 'showRequirements'])->name('requirement.show');
     Route::post('/job-requirement/store', [VacancyController::class, 'storeRequirement'])->name('requirement.store');
+    Route::post('/job-requirement/update-status', [VacancyController::class, 'updateStatusofRequirement'])->name('requirements.update-status');
 });
 
 Route::middleware('auth')->group(function () {

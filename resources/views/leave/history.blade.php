@@ -482,13 +482,21 @@
         </div>
         <div class="offcanvas-body p-4 bg-light bg-opacity-10">
             <div id="actionModalContent">
-                <div class="mb-4 d-flex align-items-center">
-                    <div class="bg-soft-primary p-2 rounded-3 me-3">
-                        <i data-feather="file-text" class="text-primary"></i>
+                <div class="mb-4 d-flex align-items-center justify-content-between">
+                    <div class="d-flex">
+                        <div class="bg-soft-primary p-2 rounded-3 me-3">
+                            <i data-feather="file-text" class="text-primary"></i>
+                        </div>
+                        <div>
+                            <span class="small fw-bold text-muted text-uppercase d-block">Application ID</span>
+                            <span id="displayAppCode" class="fw-bold text-dark fs-5">-</span>
+                        </div>
                     </div>
-                    <div>
-                        <span class="small fw-bold text-muted text-uppercase d-block">Application ID</span>
-                        <span id="displayAppCode" class="fw-bold text-dark fs-5">-</span>
+                    <div class="me-3">
+                        <span class="small fw-bold text-muted text-uppercase d-block mb-2">Balance</span>
+                        <span id="displayBalanceBadge" class="badge rounded-pill px-2 py-1 bg-soft-primary text-primary fw-bold" style="font-size: 16px;">
+                            -
+                        </span>
                     </div>
                 </div>
 
@@ -837,10 +845,23 @@
                 .then(data => {
                     document.getElementById('actionLeaveId').value = data.id;
                     document.getElementById('displayAppCode').textContent = `LA-${String(data.id).padStart(4, '0')}`;
+                    updateBalanceBadge(data.balance);
                     document.querySelector('#actionForm select[name="status"]').value = data.status;
                     const modal = new bootstrap.Offcanvas(document.getElementById('leaveActionModal'));
                     modal.show();
                 });
+        }
+
+        function updateBalanceBadge(balance) {
+            const badge = document.getElementById('displayBalanceBadge');
+            if (!badge) {
+                return;
+            }
+
+            const numericBalance = Number(balance ?? 0);
+            badge.textContent = Number.isInteger(numericBalance) ? numericBalance : numericBalance.toFixed(1);
+            badge.className = `badge px-2 py-1 ${numericBalance < 0 ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary'} fw-bold`;
+            badge.style.fontSize = '20px';
         }
 
         function openViewModal(id) {

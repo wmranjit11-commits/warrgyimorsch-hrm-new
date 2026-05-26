@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class VacancyController extends Controller
 {
     public function show() {
+
         $departments = Department::select('id','name')->get();
         $designations = Designation::select('id', 'name')->get();
         $employees = Employee::whereIn('role', [ 'super_admin', 'manager', 'hr-executive', 'team_leader'])
@@ -79,7 +80,17 @@ class VacancyController extends Controller
             ->latest()
             ->get();
 
-        return view('vacancy.job_requirement', compact('roles', 'requirements'));
+        $departments = Department::select('id','name')->get();
+        $designations = Designation::select('id', 'name')->get();
+        $employees = Employee::whereIn('role', [ 'super_admin', 'manager', 'hr-executive', 'team_leader'])
+                ->select('id','name')
+                ->get();
+
+        $applications = JobVacancy::with(['department', 'interviewer'])
+            ->latest()
+            ->get();
+
+        return view('vacancy.job_requirement', compact('roles', 'requirements', 'departments', 'designations', 'employees', 'applications'));
     }
 
     public function storeRequirement(Request $request)
@@ -103,5 +114,19 @@ class VacancyController extends Controller
             'skills' => array_map('trim', explode(',', $request->skills))
         ]);
         return back()->with('success', 'Saved Successfully');
+    }
+
+    public function updateStatusofRequirement(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:job_requirements,id',
+            'status' => 'required|in:hold,hiring,hired'
+        ]);
+
+        $requirement = JobRequirement::findOrFail($request->id);
+        $requirement->status = $request->status;
+        $requirement->save();
+
+        return response()->json(['success' => true]);
     }
 }
