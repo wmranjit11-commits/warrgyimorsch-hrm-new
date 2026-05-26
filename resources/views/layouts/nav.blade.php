@@ -258,14 +258,14 @@
                             </li>
                         </ul>
                     </li>
-
-                    <li class="nxl-item">
-                        <a href="{{ route('employee.review') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-star"></i></span>
-                            <span class="nxl-mtext">Employee Review</span>
-                        </a>
-                    </li>
                 @endif
+
+                <li class="nxl-item">
+                    <a href="{{ route('employee.review') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-star"></i></span>
+                        <span class="nxl-mtext">Employee Review</span>
+                    </a>
+                </li>
 
                 <li class="nxl-item">
                     <a href="{{ route('employees.employeeDays') }}" class="nxl-link">

@@ -217,6 +217,14 @@
                         position: relative;
                     }
 
+                    .employee-premium-form .wghrm-dropdown-group {
+                        overflow: visible;
+                    }
+
+                    .employee-premium-form .wghrm-dropdown-group .dropdown {
+                        flex: 1 1 auto;
+                    }
+
                     .wghrm-custom-dropdown-menu {
                         background: #fff;
                         border: 1px solid #e2e8f0;
@@ -224,11 +232,12 @@
                         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
                         padding: 0 !important;
                         position: absolute;
-                        top: 50px;
-                        left: 48px;
+                        top: calc(100% + 6px);
+                        left: 0;
                         right: auto;
                         z-index: 9999;
                         display: none;
+                        min-width: 100%;
                     }
 
                     .wghrm-custom-dropdown-menu.show {
@@ -303,7 +312,7 @@
                             <div class="col-md-4">
                                 <label>Working Mode</label>
 
-                                <div class="input-group mb-3">
+                                <div class="input-group mb-3 wghrm-dropdown-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-laptop"></i>
                                     </span>
@@ -322,7 +331,7 @@
 
                                         </button>
 
-                                        <div class="dropdown-menu wghrm-custom-dropdown-menu w-100" style="top: 100%; left: 0;">
+                                        <div class="dropdown-menu wghrm-custom-dropdown-menu w-100">
                                             <a class="dropdown-item wghrm-custom-dropdown-item"
                                                 href="javascript:void(0)"
                                                 onclick="wghrmSelectValue(this,'working_mode','Office','Office')">

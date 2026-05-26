@@ -197,7 +197,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/employee-review', [ReviewController::class, 'index'])->name('employee.review');
     Route::post('/employee-review/store', [ReviewController::class,'store']);
-    Route::get('/review-details/{id}', [ReviewController::class,'details']);
+    Route::get('/review-details/{id}', [ReviewController::class,'details'])->name('employee.review.details');
 });
 
 Route::middleware('auth')->group(function () {
