@@ -28,17 +28,16 @@
                             <i class="feather-trash-2 fs-18"></i>
                         </a>
                     </div>
-                    <!-- <div class="filter-toggle-wrapper">
-                        <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter"
+                    <div class="filter-toggle-wrapper">
+                        <!-- <a href="javascript:void(0);" class="btn btn-icon btn-light-brand" id="toggleFilter"
                             style="cursor: pointer;">
                             <i class="feather-filter"></i>
-                        </a>
+                        </a> -->
                     </div>
-                    <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="offcanvas" 
-                    data-bs-target="#projectOffcanvas">
+                    <button type="button" class="btn btn-primary" id="showAddRequirement">
                         <i class="feather-plus me-2"></i>
-                        <span>Add</span>
-                    </a> -->
+                        <span>Add Requirement</span>
+                    </button>
                 </div>
             </div>
             <div class="d-md-none d-flex align-items-center">
@@ -50,7 +49,7 @@
     </div>
 
     <div class="main-content">
-        <div class="container mt-4">
+        <div class="container mt-4 d-none" id="requirementFormContainer">
             <div class="card shadow border-0">
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-white">Job Requirement</h4>
@@ -128,6 +127,7 @@
                             <th>Skills</th>
                             <th>Status</th>
                             <th>Action</th>
+                            <th>Interview Count</th>
                         </tr>
                     </thead>
 
@@ -183,6 +183,16 @@
                                     >
                                         Schedule Interview
                                     </a>
+                                </td>
+                                <td>
+                                    @if(($item->applications_count ?? 0) > 0)
+                                        <a href="{{ action([App\Http\Controllers\VacancyController::class, 'show'], ['role' => $item->role_name]) }}" 
+                                        class="badge bg-info text-white text-decoration-none">
+                                            <i class="feather-users me-1"></i> {{ $item->applications_count }}
+                                        </a>
+                                    @else
+                                        <span class="text-muted">0</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -392,6 +402,22 @@
                     }
                 });
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const showBtn = document.getElementById('showAddRequirement');
+            const formContainer = document.getElementById('requirementFormContainer');
+
+            if (showBtn && formContainer) {
+                showBtn.addEventListener('click', function () {
+                    // Check if the container is hidden, then show it; otherwise hide it
+                    if (formContainer.classList.contains('d-none')) {
+                        formContainer.classList.remove('d-none');
+                    } else {
+                        formContainer.classList.add('d-none');
+                    }
+                });
+            }
         });
     </script>
 @endpush

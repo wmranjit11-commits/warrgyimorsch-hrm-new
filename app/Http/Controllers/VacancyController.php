@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class VacancyController extends Controller
 {
-    public function show() {
+    public function show(Request $request) {
 
         $departments = Department::select('id','name')->get();
         $designations = Designation::select('id', 'name')->get();
@@ -20,16 +20,29 @@ class VacancyController extends Controller
                 ->select('id','name')
                 ->get();
 
-        $applications = JobVacancy::with(['department', 'interviewer'])
-            ->latest()
-            ->get();
+        $selectedRole = $request->query('role');
 
-        $pendingCount = JobVacancy::where('status', 'pending')->count();
-        $awaitedCount = JobVacancy::where('status', 'awaited')->count();
-        $rejectedCount = JobVacancy::where('status', 'rejected')->count();
-        $selectedCount = JobVacancy::where('status', 'selected')->count();
+        $applicationsQuery = JobVacancy::with(['department', 'interviewer']);
 
-        return view('vacancy.index', compact('departments', 'designations', 'employees', 'applications', 'pendingCount', 'awaitedCount', 'rejectedCount', 'selectedCount'));
+        $statsQuery = JobVacancy::query();
+
+        if (!empty($selectedRole)) {
+            $applicationsQuery->where('designation', $selectedRole);
+            $statsQuery->where('designation', $selectedRole);
+        }
+
+        if (!empty($selectedRole)) {
+            $applicationsQuery->where('designation', $selectedRole);
+        }
+
+        $applications = $applicationsQuery->latest()->get();
+
+        $pendingCount  = (clone $statsQuery)->where('status', 'pending')->count();
+        $awaitedCount  = (clone $statsQuery)->where('status', 'awaited')->count();
+        $rejectedCount = (clone $statsQuery)->where('status', 'rejected')->count();
+        $selectedCount = (clone $statsQuery)->where('status', 'selected')->count();
+
+        return view('vacancy.index', compact('departments', 'designations', 'employees', 'applications', 'pendingCount', 'awaitedCount', 'rejectedCount', 'selectedCount', 'selectedRole'));
     }
 
     public function store(Request $request)
@@ -77,6 +90,11 @@ class VacancyController extends Controller
                 'job_requirements.*',
                 'designations.name as role_name'
             )
+            ->selectSub(function($query) {
+                $query->from('job_applications')
+                    ->whereColumn('job_applications.designation', 'designations.name')
+                    ->selectRaw('count(*)');
+            }, 'applications_count')
             ->latest()
             ->get();
 

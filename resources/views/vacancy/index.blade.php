@@ -34,10 +34,10 @@
                             <i class="feather-filter"></i>
                         </a>
                     </div>
-                    <!-- <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#projectOffcanvas">
+                    <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#projectOffcanvas">
                         <i class="feather-plus me-2"></i>
                         <span>Add</span>
-                    </a> -->
+                    </a>
                 </div>
             </div>
             <div class="d-md-none d-flex align-items-center">
@@ -181,6 +181,16 @@
                 <div class="card stretch stretch-full">
                     <div class="card-body p-0">
                         <div class="table-responsive">
+                            @if(!empty($selectedRole))
+                                <div class="alert alert-info d-flex justify-content-between align-items-center role-filter-alert" role="alert">
+                                    <span>
+                                        Showing applications filtered by: <strong>{{ $selectedRole }}</strong>
+                                    </span>
+                                    <a href="{{ action([App\Http\Controllers\VacancyController::class, 'show']) }}" class="btn btn-sm btn-primary">
+                                        Show All Data
+                                    </a>
+                                </div>
+                            @endif
                             <table class="table table-hover align-middle">
                                 <thead>
                                     <tr>
@@ -295,7 +305,7 @@
     </div>
 
     <!-- Add section  -->
-    <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="projectOffcanvas" style="width:600px;">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="projectOffcanvas" style="width:600px;">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title d-flex align-items-center gap-2">
                 <i class="feather-user-plus text-primary"></i>
@@ -311,7 +321,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">
-                            Basic Information
+                            <!-- Basic Information -->
                         </h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -388,7 +398,7 @@
                     </div>
                 </div>
 
-                
+                <!-- Interview Information -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">Interview Information</h6>
@@ -430,7 +440,7 @@
                     </div>
                 </div>
 
-                
+                <!-- Profile Information -->
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">Profile Upload</h6>
@@ -450,7 +460,7 @@
                 </button>
             </form>
         </div>
-    </div> -->
+    </div>
 
     <script>
         // Toggle filter

@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Payroll;
 use App\Models\Holiday;
 use App\Models\LeaveApplication;
+use App\Models\Broadcast;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -392,6 +393,25 @@ class DashboardController extends Controller
         //     return $item;
         // });
 
+        $userDepartment = $employee->department ?? auth()->user()->employee?->department ?? null;
+        $normalizedUserDepartment = $userDepartment
+            ? strtolower(str_replace('_', ' ', trim($userDepartment)))
+            : null;
+
+        $announcements = Broadcast::with('readByUsers')
+            ->where(function ($query) use ($normalizedUserDepartment) {
+                $query->where('department', 'All');
+
+                if ($normalizedUserDepartment) {
+                    $query->orWhereRaw(
+                        "LOWER(REPLACE(TRIM(department), '_', ' ')) = ?",
+                        [$normalizedUserDepartment]
+                    );
+                }
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         if (!$isAdmin) {
             return view('userDashboard', compact(
                 'totalEmployees',
@@ -432,7 +452,8 @@ class DashboardController extends Controller
                 'todayLeaveEmployees',
                 'todayLateEmployees',
                 'employee',
-                'celebration'
+                'celebration',
+                'announcements'
             ));
         }
 
@@ -475,7 +496,8 @@ class DashboardController extends Controller
             'todayLeaveEmployees',
             'todayLateEmployees',
             'employee',
-            'celebration'
+            'celebration',
+            'announcements'
         ));
     }
 

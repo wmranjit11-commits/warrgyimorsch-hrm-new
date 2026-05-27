@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BroadcastController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
@@ -199,6 +200,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/employee-review', [ReviewController::class, 'index'])->name('employee.review');
     Route::post('/employee-review/store', [ReviewController::class,'store']);
     Route::get('/review-details/{id}', [ReviewController::class,'details'])->name('employee.review.details');
+});
+
+Route:: middleware('auth')->group(function () {
+    Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcasts.index');
+    Route::post('/broadcasts', [BroadcastController::class, 'store'])->name('broadcasts.store');
+    Route::get('/broadcasts/{id}/edit', [BroadcastController::class, 'edit'])->name('broadcasts.edit');
+    Route::put('/broadcasts/{id}', [BroadcastController::class, 'update'])->name('broadcasts.update');
+    Route::post('/broadcasts/{id}/read', [BroadcastController::class, 'markAsRead']);
+    Route::get('/broadcasts/{id}/recipients', [BroadcastController::class, 'getRecipients']);
 });
 
 Route::middleware('auth')->group(function () {
