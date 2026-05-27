@@ -932,7 +932,7 @@
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/payroll/attendance/${id}`, {
+                    fetch(`{{ url('/payroll/attendance') }}/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -953,7 +953,7 @@
         }
 
         function editSingleAttendance(id) {
-            window.location.href = `/payroll/attendance/${id}/edit`;
+            window.location.href = `{{ url('/payroll/attendance') }}/${id}/edit`;
         }
 
         function exportAttendance() {

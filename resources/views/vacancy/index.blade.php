@@ -34,11 +34,10 @@
                             <i class="feather-filter"></i>
                         </a>
                     </div>
-                    <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="offcanvas" 
-                    data-bs-target="#projectOffcanvas">
+                    <!-- <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#projectOffcanvas">
                         <i class="feather-plus me-2"></i>
                         <span>Add</span>
-                    </a>
+                    </a> -->
                 </div>
             </div>
             <div class="d-md-none d-flex align-items-center">
@@ -296,7 +295,7 @@
     </div>
 
     <!-- Add section  -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="projectOffcanvas" style="width:600px;">
+    <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="projectOffcanvas" style="width:600px;">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title d-flex align-items-center gap-2">
                 <i class="feather-user-plus text-primary"></i>
@@ -308,7 +307,7 @@
         <div class="offcanvas-body">
             <form action="{{ url('/job-vacancy/store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <!-- Basic Information -->
+                
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">
@@ -389,7 +388,7 @@
                     </div>
                 </div>
 
-                <!-- Interview -->
+                
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">Interview Information</h6>
@@ -431,7 +430,7 @@
                     </div>
                 </div>
 
-                <!-- Profile -->
+                
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3 text-primary">Profile Upload</h6>
@@ -451,7 +450,7 @@
                 </button>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <script>
         // Toggle filter

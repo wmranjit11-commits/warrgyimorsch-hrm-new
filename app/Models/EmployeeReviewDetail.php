@@ -11,6 +11,7 @@ class EmployeeReviewDetail extends Model
         'criteria_name',
         'criteria_point',
         'self_review',
-        'author_review'
+        'author_review',
+        'admin_review'
     ];
 }
