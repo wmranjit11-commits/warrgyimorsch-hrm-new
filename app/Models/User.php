@@ -78,4 +78,10 @@ class User extends Authenticatable
         }
         return $value;
     }
+
+    // Fetch broadcasts this employee has read
+    public function readBroadcasts()
+    {
+        return $this->belongsToMany(Broadcast::class)->withPivot('read_at');
+    }
 }

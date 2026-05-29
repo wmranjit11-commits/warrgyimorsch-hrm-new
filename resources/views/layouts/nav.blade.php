@@ -267,6 +267,13 @@
                     </a>
                 </li>
 
+                @if ($isAdmin || $isTeamLeader)
+                    <a href="{{ route('broadcasts.index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-radio"></i></span>
+                        <span class="nxl-mtext">Broadcast</span>
+                    </a>
+                @endif
+
                 <li class="nxl-item">
                     <a href="{{ route('employees.employeeDays') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="fa-solid fa-cake-candles"></i></span>
