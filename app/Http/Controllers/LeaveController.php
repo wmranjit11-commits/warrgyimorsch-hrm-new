@@ -46,6 +46,8 @@ class LeaveController extends Controller
                 ->keyBy('employee_id');
 
             $history = LeaveAllotment::with('employee')
+                ->where('month', $month)
+                ->where('year', $year)
                 ->orderBy('year', 'desc')
                 ->orderBy('month', 'desc')
                 ->orderBy('created_at', 'desc')
@@ -63,6 +65,8 @@ class LeaveController extends Controller
                     ->keyBy('employee_id');
 
                 $history = LeaveAllotment::with('employee')
+                    ->where('month', $month)
+                    ->where('year', $year)
                     ->whereIn('employee_id', $employeeIds)
                     ->orderBy('year', 'desc')
                     ->orderBy('month', 'desc')
@@ -83,6 +87,8 @@ class LeaveController extends Controller
                 ->keyBy('employee_id');
 
             $history = LeaveAllotment::with('employee')
+                ->where('month', $month)
+                ->where('year', $year)
                 ->where('employee_id', $employee_id)
                 ->orderBy('year', 'desc')
                 ->orderBy('month', 'desc')

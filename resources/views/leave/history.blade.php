@@ -173,7 +173,8 @@
                                     <th>Leave Type</th>
                                     <th>Category</th>
                                     <th>Duration</th>
-                                    <th>Leave Reason</th>
+                                    <th>Total Days</th>
+                                    <!-- <th>Leave Reason</th> -->
                                     <th class="text-center pe-4">Action</th>
                                 </tr>
                             </thead>
@@ -245,7 +246,19 @@
                                                 <span style="font-size: 10px;">Upto {{ $leave->end_date->format('d-M-Y') }}</span>
                                             @endif
                                         </td>
-                                        <td class="small text-dark fw-semibold">{{ $leave->reason }}</td>
+                                        <!-- <td class="small text-dark fw-semibold">{{ $leave->reason }}</td> -->
+                                        <td class="small text-dark fw-semibold">
+                                            @php
+                                                $totalDays = (float) ($leave->total_days ?? 0);
+                                            @endphp
+                                            @if(str_contains(strtolower($leave->leave_category), 'gatepass'))
+                                                1 Hour
+                                            @elseif(str_contains(strtolower($leave->leave_type ?? ''), 'half'))
+                                                0.5 Day
+                                            @else
+                                                {{ rtrim(rtrim(number_format($totalDays, 2, '.', ''), '0'), '.') }} Day{{ $totalDays == 1 ? '' : 's' }}
+                                            @endif
+                                        </td>
                                         <td class="text-center pe-4">
                                             <div class="hstack gap-2 justify-content-center">
                                                 <button class="btn btn-icon btn-soft-info"
@@ -275,8 +288,15 @@
                     </div>
                 </div>
                 @if($leaves->hasPages())
-                    <div class="card-footer bg-white border-top p-3 small d-flex justify-content-end">
-                        {{ $leaves->links() }}
+                    <div class="card-footer bg-white border-top px-4 py-3 leave-history-pagination">
+                        <div class="d-flex justify-content-between align-items-center gap-4 flex-wrap">
+                            <span class="text-muted small fw-bold">
+                                Showing {{ $leaves->firstItem() }} to {{ $leaves->lastItem() }} of {{ $leaves->total() }} results
+                            </span>
+                            <div class="{{ $leaves->lastPage() <= 1 ? 'd-none' : '' }}">
+                                {{ $leaves->appends(request()->query())->links('pagination::bootstrap-5') }}
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -924,7 +944,7 @@
                     } else if (isWFH) {
                         document.getElementById('viewTotalDays').textContent = `${data.total_days} Days (WFH)`;
                     } else {
-                        document.getElementById('viewTotalDays').textContent = `${data.total_days} Total Days`;
+                        document.getElementById('viewTotalDays').textContent = `${data.total_days} Days`;
                     }
 
                     // Timeframe section
@@ -1333,6 +1353,51 @@
         .category-tile:hover {
             border-color: #cbd5e1;
             background: #f8fafc;
+        }
+
+        .leave-history-pagination .pagination {
+            margin-bottom: 0;
+            gap: 0.35rem;
+            justify-content: flex-end;
+        }
+
+        .leave-history-pagination .page-link {
+            min-width: 38px;
+            height: 38px;
+            padding: 0.5rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            font-weight: 600;
+            box-shadow: none;
+        }
+
+        .leave-history-pagination .page-item.active .page-link {
+            background: #3858f9;
+            border-color: #3858f9;
+            color: #fff;
+        }
+
+        .leave-history-pagination .page-item.disabled .page-link {
+            color: #94a3b8;
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .leave-history-pagination .page-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .leave-history-pagination nav .d-none.flex-sm-fill.d-sm-flex.align-items-sm-center.justify-content-sm-between {
+            justify-content: flex-end !important;
+        }
+
+        .leave-history-pagination nav .d-none.flex-sm-fill.d-sm-flex.align-items-sm-center.justify-content-sm-between > div:first-child {
+            display: none !important;
         }
     </style>
 @endsection

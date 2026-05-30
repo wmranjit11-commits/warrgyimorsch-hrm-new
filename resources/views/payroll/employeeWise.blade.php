@@ -496,8 +496,13 @@
                     return;
             }
 
-            startInput.value = start.toISOString().split('T')[0];
-            endInput.value = end.toISOString().split('T')[0];
+            startInput.value = start.getFullYear() + '-' +
+                String(start.getMonth() + 1).padStart(2, '0') + '-' +
+                String(start.getDate()).padStart(2, '0');
+
+            endInput.value = end.getFullYear() + '-' +
+                String(end.getMonth() + 1).padStart(2, '0') + '-' +
+                String(end.getDate()).padStart(2, '0');
         }
 
         function selectEmployee(id, name) {
@@ -832,7 +837,7 @@
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch(`/payroll/attendance/${id}`, {
+                    fetch(`{{ url('/payroll/attendance') }}/${id}`, {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -861,7 +866,7 @@
         }
 
         function editSingleAttendance(id, employeeId) {
-            window.location.href = `/payroll/attendace/employee/${employeeId}/edit?attendance_id=${id}`;
+            window.location.href = `{{ url('/payroll/attendace/employee') }}/${employeeId}/edit?attendance_id=${id}`;
         }
 
         function exportAttendance() {
