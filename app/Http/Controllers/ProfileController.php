@@ -92,6 +92,7 @@ class ProfileController extends Controller
     public function leaveBalance(Request $request): View
     {
         $user = $request->user();
+        // echo ($user->employee_id);
         $employee = Employee::find($user->employee_id);
         
         $balances = [];
@@ -103,10 +104,10 @@ class ProfileController extends Controller
             $total_used = LeaveApplication::where('employee_id', $employee->id)
                 ->where('status', 'approved')
                 ->where('leave_category', 'NOT LIKE', '%WFH%') // Exclude WFH from used leaves
-                ->whereYear('start_date', date('Y'))
-                ->whereMonth('start_date', date('m'))
+                // ->whereYear('start_date', date('Y'))
+                // ->whereMonth('start_date', date('m'))
                 ->sum('total_days');
-
+            // echo $total_used;exit;
             $balances[] = [
                 'type' => date('F') . ' Leave Cycle (' . date('Y') . ')',
                 'allotted' => $total_allotted,

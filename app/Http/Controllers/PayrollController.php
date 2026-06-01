@@ -1194,7 +1194,8 @@ class PayrollController extends Controller
         COUNT(CASE WHEN attendances.status = 'present' THEN 1 END) as present_count,
         COUNT(CASE WHEN attendances.total_hours > 9.50 THEN 1 END) as overtime_count,
         COUNT(CASE WHEN attendances.status = 'half_day' THEN 1 END) as half_day_count,
-        COUNT(CASE WHEN attendances.status IN ('leave','absent') THEN 1 END) as leave_count,
+        COUNT(CASE WHEN attendances.status IN ('leave') THEN 1 END) as leave_count,
+        COUNT(CASE WHEN attendances.status IN ('absent') THEN 1 END) as absent_count,
         COUNT(CASE WHEN attendances.status = 'wfh' THEN 1 END) as wfh_count,
 
         COUNT(
@@ -1256,6 +1257,8 @@ class PayrollController extends Controller
             ->groupBy('attendances.employee_id', 'employees.name')
             ->paginate(10)
             ->appends($request->all());
+
+        
 
         return view('payroll.employeeWise', compact('attendance', 'employees'));
     }
