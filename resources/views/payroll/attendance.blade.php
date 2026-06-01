@@ -206,7 +206,7 @@
                                     value="{{ request('end_date') }}" style="border-radius: 10px; height: 44px;">
                             </div>
                             <div class="col-md-3 d-flex justify-content-around">
-                                <button
+                                <button type="button"
                                     class="btn btn-primary w-50 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
                                     onclick="applyFilters()"
                                     style="background: #3858f9; border: none; height: 44px; border-radius: 10px;">
@@ -532,6 +532,13 @@
             let start = new Date();
             let end = new Date();
 
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
             switch (range) {
                 case 'today':
                     break;
@@ -562,8 +569,13 @@
                     return;
             }
 
-            // startInput.value = start.toISOString().split('T')[0];
-            // endInput.value = end.toISOString().split('T')[0];
+            if (startInput) {
+                startInput.value = formatDate(start);
+            }
+
+            if (endInput) {
+                endInput.value = formatDate(end);
+            }
         }
 
         function selectQuickRange(val, label) {

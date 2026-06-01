@@ -60,7 +60,8 @@
                                             <div class="wghrm-items-list">
                                                 @foreach(range(1, 12) as $m)
                                                     <div class="wghrm-item {{ $selectedMonth == sprintf('%02d', $m) ? 'selected' : '' }}" 
-                                                         onclick="selectMonth('{{ sprintf('%02d', $m) }}', '{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}')">
+                                                         data-value="{{ sprintf('%02d', $m) }}"
+                                                         data-text="{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}">
                                                         <span class="wghrm-item-text">{{ date('F', mktime(0, 0, 0, $m, 1)) }} {{ date('Y') }}</span>
                                                         <i data-feather="check" class="wghrm-item-check" style="width: 14px; height: 14px;"></i>
                                                     </div>
@@ -438,11 +439,6 @@
             }
         });
 
-        function selectMonth(val, text) {
-            document.getElementById('monthSelect').value = val;
-            updateView();
-        }
-
         function updateEntries(val) {
             document.getElementById('entriesPerPage').value = val;
             document.querySelector('#entriesDropdown .wghrm-trigger-text').innerText = val;
@@ -451,7 +447,7 @@
 
         function updateView() {
             const month = document.getElementById('monthSelect').value;
-            window.location.href = "{{ route('leave.allotment') }}?month=" + month;
+            window.location.href = "{{ route('leave.allotment') }}?month=" + encodeURIComponent(month);
         }
 
         function deleteHistory(id) {
@@ -522,7 +518,8 @@
 
         function saveAllotments() {
             const month = document.getElementById('monthSelect').value;
-            const inputs = document.querySelectorAll('.allotment-input');
+            const inputs = Array.from(document.querySelectorAll('.desktop-only .allotment-input, .mobile-only .allotment-input'))
+                .filter(input => input.offsetParent !== null);
             const allotments = {};
 
             inputs.forEach(input => {

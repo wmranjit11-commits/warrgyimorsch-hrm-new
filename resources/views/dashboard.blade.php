@@ -1841,8 +1841,7 @@
 
             window.location.href = url.toString();
         }
-    </script>
-    <script>
+    
         // Custom Dropdown Search & Select Logic
         function wghrmFilterItems(input) {
             const filter = input.value.toLowerCase();
@@ -1880,7 +1879,7 @@
                 let parentCard = $('#msg-card-' + broadcastId);
 
                 $.ajax({
-                    url: `/broadcasts/${broadcastId}/read`,
+                    url: `{{ url('/broadcasts') }}/${broadcastId}/read`,
                     method: 'POST',
                     data: { _token: '{{ csrf_token() }}' },
                     success: function(response) {
