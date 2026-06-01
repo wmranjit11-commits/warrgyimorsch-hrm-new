@@ -1,143 +1,139 @@
 <?php
 
-use App\Http\Controllers\BroadcastController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\BroadcastController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DailyTaskController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
-use App\Http\Controllers\PayrollController;
-use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\LeaveApplicationController;
-use App\Http\Controllers\ZKTController;
-use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\MasterController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReviewController;
-// use Rats\Zkteco\Lib\ZKTeco;
+use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\ZKTController;
 
-
-Route::get('/sync-attendance', [ZKTController::class, 'syncAttendance']);
+$adminRoles = 'super_admin,manager,hr_executive,hr_intern,business_operation_head';
+$TeamLeaderRoles = 'super_admin,manager,hr_executive,hr_intern,business_operation_head,team_leader';
 
 Route::get('/', function () {
     return view('auth.login');
 });
 
-use App\Http\Controllers\DashboardController;
+Route::get('/sync-attendance', [ZKTController::class, 'syncAttendance'])
+    ->middleware(['auth', 'role.access:super_admin,manager,hr_executive,hr_intern,business_operation_head'])
+    ->name('sync.attendance');
 
-// Emergency Role Fix Route
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/dashboard/summary', [DashboardController::class, 'getMonthlySummary'])->middleware(['auth'])->name('dashboard.summary');
-Route::get('/dashboard/chart', [DashboardController::class, 'getChartData'])->middleware(['auth'])->name('dashboard.chart');
-
-
-Route::middleware(['auth'])->group(function () {
-
-    // VIEW LIST
-    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
-
-    // CREATE PAGE
-    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
-
-    // STORE DATA
-    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
-
-    // SHOW DETAILS
-    Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
-
-    // EDIT EMPLOYEE
-    Route::get('/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-    Route::put('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
-
-    // DELETE EMPLOYEE
-    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-
-    // EXPORT EMPLOYEES
-    Route::get('/employees-export', [EmployeeController::class, 'export'])->name('employees.export');
-
-    Route::get('/attendance-history', [EmployeeController::class, 'getAttendance'])->name('attendance-history');
-    Route::get('/celebrations', [EmployeeController::class, 'employeeDays'])->name('employees.employeeDays');
-
-    // API - GET EMPLOYEE JSON
-    Route::get('/api/employees/{id}', [EmployeeController::class, 'getJson']);
-    Route::get('/api/employees/{id}/attendance', [EmployeeController::class, 'getAttendance']);
-
-    // PROJECT MODULE
-    Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
-    Route::get('/projects/create', [\App\Http\Controllers\ProjectController::class, 'create'])->name('projects.create');
-    Route::post('/projects/check-name', [\App\Http\Controllers\ProjectController::class, 'checkName'])->name('projects.check-name');
-    Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store'])->name('projects.store');
-    Route::get('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
-    Route::get('/projects/{project}/edit', [\App\Http\Controllers\ProjectController::class, 'edit'])->name('projects.edit');
-    Route::put('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'update'])->name('projects.update');
-    Route::patch('/projects/{project}/update-field', [\App\Http\Controllers\ProjectController::class, 'updateField'])->name('projects.update-field');
-    Route::post('/projects/bulk-delete', [\App\Http\Controllers\ProjectController::class, 'bulkDelete'])->name('projects.bulk-delete');
-    Route::delete('/projects/{project}', [\App\Http\Controllers\ProjectController::class, 'destroy'])->name('projects.destroy');
-    Route::get('/projects/{project}/tasks-summary', [\App\Http\Controllers\ProjectController::class, 'tasksSummary'])->name('projects.tasks-summary');
-
-    // DAILY TASKS
-    Route::get('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'index'])->name('daily-tasks.index');
-    Route::post('/daily-tasks', [\App\Http\Controllers\DailyTaskController::class, 'store'])->name('daily-tasks.store');
-    Route::put('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'update'])->name('daily-tasks.update');
-    Route::patch('/daily-tasks/{dailyTask}/status', [\App\Http\Controllers\DailyTaskController::class, 'updateStatus'])->name('daily-tasks.update-status');
-    Route::patch('/daily-tasks/{dailyTask}/priority', [\App\Http\Controllers\DailyTaskController::class, 'updatePriority'])->name('daily-tasks.update-priority');
-    Route::delete('/daily-tasks/{dailyTask}', [\App\Http\Controllers\DailyTaskController::class, 'destroy'])->name('daily-tasks.destroy');
-    Route::post('/daily-tasks/bulk-delete', [\App\Http\Controllers\DailyTaskController::class, 'bulkDestroy'])->name('daily-tasks.bulk-delete');
-    Route::post('/daily-tasks/follow-up', [\App\Http\Controllers\DailyTaskController::class, 'storeFollowUp'])->name('daily-tasks.follow-up.store');
-    Route::put('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'updateFollowUp'])->name('daily-tasks.follow-up.update');
-    Route::delete('/daily-tasks/follow-up/{id}', [\App\Http\Controllers\DailyTaskController::class, 'destroyFollowUp'])->name('daily-tasks.follow-up.destroy');
-    Route::get('/daily-tasks/{taskId}/follow-ups', [\App\Http\Controllers\DailyTaskController::class, 'getFollowUps']);
-    Route::get('/daily-task-history/{task}', [\App\Http\Controllers\DailyTaskController::class, 'statusHistory']);
-
-    // STATIC PAGES
-    Route::get('/help', function () {
-        return view('pages.help');
-    })->name('help');
-    Route::get('/terms', function () {
-        return view('pages.terms');
-    })->name('terms');
-    Route::get('/privacy', function () {
-        return view('pages.privacy');
-    })->name('privacy');
-
-    // MASTER MODULE
-    Route::get('/master/departments', [\App\Http\Controllers\MasterController::class, 'departments'])->name('master.departments');
-    Route::get('/master/designations', [\App\Http\Controllers\MasterController::class, 'designations'])->name('master.designations');
-    Route::get('/master/roles', [\App\Http\Controllers\MasterController::class, 'roles'])->name('master.roles');
-    Route::post('/master/department', [\App\Http\Controllers\MasterController::class, 'storeDepartment'])->name('master.department.store');
-    Route::put('/master/department/{id}', [\App\Http\Controllers\MasterController::class, 'updateDepartment'])->name('master.department.update');
-    Route::delete('/master/department/{id}', [\App\Http\Controllers\MasterController::class, 'destroyDepartment'])->name('master.department.destroy');
-    Route::post('/master/designation', [\App\Http\Controllers\MasterController::class, 'storeDesignation'])->name('master.designation.store');
-    Route::put('/master/designation/{id}', [\App\Http\Controllers\MasterController::class, 'updateDesignation'])->name('master.designation.update');
-    Route::delete('/master/designation/{id}', [\App\Http\Controllers\MasterController::class, 'destroyDesignation'])->name('master.designation.destroy');
-    Route::post('/master/role', [\App\Http\Controllers\MasterController::class, 'storeRole'])->name('master.role.store');
-    Route::put('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'updateRole'])->name('master.role.update');
-    Route::delete('/master/role/{id}', [\App\Http\Controllers\MasterController::class, 'destroyRole'])->name('master.role.destroy');
-
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/summary', [DashboardController::class, 'getMonthlySummary'])->name('dashboard.summary');
+    Route::get('/dashboard/chart', [DashboardController::class, 'getChartData'])->name('dashboard.chart');
 
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
-    Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
 
+    Route::get('/daily-tasks', [DailyTaskController::class, 'index'])->name('daily-tasks.index');
+    Route::post('/daily-tasks', [DailyTaskController::class, 'store'])->name('daily-tasks.store');
+    Route::put('/daily-tasks/{dailyTask}', [DailyTaskController::class, 'update'])->name('daily-tasks.update');
+    Route::patch('/daily-tasks/{dailyTask}/status', [DailyTaskController::class, 'updateStatus'])->name('daily-tasks.update-status');
+    Route::patch('/daily-tasks/{dailyTask}/priority', [DailyTaskController::class, 'updatePriority'])->name('daily-tasks.update-priority');
+    Route::delete('/daily-tasks/{dailyTask}', [DailyTaskController::class, 'destroy'])->name('daily-tasks.destroy');
+    Route::post('/daily-tasks/bulk-delete', [DailyTaskController::class, 'bulkDestroy'])->name('daily-tasks.bulk-delete');
+    Route::post('/daily-tasks/follow-up', [DailyTaskController::class, 'storeFollowUp'])->name('daily-tasks.follow-up.store');
+    Route::put('/daily-tasks/follow-up/{id}', [DailyTaskController::class, 'updateFollowUp'])->name('daily-tasks.follow-up.update');
+    Route::delete('/daily-tasks/follow-up/{id}', [DailyTaskController::class, 'destroyFollowUp'])->name('daily-tasks.follow-up.destroy');
+    Route::get('/daily-tasks/{taskId}/follow-ups', [DailyTaskController::class, 'getFollowUps']);
+    Route::get('/daily-task-history/{task}', [DailyTaskController::class, 'statusHistory']);
+
+    Route::get('/employee-review', [ReviewController::class, 'index'])->name('employee.review');
+    Route::post('/employee-review/store', [ReviewController::class, 'store']);
+    Route::get('/review-details/{id}', [ReviewController::class, 'details'])->name('employee.review.details');
+
+    Route::get('/celebrations', [EmployeeController::class, 'employeeDays'])->name('employees.employeeDays');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+
+    Route::get('/help', fn () => view('pages.help'))->name('help');
+    Route::get('/terms', fn () => view('pages.terms'))->name('terms');
+    Route::get('/privacy', fn () => view('pages.privacy'))->name('privacy');
+});
+
+Route::middleware(['auth', "role.access:$adminRoles"])->group(function () {
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('/employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::get('/employees-export', [EmployeeController::class, 'export'])->name('employees.export');
+
+    Route::get('/api/employees/{id}', [EmployeeController::class, 'getJson']);
+    Route::get('/api/employees/{id}/attendance', [EmployeeController::class, 'getAttendance']);
+
+    Route::get('/master/departments', [MasterController::class, 'departments'])->name('master.departments');
+    Route::get('/master/designations', [MasterController::class, 'designations'])->name('master.designations');
+    Route::get('/master/roles', [MasterController::class, 'roles'])->name('master.roles');
+
+    Route::post('/master/department', [MasterController::class, 'storeDepartment'])->name('master.department.store');
+    Route::put('/master/department/{id}', [MasterController::class, 'updateDepartment'])->name('master.department.update');
+    Route::delete('/master/department/{id}', [MasterController::class, 'destroyDepartment'])->name('master.department.destroy');
+
+    Route::post('/master/designation', [MasterController::class, 'storeDesignation'])->name('master.designation.store');
+    Route::put('/master/designation/{id}', [MasterController::class, 'updateDesignation'])->name('master.designation.update');
+    Route::delete('/master/designation/{id}', [MasterController::class, 'destroyDesignation'])->name('master.designation.destroy');
+
+    Route::post('/master/role', [MasterController::class, 'storeRole'])->name('master.role.store');
+    Route::put('/master/role/{id}', [MasterController::class, 'updateRole'])->name('master.role.update');
+    Route::delete('/master/role/{id}', [MasterController::class, 'destroyRole'])->name('master.role.destroy');
+
+    Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
     Route::get('/holidays/{id}/edit', [HolidayController::class, 'edit'])->name('holidays.edit');
     Route::put('/holidays/{id}', [HolidayController::class, 'update'])->name('holidays.update');
     Route::delete('/holidays/{id}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
 
-});
+    Route::get('/leave/allotment', [LeaveController::class, 'allotment'])->name('leave.allotment');
+    Route::post('/leave/allotment', [LeaveController::class, 'storeAllotment'])->name('leave.storeAllotment');
+    Route::get('/leave/balance', [LeaveController::class, 'allotment'])->name('leave.balance');
+    Route::get('/leave/balance/export', [LeaveController::class, 'exportBalances'])->name('leave.balance.export');
+    Route::get('/api/leave/balance', [LeaveController::class, 'apiBalanceList']);
 
-// PAYROLL MODULE ROUTES
-Route::middleware(['auth'])->group(function () {
+    Route::get('/leave/history', [LeaveApplicationController::class, 'index'])->name('leave.history');
+    Route::get('/leave/export', [LeaveApplicationController::class, 'export'])->name('leave.export');
+    Route::post('/leave/action', [LeaveApplicationController::class, 'updateAction'])->name('leave.updateAction');
+    Route::delete('/leave/application/{id}', [LeaveApplicationController::class, 'destroy'])->name('leave.application.destroy');
+    Route::get('/api/leave/details/{id}', [LeaveApplicationController::class, 'getDetails']);
+    Route::get('/api/leave/employee/{employeeId}', [LeaveApplicationController::class, 'getEmployeeLeaves']);
 
-    // ATTENDANCE ROUTES
     Route::get('/payroll/attendance', [PayrollController::class, 'attendance'])->name('payroll.attendance');
     Route::get('/payroll/attendance/get', [PayrollController::class, 'getAttendance'])->name('payroll.attendance.get');
     Route::get('/payroll/attendance/add', [PayrollController::class, 'addAttendance'])->name('payroll.attendance.add');
+    Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
+    Route::get('/payroll/get', [PayrollController::class, 'getPayroll'])->name('payroll.get');
+    Route::get('/payroll/export', [PayrollController::class, 'export'])->name('payroll.export');
+    Route::get('/payroll/calculation', [PayrollController::class, 'calculation'])->name('payroll.calculation');
+    Route::post('/payroll/calculate', [PayrollController::class, 'calculatePayroll'])->name('payroll.calculate');
+    Route::post('/payroll/sendDateRange', [PayrollController::class, 'calculateInRage'])->name('payroll.sendDateRange');
+    Route::post('/payroll/store', [PayrollController::class, 'storePayroll'])->name('payroll.store');
+    Route::get('/payroll/{id}', [PayrollController::class, 'show'])->name('payroll.show');
+    Route::post('/payroll/{id}/status', [PayrollController::class, 'updateStatus'])->name('payroll.status');
+    Route::delete('/payroll/{id}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
+    Route::post('/payroll/{id}/remarks', [PayrollController::class, 'saveRemarks']);
+    Route::post('/payroll/{id}/mark-read', [PayrollController::class, 'markAsRead']);
+  
     Route::get('/payroll/attendance/{id}/edit', [PayrollController::class, 'edit'])->name('payroll.attendance.edit');
     Route::get('/payroll/attendance/date/{attendance_date}/edit', [PayrollController::class, 'editByDate'])->name('payroll.attendance.editByDate');
     Route::put('/payroll/attendance/date/{attendance_date}', [PayrollController::class, 'updateByDate'])->name('payroll.attendance.updateByDate');
     Route::post('/payroll/attendance', [PayrollController::class, 'storeAttendance'])->name('payroll.attendance.store');
     Route::get('/payroll/attendance/export', [PayrollController::class, 'exportAttendance'])->name('payroll.attendance.export');
-    Route::post('payroll/attendance/import', [PayrollController::class, 'import'])->name('payroll.attendance.import');
+    Route::post('/payroll/attendance/import', [PayrollController::class, 'import'])->name('payroll.attendance.import');
     Route::get('/payroll/attendance/details', [PayrollController::class, 'getAttendanceDetails'])->name('payroll.attendance.details');
     Route::delete('/payroll/attendance/{id}', [PayrollController::class, 'destroyAttendance'])->name('payroll.attendance.destroy');
     Route::delete('/payroll/attendance/date/{date}', [PayrollController::class, 'destroyAttendanceByDate'])->name('payroll.attendance.destroyByDate');
@@ -146,63 +142,29 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payroll/attendance/employee-wise-details', [PayrollController::class, 'employeeWiseDetails'])->name('payroll.attendance.employee.details');
     Route::get('/payroll/attendace/employee/{employee_id}/edit', [PayrollController::class, 'editByName'])->name('payroll.attendance.employee.editByName');
     Route::put('/payroll/attendance/employee/{employee_id}/update', [PayrollController::class, 'updateByName'])->name('payroll.attendance.employee.updateByName');
-
-    // PAYROLL CALCULATION ROUTES
-    Route::get('/payroll/calculation', [PayrollController::class, 'calculation'])->name('payroll.calculation');
-    Route::post('/payroll/calculate', [PayrollController::class, 'calculatePayroll'])->name('payroll.calculate');
-    Route::post('/payroll/sendDateRange', [PayrollController::class, 'calculateInRage'])->name('payroll.sendDateRange');
-    Route::post('/payroll/store', [PayrollController::class, 'storePayroll'])->name('payroll.store');
-
-    // PAYROLL LIST ROUTES
-    Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
-    Route::get('/payroll/get', [PayrollController::class, 'getPayroll'])->name('payroll.get');
-    Route::get('/payroll/export', [PayrollController::class, 'export'])->name('payroll.export');
-    Route::get('/payroll/{id}', [PayrollController::class, 'show'])->name('payroll.show');
-    Route::post('/payroll/{id}/status', [PayrollController::class, 'updateStatus'])->name('payroll.status');
-    Route::delete('/payroll/{id}', [PayrollController::class, 'destroy'])->name('payroll.destroy');
-
-    // Payroll remarks
-    Route::post('/payroll/{id}/remarks', [PayrollController::class, 'saveRemarks']);
-    Route::post('/payroll/{id}/mark-read', [PayrollController::class, 'markAsRead']);
 });
 
-// LEAVE MODULE ROUTES
-Route::middleware(['auth'])->group(function () {
-    Route::get('/leave/allotment', [LeaveController::class, 'allotment'])->name('leave.allotment');
-    Route::post('/leave/allotment', [LeaveController::class, 'storeAllotment'])->name('leave.storeAllotment');
-    Route::get('/leave/balance', [LeaveController::class, 'allotment'])->name('leave.balance');
-    Route::get('/leave/balance/export', [LeaveController::class, 'exportBalances'])->name('leave.balance.export');
-    Route::get('/api/leave/balance', [LeaveController::class, 'apiBalanceList']);
+Route::middleware(['auth', "role.access:$TeamLeaderRoles"])->group(function () {
 
-    // LEAVE APPLICATIONS
-    Route::get('/leave/history', [LeaveApplicationController::class, 'index'])->name('leave.history');
-    Route::get('/leave/export', [LeaveApplicationController::class, 'export'])->name('leave.export');
-    Route::post('/leave/apply', [LeaveApplicationController::class, 'store'])->name('leave.apply');
-    Route::post('/leave/action', [LeaveApplicationController::class, 'updateAction'])->name('leave.updateAction');
-    Route::delete('/leave/application/{id}', [LeaveApplicationController::class, 'destroy'])->name('leave.application.destroy');
-    Route::get('/api/leave/details/{id}', [LeaveApplicationController::class, 'getDetails']);
-    Route::get('/api/leave/employee/{employeeId}', [LeaveApplicationController::class, 'getEmployeeLeaves']);
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+    Route::post('/projects/check-name', [ProjectController::class, 'checkName'])->name('projects.check-name');
+    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+    Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+    Route::patch('/projects/{project}/update-field', [ProjectController::class, 'updateField'])->name('projects.update-field');
+    Route::post('/projects/bulk-delete', [ProjectController::class, 'bulkDelete'])->name('projects.bulk-delete');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/projects/{project}/tasks-summary', [ProjectController::class, 'tasksSummary'])->name('projects.tasks-summary');
 
-    // NOTIFICATIONS
-    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-});
-
-Route::middleware('auth')->group(function () {
     Route::get('/job-vacancy', [VacancyController::class, 'show'])->name('vacancy.show');
-    Route::post('/job-vacancy/store', [VacancyController::class,'store'])->name('job.store');
+    Route::post('/job-vacancy/store', [VacancyController::class, 'store'])->name('job.store');
     Route::post('/job-applications/update-status/{id}', [VacancyController::class, 'updateStatus']);
     Route::get('/job-requirement', [VacancyController::class, 'showRequirements'])->name('requirement.show');
     Route::post('/job-requirement/store', [VacancyController::class, 'storeRequirement'])->name('requirement.store');
     Route::post('/job-requirement/update-status', [VacancyController::class, 'updateStatusofRequirement'])->name('requirements.update-status');
-});
 
-Route::middleware('auth')->group(function () {
-    Route::get('/employee-review', [ReviewController::class, 'index'])->name('employee.review');
-    Route::post('/employee-review/store', [ReviewController::class,'store']);
-    Route::get('/review-details/{id}', [ReviewController::class,'details'])->name('employee.review.details');
-});
-
-Route:: middleware('auth')->group(function () {
     Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcasts.index');
     Route::post('/broadcasts', [BroadcastController::class, 'store'])->name('broadcasts.store');
     Route::get('/broadcasts/{id}/edit', [BroadcastController::class, 'edit'])->name('broadcasts.edit');
@@ -211,7 +173,11 @@ Route:: middleware('auth')->group(function () {
     Route::get('/broadcasts/{id}/recipients', [BroadcastController::class, 'getRecipients']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('/attendance-history', [EmployeeController::class, 'getAttendance'])->name('attendance-history');
+
+    Route::post('/leave/apply', [LeaveApplicationController::class, 'store'])->name('leave.apply');
+
     Route::get('/profile/details', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
